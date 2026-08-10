@@ -1,0 +1,20 @@
+# Fichiers système / éditeur
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/
+*.code-workspace
+
+# Dépendances (si ajoutées plus tard)
+node_modules/
+
+# Environnement local
+.env
+.env.*
+
+# Logs / caches
+*.log
+.cache/
+dist/

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Brickcard Generator</title>
+  <script>
+    /* Applique le thème avant le CSS pour éviter un flash */
+    (function () {
+      try {
+        var t = localStorage.getItem("brickcard-generator:ui-theme");
+        if (t === "light" || t === "dark") {
+          document.documentElement.setAttribute("data-theme", t);
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div id="app" class="app">
+    <header class="topbar no-print">
+      <a href="#/about" class="topbar-brand" id="brand-link" title="À propos">
+        <img class="brand-logo" src="img/logo-brickcard-generator.svg" width="40" height="55" alt="" />
+        <span class="brand-text">
+          <span class="brand-name">Brickcard Generator</span>
+          <span class="brand-version" id="app-version"></span>
+        </span>
+      </a>
+
+      <div class="topbar-search" id="topbar-search" hidden>
+        <div class="topbar-search-field">
+          <input
+            type="search"
+            id="global-search"
+            placeholder="Rechercher une carte…"
+            autocomplete="off"
+            aria-label="Rechercher (référence, titre, thème, année)"
+          />
+          <div class="topbar-search-trail">
+            <span class="search-count" id="search-count" aria-live="polite"></span>
+            <div class="search-sort">
+              <button
+                type="button"
+                class="search-sort-btn"
+                id="search-sort-btn"
+                aria-label="Trier les cartes"
+                aria-haspopup="menu"
+                aria-expanded="false"
+                aria-controls="search-sort-menu"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M10 18H14V16H10V18ZM3 6V8H21V6H3ZM6 13H18V11H6V13Z"/>
+                </svg>
+              </button>
+              <div class="search-sort-menu" id="search-sort-menu" role="menu" hidden>
+                <div class="search-sort-row">
+                  <button type="button" class="search-sort-option" role="menuitemradio" data-sort="updatedAt" aria-checked="false">Date de modification</button>
+                  <button type="button" class="search-sort-dir" data-sort-dir="updatedAt" aria-label="Inverser le tri" hidden></button>
+                </div>
+                <div class="search-sort-row">
+                  <button type="button" class="search-sort-option" role="menuitemradio" data-sort="legoSetRef" aria-checked="false">Référence</button>
+                  <button type="button" class="search-sort-dir" data-sort-dir="legoSetRef" aria-label="Inverser le tri" hidden></button>
+                </div>
+                <div class="search-sort-row">
+                  <button type="button" class="search-sort-option" role="menuitemradio" data-sort="title" aria-checked="false">Titre</button>
+                  <button type="button" class="search-sort-dir" data-sort-dir="title" aria-label="Inverser le tri" hidden></button>
+                </div>
+                <div class="search-sort-row">
+                  <button type="button" class="search-sort-option" role="menuitemradio" data-sort="releaseYear" aria-checked="false">Année de sortie</button>
+                  <button type="button" class="search-sort-dir" data-sort-dir="releaseYear" aria-label="Inverser le tri" hidden></button>
+                </div>
+                <div class="search-sort-row">
+                  <button type="button" class="search-sort-option" role="menuitemradio" data-sort="pieceCount" aria-checked="false">Nombre de pièces</button>
+                  <button type="button" class="search-sort-dir" data-sort-dir="pieceCount" aria-label="Inverser le tri" hidden></button>
+                </div>
+                <div class="search-sort-row">
+                  <button type="button" class="search-sort-option" role="menuitemradio" data-sort="figurineCount" aria-checked="false">Nombre de figurines</button>
+                  <button type="button" class="search-sort-dir" data-sort-dir="figurineCount" aria-label="Inverser le tri" hidden></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="topbar-actions" id="topbar-actions">
+        <button type="button" class="btn primary btn-new-card" id="btn-new-card">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+            <path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"/>
+          </svg>
+          <span>Nouvelle carte</span>
+        </button>
+
+        <div class="print-menu" id="print-menu" hidden>
+          <button
+            type="button"
+            class="btn-icon print-menu-btn is-empty"
+            id="btn-print-menu"
+            aria-label="Impression"
+            aria-haspopup="dialog"
+            aria-expanded="false"
+            aria-controls="print-menu-panel"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+              <path d="M7 17H17V22H7V17ZM19 8H5C3.34315 8 2 9.34315 2 11V15C2 16.1046 2.89543 17 4 17H5V13H19V17H20C21.1046 17 22 16.1046 22 15V11C22 9.34315 20.6569 8 19 8ZM7 2H17V6H7V2Z"/>
+            </svg>
+            <span class="print-menu-count" id="print-menu-count" hidden>0</span>
+          </button>
+          <div class="print-menu-panel" id="print-menu-panel" role="dialog" aria-label="Impression">
+            <p class="print-menu-summary" id="print-menu-summary">Aucune carte à imprimer</p>
+            <button type="button" class="btn secondary sm" id="btn-print-select-all">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"/>
+              </svg>
+              <span>Tout sélectionner</span>
+            </button>
+            <button type="button" class="btn secondary sm" id="btn-print-select-none" hidden>
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 11H19V13H5V11Z"/>
+              </svg>
+              <span>Tout désélectionner</span>
+            </button>
+            <button type="button" class="btn primary sm" id="btn-print-run" disabled>
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 17H17V22H7V17ZM19 8H5C3.34315 8 2 9.34315 2 11V15C2 16.1046 2.89543 17 4 17H5V13H19V17H20C21.1046 17 22 16.1046 22 15V11C22 9.34315 20.6569 8 19 8ZM7 2H17V6H7V2Z"/>
+              </svg>
+              <span>Imprimer la sélection</span>
+            </button>
+          </div>
+        </div>
+
+        <button type="button" class="btn-icon" id="btn-settings" aria-label="Paramètres">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 1L21.5 6.5V17.5L12 23L2.5 17.5V6.5L12 1ZM12 3.311L4.5 7.653V16.347L12 20.689L19.5 16.347V7.653L12 3.311ZM12 16C9.79086 16 8 14.2091 8 12C8 9.79086 9.79086 8 12 8C14.2091 8 16 9.79086 16 12C16 14.2091 14.2091 16 12 16ZM12 14C13.1046 14 14 13.1046 14 12C14 10.8954 13.1046 10 12 10C10.8954 10 10 10.8954 10 12C10 13.1046 10.8954 14 12 14Z"/>
+          </svg>
+          <span class="tooltip">
+            <strong class="tooltip-title">Paramètres</strong>
+            <span class="tooltip-desc">Options et configuration de l’application.</span>
+          </span>
+        </button>
+      </div>
+    </header>
+
+    <main id="main" class="main"></main>
+  </div>
+
+  <input type="file" id="import-file" accept="application/json,.json" hidden />
+
+  <div id="modal-root" class="modal-root no-print"></div>
+
+  <div id="print-root" class="print-root" aria-hidden="true"></div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+{
+  "themes": [
+    {
+      "id": "aquazone",
+      "themeName": "Aquazone",
+      "logoSrc": "img/logo-theme-aquazone.png",
+      "color": "#F2CD37"
+    },
+    {
+      "id": "legends-of-chima",
+      "themeName": "Legends of Chima",
+      "logoSrc": "img/logo-theme-legends-of-chima.webp",
+      "color": "#0088dd"
+    },
+    {
+      "id": "city",
+      "themeName": "City",
+      "logoSrc": "img/logo-theme-city.svg",
+      "color": "#0055BF"
+    },
+    {
+      "id": "friends",
+      "themeName": "Friends",
+      "logoSrc": "img/logo-theme-friends.svg",
+      "color": "#C870A0"
+    },
+    {
+      "id": "sports",
+      "themeName": "Sports",
+      "logoSrc": "img/logo-theme-sports.webp"
+    },
+    {
+      "id": "star-wars",
+      "themeName": "Star Wars",
+      "logoSrc": "img/logo-theme-star-wars.svg",
+      "color": "#111111"
+    },
+    {
+      "id": "ninjago",
+      "themeName": "Ninjago",
+      "logoSrc": "img/logo-theme-ninjago.svg",
+      "color": "#C91A09"
+    },
+    {
+      "id": "rock-raiders",
+      "themeName": "Rock Raiders",
+      "logoSrc": "img/logo-theme-rock-raiders.webp",
+      "color": "#4C4C4C"
+    },
+    {
+      "id": "space",
+      "themeName": "Space",
+      "logoSrc": "img/logo-theme-space.svg",
+      "color": "#0A58CA"
+    },
+    {
+      "id": "harry-potter",
+      "themeName": "Harry Potter",
+      "logoSrc": "img/logo-theme-harry-potter.svg",
+      "color": "#720E0F"
+    }
+  ]
+}
