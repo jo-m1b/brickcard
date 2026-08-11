@@ -1,3 +1,5 @@
+import { ICON_CLOSE } from "../icons.js";
+import { bindFormColor, formColorMarkup } from "../form-color.js";
 import {
   loadThemes,
   upsertTheme,
@@ -37,6 +39,9 @@ export async function renderThemesModal(host, opts) {
   /** @type {((e: KeyboardEvent) => void)|null} */
   let onThemeEscape = null;
 
+  /** @type {ReturnType<typeof bindFormColor>|null} */
+  let themeColorField = null;
+
   function q(sel) {
     return host.querySelector(sel);
   }
@@ -73,8 +78,7 @@ export async function renderThemesModal(host, opts) {
       ? `Modifier « ${theme.themeName} »`
       : "Nouveau thème";
     q("#theme-name").value = draft.themeName;
-    q("#theme-color").value = colorDisplay;
-    q("#theme-color-hex").value = draft.color;
+    themeColorField?.setValue(draft.color, colorDisplay);
     q("#theme-error").textContent = "";
     q("#theme-logo-url").value = "";
     q("#theme-logo").value = "";
@@ -145,27 +149,20 @@ export async function renderThemesModal(host, opts) {
   }
 
   function bindEditor() {
-    const colorInput = q("#theme-color");
-    const hex = q("#theme-color-hex");
-    colorInput.oninput = () => {
-      draft.color = colorInput.value;
-      hex.value = colorInput.value;
-    };
-    hex.onchange = () => {
-      let v = hex.value.trim();
-      if (!v) {
-        draft.color = "";
-        colorInput.value = resolveCardAccent(null);
-        hex.value = "";
-        return;
-      }
-      if (!v.startsWith("#")) v = `#${v}`;
-      if (/^#[0-9a-fA-F]{6}$/.test(v)) {
-        draft.color = v.toLowerCase();
-        colorInput.value = draft.color;
-        hex.value = draft.color;
-      }
-    };
+    const colorRoot = /** @type {HTMLElement|null} */ (
+      q("#theme-color-hex")?.closest("[data-form-color]")
+    );
+    if (colorRoot) {
+      themeColorField = bindFormColor(colorRoot, {
+        fallbackColor: DEFAULT_THEME_COLOR,
+        onChange(value) {
+          draft.color = value || "";
+          if (!value) {
+            themeColorField?.setValue("", resolveCardAccent(null));
+          }
+        },
+      });
+    }
 
     async function applyThemeLogoFile(file) {
       draft.logoDataUrl = await compressThemeImage(file);
@@ -314,10 +311,9 @@ export async function renderThemesModal(host, opts) {
             <h2 class="view-title" id="themes-modal-title">Thèmes LEGO</h2>
             <p class="view-desc">Nom, couleur et logo optionnel. Les préréglages sont modifiables et réinitialisables.</p>
           </div>
-          <button type="button" class="btn-icon modal-close" id="btn-themes-close" aria-label="Fermer">
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 10.586L16.95 5.63599L18.364 7.04999L13.414 12L18.364 16.95L16.95 18.364L12 13.414L7.04999 18.364L5.63599 16.95L10.586 12L5.63599 7.04999L7.04999 5.63599L12 10.586Z"/>
-            </svg>
+          <button type="button" class="btn ghost icon-only modal-close" id="btn-themes-close">
+            ${ICON_CLOSE}
+            <span class="visually-hidden">Fermer</span>
           </button>
         </div>
         <div class="modal-body">
@@ -336,29 +332,32 @@ export async function renderThemesModal(host, opts) {
             <h2 class="view-title" id="theme-editor-title">Modifier le thème</h2>
             <p class="view-desc">Nom, couleur et logo optionnel.</p>
           </div>
-          <button type="button" class="btn-icon modal-close" id="theme-modal-close" aria-label="Fermer">
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 10.586L16.95 5.63599L18.364 7.04999L13.414 12L18.364 16.95L16.95 18.364L12 13.414L7.04999 18.364L5.63599 16.95L10.586 12L5.63599 7.04999L7.04999 5.63599L12 10.586Z"/>
-            </svg>
+          <button type="button" class="btn ghost icon-only modal-close" id="theme-modal-close">
+            ${ICON_CLOSE}
+            <span class="visually-hidden">Fermer</span>
           </button>
         </div>
         <div class="modal-body">
-          <div class="field">
-            <label for="theme-name" class="required">Nom</label>
-            <input type="text" id="theme-name" placeholder="CITY" />
+          <div class="form-field">
+            <label class="form-label form-label--required" for="theme-name">Nom</label>
+            <input class="form-control" type="text" id="theme-name" placeholder="CITY" autocomplete="off" />
           </div>
-          <div class="field">
-            <label for="theme-color">Couleur</label>
-            <div class="color-row">
-              <input type="color" id="theme-color" value="${DEFAULT_THEME_COLOR}" />
-              <input type="text" id="theme-color-hex" value="" maxlength="7" placeholder="${DEFAULT_THEME_COLOR}" />
-            </div>
+          <div class="form-field">
+            <label class="form-label" for="theme-color-hex">Couleur</label>
+            <p class="form-hint" id="theme-color-hint">Optionnel — sinon couleur par défaut des cartes.</p>
+            ${formColorMarkup({
+              id: "theme-color-hex",
+              value: "",
+              fallback: DEFAULT_THEME_COLOR,
+              placeholder: DEFAULT_THEME_COLOR,
+              describedBy: "theme-color-hint",
+            })}
           </div>
-          <div class="field">
-            <label for="theme-logo">Logo</label>
-            <span class="hint">Optionnel — SVG, PNG ou WebP (fichier ou URL). L’URL n’est pas conservée.</span>
-            <div class="file-row">
-              <label class="file-btn">
+          <div class="form-field">
+            <label class="form-label" for="theme-logo">Logo</label>
+            <p class="form-hint" id="theme-logo-hint">Optionnel — SVG, PNG ou WebP (fichier ou URL). L’URL n’est pas conservée.</p>
+            <div class="file-row" role="group" aria-describedby="theme-logo-hint">
+              <label class="btn primary file-btn">
                 Parcourir…
                 <input type="file" id="theme-logo" accept="image/svg+xml,image/png,image/webp,.svg,.png,.webp" />
               </label>
@@ -371,7 +370,7 @@ export async function renderThemesModal(host, opts) {
             </div>
             <img id="theme-logo-preview" class="theme-preview-img" alt="" hidden />
           </div>
-          <p class="error" id="theme-error" role="alert"></p>
+          <p class="form-error" id="theme-error" role="alert"></p>
           <div class="editor-actions">
             <button type="button" class="btn primary" id="theme-save">Enregistrer</button>
             <button type="button" class="btn secondary" id="theme-cancel">Annuler</button>
@@ -411,6 +410,8 @@ export async function renderThemesModal(host, opts) {
   document.addEventListener("keydown", onKey);
 
   function cleanup() {
+    themeColorField?.destroy();
+    themeColorField = null;
     closeEditor();
     document.removeEventListener("keydown", onKey);
     backdrop?.removeEventListener("click", onBackdropClick);

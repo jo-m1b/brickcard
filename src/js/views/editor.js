@@ -1,3 +1,6 @@
+import { ICON_CLOSE } from "../icons.js";
+import { bindFormColor, formColorMarkup } from "../form-color.js";
+import { enhanceFormSelect } from "../form-select.js";
 import {
   compressImage,
   fetchImageAsFile,
@@ -79,56 +82,55 @@ export async function renderEditor(host, opts) {
             <h2 class="view-title" id="editor-title">${isEdit ? "Modifier la carte" : "Nouvelle carte"}</h2>
             <p class="view-desc">Tu peux enregistrer une carte totalement vierge et compléter les infos plus tard.</p>
           </div>
-          <button type="button" class="btn-icon modal-close" id="btn-modal-close" aria-label="Fermer">
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 10.586L16.95 5.63599L18.364 7.04999L13.414 12L18.364 16.95L16.95 18.364L12 13.414L7.04999 18.364L5.63599 16.95L10.586 12L5.63599 7.04999L7.04999 5.63599L12 10.586Z"/>
-            </svg>
+          <button type="button" class="btn ghost icon-only modal-close" id="btn-modal-close">
+            ${ICON_CLOSE}
+            <span class="visually-hidden">Fermer</span>
           </button>
         </div>
         <div class="modal-body">
           <div class="editor-layout">
             <div>
-              <div class="field">
-                <label for="lego-set-ref">Référence du set</label>
-                <input type="text" id="lego-set-ref" autocomplete="off" />
+              <div class="form-field">
+                <label class="form-label" for="lego-set-ref">Référence du set</label>
+                <input class="form-control" type="text" id="lego-set-ref" autocomplete="off" />
               </div>
 
-              <div class="field">
-                <label for="card-title">Titre</label>
-                <span class="hint">Entrée pour un saut de ligne (3 lignes max sur la carte)</span>
-                <textarea id="card-title" rows="3" autocomplete="off"></textarea>
+              <div class="form-field">
+                <label class="form-label" for="card-title">Titre</label>
+                <p class="form-hint" id="card-title-hint">Entrée pour un saut de ligne (3 lignes max sur la carte)</p>
+                <textarea class="form-control" id="card-title" rows="3" autocomplete="off" aria-describedby="card-title-hint"></textarea>
               </div>
 
               <div class="field-row field-row-3">
-                <div class="field">
-                  <label for="release-year">Année de sortie</label>
-                  <input type="number" id="release-year" min="1900" max="2100" step="1" inputmode="numeric" />
+                <div class="form-field">
+                  <label class="form-label" for="release-year">Année de sortie</label>
+                  <input class="form-control" type="number" id="release-year" min="1900" max="2100" step="1" inputmode="numeric" />
                 </div>
-                <div class="field">
-                  <label for="piece-count">Nombre de pièces</label>
-                  <input type="number" id="piece-count" min="0" step="1" inputmode="numeric" />
+                <div class="form-field">
+                  <label class="form-label" for="piece-count">Nombre de pièces</label>
+                  <input class="form-control" type="number" id="piece-count" min="0" step="1" inputmode="numeric" />
                 </div>
-                <div class="field">
-                  <label for="figurine-count">Nombre de figurines</label>
-                  <input type="number" id="figurine-count" min="0" step="1" inputmode="numeric" />
+                <div class="form-field">
+                  <label class="form-label" for="figurine-count">Nombre de figurines</label>
+                  <input class="form-control" type="number" id="figurine-count" min="0" step="1" inputmode="numeric" />
                 </div>
               </div>
 
-              <div class="field">
-                <label for="brickcard-theme-id">Thème</label>
-                <span class="hint">Couleur + logo sur la carte — <a href="#/themes">gérer les thèmes</a></span>
-                <select id="brickcard-theme-id" class="filter-select theme-select">
+              <div class="form-field">
+                <label class="form-label" for="brickcard-theme-id">Thème</label>
+                <p class="form-hint" id="brickcard-theme-hint">Couleur + logo sur la carte — <a href="#/themes">gérer les thèmes</a></p>
+                <select id="brickcard-theme-id" class="form-control" aria-describedby="brickcard-theme-hint">
                   <option value="">Aucun thème</option>
                   ${themeOptions}
                 </select>
               </div>
 
-              <div class="field">
-                <label>Photo</label>
-                <span class="hint">Fichier ou URL.</span>
-                <div class="photo-zone" id="photo-zone">
+              <div class="form-field">
+                <label class="form-label" id="card-photo-label">Photo</label>
+                <p class="form-hint" id="card-photo-hint">Fichier ou URL.</p>
+                <div class="photo-zone" id="photo-zone" role="group" aria-labelledby="card-photo-label" aria-describedby="card-photo-hint">
                   <div class="file-row">
-                    <label class="file-btn">
+                    <label class="btn primary file-btn">
                       ${isEdit && existing?.imageDataUrl ? "Changer l'image" : "Parcourir…"}
                       <input type="file" id="card-image" accept="image/*" />
                     </label>
@@ -141,14 +143,16 @@ export async function renderEditor(host, opts) {
                     <button type="button" class="btn secondary sm" id="card-image-url-btn">Charger</button>
                   </div>
 
-                  <div class="field image-bg-field">
-                    <label for="image-background-color-hex">Fond de l’image</label>
-                    <span class="hint">Vide = blanc à l’affichage (utile pour PNG/SVG transparents)</span>
-                    <div class="color-row">
-                      <input type="color" id="image-background-color" value="${escapeAttr(imageBgDisplay)}" title="Choisir une couleur" />
-                      <input type="text" id="image-background-color-hex" value="${escapeAttr(storedImageBg)}" maxlength="7" placeholder="#ffffff" />
-                      <button type="button" class="btn ghost sm" id="image-background-clear" ${storedImageBg ? "" : "hidden"}>Effacer</button>
-                    </div>
+                  <div class="form-field image-bg-field">
+                    <label class="form-label" for="image-background-color-hex">Fond de l’image</label>
+                    <p class="form-hint" id="image-bg-hint">Vide = blanc à l’affichage (utile pour PNG/SVG transparents)</p>
+                    ${formColorMarkup({
+                      id: "image-background-color-hex",
+                      value: storedImageBg,
+                      fallback: imageBgDisplay,
+                      placeholder: "#ffffff",
+                      describedBy: "image-bg-hint",
+                    })}
                   </div>
 
                   <div class="cropper" id="cropper" title="Glisser pour déplacer · molette pour zoomer" style="background-color:${escapeAttr(imageBgDisplay)}">
@@ -157,10 +161,12 @@ export async function renderEditor(host, opts) {
                   </div>
 
                   <div class="controls ${existing?.imageDataUrl ? "" : "disabled"}" id="image-controls">
-                    <div class="slider-row">
-                      <span>Zoom</span>
-                      <input type="range" id="image-zoom" min="${ZOOM_MIN}" max="${ZOOM_MAX}" value="${zoomPercent}" />
-                      <output id="image-zoom-out">${zoomPercent}%</output>
+                    <div class="form-field">
+                      <label class="form-label" for="image-zoom">Zoom</label>
+                      <div class="form-range-row">
+                        <input type="range" id="image-zoom" min="${ZOOM_MIN}" max="${ZOOM_MAX}" value="${zoomPercent}" aria-valuemin="${ZOOM_MIN}" aria-valuemax="${ZOOM_MAX}" aria-valuenow="${zoomPercent}" aria-describedby="image-zoom-out" />
+                        <output id="image-zoom-out" for="image-zoom">${zoomPercent}%</output>
+                      </div>
                     </div>
                     <div class="editor-actions">
                       <button type="button" class="btn secondary sm" id="reset-image-crop">Recentrer</button>
@@ -170,7 +176,7 @@ export async function renderEditor(host, opts) {
                 </div>
               </div>
 
-              <p class="error" id="error" role="alert"></p>
+              <p class="form-error" id="error" role="alert"></p>
 
               <div class="editor-actions">
                 <button type="button" class="btn primary" id="btn-card-save">Enregistrer</button>
@@ -208,9 +214,6 @@ export async function renderEditor(host, opts) {
     cardImageUrl: host.querySelector("#card-image-url"),
     cardImageUrlBtn: host.querySelector("#card-image-url-btn"),
     cardImageClear: host.querySelector("#card-image-clear"),
-    imageBackgroundColor: host.querySelector("#image-background-color"),
-    imageBackgroundColorHex: host.querySelector("#image-background-color-hex"),
-    imageBackgroundClear: host.querySelector("#image-background-clear"),
     fileName: host.querySelector("#file-name"),
     photoZone: host.querySelector("#photo-zone"),
     cropper: host.querySelector("#cropper"),
@@ -229,6 +232,15 @@ export async function renderEditor(host, opts) {
     deleteBtn: host.querySelector("#btn-card-delete"),
     close: host.querySelector("#btn-modal-close"),
   };
+
+  const imageBgColorRoot = /** @type {HTMLElement|null} */ (
+    host.querySelector("#image-background-color-hex")?.closest("[data-form-color]")
+  );
+  /** @type {ReturnType<typeof bindFormColor>|null} */
+  let imageBgColorField = null;
+  const destroyThemeSelect = enhanceFormSelect(
+    /** @type {HTMLSelectElement} */ (refs.brickcardThemeId)
+  );
 
   const previewDraft = {
     legoSetRef: existing?.legoSetRef || "",
@@ -262,16 +274,6 @@ export async function renderEditor(host, opts) {
       existing.pieceCount != null ? String(existing.pieceCount) : "";
     refs.figurineCount.value =
       existing.figurineCount != null ? String(existing.figurineCount) : "";
-  }
-
-  function applyImageBackground(color) {
-    const next = color || "";
-    state.imageBackgroundColor = next;
-    const display = resolveImageBackground(next);
-    if (refs.cropper) refs.cropper.style.backgroundColor = display;
-    if (refs.imageBackgroundColor) refs.imageBackgroundColor.value = display;
-    if (refs.imageBackgroundColorHex) refs.imageBackgroundColorHex.value = next;
-    if (refs.imageBackgroundClear) refs.imageBackgroundClear.hidden = !next;
   }
 
   function draft() {
@@ -319,6 +321,7 @@ export async function renderEditor(host, opts) {
     const clamped = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round(Number(percent) || 100)));
     state.imageZoom = clamped / 100;
     refs.imageZoom.value = String(clamped);
+    refs.imageZoom.setAttribute("aria-valuenow", String(clamped));
     refs.imageZoomOut.textContent = `${clamped}%`;
     syncPreview();
   }
@@ -474,29 +477,18 @@ export async function renderEditor(host, opts) {
     clearImage();
   });
 
-  refs.imageBackgroundColor?.addEventListener("input", () => {
-    applyImageBackground(refs.imageBackgroundColor.value);
-    syncPreview();
-  });
-  refs.imageBackgroundColorHex?.addEventListener("change", () => {
-    let v = refs.imageBackgroundColorHex.value.trim();
-    if (!v) {
-      applyImageBackground("");
-      syncPreview();
-      return;
-    }
-    if (!v.startsWith("#")) v = `#${v}`;
-    if (/^#[0-9a-fA-F]{6}$/.test(v)) {
-      applyImageBackground(v.toLowerCase());
-      syncPreview();
-    } else {
-      refs.imageBackgroundColorHex.value = state.imageBackgroundColor;
-    }
-  });
-  refs.imageBackgroundClear?.addEventListener("click", () => {
-    applyImageBackground("");
-    syncPreview();
-  });
+  if (imageBgColorRoot) {
+    imageBgColorField = bindFormColor(imageBgColorRoot, {
+      fallbackColor: resolveImageBackground(""),
+      onChange(value) {
+        state.imageBackgroundColor = value || "";
+        if (refs.cropper) {
+          refs.cropper.style.backgroundColor = resolveImageBackground(value);
+        }
+        syncPreview();
+      },
+    });
+  }
 
   refs.imageZoom.addEventListener("input", () =>
     setImageZoomPercent(Number(refs.imageZoom.value))
@@ -634,6 +626,8 @@ export async function renderEditor(host, opts) {
   queueMicrotask(() => refs.legoSetRef?.focus());
 
   return () => {
+    destroyThemeSelect();
+    imageBgColorField?.destroy();
     window.removeEventListener("resize", syncPreview);
     window.removeEventListener("keydown", onKeydown);
     document.body.classList.remove("modal-open");

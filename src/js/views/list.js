@@ -1,3 +1,4 @@
+import { ICON_ADD, ICON_ARROW_DOWN_S, ICON_ARROW_UP_S, ICON_PRINTER, ICON_SUBTRACT } from "../icons.js";
 import { loadCards, loadThemes } from "../storage.js";
 import {
   printQty,
@@ -22,9 +23,9 @@ function includesCI(hay, needle) {
   return hay.toLowerCase().includes(needle.toLowerCase());
 }
 
-const ICON_PRINT = `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><path d="M7 17H17V22H7V17ZM19 8H5C3.34315 8 2 9.34315 2 11V15C2 16.1046 2.89543 17 4 17H5V13H19V17H20C21.1046 17 22 16.1046 22 15V11C22 9.34315 20.6569 8 19 8ZM7 2H17V6H7V2Z"/></svg>`;
-const ICON_MINUS = `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><path d="M5 11H19V13H5V11Z"/></svg>`;
-const ICON_PLUS = `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"/></svg>`;
+const ICON_PRINT = ICON_PRINTER;
+const ICON_MINUS = ICON_SUBTRACT;
+const ICON_PLUS = ICON_ADD;
 
 const SORT_KEY = "brickcard-generator:list-sort";
 const SORT_DIR_KEY = "brickcard-generator:list-sort-dir";
@@ -42,8 +43,8 @@ const SORT_KEYS = [
   "figurineCount",
 ];
 
-const ICON_SORT_ASC = `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><path d="M12 4L18 10H13V20H11V10H6L12 4Z"/></svg>`;
-const ICON_SORT_DESC = `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><path d="M12 20L6 14H11V4H13V14H18L12 20Z"/></svg>`;
+const ICON_SORT_ASC = ICON_ARROW_UP_S;
+const ICON_SORT_DESC = ICON_ARROW_DOWN_S;
 
 /** @param {ListSortKey} key @returns {ListSortDir} */
 function defaultSortDir(key) {
@@ -259,17 +260,21 @@ export async function renderList(main, opts) {
   function printQtyMarkup(id, qty) {
     const has = qty > 0;
     const safeId = escapeAttr(id);
+    const decLabel = "Retirer une carte";
+    const incLabel = has ? "Ajouter une carte" : "Ajouter à l’impression";
     return `
       <div class="print-qty${has ? " is-active" : ""}" data-print-qty="${safeId}">
-        <button type="button" class="print-qty-btn print-qty-dec" data-qty-dec="${safeId}" aria-label="Retirer une carte" ${has ? "" : "hidden"}>
+        <button type="button" class="btn ghost icon-only sm" data-qty-dec="${safeId}" ${has ? "" : "hidden"}>
           ${ICON_MINUS}
+          <span class="visually-hidden">${decLabel}</span>
         </button>
         <span class="print-qty-count" ${has ? "" : "hidden"} aria-label="${qty} carte${qty > 1 ? "s" : ""}">
           ${ICON_PRINT}
           <span class="print-qty-num">${qty}</span>
         </span>
-        <button type="button" class="print-qty-btn print-qty-inc" data-qty-inc="${safeId}" aria-label="${has ? "Ajouter une carte" : "Ajouter à l’impression"}">
+        <button type="button" class="btn ghost icon-only${has ? " sm" : ""}" data-qty-inc="${safeId}">
           ${has ? ICON_PLUS : ICON_PRINT}
+          <span class="visually-hidden">${incLabel}</span>
         </button>
       </div>
     `;

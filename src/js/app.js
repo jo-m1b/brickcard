@@ -9,6 +9,12 @@ import { renderList } from "./views/list.js";
 import { renderThemesModal } from "./views/themes.js";
 import { renderPageModal } from "./views/page.js";
 import { renderSettingsModal } from "./views/settings.js";
+import { renderTestIndex } from "./views/test/index.js";
+import { renderTestButtons } from "./views/test/buttons.js";
+import { renderTestFields } from "./views/test/fields.js";
+import { renderTestSelects } from "./views/test/selects.js";
+import { renderTestSliders } from "./views/test/sliders.js";
+import { renderTestColors } from "./views/test/colors.js";
 import {
   initPrintMenu,
   setPrintMenuVisible,
@@ -64,6 +70,11 @@ function parseRoute() {
   }
   if (path === "list") return { name: "list" };
   if (path === "themes") return { name: "themes" };
+  if (path === "test" || path === "test/") return { name: "test", page: "index" };
+  if (path.startsWith("test/")) {
+    const page = path.slice(5).replace(/\/$/, "") || "index";
+    return { name: "test", page };
+  }
   return { name: "home", params };
 }
 
@@ -218,6 +229,11 @@ function openSettingsModal() {
     onThemes: () => {
       openThemesModal();
     },
+    onStyleguide: isLocalDevHost()
+      ? () => {
+          navigate("#/test");
+        }
+      : undefined,
     onDevReset: isLocalDevHost() ? handleDevReset : undefined,
   });
 }
@@ -303,6 +319,26 @@ async function route() {
   if (token !== routeToken) return;
 
   const routeInfo = parseRoute();
+
+  if (routeInfo.name === "test") {
+    setNewButtonVisible(false);
+    setSearchVisible(false);
+    syncHeaderPrint(0);
+    if (routeInfo.page === "buttons") {
+      cleanupList = renderTestButtons(main);
+    } else if (routeInfo.page === "fields") {
+      cleanupList = renderTestFields(main);
+    } else if (routeInfo.page === "selects") {
+      cleanupList = renderTestSelects(main);
+    } else if (routeInfo.page === "sliders") {
+      cleanupList = renderTestSliders(main);
+    } else if (routeInfo.page === "colors") {
+      cleanupList = renderTestColors(main);
+    } else {
+      cleanupList = renderTestIndex(main);
+    }
+    return;
+  }
 
   if (routeInfo.name === "themes") {
     setNewButtonVisible(true);

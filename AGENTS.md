@@ -31,11 +31,15 @@ Tout le code applicatif est dans **`src/`**.
 | `src/js/card-export.js` | Téléchargement de la photo d’une Brickcard |
 | `src/js/print.js` | Impression A4 3×3 + dos miroir |
 | `src/js/version.js` | Version SemVer (`APP_VERSION`) — source unique |
+| `src/js/icons.js` | Icônes UI ([Remix Icon](https://remixicon.com/)) — paths + helpers |
+| `src/js/form-color.js` | Champ couleur (`form-color` / pastille / clear) |
+| `src/js/form-select.js` | Surcouche select (`form-select` / liste custom) |
 | `src/js/views/list.js` | Grille d’aperçus + recherche (barre topbar) |
 | `src/js/views/editor.js` | Éditeur de carte |
 | `src/js/views/themes.js` | Modale gestion thèmes LEGO |
 | `src/js/views/page.js` | Modale page Markdown |
 | `src/js/views/settings.js` | Modale paramètres |
+| `src/js/views/test/` | Styleguide / pages de test UI (`#/test`, `#/test/buttons`, …) |
 | `CHANGELOG.md` | Historique des versions (Keep a Changelog) |
 
 ## Modèle carte (`Card`)
@@ -110,6 +114,62 @@ Accent d’une Brickcard (`resolveCardAccent`) :
 ## Vues
 
 - `#/` `#/list` `#/new` `#/edit/:id` `#/themes` (modale thèmes)
+- `#/test` `#/test/buttons` `#/test/fields` `#/test/selects` `#/test/sliders` `#/test/colors` — styleguide UI (extensible : `#/test/…`) ; lien Paramètres en local uniquement
+
+## Boutons (design system)
+
+Vocabulaire UI → classes CSS :
+
+| Axe | Options |
+|-----|---------|
+| Variante | `btn primary` (défaut) · `secondary` · `ghost` · `danger` |
+| Contenu | texte seul · texte + icône (`svg` + `span`) · `icon-only` |
+| Disposition (texte+icône) | icône à gauche (défaut) · `icon-right` |
+| Taille | (défaut) · `sm` |
+| Badge | `span.btn-badge` (overlay, `aria-hidden`) |
+| État | (actif) · `disabled` |
+
+Icône seule : label dans `span.visually-hidden`, SVG en `aria-hidden="true"`.
+Badge : compteur en overlay (coin haut-droit) ; le bouton reste dans son type (y compris `icon-only`). Nom accessible sur le bouton, pas sur le badge.
+Hover et `:focus-visible` partagent le même style (pas d’outline dédié sur les boutons).
+Ghost : texte = secondary ; hover/focus = primary au repos (fond accent / texte contraste).
+Ne pas créer de classes one-shot — réutiliser ce vocabulaire. Galerie : `#/test/buttons`.
+
+## Champs de saisie (design system)
+
+Ordre standard d’un champ (sauf exception documentée)&nbsp;:
+
+1. **Label** — `form-label` (+ `form-label--required` si besoin)
+2. **Hint / description** — `form-hint` (optionnel, toujours au-dessus du contrôle)
+3. **Contrôle** — `form-control` (text / number / textarea) ou groupe de saisie (couleur, photo…)
+4. **Erreur / validation** — `form-error` (sous le contrôle, seulement si affiché)
+
+Vocabulaire :
+
+| Axe | Options |
+|-----|---------|
+| Bloc | `form-field` |
+| Label | `form-label` (+ `form-label--required`) |
+| Aide | `form-hint` |
+| Contrôle | `form-control` (text / number / textarea) |
+| Erreur | `form-error` + `is-invalid` / `aria-invalid` sur le contrôle |
+| Taille | (défaut) · `sm` |
+
+Hover : **aucun**. Repos = trait bas inset 2px ; focus = `outline` 2px + `outline-offset` 1px (`ink`, inchangé en erreur). Couleur erreur : `--form-error` (`#ce0000` clair / `#ff5555` dark). Galerie : `#/test/fields`.
+
+Exceptions actuelles : alertes form-wide (`#error`, `#theme-error`) sous le bloc de champs.
+
+## Listes déroulantes (design system — styleguide)
+
+Markup&nbsp;: `select.form-control` (même look qu’un champ texte). Surcouche unobtrusive&nbsp;: `enhanceFormSelects()` / `enhanceFormSelect()` dans `form-select.js` — déclencheur stylé + liste custom (optgroup, clavier, états). Option placeholder (`value=""`) exclue de la liste ; reset `ri-close-circle-fill` (non focusable) pour y revenir. Icônes d’option&nbsp;: `data-icon-left` / `data-icon-right` (clés Remix de `icons.js`, ex. `printer`, `arrow-right`). Le `<select>` natif reste synchronisé. Appliqué : éditeur (thème). Galerie&nbsp;: `#/test/selects`.
+
+## Curseurs / range (design system)
+
+Même ordre de champ. Contrôle&nbsp;: `form-range-row` (`input[type=range]` + `output` optionnel). Poignée carrée sans bordure ; focus sur la poignée seule ; erreur = message seulement (pas de teinte rouge sur le curseur). Appliqué : paramètres (colonnes, bordure, coins) · éditeur (zoom). Galerie&nbsp;: `#/test/sliders`.
+
+## Couleurs (design system)
+
+Même ordre de champ. Contrôle&nbsp;: `input.form-control` texte dans un wrapper `form-color`, avec pastille à gauche (`input[type=color]`) et bouton effacer (`ri-close-circle-fill`) en overlay à l’intérieur du champ. Clear visible seulement s’il y a une valeur (peut être omis / disabled) ; non focusable (`tabindex="-1"`). Pastille&nbsp;: uniquement si hex valide ; sinon couleur par défaut du champ (`fallback` / `fallbackColor`), sinon damier transparent. Module&nbsp;: `form-color.js`. Appliqué : paramètres · éditeur (fond image) · thèmes. Galerie&nbsp;: `#/test/colors`.
 
 ## Impression
 
@@ -120,4 +180,5 @@ Accent d’une Brickcard (`resolveCardAccent`) :
 - Garder le nom produit **Brickcard Generator** / marque **Brickcard** dans l’UI et la doc.
 - Garder les noms de champs **verbeux** sur les modèles Card / LegoTheme.
 - UI française, design minimaliste (pas d’arrondis/ombres UI).
+- **Icônes** : toujours partir de [Remix Icon](https://remixicon.com/) (style *fill* de préférence) avant d’inventer un SVG. Réutiliser / étendre `src/js/icons.js` ; en HTML, commenter le nom `ri-*`.
 - Pas de dépendances npm sauf demande explicite.

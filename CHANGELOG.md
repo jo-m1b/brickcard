@@ -5,6 +5,110 @@ Toutes les modifications notables de ce projet sont documentées dans ce fichier
 Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [0.4.14] — 2026-08-11
+
+### Fixed
+
+- Select custom : plus de surbrillance « fantôme » sur la 1ʳᵉ option après reset (highlight suit le pointeur ; aucune option active si rien n’est sélectionné)
+
+## [0.4.13] — 2026-08-11
+
+### Changed
+
+- Select custom `form-select` appliqué au choix du thème dans l’éditeur ; styles legacy `filter-select` / `theme-select` retirés
+
+## [0.4.12] — 2026-08-11
+
+### Added
+
+- Styleguide selects : surcouche unobtrusive `form-select.js` (déclencheur type champ texte + liste stylable) sur `#/test/selects`
+
+## [0.4.11] — 2026-08-11
+
+### Changed
+
+- Champs couleur `form-color` appliqués aux paramètres, à l’éditeur et aux thèmes ; styles legacy `color-row` retirés
+- Pastille couleur : affiche le défaut du champ si la valeur est vide (damier seulement sans défaut)
+
+## [0.4.10] — 2026-08-11
+
+### Added
+
+- Styleguide champs couleur : `#/test/colors` (`form-control` texte + pastille / `ri-close-circle-fill` en overlay)
+
+## [0.4.9] — 2026-08-11
+
+### Changed
+
+- Curseurs `form-range-row` appliqués aux paramètres et au zoom éditeur ; styles legacy `settings-control-row` / `slider-row` retirés
+
+## [0.4.8] — 2026-08-11
+
+### Added
+
+- Styleguide curseurs : `#/test/sliders` (`form-range-row` — label → hint → range → erreur ; poignée carrée, focus sur la poignée seule)
+
+## [0.4.7] — 2026-08-11
+
+### Changed
+
+- Schéma de champ standardisé : label → hint → contrôle → erreur (`form-field` / `form-label` / `form-hint` / `form-error`)
+- Champs texte / nombre / textarea : design system `form-control` dans l’éditeur (référence, titre, année, pièces, figurines) et le nom de thème
+- Styles legacy `.field` / `.required` retirés
+
+## [0.4.6] — 2026-08-11
+
+### Added
+
+- Styleguide champs de saisie : `#/test/fields` (`form-field` / `form-control` — text, number, textarea)
+- Styleguide listes déroulantes : `#/test/selects`
+
+## [0.4.5] — 2026-08-11
+
+### Changed
+
+- Icônes UI : [Remix Icon](https://remixicon.com/) via `src/js/icons.js` (convention AGENTS.md)
+
+## [0.4.4] — 2026-08-11
+
+### Added
+
+- Badge bouton (`btn-badge`) dans le design system + exemples styleguide (variantes, icônes, `sm`)
+
+### Changed
+
+- Compteur impression header : utilise `btn-badge`
+
+## [0.4.3] — 2026-08-11
+
+### Changed
+
+- Boutons de l’app alignés sur le design system (header, liste, paramètres, éditeur, modales)
+- Tri header : `btn ghost sm icon-only` ; sélection impression liste : ghost icon-only (+/− en `sm`)
+- Paramètres : modes d’affichage secondary/primary ; actions import/export/thèmes/styleguide en primary
+- CSS one-shot retiré (`print-qty-btn`, `theme-mode-btn`, `search-sort-btn` custom, etc.)
+
+## [0.4.2] — 2026-08-11
+
+### Changed
+
+- Boutons : modèle unifié (4 variantes × texte / texte+icône / icône seule, `icon-right`, `sm`)
+- Icône seule : `btn … icon-only` + label `visually-hidden` (remplace `btn-icon`)
+- Hover et focus clavier : même style (plus d’outline dédié sur les boutons)
+- Ghost : texte comme secondary ; hover/focus = style du primary au repos
+
+## [0.4.1] — 2026-08-11
+
+### Added
+
+- Design system boutons formalisé (`primary` / `secondary` / `ghost` / `danger` / `btn-icon` / `btn-icon--ghost` / `sm`)
+- Styleguide UI : `#/test`, `#/test/buttons` (lien Paramètres en local)
+
+### Changed
+
+- Bouton primary : survol en inversion fond / texte (dont « Nouvelle carte »)
+- Icônes topbar et croix de modale : classe partagée `btn-icon--ghost`
+
 ## [0.4.0] — 2026-08-10
 
 ### Added
