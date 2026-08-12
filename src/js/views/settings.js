@@ -59,7 +59,7 @@ export function renderSettingsModal(host, opts) {
         <div class="modal-header">
           <div>
             <h2 class="view-title" id="settings-modal-title">Paramètres</h2>
-            <p class="view-desc">Configuration de Brickcard Generator</p>
+            <p class="view-desc">Options et configuration de l'application</p>
           </div>
           <button type="button" class="btn ghost icon-only modal-close" id="btn-settings-close">
             ${ICON_CLOSE}

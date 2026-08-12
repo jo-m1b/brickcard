@@ -2087,6 +2087,11 @@ button.form-select-trigger.sm {
   overflow: auto;
 }
 
+.modal-confirm-msg {
+  margin: 0;
+  text-align: center;
+}
+
 .modal-footer {
   display: flex;
   flex-wrap: wrap;
@@ -2521,29 +2526,6 @@ textarea {
   gap: 0.55rem;
   justify-items: center;
   align-content: start;
-}
-
-.preview-label {
-  font-size: 0.78rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--ink-soft);
-  justify-self: start;
-  width: 100%;
-  margin-top: 0.35rem;
-}
-
-.preview-wrap > .preview-label:first-child {
-  margin-top: 0;
-}
-
-.preview-hint {
-  font-size: 0.82rem;
-  color: var(--ink-soft);
-  text-align: center;
-  margin: 0.35rem 0 0;
-  max-width: 20rem;
 }
 
 .field-row {

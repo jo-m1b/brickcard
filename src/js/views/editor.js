@@ -80,7 +80,7 @@ export async function renderEditor(host, opts) {
         <div class="modal-header">
           <div>
             <h2 class="view-title" id="editor-title">${isEdit ? "Modifier la carte" : "Nouvelle carte"}</h2>
-            <p class="view-desc">Tu peux enregistrer une carte totalement vierge et compléter les infos plus tard.</p>
+            <p class="view-desc">${isEdit ? "Les modifications seront appliquées à la carte après l’enregistrement" : "Créer une nouvelle carte pour l'ajouter à la collection"}</p>
           </div>
           <button type="button" class="btn ghost icon-only modal-close" id="btn-modal-close">
             ${ICON_CLOSE}
@@ -91,13 +91,13 @@ export async function renderEditor(host, opts) {
           <div class="editor-layout">
             <div>
               <div class="form-field">
-                <label class="form-label" for="lego-set-ref">Référence du set</label>
+                <label class="form-label" for="lego-set-ref">Numéro de l'ensemble</label>
                 <input class="form-control" type="text" id="lego-set-ref" autocomplete="off" />
               </div>
 
               <div class="form-field">
                 <label class="form-label" for="card-title">Titre</label>
-                <p class="form-hint" id="card-title-hint">Entrée pour un saut de ligne (3 lignes max sur la carte)</p>
+                <p class="form-hint" id="card-title-hint">Maximum 3 lignes affichées sur la carte (Entrée pour un saut de ligne)</p>
                 <textarea class="form-control" id="card-title" rows="3" autocomplete="off" aria-describedby="card-title-hint"></textarea>
               </div>
 
@@ -118,17 +118,15 @@ export async function renderEditor(host, opts) {
 
               <div class="form-field">
                 <label class="form-label" for="brickcard-theme-id">Thème</label>
-                <p class="form-hint" id="brickcard-theme-hint">Couleur + logo sur la carte — <a href="#/themes">gérer les thèmes</a></p>
-                <select id="brickcard-theme-id" class="form-control" aria-describedby="brickcard-theme-hint">
+                <select id="brickcard-theme-id" class="form-control">
                   <option value="">Aucun thème</option>
                   ${themeOptions}
                 </select>
               </div>
 
               <div class="form-field">
-                <label class="form-label" id="card-photo-label">Photo</label>
-                <p class="form-hint" id="card-photo-hint">Fichier ou URL.</p>
-                <div class="photo-zone" id="photo-zone" role="group" aria-labelledby="card-photo-label" aria-describedby="card-photo-hint">
+                <label class="form-label" id="card-photo-label">Image</label>
+                <div class="photo-zone" id="photo-zone" role="group" aria-labelledby="card-photo-label">
                   <div class="file-row">
                     <label class="btn primary file-btn">
                       ${isEdit && existing?.imageDataUrl ? "Changer l'image" : "Parcourir…"}
@@ -180,11 +178,8 @@ export async function renderEditor(host, opts) {
             </div>
 
             <aside class="preview-wrap">
-              <div class="preview-label">Face</div>
               <div class="card-preview" id="preview-host" aria-label="Aperçu de la face"></div>
-              <div class="preview-label">Dos</div>
               <div class="card-preview" id="preview-back-host" aria-label="Aperçu du dos"></div>
-              <p class="preview-hint">Format poker 63 × 88 mm</p>
             </aside>
           </div>
         </div>
@@ -203,10 +198,40 @@ export async function renderEditor(host, opts) {
         </div>
       </div>
     </div>
+
+    <div class="modal-backdrop" id="card-delete-backdrop" hidden>
+      <div class="modal modal--sm" role="dialog" aria-modal="true" aria-labelledby="card-delete-title" aria-describedby="card-delete-desc">
+        <div class="modal-header">
+          <div>
+            <h2 class="view-title" id="card-delete-title">Supprimer&nbsp;?</h2>
+            <p class="view-desc" id="card-delete-subtitle"></p>
+          </div>
+          <button type="button" class="btn ghost icon-only modal-close" id="card-delete-close">
+            ${ICON_CLOSE}
+            <span class="visually-hidden">Fermer</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p id="card-delete-desc" class="modal-confirm-msg">Attention, la suppression est définitive et ne pourra pas être annulée&nbsp;! Souhaitez-vous continuer&nbsp;?</p>
+        </div>
+        <div class="modal-footer">
+          <div class="modal-footer-end">
+            <button type="button" class="btn secondary" id="card-delete-cancel">Annuler</button>
+            <button type="button" class="btn danger" id="card-delete-confirm">Supprimer</button>
+          </div>
+        </div>
+      </div>
+    </div>
   `;
 
   const refs = {
     backdrop: host.querySelector("#card-editor-backdrop"),
+    deleteBackdrop: host.querySelector("#card-delete-backdrop"),
+    deleteSubtitle: host.querySelector("#card-delete-subtitle"),
+    deleteDesc: host.querySelector("#card-delete-desc"),
+    deleteCancel: host.querySelector("#card-delete-cancel"),
+    deleteClose: host.querySelector("#card-delete-close"),
+    deleteConfirm: host.querySelector("#card-delete-confirm"),
     legoSetRef: host.querySelector("#lego-set-ref"),
     title: host.querySelector("#card-title"),
     releaseYear: host.querySelector("#release-year"),
@@ -549,6 +574,10 @@ export async function renderEditor(host, opts) {
   window.addEventListener("resize", syncPreview);
 
   function requestClose() {
+    if (isDeleteConfirmOpen()) {
+      closeDeleteConfirm();
+      return;
+    }
     opts.onCancel();
   }
 
@@ -559,11 +588,43 @@ export async function renderEditor(host, opts) {
     if (e.target === refs.backdrop) requestClose();
   });
 
+  function isDeleteConfirmOpen() {
+    return Boolean(refs.deleteBackdrop && !refs.deleteBackdrop.hidden);
+  }
+
+  function cardDeleteSubtitle() {
+    const data = draft();
+    const refRaw = data.legoSetRef.replace(/^#+\s*/, "").trim();
+    const title = data.title.replace(/\s*\n\s*/g, " ").trim();
+    if (!refRaw && !title) return existing?.id || "";
+    const parts = [];
+    if (refRaw) parts.push(`#${refRaw}`);
+    if (title) parts.push(title);
+    return parts.join(" ");
+  }
+
+  function closeDeleteConfirm() {
+    if (!refs.deleteBackdrop) return;
+    refs.deleteBackdrop.hidden = true;
+    if (refs.deleteConfirm) refs.deleteConfirm.disabled = false;
+    if (refs.deleteCancel) refs.deleteCancel.disabled = false;
+  }
+
+  function openDeleteConfirm() {
+    if (!refs.deleteBackdrop || !refs.deleteSubtitle) return;
+    refs.deleteSubtitle.textContent = cardDeleteSubtitle();
+    refs.deleteBackdrop.hidden = false;
+    queueMicrotask(() => refs.deleteCancel?.focus());
+  }
+
   function onKeydown(e) {
-    if (e.key === "Escape") {
-      e.preventDefault();
-      requestClose();
+    if (e.key !== "Escape") return;
+    e.preventDefault();
+    if (isDeleteConfirmOpen()) {
+      closeDeleteConfirm();
+      return;
     }
+    requestClose();
   }
   window.addEventListener("keydown", onKeydown);
 
@@ -602,15 +663,20 @@ export async function renderEditor(host, opts) {
     }
   });
 
-  if (refs.deleteBtn && existing) {
-    refs.deleteBtn.addEventListener("click", async () => {
-      if (
-        !confirm(
-          `Supprimer cette carte${existing.title ? ` « ${existing.title} »` : ""}${existing.legoSetRef ? ` (${existing.legoSetRef})` : ""} ?\nCette action est irréversible.`
-        )
-      ) {
-        return;
-      }
+  if (refs.deleteBtn && existing && refs.deleteBackdrop) {
+    refs.deleteBtn.addEventListener("click", () => {
+      openDeleteConfirm();
+    });
+
+    refs.deleteCancel?.addEventListener("click", closeDeleteConfirm);
+    refs.deleteClose?.addEventListener("click", closeDeleteConfirm);
+    refs.deleteBackdrop.addEventListener("click", (e) => {
+      if (e.target === refs.deleteBackdrop) closeDeleteConfirm();
+    });
+
+    refs.deleteConfirm?.addEventListener("click", async () => {
+      refs.deleteConfirm.disabled = true;
+      refs.deleteCancel.disabled = true;
       refs.deleteBtn.disabled = true;
       refs.save.disabled = true;
       try {
@@ -619,6 +685,7 @@ export async function renderEditor(host, opts) {
         else opts.onCancel();
       } catch (err) {
         refs.error.textContent = err.message || "Suppression impossible.";
+        closeDeleteConfirm();
         refs.deleteBtn.disabled = false;
         refs.save.disabled = false;
       }

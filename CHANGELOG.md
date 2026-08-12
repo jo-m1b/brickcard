@@ -5,7 +5,46 @@ Toutes les modifications notables de ce projet sont documentées dans ce fichier
 Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [0.5.5] — 2026-08-12
+
+### Changed
+
+- Éditeur / paramètres : libellés et descriptions allégés (numéro d’ensemble, image, aperçus sans légendes Face/Dos)
+
+### Fixed
+
+- Éditeur : `aria-describedby` orphelins retirés après suppression des hints thème / photo
+
+### Removed
+
+- CSS mort `.preview-label` / `.preview-hint`
+
+## [0.5.4] — 2026-08-12
+
+### Changed
+
+- Modale suppression carte : nouveau texte d’avertissement
+
+## [0.5.3] — 2026-08-12
+
+### Changed
+
+- Modale suppression carte : texte de confirmation plus explicite
+
+## [0.5.2] — 2026-08-12
+
+### Changed
+
+- Modale suppression carte : titre « Supprimer ? », sous-titre `#réf titre` (ou id), message générique centré
+
+## [0.5.1] — 2026-08-12
+
+### Changed
+
+- Suppression d’une carte : `confirm()` remplacé par une modale (`modal--sm`) — Annuler / Supprimer à droite
+
 ## [0.5.0] — 2026-08-12
+
 
 ### Added
 
