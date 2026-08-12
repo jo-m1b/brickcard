@@ -98,7 +98,7 @@ Accent d’une Brickcard (`resolveCardAccent`) :
 
 ## Persistance
 
-- IndexedDB : `brickcard-generator` **v2** — stores `cards` + `themes`
+- IndexedDB : `brickcard-generator` **v2** — stores `cards` + `themes` (après Reset local : nom `brickcard-generator-<db-gen>`, clé `brickcard-generator:db-gen`)
 - Clé thème UI : `brickcard-generator:ui-theme`
 - Clé bordure face : `brickcard-generator:card-face-border-mm` (défaut `3`)
 - Clé arrondi coins : `brickcard-generator:card-radius-mm` (défaut `1.5`, face + dos)
@@ -114,7 +114,7 @@ Accent d’une Brickcard (`resolveCardAccent`) :
 ## Vues
 
 - `#/` `#/list` `#/new` `#/edit/:id` `#/themes` (modale thèmes)
-- `#/test` `#/test/buttons` `#/test/fields` `#/test/selects` `#/test/sliders` `#/test/colors` — styleguide UI (extensible : `#/test/…`) ; lien Paramètres en local uniquement
+- `#/test` `#/test/buttons` `#/test/fields` `#/test/selects` `#/test/sliders` `#/test/colors` `#/test/search` — styleguide UI (extensible : `#/test/…`) ; lien Paramètres en local uniquement
 
 ## Boutons (design system)
 
@@ -152,6 +152,7 @@ Vocabulaire :
 | Label | `form-label` (+ `form-label--required`) |
 | Aide | `form-hint` |
 | Contrôle | `form-control` (text / number / textarea) |
+| Icône | optionnelle — `form-control-wrap` + `form-control-icon` (Remix, décoratif) |
 | Erreur | `form-error` + `is-invalid` / `aria-invalid` sur le contrôle |
 | Taille | (défaut) · `sm` |
 
@@ -170,6 +171,23 @@ Même ordre de champ. Contrôle&nbsp;: `form-range-row` (`input[type=range]` + `
 ## Couleurs (design system)
 
 Même ordre de champ. Contrôle&nbsp;: `input.form-control` texte dans un wrapper `form-color`, avec pastille à gauche (`input[type=color]`) et bouton effacer (`ri-close-circle-fill`) en overlay à l’intérieur du champ. Clear visible seulement s’il y a une valeur (peut être omis / disabled) ; non focusable (`tabindex="-1"`). Pastille&nbsp;: uniquement si hex valide ; sinon couleur par défaut du champ (`fallback` / `fallbackColor`), sinon damier transparent. Module&nbsp;: `form-color.js`. Appliqué : paramètres · éditeur (fond image) · thèmes. Galerie&nbsp;: `#/test/colors`.
+
+## Recherche (design system)
+
+Barre centrale (liste)&nbsp;: bloc `search-bar` dans le slot `topbar-search`.
+
+| Axe | Options |
+|-----|---------|
+| Bloc | `search-bar` (+ `search-bar--input-only` si pas de trail) |
+| Icône | optionnelle — `form-control-icon` (défaut recherche : `ri-search-line`) |
+| Contrôle | `input.form-control` `type="search"` (même look qu’un champ texte) |
+| Trail | `search-bar-trail` (absolute, droite) — visible seulement si ≥ 2 éléments (`[hidden]` sinon) |
+| Compteur | `search-count` (vide → masqué) |
+| Tri | `search-sort` + `btn ghost sm icon-only` (`ri-filter-3-fill`) + menu `search-sort-menu form-select-list` (enfant de `search-bar`, sans bordure haute, aligné cadre focus) / options `form-select-option` ; icône droite `ri-sort-asc` / `ri-sort-desc` sur l’option active |
+
+Ouverture du menu de tri&nbsp;: **clic** uniquement (pas au hover ni au seul focus) ; une fois le bouton focusé, clavier comme `form-select` (↑↓ Entrée/Espace Home/End Échap, `aria-activedescendant`). Le menu **reste ouvert** après un choix de critère ou l’inversion du sens (fermeture : clic extérieur, Échap, ou reclic sur le bouton).
+
+Appliqué : topbar liste. Galerie&nbsp;: `#/test/search`.
 
 ## Impression
 

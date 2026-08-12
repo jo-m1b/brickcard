@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/styles.css?v=0.4.30" />
 </head>
 <body>
   <div id="app" class="app">
@@ -32,22 +32,29 @@
       </a>
 
       <div class="topbar-search" id="topbar-search" hidden>
-        <div class="topbar-search-field">
+        <div class="search-bar">
+          <!-- ri-search-line (optionnelle ; défaut pour la recherche) -->
+          <span class="form-control-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18.031 16.6168L22.3137 20.8995L20.8995 22.3137L16.6168 18.031C15.0769 19.263 13.124 20 11 20C6.032 20 2 15.968 2 11C2 6.032 6.032 2 11 2C15.968 2 20 6.032 20 11C20 13.124 19.263 15.0769 18.031 16.6168ZM16.0247 15.8748C17.2475 14.6146 18 12.8956 18 11C18 7.1325 14.8675 4 11 4C7.1325 4 4 7.1325 4 11C4 14.8675 7.1325 18 11 18C12.8956 18 14.6146 17.2475 15.8748 16.0247L16.0247 15.8748Z"/>
+            </svg>
+          </span>
           <input
+            class="form-control"
             type="search"
             id="global-search"
             placeholder="Rechercher une carte…"
             autocomplete="off"
             aria-label="Rechercher (référence, titre, thème, année)"
           />
-          <div class="topbar-search-trail">
+          <div class="search-bar-trail">
             <span class="search-count" id="search-count" aria-live="polite"></span>
             <div class="search-sort">
               <button
                 type="button"
                 class="btn ghost sm icon-only search-sort-btn"
                 id="search-sort-btn"
-                aria-haspopup="menu"
+                aria-haspopup="listbox"
                 aria-expanded="false"
                 aria-controls="search-sort-menu"
               >
@@ -57,32 +64,32 @@
                 </svg>
                 <span class="visually-hidden">Trier les cartes</span>
               </button>
-              <div class="search-sort-menu" id="search-sort-menu" role="menu" hidden>
-                <div class="search-sort-row">
-                  <button type="button" class="search-sort-option" role="menuitemradio" data-sort="updatedAt" aria-checked="false">Date de modification</button>
-                  <button type="button" class="search-sort-dir" data-sort-dir="updatedAt" aria-label="Inverser le tri" hidden></button>
-                </div>
-                <div class="search-sort-row">
-                  <button type="button" class="search-sort-option" role="menuitemradio" data-sort="legoSetRef" aria-checked="false">Référence</button>
-                  <button type="button" class="search-sort-dir" data-sort-dir="legoSetRef" aria-label="Inverser le tri" hidden></button>
-                </div>
-                <div class="search-sort-row">
-                  <button type="button" class="search-sort-option" role="menuitemradio" data-sort="title" aria-checked="false">Titre</button>
-                  <button type="button" class="search-sort-dir" data-sort-dir="title" aria-label="Inverser le tri" hidden></button>
-                </div>
-                <div class="search-sort-row">
-                  <button type="button" class="search-sort-option" role="menuitemradio" data-sort="releaseYear" aria-checked="false">Année de sortie</button>
-                  <button type="button" class="search-sort-dir" data-sort-dir="releaseYear" aria-label="Inverser le tri" hidden></button>
-                </div>
-                <div class="search-sort-row">
-                  <button type="button" class="search-sort-option" role="menuitemradio" data-sort="pieceCount" aria-checked="false">Nombre de pièces</button>
-                  <button type="button" class="search-sort-dir" data-sort-dir="pieceCount" aria-label="Inverser le tri" hidden></button>
-                </div>
-                <div class="search-sort-row">
-                  <button type="button" class="search-sort-option" role="menuitemradio" data-sort="figurineCount" aria-checked="false">Nombre de figurines</button>
-                  <button type="button" class="search-sort-dir" data-sort-dir="figurineCount" aria-label="Inverser le tri" hidden></button>
-                </div>
-              </div>
+            </div>
+          </div>
+          <div class="search-sort-menu form-select-list" id="search-sort-menu" role="listbox" hidden>
+            <div class="form-select-option" role="option" id="search-sort-opt-updatedAt" data-sort="updatedAt" aria-selected="false">
+              <span class="form-select-option-label">Date de modification</span>
+              <span class="form-select-icon form-select-icon--right" hidden></span>
+            </div>
+            <div class="form-select-option" role="option" id="search-sort-opt-legoSetRef" data-sort="legoSetRef" aria-selected="false">
+              <span class="form-select-option-label">Référence</span>
+              <span class="form-select-icon form-select-icon--right" hidden></span>
+            </div>
+            <div class="form-select-option" role="option" id="search-sort-opt-title" data-sort="title" aria-selected="false">
+              <span class="form-select-option-label">Titre</span>
+              <span class="form-select-icon form-select-icon--right" hidden></span>
+            </div>
+            <div class="form-select-option" role="option" id="search-sort-opt-releaseYear" data-sort="releaseYear" aria-selected="false">
+              <span class="form-select-option-label">Année de sortie</span>
+              <span class="form-select-icon form-select-icon--right" hidden></span>
+            </div>
+            <div class="form-select-option" role="option" id="search-sort-opt-pieceCount" data-sort="pieceCount" aria-selected="false">
+              <span class="form-select-option-label">Nombre de pièces</span>
+              <span class="form-select-icon form-select-icon--right" hidden></span>
+            </div>
+            <div class="form-select-option" role="option" id="search-sort-opt-figurineCount" data-sort="figurineCount" aria-selected="false">
+              <span class="form-select-option-label">Nombre de figurines</span>
+              <span class="form-select-icon form-select-icon--right" hidden></span>
             </div>
           </div>
         </div>
@@ -162,6 +169,6 @@
 
   <div id="print-root" class="print-root" aria-hidden="true"></div>
 
-  <script type="module" src="js/app.js"></script>
+  <script type="module" src="js/app.js?v=0.4.30"></script>
 </body>
 </html>

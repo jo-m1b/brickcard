@@ -24,7 +24,7 @@ export function renderTestIndex(host) {
         <li>
           <a class="styleguide-nav-link" href="#/test/fields">
             <strong>Champs de saisie</strong>
-            <span>text, number, textarea — états, sm</span>
+            <span>text, number, textarea — icônes, états, sm</span>
           </a>
         </li>
         <li>
@@ -43,6 +43,12 @@ export function renderTestIndex(host) {
           <a class="styleguide-nav-link" href="#/test/colors">
             <strong>Couleurs</strong>
             <span>color — pastille, hex, effacer</span>
+          </a>
+        </li>
+        <li>
+          <a class="styleguide-nav-link" href="#/test/search">
+            <strong>Recherche</strong>
+            <span>search-bar — champ, compteur, tri</span>
           </a>
         </li>
       </ul>

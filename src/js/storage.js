@@ -5,7 +5,8 @@
 
 import { getPresetThemes, getPresetTheme, parseHexColor, isLocalDevHost, clearPresetCache } from "./themes-data.js";
 
-const DB_NAME = "brickcard-generator";
+const DB_NAME_BASE = "brickcard-generator";
+const DB_GEN_KEY = "brickcard-generator:db-gen";
 const DB_VERSION = 2;
 const STORE_CARDS = "cards";
 const STORE_THEMES = "themes";
@@ -43,6 +44,46 @@ let dbPromise = null;
 /** @type {Promise<void>|null} */
 let seedPromise = null;
 
+/** Nom IndexedDB courant (génération pour échapper à un delete/open coincé). */
+function getDbName() {
+  try {
+    const gen = String(localStorage.getItem(DB_GEN_KEY) || "").trim();
+    if (gen) return `${DB_NAME_BASE}-${gen}`;
+  } catch {
+    /* ignore */
+  }
+  return DB_NAME_BASE;
+}
+
+/**
+ * Après un reset buggé, l’URL a souvent `?_=` et la base historique est coincée.
+ * On bascule alors sur une nouvelle génération (données déjà vidées de toute façon).
+ */
+function repairWedgedDbIfNeeded() {
+  try {
+    if (localStorage.getItem(DB_GEN_KEY)) return;
+    if (typeof location === "undefined") return;
+    if (!new URLSearchParams(location.search).has("_")) return;
+    localStorage.setItem(DB_GEN_KEY, String(Date.now()));
+    deleteDatabaseBestEffort(DB_NAME_BASE);
+    deleteDatabaseBestEffort("lego-set-cards");
+  } catch {
+    /* ignore */
+  }
+}
+
+/** @returns {string} ancien nom de base */
+function bumpDbGeneration() {
+  const prev = getDbName();
+  const next = String(Date.now());
+  try {
+    localStorage.setItem(DB_GEN_KEY, next);
+  } catch {
+    /* ignore */
+  }
+  return prev;
+}
+
 export function createId() {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {
     return crypto.randomUUID();
@@ -71,8 +112,10 @@ function isValidTheme(theme) {
 function openDb() {
   if (dbPromise) return dbPromise;
 
+  const dbName = getDbName();
+
   dbPromise = new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    const req = indexedDB.open(dbName, DB_VERSION);
 
     req.onupgradeneeded = (event) => {
       const db = req.result;
@@ -98,7 +141,18 @@ function openDb() {
       }
     };
 
-    req.onsuccess = () => resolve(req.result);
+    req.onsuccess = () => {
+      const db = req.result;
+      db.onversionchange = () => {
+        try {
+          db.close();
+        } catch {
+          /* ignore */
+        }
+        if (dbPromise) dbPromise = null;
+      };
+      resolve(db);
+    };
     req.onerror = () => {
       dbPromise = null;
       reject(req.error || new Error("Impossible d'ouvrir IndexedDB"));
@@ -130,7 +184,10 @@ function txDone(tx) {
 }
 
 /** Supprime l'ancienne base / clés (projet renommé Brickcard Generator). */
+let legacyStoragePurged = false;
 function purgeLegacyBrowserStorage() {
+  if (legacyStoragePurged) return;
+  legacyStoragePurged = true;
   try {
     localStorage.removeItem("lego-set-cards:v1");
     localStorage.removeItem("lego-set-cards:theme");
@@ -144,43 +201,60 @@ function purgeLegacyBrowserStorage() {
   }
 }
 
-/** @param {string} name */
-function deleteDatabase(name) {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.deleteDatabase(name);
-    req.onsuccess = () => resolve();
-    req.onerror = () => reject(req.error || new Error(`Suppression ${name} impossible`));
-    // Connexion encore ouverte ailleurs : on attend un peu puis on continue
-    req.onblocked = () => {
-      setTimeout(() => resolve(), 400);
-    };
-  });
+/** Best-effort : ne bloque jamais le flux appelant. */
+function deleteDatabaseBestEffort(name) {
+  try {
+    indexedDB.deleteDatabase(name);
+  } catch {
+    /* ignore */
+  }
+}
+
+/**
+ * Ferme la connexion singleton si elle existe.
+ * @returns {Promise<void>}
+ */
+async function closeDbConnection() {
+  const pending = dbPromise;
+  dbPromise = null;
+  seedPromise = null;
+  if (!pending) return;
+  try {
+    const db = await Promise.race([
+      pending,
+      new Promise((_, reject) => {
+        setTimeout(() => reject(new Error("timeout")), 500);
+      }),
+    ]);
+    try {
+      db.close();
+    } catch {
+      /* ignore */
+    }
+  } catch {
+    /* open bloqué / erreur */
+  }
 }
 
 /**
  * Dev only : vide IndexedDB + localStorage liés à l’app (retour usine).
+ * Stratégie : basculer sur un nouveau nom de base (génération) pour ne jamais
+ * dépendre d’un `deleteDatabase` qui peut rester bloqué indéfiniment.
  * Recharger la page ensuite pour reseeder les thèmes depuis le JSON.
  */
 export async function wipeAllLocalData() {
   clearPresetCache();
-  seedPromise = null;
 
-  // 1) Vider les stores pendant que la connexion est ouverte (fiable)
-  try {
-    const db = await openDb();
-    const tx = db.transaction([STORE_CARDS, STORE_THEMES], "readwrite");
-    tx.objectStore(STORE_CARDS).clear();
-    tx.objectStore(STORE_THEMES).clear();
-    await txDone(tx);
-    db.close();
-  } catch {
-    /* ignore */
-  }
-  dbPromise = null;
+  const oldDbName = getDbName();
+  await closeDbConnection();
 
-  // 2) Supprimer complètement les bases
-  await deleteDatabase(DB_NAME);
-  await deleteDatabase("lego-set-cards");
+  // Nouvelle génération AVANT de vider le reste du localStorage
+  bumpDbGeneration();
+
+  // Best-effort : nettoyer l’ancienne base (peut rester coincée — sans importance)
+  deleteDatabaseBestEffort(oldDbName);
+  deleteDatabaseBestEffort(DB_NAME_BASE);
+  deleteDatabaseBestEffort("lego-set-cards");
 
   try {
     localStorage.removeItem("brickcard-generator:ui-theme");
@@ -195,6 +269,7 @@ export async function wipeAllLocalData() {
     localStorage.removeItem("brickcard-generator:print-qty");
     localStorage.removeItem("lego-set-cards:v1");
     localStorage.removeItem("lego-set-cards:theme");
+    /* Ne pas retirer DB_GEN_KEY : c’est la clé de la nouvelle base vide. */
   } catch {
     /* ignore */
   }
@@ -357,15 +432,21 @@ export function resolveImageBackground(hex) {
   return normalizeImageBackground(hex) || DEFAULT_IMAGE_BACKGROUND;
 }
 
-async function ready() {
+/** Ouvre la DB sans attendre le seed des thèmes (affichage liste / empty rapide). */
+async function openDbReady() {
   purgeLegacyBrowserStorage();
+  repairWedgedDbIfNeeded();
   await openDb();
+}
+
+async function ready() {
+  await openDbReady();
   await seedThemesIfNeeded();
 }
 
 /** @returns {Promise<Card[]>} */
 export async function loadCards() {
-  await ready();
+  await openDbReady();
   const db = await openDb();
   const rows = await reqToPromise(
     db.transaction(STORE_CARDS, "readonly").objectStore(STORE_CARDS).getAll()

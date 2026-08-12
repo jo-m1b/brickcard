@@ -5,6 +5,120 @@ Toutes les modifications notables de ce projet sont documentées dans ce fichier
 Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [0.4.30] — 2026-08-12
+
+### Changed
+
+- Menu de tri recherche : reste ouvert après changement de critère ou de sens (fermeture : clic extérieur / Échap / bouton)
+
+## [0.4.29] — 2026-08-12
+
+### Fixed
+
+- Reset local : bascule sur une **nouvelle** base IndexedDB (`db-gen`) au lieu d’attendre `deleteDatabase` (qui restait bloqué et empêchait toute ouverture)
+
+## [0.4.28] — 2026-08-12
+
+### Fixed
+
+- Reset local (dev) : plus de blocage IndexedDB après reset (connexion fermée correctement, `deleteDatabase` attendu pour de vrai, `onversionchange`) — nouvelle carte / thèmes / import / styleguide redeviennent utilisables
+
+## [0.4.27] — 2026-08-12
+
+### Changed
+
+- Recherche topbar : vocabulaire design system `search-bar` finalisé (liste + styleguide `#/test/search`)
+
+### Removed
+
+- CSS mort : `list-toolbar` / `toolbar-row` / `selection-count`, styles `search` hors `form-control`
+
+## [0.4.26] — 2026-08-12
+
+### Changed
+
+- Menu de tri : sans bordure haute, aligné sur le cadre focus du champ (comme `form-select`)
+
+## [0.4.25] — 2026-08-12
+
+### Fixed
+
+- Recherche : cadre focus du champ conservé quand le menu de tri est ouvert / focus sur le bouton
+
+### Added
+
+- Menu de tri : navigation clavier (↑↓, Entrée/Espace, Home/End, Échap) comme les listes déroulantes
+
+## [0.4.24] — 2026-08-12
+
+### Changed
+
+- Menu de tri recherche : look `form-select-list` ; sens via `ri-sort-asc` / `ri-sort-desc` à droite de l’option active (recliquer pour inverser)
+
+## [0.4.23] — 2026-08-12
+
+### Fixed
+
+- Recherche : bouton de tri recentré dans le champ ; compteur seul avec `padding-right` (pas collé au bord)
+
+## [0.4.22] — 2026-08-12
+
+### Fixed
+
+- Recherche : bouton de tri recentré dans le champ (marges égales autour du fond au survol / focus, au-dessus du trait bas)
+
+## [0.4.21] — 2026-08-12
+
+### Added
+
+- Champs texte / nombre / textarea : icône gauche optionnelle (`form-control-wrap` / `form-control-icon`) — galerie `#/test/fields`
+
+### Changed
+
+- Recherche : icône via `form-control-icon` (optionnelle ; défaut `ri-search-line`)
+
+## [0.4.20] — 2026-08-12
+
+### Added
+
+- Barre de recherche : icône `ri-search-line` à gauche du champ
+
+## [0.4.19] — 2026-08-12
+
+### Changed
+
+- Compteur recherche : libellé toujours « cartes » (pluriel du total)
+
+## [0.4.18] — 2026-08-12
+
+### Changed
+
+- Recherche : compteur et tri visibles seulement s’il y a au moins 2 cartes
+
+## [0.4.17] — 2026-08-12
+
+### Changed
+
+- Barre de recherche : `input.form-control` (fond + trait bas inset, comme un champ texte)
+
+## [0.4.16] — 2026-08-12
+
+### Added
+
+- Styleguide recherche : `#/test/search` (`search-bar` — champ, compteur, menu de tri)
+
+### Changed
+
+- Topbar liste : classes `search-bar` / `search-bar-trail` (vocabulaire design system) ; styles legacy `search-field` retirés
+
+## [0.4.15] — 2026-08-11
+
+### Fixed
+
+- Header : le logo / marque ne s’étend plus sur toute la largeur (hover limité au contenu)
+- Accueil vide : page de bienvenue affichée immédiatement après un reset (load cartes découplé du seed thèmes)
+- Boot : plus d’import cassé qui empêchait l’app de démarrer (modales `#/new`, thèmes, styleguide)
+
 ## [0.4.14] — 2026-08-11
 
 ### Fixed

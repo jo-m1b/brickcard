@@ -1,4 +1,4 @@
-import { ICON_ADD, ICON_ARROW_DOWN_S, ICON_ARROW_UP_S, ICON_PRINTER, ICON_SUBTRACT } from "../icons.js";
+import { ICON_ADD, ICON_PRINTER, ICON_SORT_ASC, ICON_SORT_DESC, ICON_SUBTRACT } from "../icons.js";
 import { loadCards, loadThemes } from "../storage.js";
 import {
   printQty,
@@ -42,9 +42,6 @@ const SORT_KEYS = [
   "pieceCount",
   "figurineCount",
 ];
-
-const ICON_SORT_ASC = ICON_ARROW_UP_S;
-const ICON_SORT_DESC = ICON_ARROW_DOWN_S;
 
 /** @param {ListSortKey} key @returns {ListSortDir} */
 function defaultSortDir(key) {
@@ -168,6 +165,8 @@ export async function renderList(main, opts) {
   const searchCount = document.getElementById("search-count");
   const sortBtn = document.getElementById("search-sort-btn");
   const sortMenu = document.getElementById("search-sort-menu");
+  const searchBar = searchInput?.closest(".search-bar");
+  const searchTrail = searchBar?.querySelector(".search-bar-trail");
 
   main.innerHTML = `
     <section class="panel" aria-label="Liste des cartes">
@@ -215,42 +214,119 @@ export async function renderList(main, opts) {
     const shown = filtered().length;
     const q = searchQuery();
     if (!total) {
-      searchCount.textContent = "0 carte";
+      searchCount.textContent = "0 cartes";
       return;
     }
     if (q) {
-      searchCount.textContent = `${shown} / ${total} carte${total > 1 ? "s" : ""}`;
+      searchCount.textContent = `${shown} / ${total} cartes`;
     } else {
-      searchCount.textContent = `${total} carte${total > 1 ? "s" : ""}`;
+      searchCount.textContent = `${total} cartes`;
     }
+  }
+
+  /** Compteur + tri : visibles seulement s’il y a au moins 2 cartes. */
+  function syncSearchTrail() {
+    const show = cards.length >= 2;
+    if (searchTrail) searchTrail.hidden = !show;
+    if (!show) setSortMenuOpen(false);
+  }
+
+  /** @returns {HTMLElement[]} */
+  function sortOptionEls() {
+    if (!sortMenu) return [];
+    return /** @type {HTMLElement[]} */ ([
+      ...sortMenu.querySelectorAll("[data-sort]"),
+    ]);
+  }
+
+  let sortActiveIndex = -1;
+
+  function clearSortActive() {
+    sortActiveIndex = -1;
+    sortOptionEls().forEach((el) => el.classList.remove("is-active"));
+    sortBtn?.removeAttribute("aria-activedescendant");
+  }
+
+  /** @param {number} index @param {boolean} [scroll] */
+  function setSortActive(index, scroll = false) {
+    const opts = sortOptionEls();
+    if (!opts.length || !sortBtn) return;
+    let i = index;
+    if (i < 0) i = opts.length - 1;
+    if (i >= opts.length) i = 0;
+    sortActiveIndex = i;
+    opts.forEach((el, n) => el.classList.toggle("is-active", n === i));
+    const active = opts[i];
+    if (active?.id) {
+      sortBtn.setAttribute("aria-activedescendant", active.id);
+      if (scroll) active.scrollIntoView({ block: "nearest" });
+    }
+  }
+
+  function isSortMenuOpen() {
+    return Boolean(sortMenu && !sortMenu.hidden);
   }
 
   function syncSortMenu() {
     if (!sortMenu || !sortBtn) return;
-    sortMenu.querySelectorAll("[data-sort]").forEach((btn) => {
-      const key = btn.getAttribute("data-sort");
+    sortOptionEls().forEach((el) => {
+      const key = el.getAttribute("data-sort");
       const on = key === sortKey;
-      btn.setAttribute("aria-checked", on ? "true" : "false");
-    });
-    sortMenu.querySelectorAll("[data-sort-dir]").forEach((btn) => {
-      const key = btn.getAttribute("data-sort-dir");
-      const on = key === sortKey;
-      btn.hidden = !on;
+      el.setAttribute("aria-selected", on ? "true" : "false");
+      el.classList.toggle("is-selected", on);
+      const iconSlot = el.querySelector(".form-select-icon--right");
+      if (!(iconSlot instanceof HTMLElement)) return;
       if (on) {
-        btn.innerHTML = sortDir === "asc" ? ICON_SORT_ASC : ICON_SORT_DESC;
-        btn.setAttribute(
-          "aria-label",
-          sortDir === "asc" ? "Tri croissant — cliquer pour inverser" : "Tri décroissant — cliquer pour inverser"
-        );
-        btn.title = sortDir === "asc" ? "Croissant" : "Décroissant";
+        iconSlot.hidden = false;
+        iconSlot.innerHTML = sortDir === "asc" ? ICON_SORT_ASC : ICON_SORT_DESC;
+        iconSlot.title = sortDir === "asc" ? "Croissant" : "Décroissant";
+      } else {
+        iconSlot.hidden = true;
+        iconSlot.innerHTML = "";
+        iconSlot.removeAttribute("title");
       }
     });
   }
 
-  function setSortMenuOpen(open) {
+  /**
+   * @param {boolean} open
+   * @param {{ focusBtn?: boolean }} [opts]
+   */
+  function setSortMenuOpen(open, opts = {}) {
     if (!sortMenu || !sortBtn) return;
     sortMenu.hidden = !open;
     sortBtn.setAttribute("aria-expanded", open ? "true" : "false");
+    if (open) {
+      syncSortMenu();
+      const selectedIdx = sortOptionEls().findIndex((el) =>
+        el.classList.contains("is-selected")
+      );
+      if (selectedIdx >= 0) setSortActive(selectedIdx, true);
+      else clearSortActive();
+    } else {
+      clearSortActive();
+    }
+    if (opts.focusBtn) sortBtn.focus();
+  }
+
+  /** @param {string} key */
+  function applySortKey(key) {
+    if (!SORT_KEYS.includes(/** @type {ListSortKey} */ (key))) return;
+    const next = /** @type {ListSortKey} */ (key);
+    if (next !== sortKey) {
+      sortKey = next;
+      sortDir = defaultSortDir(next);
+      saveSortKey(sortKey);
+      saveSortDir(sortDir);
+    } else {
+      sortDir = sortDir === "asc" ? "desc" : "asc";
+      saveSortDir(sortDir);
+    }
+    renderGrid();
+    const idx = sortOptionEls().findIndex(
+      (el) => el.getAttribute("data-sort") === sortKey
+    );
+    if (idx >= 0) setSortActive(idx);
   }
 
   /**
@@ -282,6 +358,7 @@ export async function renderList(main, opts) {
 
   function renderGrid() {
     const list = filtered();
+    syncSearchTrail();
     updateSearchCount();
     syncSortMenu();
     syncPrintMenu({ cardCount: cards.length });
@@ -325,15 +402,57 @@ export async function renderList(main, opts) {
 
   /** @param {MouseEvent} e */
   function onDocClick(e) {
-    if (!sortMenu || sortMenu.hidden) return;
+    if (!isSortMenuOpen()) return;
     const t = /** @type {Node} */ (e.target);
-    if (sortMenu.contains(t) || sortBtn?.contains(t)) return;
+    if (sortMenu?.contains(t) || sortBtn?.contains(t)) return;
     setSortMenuOpen(false);
   }
 
   /** @param {KeyboardEvent} e */
   function onDocKeydown(e) {
-    if (e.key === "Escape") setSortMenuOpen(false);
+    if (e.key === "Escape" && isSortMenuOpen()) {
+      e.preventDefault();
+      setSortMenuOpen(false, { focusBtn: true });
+    }
+  }
+
+  /** @param {KeyboardEvent} e */
+  function onSortBtnKeydown(e) {
+    if (!sortBtn || !sortMenu) return;
+    const open = isSortMenuOpen();
+    if (
+      e.key === "ArrowDown" ||
+      e.key === "ArrowUp" ||
+      e.key === "Enter" ||
+      e.key === " "
+    ) {
+      e.preventDefault();
+      if (!open) {
+        setSortMenuOpen(true);
+        if (e.key === "ArrowUp") {
+          setSortActive(sortOptionEls().length - 1, true);
+        }
+        return;
+      }
+      if (e.key === "ArrowDown") setSortActive(sortActiveIndex + 1, true);
+      else if (e.key === "ArrowUp") setSortActive(sortActiveIndex - 1, true);
+      else if (e.key === "Enter" || e.key === " ") {
+        const opt = sortOptionEls()[sortActiveIndex];
+        const key = opt?.getAttribute("data-sort");
+        if (key) applySortKey(key);
+      }
+    } else if (e.key === "Escape") {
+      if (open) {
+        e.preventDefault();
+        setSortMenuOpen(false, { focusBtn: true });
+      }
+    } else if (e.key === "Home" && open) {
+      e.preventDefault();
+      setSortActive(0, true);
+    } else if (e.key === "End" && open) {
+      e.preventDefault();
+      setSortActive(sortOptionEls().length - 1, true);
+    }
   }
 
   if (searchInput) {
@@ -343,35 +462,29 @@ export async function renderList(main, opts) {
   if (sortBtn && sortMenu) {
     sortBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      setSortMenuOpen(sortMenu.hidden);
+      setSortMenuOpen(!isSortMenuOpen());
     });
+    sortBtn.addEventListener("keydown", onSortBtnKeydown);
     sortMenu.addEventListener("click", (e) => {
       const t = /** @type {HTMLElement} */ (e.target);
-      const dirBtn = t.closest("[data-sort-dir]");
-      if (dirBtn) {
-        e.stopPropagation();
-        const key = dirBtn.getAttribute("data-sort-dir");
-        if (key !== sortKey) return;
-        sortDir = sortDir === "asc" ? "desc" : "asc";
-        saveSortDir(sortDir);
-        renderGrid();
-        return;
-      }
       const opt = t.closest?.("[data-sort]");
-      if (!opt) return;
+      if (!opt || !sortMenu.contains(opt)) return;
       e.stopPropagation();
       const key = opt.getAttribute("data-sort");
-      if (!key || !SORT_KEYS.includes(/** @type {ListSortKey} */ (key))) return;
-      const next = /** @type {ListSortKey} */ (key);
-      if (next !== sortKey) {
-        sortKey = next;
-        sortDir = defaultSortDir(next);
-        saveSortKey(sortKey);
-        saveSortDir(sortDir);
-      }
-      setSortMenuOpen(false);
-      renderGrid();
+      if (key) applySortKey(key);
     });
+    sortMenu.addEventListener(
+      "pointerenter",
+      (e) => {
+        if (!isSortMenuOpen()) return;
+        const t = /** @type {HTMLElement} */ (e.target);
+        const opt = t.closest?.(".form-select-option");
+        if (!opt || !sortMenu.contains(opt)) return;
+        const idx = sortOptionEls().indexOf(/** @type {HTMLElement} */ (opt));
+        if (idx >= 0) setSortActive(idx);
+      },
+      true
+    );
     document.addEventListener("click", onDocClick);
     document.addEventListener("keydown", onDocKeydown);
   }
@@ -433,9 +546,11 @@ export async function renderList(main, opts) {
   return () => {
     unregisterGrid();
     if (searchInput) searchInput.removeEventListener("input", onSearchInput);
+    if (sortBtn) sortBtn.removeEventListener("keydown", onSortBtnKeydown);
     document.removeEventListener("click", onDocClick);
     document.removeEventListener("keydown", onDocKeydown);
     setSortMenuOpen(false);
+    if (searchTrail) searchTrail.hidden = false;
     clearPrintMenuHooks();
   };
 }

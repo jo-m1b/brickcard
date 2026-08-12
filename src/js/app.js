@@ -1,4 +1,4 @@
-import { loadCards, exportToJson, importFromJson, wipeAllLocalData } from "./storage.js";
+import { loadCards, loadThemes, exportToJson, importFromJson, wipeAllLocalData } from "./storage.js";
 import { initTheme } from "./theme.js";
 import { initCardDesign } from "./card-design.js";
 import { initListLayout } from "./list-layout.js";
@@ -15,6 +15,7 @@ import { renderTestFields } from "./views/test/fields.js";
 import { renderTestSelects } from "./views/test/selects.js";
 import { renderTestSliders } from "./views/test/sliders.js";
 import { renderTestColors } from "./views/test/colors.js";
+import { renderTestSearch } from "./views/test/search.js";
 import {
   initPrintMenu,
   setPrintMenuVisible,
@@ -202,6 +203,11 @@ async function handleDevReset() {
   );
   if (!ok) return;
   try {
+    /* Fermer la modale avant wipe pour éviter un état UI coincé si le reload échoue. */
+    if (cleanupSettings) {
+      cleanupSettings();
+      cleanupSettings = null;
+    }
     await wipeAllLocalData();
     const url = new URL(location.href);
     url.searchParams.set("_", String(Date.now()));
@@ -307,19 +313,9 @@ async function route() {
   disposeList();
   setSearchVisible(false);
 
-  let cards;
-  try {
-    cards = await loadCards();
-  } catch (err) {
-    console.error(err);
-    main.innerHTML = `<section class="panel"><p class="error">Erreur de stockage : ${err.message || err}</p></section>`;
-    return;
-  }
-
-  if (token !== routeToken) return;
-
   const routeInfo = parseRoute();
 
+  /* Styleguide : pas besoin d’IndexedDB (évite de bloquer toute l’UI si la DB est coincée). */
   if (routeInfo.name === "test") {
     setNewButtonVisible(false);
     setSearchVisible(false);
@@ -334,11 +330,24 @@ async function route() {
       cleanupList = renderTestSliders(main);
     } else if (routeInfo.page === "colors") {
       cleanupList = renderTestColors(main);
+    } else if (routeInfo.page === "search") {
+      cleanupList = renderTestSearch(main);
     } else {
       cleanupList = renderTestIndex(main);
     }
     return;
   }
+
+  let cards;
+  try {
+    cards = await loadCards();
+  } catch (err) {
+    console.error(err);
+    main.innerHTML = `<section class="panel"><p class="error">Erreur de stockage : ${err.message || err}</p></section>`;
+    return;
+  }
+
+  if (token !== routeToken) return;
 
   if (routeInfo.name === "themes") {
     setNewButtonVisible(true);
@@ -368,7 +377,12 @@ async function route() {
 
   if (routeInfo.name === "list") {
     if (!cards.length) {
-      navigate("#/");
+      setNewButtonVisible(true);
+      syncHeaderPrint(0);
+      renderEmpty();
+      if (location.hash !== "#/" && location.hash !== "") {
+        history.replaceState(null, "", `${location.pathname}${location.search}#/`);
+      }
       return;
     }
     setNewButtonVisible(true);
@@ -453,6 +467,14 @@ async function boot() {
     initCardDesign();
     initListLayout();
     initPrintMenu({ toast });
+    /* Seed thèmes en arrière-plan : ne bloque pas l’empty state après un reset. */
+    void loadThemes().catch((err) => console.error(err));
+    /* Afficher tout de suite l’accueil vide pendant l’ouverture IndexedDB. */
+    if (parseRoute().name === "home") {
+      setNewButtonVisible(true);
+      syncHeaderPrint(0);
+      renderEmpty();
+    }
     const cards = await loadCards();
     syncHeaderPrint(cards.length);
     if (!location.hash || location.hash === "#") {

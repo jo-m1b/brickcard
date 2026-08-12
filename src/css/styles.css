@@ -181,7 +181,7 @@ textarea {
 }
 
 .topbar:not(:has(#topbar-search:not([hidden]))) {
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: max-content 1fr;
 }
 
 .topbar:not(:has(#topbar-search:not([hidden]))) .topbar-actions {
@@ -199,46 +199,57 @@ textarea {
   display: none !important;
 }
 
-.topbar-search-field {
+/* ——— Search bar (design system) ———
+   Slot topbar : `.topbar-search` centre le bloc.
+   Contrôle : `input.form-control` dans `.search-bar` (+ trail compteur / tri).
+   Icône : `.form-control-icon` optionnelle (défaut recherche : `ri-search-line`). */
+.search-bar {
   position: relative;
   width: min(100%, 28rem);
   display: flex;
   align-items: center;
 }
 
-.topbar-search-field input {
-  width: 100%;
-  margin: 0;
-  padding: 0.55rem 7.5rem 0.55rem 0.9rem;
-  border: none;
-  border-radius: 0;
-  background: transparent;
-  color: var(--ink);
-  font-size: 0.92rem;
+.search-bar:has(> .form-control-icon) > .form-control {
+  padding-left: 2.35rem;
 }
 
-.topbar-search-field input[type="search"]::-webkit-search-cancel-button {
-  margin-right: 0.15rem;
+.search-bar > .form-control {
+  /* place pour compteur + bouton tri */
+  padding-right: 7.5rem;
 }
 
-.topbar-search-field input:focus {
+/* Cadre focus du champ : aussi quand le tri a le focus ou le menu est ouvert */
+.search-bar:has(.search-sort-btn:focus-visible) > .form-control,
+.search-bar:has(.search-sort-btn[aria-expanded="true"]) > .form-control {
   outline: 2px solid var(--ink);
   outline-offset: 1px;
 }
 
-.topbar-search-field input::placeholder {
-  color: var(--muted);
+.search-bar > .form-control[type="search"]::-webkit-search-cancel-button {
+  margin-right: 0.15rem;
 }
 
-.topbar-search-trail {
+/* Trail masqué (< 2 éléments) ou démo sans trail → padding texte normal à droite */
+.search-bar--input-only > .form-control,
+.search-bar:has(> .search-bar-trail[hidden]) > .form-control {
+  padding-right: 0.85rem;
+}
+
+.search-bar-trail {
   position: absolute;
-  right: 0.35rem;
-  top: 50%;
-  transform: translateY(-50%);
+  /* 2px d’air en haut / à droite ; 4px en bas = 2px au-dessus du trait inset 2px */
+  top: 2px;
+  right: 2px;
+  bottom: 4px;
   display: flex;
   align-items: center;
   gap: 0.35rem;
   pointer-events: none;
+}
+
+.search-bar-trail[hidden] {
+  display: none !important;
 }
 
 .search-count {
@@ -257,9 +268,39 @@ textarea {
   display: none;
 }
 
+/* Compteur seul : air à droite (équivalent au gap avec l’icône de tri) */
+.search-count:last-child {
+  padding-right: 0.35rem;
+}
+
 .search-sort {
-  position: relative;
   pointer-events: auto;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+/* Bouton tri : carré qui remplit la hauteur utile (marges égales autour au hover) */
+.search-bar .search-sort-btn.btn.sm.icon-only {
+  box-sizing: border-box;
+  width: auto;
+  height: 100%;
+  aspect-ratio: 1;
+  flex-shrink: 0;
+}
+
+/* Menu tri : ancré au search-bar (comme form-select sur son trigger) */
+.search-sort-menu.form-select-list {
+  left: auto;
+  right: -3px;
+  top: calc(100% + 1px);
+  z-index: 350;
+  min-width: 15rem;
+  width: max-content;
+}
+
+.search-sort-menu.form-select-list[hidden] {
+  display: none !important;
 }
 
 /* Menu ouvert = même look que ghost hover/focus */
@@ -269,93 +310,21 @@ textarea {
   border-color: var(--brick-red);
 }
 
-.search-sort-menu {
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
-  z-index: 350;
-  min-width: 15rem;
-  padding: 0.25rem 0;
-  background: var(--panel);
-  border: 1px solid var(--line-strong);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-}
-
-.search-sort-menu[hidden] {
-  display: none !important;
-}
-
-.search-sort-row {
-  display: flex;
-  align-items: stretch;
-  gap: 0;
-}
-
-.search-sort-row:has([aria-checked="true"]) {
-  background: var(--row-selected);
-}
-
-.search-sort-option {
-  display: block;
-  flex: 1;
-  min-width: 0;
-  margin: 0;
-  padding: 0.55rem 0.85rem;
-  border: none;
-  background: transparent;
-  color: var(--ink);
-  font: inherit;
-  font-size: 0.88rem;
-  font-weight: 500;
-  text-align: left;
-  cursor: pointer;
-}
-
-.search-sort-option:hover,
-.search-sort-option:focus-visible {
-  background: var(--row-hover);
-  outline: none;
-}
-
-.search-sort-option[aria-checked="true"] {
-  font-weight: 700;
-}
-
-.search-sort-dir {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 2.25rem;
-  margin: 0;
-  padding: 0;
-  border: none;
-  border-left: 1px solid var(--line);
-  background: transparent;
-  color: var(--ink);
-  cursor: pointer;
-}
-
-.search-sort-dir[hidden] {
-  display: none !important;
-}
-
-.search-sort-dir:hover,
-.search-sort-dir:focus-visible {
-  background: var(--row-hover);
-  outline: none;
-}
-
-.search-sort-dir > svg {
-  width: 1.05rem;
-  height: 1.05rem;
-  display: block;
-  fill: currentColor;
+/* Démos styleguide : fond pour voir le champ transparent */
+.styleguide-search-demo {
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  max-width: 36rem;
 }
 
 @media (max-width: 840px) {
   .topbar {
     grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .topbar:not(:has(#topbar-search:not([hidden]))) {
+    grid-template-columns: max-content 1fr;
   }
 
   .topbar-search {
@@ -374,7 +343,8 @@ textarea {
   gap: 0.75rem;
   text-decoration: none;
   color: var(--ink);
-  min-width: 0;
+  justify-self: start;
+  width: max-content;
   padding: 0.2rem 0.45rem;
   margin: -0.2rem -0.45rem;
   border: 1px solid transparent;
@@ -434,7 +404,6 @@ textarea {
 .brand-text {
   display: grid;
   gap: 0.1rem;
-  min-width: 0;
 }
 
 .brand-name {
@@ -445,6 +414,7 @@ textarea {
   color: var(--ink);
   letter-spacing: 0;
   text-transform: none;
+  white-space: nowrap;
 }
 
 .brand-version {
@@ -1096,6 +1066,7 @@ html:not([data-theme]) .btn .icon-system {
  *   label    → .form-label (+ .form-label--required)
  *   aide     → .form-hint
  *   contrôle → .form-control (input text/number, textarea ; select → plus tard)
+ *   icône    → .form-control-wrap + .form-control-icon (optionnel, gauche)
  *   erreur   → .form-error + .is-invalid / aria-invalid
  *   taille   → .sm
  * Repos : fond + trait bas (box-shadow inset). Focus : outline 2px + offset 1px (trait bas conservé ; couleur inchangée en erreur).
@@ -1139,6 +1110,60 @@ html:not([data-theme]) .btn .icon-system {
 
 .form-error:empty {
   margin: 0;
+}
+
+/* Icône optionnelle à gauche (text / number / textarea / search) */
+.form-control-wrap {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.form-control-icon {
+  position: absolute;
+  left: 0.65rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  color: var(--ink-soft);
+}
+
+.form-control-icon svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  display: block;
+  fill: currentColor;
+}
+
+.form-control-wrap:has(> .form-control-icon) > .form-control {
+  padding-left: 2.35rem;
+}
+
+.form-control-wrap:has(> .form-control.sm) > .form-control-icon {
+  left: 0.5rem;
+}
+
+.form-control-wrap:has(> .form-control.sm) > .form-control-icon svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.form-control-wrap:has(> .form-control.sm) > .form-control {
+  padding-left: 2rem;
+}
+
+/* Textarea : icône en haut à gauche */
+.form-control-wrap:has(> textarea.form-control) > .form-control-icon {
+  top: 0.7rem;
+  transform: none;
+}
+
+.form-control-wrap:has(> textarea.form-control.sm) > .form-control-icon {
+  top: 0.5rem;
 }
 
 /* Contrôle range : piste + valeur (output optionnel)
@@ -1775,66 +1800,7 @@ button.form-select-trigger.sm {
   cursor: not-allowed;
 }
 
-/* ——— List toolbar ——— */
-.list-toolbar {
-  display: grid;
-  gap: 0.85rem;
-  margin-bottom: 1rem;
-}
-
-.toolbar-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  align-items: center;
-}
-
-.search-field {
-  flex: 1 1 220px;
-  min-width: 180px;
-  position: relative;
-}
-
-.search-field input {
-  width: 100%;
-  border: 1px solid var(--line);
-  border-radius: 0;
-  padding: 0.6rem 0.85rem 0.6rem 2.2rem;
-  background: var(--input-bg);
-  color: var(--ink);
-}
-
-.search-field::before {
-  content: "";
-  position: absolute;
-  left: 0.75rem;
-  top: 50%;
-  width: 12px;
-  height: 12px;
-  transform: translateY(-50%);
-  border: 1.5px solid var(--muted);
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-.search-field::after {
-  content: "";
-  position: absolute;
-  left: 1.55rem;
-  top: calc(50% + 4px);
-  width: 6px;
-  height: 1.5px;
-  background: var(--muted);
-  transform: rotate(45deg);
-  pointer-events: none;
-}
-
-.selection-count {
-  font-size: 0.9rem;
-  font-weight: 600;
-  margin-right: auto;
-}
-
+/* ——— List meta (thèmes, etc.) ——— */
 .list-meta {
   font-size: 0.85rem;
   color: var(--muted);
@@ -2239,7 +2205,6 @@ body.modal-open {
 
 input[type="text"]:not(.form-control),
 input[type="number"]:not(.form-control),
-input[type="search"]:not(.form-control),
 textarea:not(.form-control) {
   width: 100%;
   border: 1px solid var(--line);
@@ -2251,9 +2216,7 @@ textarea:not(.form-control) {
 
 input[type="text"]:not(.form-control):focus,
 input[type="number"]:not(.form-control):focus,
-input[type="search"]:not(.form-control):focus,
-textarea:not(.form-control):focus,
-.search-field input:focus {
+textarea:not(.form-control):focus {
   outline: 1px solid var(--brick-red);
   outline-offset: 1px;
 }

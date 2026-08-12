@@ -1,3 +1,10 @@
+import {
+  ICON_CALENDAR_LINE,
+  ICON_FILE_TEXT_LINE,
+  ICON_HASHTAG,
+  ICON_TEXT,
+} from "../../icons.js";
+
 /**
  * Galerie des champs de saisie (design system — test uniquement).
  * Select : voir `#/test/selects`.
@@ -15,6 +22,8 @@ export function renderTestFields(host) {
           Classes&nbsp;: <code>form-field</code> + <code>form-label</code> /
           <code>form-hint</code> / <code>form-error</code> + <code>form-control</code>
           (text, number, textarea).
+          Icône optionnelle&nbsp;: wrapper <code>form-control-wrap</code> +
+          <code>form-control-icon</code> (Remix, décoratif).
           Listes déroulantes&nbsp;: <a href="#/test/selects">page dédiée</a>.
           Compact&nbsp;: <code>sm</code>.
           Repos&nbsp;: fond + trait bas (inset). Focus&nbsp;: cadre avec 1&nbsp;px d’air (pas de hover).
@@ -29,9 +38,20 @@ export function renderTestFields(host) {
             <input class="form-control" type="text" id="demo-text" name="demo-text" placeholder="Ex. Camion de pompiers" autocomplete="off" />
           </div>
           <div class="form-field">
+            <label class="form-label" for="demo-text-icon">Titre avec icône</label>
+            <p class="form-hint" id="demo-text-icon-desc">Icône optionnelle (<code>ri-text</code>).</p>
+            <div class="form-control-wrap">
+              <span class="form-control-icon" aria-hidden="true">${ICON_TEXT}</span>
+              <input class="form-control" type="text" id="demo-text-icon" name="demo-text-icon" placeholder="Ex. Camion de pompiers" autocomplete="off" aria-describedby="demo-text-icon-desc" />
+            </div>
+          </div>
+          <div class="form-field">
             <label class="form-label" for="demo-text-hinted">Référence</label>
             <p class="form-hint" id="demo-text-hinted-desc">Numéro de set LEGO, éventuellement composé.</p>
-            <input class="form-control" type="text" id="demo-text-hinted" name="demo-text-hinted" placeholder="6140/6109" aria-describedby="demo-text-hinted-desc" autocomplete="off" />
+            <div class="form-control-wrap">
+              <span class="form-control-icon" aria-hidden="true">${ICON_HASHTAG}</span>
+              <input class="form-control" type="text" id="demo-text-hinted" name="demo-text-hinted" placeholder="6140/6109" aria-describedby="demo-text-hinted-desc" autocomplete="off" />
+            </div>
           </div>
           <div class="form-field">
             <label class="form-label form-label--required" for="demo-text-required">Champ requis</label>
@@ -48,9 +68,20 @@ export function renderTestFields(host) {
             <input class="form-control" type="number" id="demo-number" name="demo-number" min="0" step="1" placeholder="232" inputmode="numeric" />
           </div>
           <div class="form-field">
+            <label class="form-label" for="demo-number-icon">Pièces avec icône</label>
+            <p class="form-hint" id="demo-number-icon-desc">Même champ avec <code>ri-hashtag</code>.</p>
+            <div class="form-control-wrap">
+              <span class="form-control-icon" aria-hidden="true">${ICON_HASHTAG}</span>
+              <input class="form-control" type="number" id="demo-number-icon" name="demo-number-icon" min="0" step="1" placeholder="232" inputmode="numeric" aria-describedby="demo-number-icon-desc" />
+            </div>
+          </div>
+          <div class="form-field">
             <label class="form-label" for="demo-number-year">Année de sortie</label>
-            <p class="form-hint" id="demo-number-year-desc">Optionnel.</p>
-            <input class="form-control" type="number" id="demo-number-year" name="demo-number-year" min="1949" max="2100" step="1" placeholder="1998" inputmode="numeric" aria-describedby="demo-number-year-desc" />
+            <p class="form-hint" id="demo-number-year-desc">Optionnel — icône <code>ri-calendar-line</code>.</p>
+            <div class="form-control-wrap">
+              <span class="form-control-icon" aria-hidden="true">${ICON_CALENDAR_LINE}</span>
+              <input class="form-control" type="number" id="demo-number-year" name="demo-number-year" min="1949" max="2100" step="1" placeholder="1998" inputmode="numeric" aria-describedby="demo-number-year-desc" />
+            </div>
           </div>
         </div>
       </div>
@@ -61,6 +92,14 @@ export function renderTestFields(host) {
           <div class="form-field">
             <label class="form-label" for="demo-textarea">Description</label>
             <textarea class="form-control" id="demo-textarea" name="demo-textarea" rows="4" placeholder="Notes libres…"></textarea>
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="demo-textarea-icon">Description avec icône</label>
+            <p class="form-hint" id="demo-textarea-icon-desc">Icône en haut à gauche (<code>ri-file-text-line</code>).</p>
+            <div class="form-control-wrap">
+              <span class="form-control-icon" aria-hidden="true">${ICON_FILE_TEXT_LINE}</span>
+              <textarea class="form-control" id="demo-textarea-icon" name="demo-textarea-icon" rows="4" placeholder="Notes libres…" aria-describedby="demo-textarea-icon-desc"></textarea>
+            </div>
           </div>
         </div>
       </div>
@@ -73,6 +112,13 @@ export function renderTestFields(host) {
             <input class="form-control sm" type="text" id="demo-text-sm" name="demo-text-sm" placeholder="Compact" autocomplete="off" />
           </div>
           <div class="form-field">
+            <label class="form-label" for="demo-text-sm-icon">Texte + icône</label>
+            <div class="form-control-wrap">
+              <span class="form-control-icon" aria-hidden="true">${ICON_TEXT}</span>
+              <input class="form-control sm" type="text" id="demo-text-sm-icon" name="demo-text-sm-icon" placeholder="Compact" autocomplete="off" />
+            </div>
+          </div>
+          <div class="form-field">
             <label class="form-label" for="demo-number-sm">Nombre</label>
             <input class="form-control sm" type="number" id="demo-number-sm" name="demo-number-sm" min="0" placeholder="12" inputmode="numeric" />
           </div>
@@ -80,6 +126,13 @@ export function renderTestFields(host) {
         <div class="form-field" style="margin-top: 0.85rem; max-width: 28rem">
           <label class="form-label" for="demo-textarea-sm">Textarea</label>
           <textarea class="form-control sm" id="demo-textarea-sm" name="demo-textarea-sm" rows="3" placeholder="Compact…"></textarea>
+        </div>
+        <div class="form-field" style="margin-top: 0.85rem; max-width: 28rem">
+          <label class="form-label" for="demo-textarea-sm-icon">Textarea + icône</label>
+          <div class="form-control-wrap">
+            <span class="form-control-icon" aria-hidden="true">${ICON_FILE_TEXT_LINE}</span>
+            <textarea class="form-control sm" id="demo-textarea-sm-icon" name="demo-textarea-sm-icon" rows="3" placeholder="Compact…"></textarea>
+          </div>
         </div>
       </div>
 
