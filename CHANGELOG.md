@@ -5,6 +5,24 @@ Toutes les modifications notables de ce projet sont documentées dans ce fichier
 Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [0.5.0] — 2026-08-12
+
+### Added
+
+- Design system **modales** : 3 tailles (`modal--sm|md|lg`), alignement backdrop, header inversé, footer à deux zones ; styleguide `#/test/modals`
+
+### Changed
+
+- App migrée sur ce vocabulaire (paramètres / pages MD `md`, thèmes + éditeur carte `lg`, éditeur de thème `sm`) ; actions principales en pied de modale
+
+### Fixed
+
+- Tri recherche : listeners correctement retirés au quit de la liste (plus de double-clic fantôme après styleguide / retour)
+
+### Removed
+
+- Classes CSS one-shot des modales (`modal-sm`, `modal-settings`, `modal-page`, `modal-themes`)
+
 ## [0.4.30] — 2026-08-12
 
 ### Changed

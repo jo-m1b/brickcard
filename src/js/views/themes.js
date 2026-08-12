@@ -305,7 +305,7 @@ export async function renderThemesModal(host, opts) {
 
   host.innerHTML = `
     <div class="modal-backdrop" id="themes-modal-backdrop" role="presentation">
-      <div class="modal modal-themes" role="dialog" aria-modal="true" aria-labelledby="themes-modal-title">
+      <div class="modal modal--lg" role="dialog" aria-modal="true" aria-labelledby="themes-modal-title">
         <div class="modal-header">
           <div>
             <h2 class="view-title" id="themes-modal-title">Thèmes LEGO</h2>
@@ -326,7 +326,7 @@ export async function renderThemesModal(host, opts) {
     </div>
 
     <div class="modal-backdrop" id="theme-editor-backdrop" hidden>
-      <div class="modal modal-sm" role="dialog" aria-modal="true" aria-labelledby="theme-editor-title">
+      <div class="modal modal--sm" role="dialog" aria-modal="true" aria-labelledby="theme-editor-title">
         <div class="modal-header">
           <div>
             <h2 class="view-title" id="theme-editor-title">Modifier le thème</h2>
@@ -371,9 +371,11 @@ export async function renderThemesModal(host, opts) {
             <img id="theme-logo-preview" class="theme-preview-img" alt="" hidden />
           </div>
           <p class="form-error" id="theme-error" role="alert"></p>
-          <div class="editor-actions">
+        </div>
+        <div class="modal-footer">
+          <div class="modal-footer-start">
             <button type="button" class="btn primary" id="theme-save">Enregistrer</button>
-            <button type="button" class="btn secondary" id="theme-cancel">Annuler</button>
+            <button type="button" class="btn secondary sm" id="theme-cancel">Annuler</button>
           </div>
         </div>
       </div>

@@ -114,7 +114,7 @@ Accent d’une Brickcard (`resolveCardAccent`) :
 ## Vues
 
 - `#/` `#/list` `#/new` `#/edit/:id` `#/themes` (modale thèmes)
-- `#/test` `#/test/buttons` `#/test/fields` `#/test/selects` `#/test/sliders` `#/test/colors` `#/test/search` — styleguide UI (extensible : `#/test/…`) ; lien Paramètres en local uniquement
+- `#/test` `#/test/buttons` `#/test/fields` `#/test/selects` `#/test/sliders` `#/test/colors` `#/test/search` `#/test/modals` — styleguide UI (extensible : `#/test/…`) ; lien Paramètres en local uniquement
 
 ## Boutons (design system)
 
@@ -188,6 +188,14 @@ Barre centrale (liste)&nbsp;: bloc `search-bar` dans le slot `topbar-search`.
 Ouverture du menu de tri&nbsp;: **clic** uniquement (pas au hover ni au seul focus) ; une fois le bouton focusé, clavier comme `form-select` (↑↓ Entrée/Espace Home/End Échap, `aria-activedescendant`). Le menu **reste ouvert** après un choix de critère ou l’inversion du sens (fermeture : clic extérieur, Échap, ou reclic sur le bouton).
 
 Appliqué : topbar liste. Galerie&nbsp;: `#/test/search`.
+
+## Modales (design system)
+
+Coquille&nbsp;: `modal-backdrop` + `modal` (`role="dialog"` / `aria-modal`). Bordure&nbsp;: `2px solid var(--ink)` (comme le focus des champs). Alignement vertical (sur le backdrop)&nbsp;: `modal-backdrop--top` · `modal-backdrop--middle` (**défaut**) · `modal-backdrop--bottom`. Header inversé (fond `ink` / texte `panel`)&nbsp;: titre (`view-title`) + desc optionnelle (`view-desc`) + `btn ghost icon-only modal-close`. Corps&nbsp;: `modal-body`. Pied optionnel&nbsp;: `modal-footer` avec `modal-footer-start` (gauche&nbsp;: sauvegarde / validation) et `modal-footer-end` (droite&nbsp;: danger) — boutons centrés verticalement (normal / `sm`). Séparateur header&nbsp;: `2px solid var(--ink)` (pas de bordure haute sur le footer).
+
+Tailles (3)&nbsp;: `modal--sm` (~640) · `modal--md` (~896, **défaut**) · `modal--lg` (~1152). Toujours bornées au **viewport** (`100vw` / `100dvh`). Responsive ≤&nbsp;640px&nbsp;: **plein écran**, overlay masqué.
+
+Appliqué&nbsp;: paramètres / page MD (`md`) · thèmes + éditeur carte (`lg`) · éditeur de thème (`sm`). Galerie&nbsp;: `#/test/modals`.
 
 ## Impression
 

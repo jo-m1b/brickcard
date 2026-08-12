@@ -459,32 +459,37 @@ export async function renderList(main, opts) {
     searchInput.addEventListener("input", onSearchInput);
   }
 
+  /** @param {MouseEvent} e */
+  function onSortBtnClick(e) {
+    e.stopPropagation();
+    setSortMenuOpen(!isSortMenuOpen());
+  }
+
+  /** @param {MouseEvent} e */
+  function onSortMenuClick(e) {
+    const t = /** @type {HTMLElement} */ (e.target);
+    const opt = t.closest?.("[data-sort]");
+    if (!opt || !sortMenu?.contains(opt)) return;
+    e.stopPropagation();
+    const key = opt.getAttribute("data-sort");
+    if (key) applySortKey(key);
+  }
+
+  /** @param {PointerEvent} e */
+  function onSortMenuPointer(e) {
+    if (!isSortMenuOpen() || !sortMenu) return;
+    const t = /** @type {HTMLElement} */ (e.target);
+    const opt = t.closest?.(".form-select-option");
+    if (!opt || !sortMenu.contains(opt)) return;
+    const idx = sortOptionEls().indexOf(/** @type {HTMLElement} */ (opt));
+    if (idx >= 0) setSortActive(idx);
+  }
+
   if (sortBtn && sortMenu) {
-    sortBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      setSortMenuOpen(!isSortMenuOpen());
-    });
+    sortBtn.addEventListener("click", onSortBtnClick);
     sortBtn.addEventListener("keydown", onSortBtnKeydown);
-    sortMenu.addEventListener("click", (e) => {
-      const t = /** @type {HTMLElement} */ (e.target);
-      const opt = t.closest?.("[data-sort]");
-      if (!opt || !sortMenu.contains(opt)) return;
-      e.stopPropagation();
-      const key = opt.getAttribute("data-sort");
-      if (key) applySortKey(key);
-    });
-    sortMenu.addEventListener(
-      "pointerenter",
-      (e) => {
-        if (!isSortMenuOpen()) return;
-        const t = /** @type {HTMLElement} */ (e.target);
-        const opt = t.closest?.(".form-select-option");
-        if (!opt || !sortMenu.contains(opt)) return;
-        const idx = sortOptionEls().indexOf(/** @type {HTMLElement} */ (opt));
-        if (idx >= 0) setSortActive(idx);
-      },
-      true
-    );
+    sortMenu.addEventListener("click", onSortMenuClick);
+    sortMenu.addEventListener("pointerenter", onSortMenuPointer, true);
     document.addEventListener("click", onDocClick);
     document.addEventListener("keydown", onDocKeydown);
   }
@@ -546,7 +551,14 @@ export async function renderList(main, opts) {
   return () => {
     unregisterGrid();
     if (searchInput) searchInput.removeEventListener("input", onSearchInput);
-    if (sortBtn) sortBtn.removeEventListener("keydown", onSortBtnKeydown);
+    if (sortBtn) {
+      sortBtn.removeEventListener("click", onSortBtnClick);
+      sortBtn.removeEventListener("keydown", onSortBtnKeydown);
+    }
+    if (sortMenu) {
+      sortMenu.removeEventListener("click", onSortMenuClick);
+      sortMenu.removeEventListener("pointerenter", onSortMenuPointer, true);
+    }
     document.removeEventListener("click", onDocClick);
     document.removeEventListener("keydown", onDocKeydown);
     setSortMenuOpen(false);

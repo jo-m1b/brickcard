@@ -141,6 +141,8 @@ html,
 body {
   margin: 0;
   min-height: 100%;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 body {
@@ -162,6 +164,9 @@ textarea {
   padding: 0 1.25rem 3rem;
   display: grid;
   gap: 1.25rem;
+  max-width: 100%;
+  overflow-x: clip;
+  box-sizing: border-box;
 }
 
 /* ——— Topbar sticky ——— */
@@ -1029,6 +1034,45 @@ html:not([data-theme]) .btn .icon-system {
 
 .styleguide-back a {
   color: var(--ink);
+}
+
+.styleguide-notes {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: grid;
+  gap: 0.35rem;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+}
+
+.styleguide-table-wrap {
+  overflow: auto;
+  border: 1px solid var(--line);
+  background: var(--bg);
+}
+
+.styleguide-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.styleguide-table th,
+.styleguide-table td {
+  padding: 0.55rem 0.75rem;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--line);
+}
+
+.styleguide-table th {
+  font-weight: 700;
+  background: var(--panel);
+  white-space: nowrap;
+}
+
+.styleguide-table tr:last-child td {
+  border-bottom: none;
 }
 
 .styleguide code {
@@ -1918,7 +1962,9 @@ button.form-select-trigger.sm {
   color: var(--ink-soft);
 }
 
-/* ——— Modales ——— */
+/* ——— Modales ———
+   Dimensions toujours bornées au viewport (vw / dvh), jamais à la largeur
+   scrollable du document — sinon un overflow horizontal de l’app élargit la modale. */
 .modal-root:empty {
   display: none;
 }
@@ -1927,13 +1973,34 @@ button.form-select-trigger.sm {
   position: fixed;
   inset: 0;
   z-index: 400;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  max-width: 100vw;
+  max-height: 100vh;
+  max-height: 100dvh;
   display: grid;
-  place-items: start center;
+  justify-items: center;
+  align-items: safe center; /* milieu par défaut ; « safe » évite de couper le haut si trop haut */
   padding: 1.25rem 1rem 2rem;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   background: rgba(10, 10, 10, 0.55);
   -webkit-backdrop-filter: blur(1px);
   backdrop-filter: blur(1px);
+}
+
+.modal-backdrop.modal-backdrop--top {
+  align-items: start;
+}
+
+.modal-backdrop.modal-backdrop--middle {
+  align-items: safe center;
+}
+
+.modal-backdrop.modal-backdrop--bottom {
+  align-items: safe end;
 }
 
 .modal-backdrop[hidden] {
@@ -1941,18 +2008,39 @@ button.form-select-trigger.sm {
 }
 
 .modal {
-  width: min(920px, 100%);
-  margin: 2vh auto;
+  --modal-max-w: calc(100vw - 2rem);
+  --modal-max-h: calc(100dvh - 2.5rem);
+  --modal-width: 56rem; /* moyenne par défaut (~896px) */
+  box-sizing: border-box;
+  width: min(var(--modal-width), var(--modal-max-w));
+  max-width: var(--modal-max-w);
+  max-height: var(--modal-max-h);
+  margin: 0 auto;
   background: var(--panel);
-  border: 1px solid var(--line-strong);
+  border: 2px solid var(--ink);
   color: var(--ink);
   display: flex;
   flex-direction: column;
-  max-height: none;
+  min-height: 0;
 }
 
-.modal-sm {
-  width: min(480px, 100%);
+@supports not (height: 100dvh) {
+  .modal {
+    --modal-max-h: calc(100vh - 2.5rem);
+  }
+}
+
+/* Tailles design system : petite / moyenne (défaut) / grande */
+.modal.modal--sm {
+  --modal-width: 40rem; /* ~640px */
+}
+
+.modal.modal--md {
+  --modal-width: 56rem; /* ~896px */
+}
+
+.modal.modal--lg {
+  --modal-width: 72rem; /* ~1152px */
 }
 
 .modal-header {
@@ -1961,21 +2049,69 @@ button.form-select-trigger.sm {
   justify-content: space-between;
   gap: 1rem;
   padding: 1.1rem 1.25rem;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 2px solid var(--ink);
   flex-shrink: 0;
+  /* Essai : header inversé */
+  background: var(--ink);
+  color: var(--panel);
 }
 
 .modal-header .view-title {
   margin: 0;
   font-size: 1.35rem;
+  color: inherit;
 }
 
 .modal-header .view-desc {
   margin: 0.35rem 0 0;
+  color: inherit;
+  opacity: 0.8;
+}
+
+.modal-header .modal-close.btn.ghost {
+  color: var(--panel);
+  border-color: transparent;
+}
+
+.modal-header .modal-close.btn.ghost:hover,
+.modal-header .modal-close.btn.ghost:focus-visible {
+  background: var(--panel);
+  color: var(--ink);
+  border-color: var(--panel);
 }
 
 .modal-body {
   padding: 1.25rem;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: auto;
+}
+
+.modal-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  padding: 0.85rem 1.25rem 1.1rem;
+  flex-shrink: 0;
+}
+
+/* Zones d’actions : gauche = validation / sauvegarde ; droite = danger */
+.modal-footer-start,
+.modal-footer-end {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.modal-footer-end {
+  margin-left: auto;
+}
+
+.modal-footer .btn {
+  /* Aligne les hauteurs mixte (normal + sm) sur l’axe vertical */
+  align-self: center;
 }
 
 .modal-close {
@@ -1986,22 +2122,41 @@ body.modal-open {
   overflow: hidden;
 }
 
-.modal-page {
-  width: min(640px, 100%);
-}
+/* Écran étroit : plein écran viewport, plus d’overlay visible */
+@media (max-width: 640px) {
+  .modal-backdrop {
+    padding: 0;
+    place-items: stretch;
+    overflow: hidden;
+    background: var(--panel);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
 
-.modal-settings {
-  width: min(560px, 100%);
-}
+  .modal,
+  .modal.modal--sm,
+  .modal.modal--md,
+  .modal.modal--lg {
+    --modal-max-w: 100vw;
+    --modal-max-h: 100dvh;
+    width: 100vw;
+    max-width: 100vw;
+    height: 100dvh;
+    max-height: 100dvh;
+    margin: 0;
+    border: none;
+  }
 
-.modal-themes {
-  width: min(720px, 100%);
-  max-height: min(92vh, 920px);
-}
-
-.modal-themes .modal-body {
-  overflow: auto;
-  min-height: 0;
+  @supports not (height: 100dvh) {
+    .modal,
+    .modal.modal--sm,
+    .modal.modal--md,
+    .modal.modal--lg {
+      --modal-max-h: 100vh;
+      height: 100vh;
+      max-height: 100vh;
+    }
+  }
 }
 
 .themes-toolbar {
@@ -2350,10 +2505,6 @@ textarea {
   gap: 0.5rem;
   margin-top: 0.5rem;
   align-items: center;
-}
-
-.editor-actions #btn-card-delete {
-  margin-left: auto;
 }
 
 /* Erreurs page / panel (hors design system form-field) */

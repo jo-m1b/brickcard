@@ -51,6 +51,12 @@ export function renderTestIndex(host) {
             <span>search-bar — champ, compteur, tri</span>
           </a>
         </li>
+        <li>
+          <a class="styleguide-nav-link" href="#/test/modals">
+            <strong>Modales</strong>
+            <span>backdrop, tailles, header, scroll, footer</span>
+          </a>
+        </li>
       </ul>
       <p class="styleguide-back">
         <a href="#/list">← Retour à l’app</a>

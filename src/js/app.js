@@ -16,6 +16,7 @@ import { renderTestSelects } from "./views/test/selects.js";
 import { renderTestSliders } from "./views/test/sliders.js";
 import { renderTestColors } from "./views/test/colors.js";
 import { renderTestSearch } from "./views/test/search.js";
+import { renderTestModals } from "./views/test/modals.js";
 import {
   initPrintMenu,
   setPrintMenuVisible,
@@ -332,6 +333,8 @@ async function route() {
       cleanupList = renderTestColors(main);
     } else if (routeInfo.page === "search") {
       cleanupList = renderTestSearch(main);
+    } else if (routeInfo.page === "modals") {
+      cleanupList = renderTestModals(main);
     } else {
       cleanupList = renderTestIndex(main);
     }

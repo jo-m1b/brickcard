@@ -24,7 +24,7 @@ export async function renderPageModal(host, opts) {
 
   host.innerHTML = `
     <div class="modal-backdrop" id="page-modal-backdrop" role="presentation">
-      <div class="modal modal-page" role="dialog" aria-modal="true" aria-labelledby="page-modal-title">
+      <div class="modal modal--md" role="dialog" aria-modal="true" aria-labelledby="page-modal-title">
         <div class="modal-header">
           <div>
             <h2 class="view-title" id="page-modal-title">${escapeAttr(page.title)}</h2>

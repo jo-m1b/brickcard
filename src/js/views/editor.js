@@ -76,7 +76,7 @@ export async function renderEditor(host, opts) {
 
   host.innerHTML = `
     <div class="modal-backdrop" id="card-editor-backdrop" role="presentation">
-      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="editor-title">
+      <div class="modal modal--lg" role="dialog" aria-modal="true" aria-labelledby="editor-title">
         <div class="modal-header">
           <div>
             <h2 class="view-title" id="editor-title">${isEdit ? "Modifier la carte" : "Nouvelle carte"}</h2>
@@ -177,16 +177,6 @@ export async function renderEditor(host, opts) {
               </div>
 
               <p class="form-error" id="error" role="alert"></p>
-
-              <div class="editor-actions">
-                <button type="button" class="btn primary" id="btn-card-save">Enregistrer</button>
-                <button type="button" class="btn secondary" id="btn-card-cancel">Annuler</button>
-                ${
-                  isEdit
-                    ? `<button type="button" class="btn danger" id="btn-card-delete">Supprimer</button>`
-                    : ""
-                }
-              </div>
             </div>
 
             <aside class="preview-wrap">
@@ -197,6 +187,19 @@ export async function renderEditor(host, opts) {
               <p class="preview-hint">Format poker 63 × 88 mm</p>
             </aside>
           </div>
+        </div>
+        <div class="modal-footer">
+          <div class="modal-footer-start">
+            <button type="button" class="btn primary" id="btn-card-save">Enregistrer</button>
+            <button type="button" class="btn secondary sm" id="btn-card-cancel">Annuler</button>
+          </div>
+          ${
+            isEdit
+              ? `<div class="modal-footer-end">
+            <button type="button" class="btn danger" id="btn-card-delete">Supprimer</button>
+          </div>`
+              : ""
+          }
         </div>
       </div>
     </div>

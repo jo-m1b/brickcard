@@ -55,7 +55,7 @@ export function renderSettingsModal(host, opts) {
 
   host.innerHTML = `
     <div class="modal-backdrop" id="settings-modal-backdrop" role="presentation">
-      <div class="modal modal-settings" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
+      <div class="modal modal--md" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
         <div class="modal-header">
           <div>
             <h2 class="view-title" id="settings-modal-title">Paramètres</h2>
