@@ -11,20 +11,22 @@ import { ICON_CLOSE } from "../../icons.js";
  * @param {HTMLElement} host
  * @returns {() => void}
  */
-export function renderTestModals(host) {
-  const modalRoot = document.getElementById("modal-root");
+export function renderDeveloperModals(host) {
+  function getDemoRoot() {
+    return document.getElementById("developer-demo-root");
+  }
 
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker"><a href="#/test">Styleguide</a> / Modales</p>
+        <p class="styleguide-kicker"><a href="#/developer">Styleguide</a> / Modales</p>
         <h1 class="view-title">Modales</h1>
         <p class="view-desc">
           Banc d’essai pour uniformiser les dialogues.
           <strong>3 tailles</strong> (<code>modal--sm</code> / <code>modal--md</code> / <code>modal--lg</code>).
           Sous <code>640px</code> de largeur&nbsp;: plein écran (plus d’overlay visible).
           Largeur / hauteur toujours plafonnées au <strong>viewport</strong> (<code>100vw</code> / <code>100dvh</code>), pas au scroll de la page.
-          Les démos s’ouvrent dans <code>#modal-root</code>.
+          Les démos s’empilent au-dessus de cette galerie (sans la remplacer).
         </p>
       </header>
 
@@ -54,7 +56,7 @@ export function renderTestModals(host) {
               </tr>
               <tr>
                 <td>Header</td>
-                <td><code>modal-header</code> : titre + desc optionnelle + <code>modal-close</code></td>
+                <td><code>modal-header</code> : <code>h1.view-title</code> + desc optionnelle + <code>modal-close</code></td>
               </tr>
               <tr>
                 <td>Corps</td>
@@ -69,7 +71,7 @@ export function renderTestModals(host) {
         </div>
         <p class="form-hint" style="margin-top: 0.75rem">
           Appliqué dans l’app&nbsp;: paramètres / page MD (<code>modal--md</code>),
-          thèmes + éditeur carte (<code>modal--lg</code>), éditeur de thème (<code>modal--sm</code>).
+          thèmes + éditeur carte + espace développeur (<code>modal--lg</code>), éditeur de thème (<code>modal--sm</code>).
         </p>
       </div>
 
@@ -83,7 +85,7 @@ export function renderTestModals(host) {
             <tbody>
               <tr><td>Éditeur de thème</td><td><code>modal--sm</code></td></tr>
               <tr><td>Paramètres / page MD</td><td><code>modal--md</code></td></tr>
-              <tr><td>Thèmes LEGO / éditeur carte</td><td><code>modal--lg</code></td></tr>
+              <tr><td>Thèmes LEGO / éditeur carte / espace développeur</td><td><code>modal--lg</code></td></tr>
             </tbody>
           </table>
         </div>
@@ -148,7 +150,7 @@ export function renderTestModals(host) {
       </div>
 
       <p class="styleguide-back">
-        <a href="#/test">← Styleguide</a>
+        <a href="#/developer">← Styleguide</a>
       </p>
     </section>
   `;
@@ -174,7 +176,8 @@ export function renderTestModals(host) {
    * }} spec
    */
   function openDemo(spec) {
-    if (!modalRoot) return;
+    const demoRoot = getDemoRoot();
+    if (!demoRoot) return;
     closeDemo();
 
     const size = spec.size || "md";
@@ -189,8 +192,7 @@ export function renderTestModals(host) {
       ? `<div class="modal-footer">${spec.footerHtml}</div>`
       : "";
 
-    document.body.classList.add("modal-open");
-    modalRoot.innerHTML = `
+    demoRoot.innerHTML = `
       <div class="modal-backdrop${alignClass}" id="demo-modal-backdrop" role="presentation">
         <div
           class="modal ${sizeClass}"
@@ -200,7 +202,7 @@ export function renderTestModals(host) {
         >
           <div class="modal-header">
             <div>
-              <h2 class="view-title" id="demo-modal-title">${spec.title}</h2>
+              <h1 class="view-title" id="demo-modal-title">${spec.title}</h1>
               ${desc}
             </div>
             <button type="button" class="btn ghost icon-only modal-close" id="demo-modal-close">
@@ -216,8 +218,8 @@ export function renderTestModals(host) {
       </div>
     `;
 
-    const backdrop = modalRoot.querySelector("#demo-modal-backdrop");
-    const btnClose = modalRoot.querySelector("#demo-modal-close");
+    const backdrop = demoRoot.querySelector("#demo-modal-backdrop");
+    const btnClose = demoRoot.querySelector("#demo-modal-close");
 
     const onBackdrop = (/** @type {MouseEvent} */ e) => {
       if (e.target === backdrop) closeDemo();
@@ -225,24 +227,24 @@ export function renderTestModals(host) {
     const onKey = (/** @type {KeyboardEvent} */ e) => {
       if (e.key === "Escape") {
         e.preventDefault();
+        e.stopImmediatePropagation();
         closeDemo();
       }
     };
 
     backdrop?.addEventListener("click", onBackdrop);
     btnClose?.addEventListener("click", closeDemo);
-    modalRoot.querySelectorAll("[data-demo-close]").forEach((el) => {
+    demoRoot.querySelectorAll("[data-demo-close]").forEach((el) => {
       el.addEventListener("click", closeDemo);
     });
-    document.addEventListener("keydown", onKey);
+    document.addEventListener("keydown", onKey, true);
     /** @type {HTMLElement|null} */ (btnClose)?.focus();
 
     demoCleanup = () => {
       backdrop?.removeEventListener("click", onBackdrop);
       btnClose?.removeEventListener("click", closeDemo);
-      document.removeEventListener("keydown", onKey);
-      modalRoot.innerHTML = "";
-      document.body.classList.remove("modal-open");
+      document.removeEventListener("keydown", onKey, true);
+      demoRoot.innerHTML = "";
     };
   }
 

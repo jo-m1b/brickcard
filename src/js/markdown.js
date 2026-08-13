@@ -2,6 +2,7 @@
  * Parser Markdown léger (sous-ensemble GFM) + chargement des pages `data/page-{{slug}}.md`.
  * Gère : titres, paragraphes, listes, citations, code, liens, images, gras/italique, HR.
  * Placeholder : `{{APP_VERSION}}` → version SemVer.
+ * Titre de page : `# Titre` ou `# Titre | Sous-titre` (premier ` | ` → `view-desc`).
  */
 
 import { APP_VERSION } from "./version.js";
@@ -158,9 +159,26 @@ export function parseMarkdown(md) {
 }
 
 /**
+ * `# Titre` ou `# Titre | Sous-titre` (premier ` | `).
+ * @param {string} raw Ligne sans le `#`
+ * @returns {{ title: string, desc: string }} HTML inline (échappé)
+ */
+function parsePageHeading(raw) {
+  const line = String(raw || "").trim();
+  const sep = " | ";
+  const idx = line.indexOf(sep);
+  const titleRaw = (idx === -1 ? line : line.slice(0, idx)).trim();
+  const descRaw = idx === -1 ? "" : line.slice(idx + sep.length).trim();
+  return {
+    title: titleRaw ? inline(titleRaw) : "",
+    desc: descRaw ? inline(descRaw) : "",
+  };
+}
+
+/**
  * Charge et parse `data/page-{{slug}}.md`.
  * @param {string} slug
- * @returns {Promise<{ slug: string, title: string, html: string }>}
+ * @returns {Promise<{ slug: string, title: string, desc: string, html: string }>}
  */
 export async function loadMarkdownPage(slug) {
   const safe = String(slug || "")
@@ -177,6 +195,11 @@ export async function loadMarkdownPage(slug) {
   }
   const md = (await res.text()).replace(/\{\{APP_VERSION\}\}/g, APP_VERSION);
   const titleMatch = md.match(/^#\s+(.+)$/m);
-  const title = titleMatch ? titleMatch[1].trim() : safe;
-  return { slug: safe, title, html: parseMarkdown(md) };
+  const heading = parsePageHeading(titleMatch ? titleMatch[1] : "");
+  return {
+    slug: safe,
+    title: heading.title || inline(safe),
+    desc: heading.desc,
+    html: parseMarkdown(md),
+  };
 }

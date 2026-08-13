@@ -43,7 +43,7 @@ function demoBtn(variant, label, opts = {}) {
  * @param {HTMLElement} host
  * @returns {() => void}
  */
-export function renderTestButtons(host) {
+export function renderDeveloperButtons(host) {
   const variants = /** @type {const} */ (["primary", "secondary", "ghost", "danger"]);
   const labels = {
     primary: "Primary",
@@ -55,7 +55,7 @@ export function renderTestButtons(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker"><a href="#/test">Styleguide</a> / Boutons</p>
+        <p class="styleguide-kicker"><a href="#/developer">Styleguide</a> / Boutons</p>
         <h1 class="view-title">Boutons</h1>
         <p class="view-desc">
           4 variantes × 3 contenus (texte, texte+icône, icône seule).
@@ -179,9 +179,9 @@ export function renderTestButtons(host) {
       </div>
 
       <p class="styleguide-back">
-        <a href="#/test">← Index styleguide</a>
+        <a href="#/developer">← Index styleguide</a>
         ·
-        <a href="#/list">App</a>
+        <a href="#/">App</a>
       </p>
     </section>
   `;

@@ -169,7 +169,8 @@ export async function renderList(main, opts) {
   const searchTrail = searchBar?.querySelector(".search-bar-trail");
 
   main.innerHTML = `
-    <section class="panel" aria-label="Liste des cartes">
+    <section class="panel">
+      <h1 class="visually-hidden">Cartes</h1>
       <div class="cards-grid" id="cards-grid"></div>
       <div class="empty-table" id="empty-filter" hidden>Aucune carte ne correspond à la recherche.</div>
     </section>

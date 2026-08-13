@@ -1,6 +1,8 @@
 /* Thème clair (défaut) */
 :root {
   color-scheme: light;
+  --font-ui: "Open Sans", system-ui, sans-serif;
+  --font-card: "Inter", system-ui, sans-serif;
   /* Accent UI neutre — les couleurs vives restent sur les cartes */
   --brick-red: #141414;
   --brick-red-dark: #000000;
@@ -146,7 +148,7 @@ body {
 }
 
 body {
-  font-family: "DM Sans", sans-serif;
+  font-family: var(--font-ui);
   color: var(--ink);
   background: var(--bg);
 }
@@ -412,7 +414,7 @@ textarea {
 }
 
 .brand-name {
-  font-family: "DM Sans", sans-serif;
+  font-family: var(--font-ui);
   font-size: 1.15rem;
   font-weight: 700;
   line-height: 1.15;
@@ -887,16 +889,26 @@ html:not([data-theme]) .btn .icon-system {
 
 .view-title {
   margin: 0 0 0.35rem;
-  font-family: "Bebas Neue", sans-serif;
+  font-family: var(--font-ui);
   font-size: 1.7rem;
-  letter-spacing: 0.05em;
-  font-weight: 400;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  line-height: 1.2;
 }
 
 .view-desc {
   margin: 0 0 1.25rem;
   color: var(--ink-soft);
   font-size: 0.95rem;
+}
+
+.section-title {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-ui);
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  line-height: 1.2;
 }
 
 /* ——— Empty state ——— */
@@ -937,11 +949,8 @@ html:not([data-theme]) .btn .icon-system {
   right: 8px;
 }
 
-.empty-view h2 {
+.empty-view .view-title {
   margin: 0;
-  font-family: "Bebas Neue", sans-serif;
-  font-size: 2rem;
-  letter-spacing: 0.04em;
 }
 
 .empty-view p {
@@ -1036,6 +1045,14 @@ html:not([data-theme]) .btn .icon-system {
   color: var(--ink);
 }
 
+.modal-body .styleguide {
+  max-width: none;
+}
+
+.modal-body .styleguide-kicker {
+  margin: 0 0 1.25rem;
+}
+
 .styleguide-notes {
   margin: 0;
   padding-left: 1.2rem;
@@ -1043,6 +1060,53 @@ html:not([data-theme]) .btn .icon-system {
   gap: 0.35rem;
   color: var(--ink-soft);
   font-size: 0.92rem;
+}
+
+.styleguide-type-specimens {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.styleguide-type-specimen {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  font-size: 1.15rem;
+  line-height: 1.35;
+}
+
+.styleguide-type-specimen-label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.styleguide-type-specimen--ui {
+  font-family: var(--font-ui);
+  font-weight: 500;
+}
+
+.styleguide-type-specimen--card {
+  font-family: var(--font-card);
+  font-weight: 500;
+}
+
+.styleguide-type-demo {
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--line);
+  background: var(--bg);
+}
+
+.styleguide-dialog-demo {
+  border: 2px solid var(--ink);
+  background: var(--panel);
 }
 
 .styleguide-table-wrap {
@@ -1126,6 +1190,7 @@ html:not([data-theme]) .btn .icon-system {
 }
 
 .form-label {
+  margin: 0;
   font-size: 0.82rem;
   font-weight: 600;
   color: var(--ink);
@@ -1969,6 +2034,11 @@ button.form-select-trigger.sm {
   display: none;
 }
 
+#developer-demo-root .modal-backdrop,
+.modal-root > .modal-backdrop ~ .modal-backdrop {
+  z-index: 410;
+}
+
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -2184,52 +2254,13 @@ body.modal-open {
 
 .settings-panel {
   padding: 1rem 1.1rem;
-  border: 1px solid var(--line);
   background: var(--bg);
 }
 
-.settings-panel-danger {
-  border-color: var(--danger-line);
-}
-
-.settings-panel-title {
-  margin: 0 0 0.35rem;
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--ink);
-}
-
-.settings-panel-desc {
-  margin: 0 0 0.85rem;
-  font-size: 0.88rem;
-  line-height: 1.45;
-  color: var(--ink-soft);
-}
-
-.settings-panel-desc--tight {
-  margin-bottom: 0.55rem;
-}
-
-.settings-subblock {
-  display: grid;
-  gap: 0.55rem;
-}
-
-.settings-subblock + .settings-subblock {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--line);
-}
-
-.settings-subblock-title {
-  margin: 0;
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: var(--ink);
-}
-
-.settings-subblock .form-field {
-  margin-bottom: 0;
+.settings-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .settings-color-field {
@@ -2261,23 +2292,22 @@ body.modal-open {
   margin-bottom: 0;
 }
 
-.md-content h1,
 .md-content h2,
 .md-content h3 {
-  font-family: "Bebas Neue", sans-serif;
-  font-weight: 400;
-  letter-spacing: 0.02em;
-  line-height: 1.15;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
   margin: 1.35rem 0 0.55rem;
   color: var(--ink);
 }
 
 .md-content h2 {
-  font-size: 1.55rem;
+  font-size: 1.2rem;
 }
 
 .md-content h3 {
-  font-size: 1.25rem;
+  font-size: 1.05rem;
 }
 
 .md-content p,
@@ -2311,8 +2341,9 @@ body.modal-open {
 }
 
 .md-content code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.88em;
+  font-family: var(--font-ui);
+  font-size: 0.92em;
+  font-weight: 600;
   padding: 0.1em 0.35em;
   background: var(--row-hover);
   border: 1px solid var(--line);
@@ -2598,9 +2629,10 @@ textarea {
   align-content: start;
 }
 
-.theme-card-body h3 {
+.theme-card-name {
   margin: 0;
   font-size: 0.95rem;
+  font-weight: 700;
   letter-spacing: 0.04em;
 }
 
@@ -2644,7 +2676,7 @@ textarea {
   flex-shrink: 0;
   --card-accent: var(--card-default-accent, #6e6e6e);
   --card-accent-fg: var(--card-default-accent-fg, #ffffff);
-  font-family: "Inter", system-ui, sans-serif;
+  font-family: var(--font-card);
   text-transform: uppercase;
 }
 
@@ -2674,7 +2706,7 @@ textarea {
 }
 
 .card-lego-set-ref {
-  font-family: "Inter", system-ui, sans-serif;
+  font-family: var(--font-card);
   font-size: 11pt;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -2801,7 +2833,7 @@ textarea {
 
 .card-brand-name {
   margin: 0;
-  font-family: "Inter", system-ui, sans-serif;
+  font-family: var(--font-card);
   font-size: 14pt;
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -2843,7 +2875,7 @@ textarea {
 
 .card-footer .card-title {
   margin: 0;
-  font-family: "Inter", system-ui, sans-serif;
+  font-family: var(--font-card);
   font-size: 13pt;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -2883,7 +2915,7 @@ textarea {
   --card-accent: var(--card-default-accent, #6e6e6e);
   --card-accent-fg: var(--card-default-accent-fg, #ffffff);
   --card-brand-logo-h: 16mm;
-  font-family: "Inter", system-ui, sans-serif;
+  font-family: var(--font-card);
   text-transform: uppercase;
 }
 

@@ -5,7 +5,7 @@ import { loadMarkdownPage } from "../markdown.js";
  * Affiche une page Markdown (`data/page-{{slug}}.md`) en modale overlay.
  * @param {HTMLElement} host Conteneur modale (#modal-root)
  * @param {{ slug: string, onClose: () => void, toast?: (msg: string, type?: string) => void }} opts
- * @returns {Promise<() => void>} cleanup
+ * @returns {Promise<(() => void)|null>} cleanup, ou `null` si la page est introuvable
  */
 export async function renderPageModal(host, opts) {
   const { slug, onClose, toast } = opts;
@@ -16,8 +16,7 @@ export async function renderPageModal(host, opts) {
   } catch (err) {
     console.error(err);
     if (toast) toast(err.message || "Page introuvable", "error");
-    onClose();
-    return () => {};
+    return null;
   }
 
   document.body.classList.add("modal-open");
@@ -27,7 +26,8 @@ export async function renderPageModal(host, opts) {
       <div class="modal modal--md" role="dialog" aria-modal="true" aria-labelledby="page-modal-title">
         <div class="modal-header">
           <div>
-            <h2 class="view-title" id="page-modal-title">${escapeAttr(page.title)}</h2>
+            <h1 class="view-title" id="page-modal-title">${page.title}</h1>
+            ${page.desc ? `<p class="view-desc" id="page-modal-desc">${page.desc}</p>` : ""}
           </div>
           <button type="button" class="btn ghost icon-only modal-close" id="btn-page-close">
             ${ICON_CLOSE}
@@ -44,17 +44,14 @@ export async function renderPageModal(host, opts) {
   const body = host.querySelector("#page-md-body");
   if (body) body.innerHTML = page.html;
 
-  // Le H1 du markdown est déjà dans le header de la modale → on le retire du corps.
+  // Le # du markdown = titre du dialog (h1) ; ` | ` optionnel = view-desc. ## / ### restent h2 / h3.
   const firstH1 = body?.querySelector("h1");
   if (firstH1) firstH1.remove();
 
   const backdrop = host.querySelector("#page-modal-backdrop");
   const btnClose = host.querySelector("#btn-page-close");
 
-  const close = () => {
-    cleanup();
-    onClose();
-  };
+  const close = () => onClose();
 
   /** @param {MouseEvent} e */
   const onBackdropClick = (e) => {
@@ -77,17 +74,7 @@ export async function renderPageModal(host, opts) {
     document.removeEventListener("keydown", onKey);
     backdrop?.removeEventListener("click", onBackdropClick);
     btnClose?.removeEventListener("click", close);
-    host.innerHTML = "";
-    document.body.classList.remove("modal-open");
   }
 
   return cleanup;
-}
-
-/** @param {string} s */
-function escapeAttr(s) {
-  return String(s)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/"/g, "&quot;");
 }

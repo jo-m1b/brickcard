@@ -17,11 +17,11 @@ function controlIconMarkup(svg) {
  * @param {HTMLElement} host
  * @returns {() => void}
  */
-export function renderTestSearch(host) {
+export function renderDeveloperSearch(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker"><a href="#/test">Styleguide</a> / Recherche</p>
+        <p class="styleguide-kicker"><a href="#/developer">Styleguide</a> / Recherche</p>
         <h1 class="view-title">Barre de recherche</h1>
         <p class="view-desc">
           Bloc <code>search-bar</code>&nbsp;: <code>input.form-control</code>
@@ -162,7 +162,7 @@ export function renderTestSearch(host) {
       </div>
 
       <p class="styleguide-back">
-        <a href="#/test">← Styleguide</a>
+        <a href="#/developer">← Styleguide</a>
       </p>
     </section>
   `;

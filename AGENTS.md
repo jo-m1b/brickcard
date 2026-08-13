@@ -18,10 +18,10 @@ Tout le code applicatif est dans **`src/`**.
 |---------|------|
 | `src/index.html` | Coquille : topbar sticky, `#main`, `#modal-root`, `#print-root` |
 | `src/data/themes-presets.json` | Liste des thèmes LEGO prédéfinis (éditable sans toucher au JS) |
-| `src/data/page-{{slug}}.md` | Pages Markdown affichées en modale (ex. `page-about.md`) |
+| `src/data/page-{{slug}}.md` | Pages Markdown en modale (`#/page/:slug`, ex. `page-about.md`) ; `# Titre` ou `# Titre \| Sous-titre` |
 | `src/img/logo-brickcard-generator.svg` | Logo app (brick outline — crédit Joko Sutrisno / Vecteezy) |
 | `src/css/styles.css` | Styles écran + `@media print` |
-| `src/js/app.js` | Hash routing, import/export, ouverture pages MD |
+| `src/js/app.js` | Hash routing (vues + historique), import/export |
 | `src/js/markdown.js` | Parser Markdown léger + `loadMarkdownPage(slug)` |
 | `src/js/theme.js` | Thème **UI** system / light / dark |
 | `src/js/card-design.js` | Design cartes (bordure face, CSS vars) — localStorage |
@@ -39,7 +39,7 @@ Tout le code applicatif est dans **`src/`**.
 | `src/js/views/themes.js` | Modale gestion thèmes LEGO |
 | `src/js/views/page.js` | Modale page Markdown |
 | `src/js/views/settings.js` | Modale paramètres |
-| `src/js/views/test/` | Styleguide / pages de test UI (`#/test`, `#/test/buttons`, …) |
+| `src/js/views/developer/` | Espace développeur / styleguide UI en modale (`#/developer`, `#/developer/typography`, …) |
 | `CHANGELOG.md` | Historique des versions (Keep a Changelog) |
 
 ## Modèle carte (`Card`)
@@ -113,8 +113,16 @@ Accent d’une Brickcard (`resolveCardAccent`) :
 
 ## Vues
 
-- `#/` `#/list` `#/new` `#/edit/:id` `#/themes` (modale thèmes)
-- `#/test` `#/test/buttons` `#/test/fields` `#/test/selects` `#/test/sliders` `#/test/colors` `#/test/search` `#/test/modals` — styleguide UI (extensible : `#/test/…`) ; lien Paramètres en local uniquement
+Hash = source de vérité (Précédent / Suivant). Croix / Échap / backdrop d’un overlay → `#/` (`replace`). Liens internes `#/developer/…` → `replace` (une entrée). Hash inconnu → `#/`. Pas d’alias.
+
+Overlays de route (une à la fois, **swap** sans démonter la liste) : `#/settings`, `#/themes`, `#/page/:slug`, `#/new-card`, `#/edit-card/:id`, `#/developer/…`. Dialogues enfants (éditeur de thème, confirmations) : pas d’URL, second backdrop par-dessus la vue courante.
+
+- `#/` accueil (empty state, liste, ou « aucune carte ne correspond à la recherche »)
+- `#/new-card` `#/edit-card/:id` éditeur de carte (modale)
+- `#/themes` gestion des thèmes (modale)
+- `#/settings` paramètres (modale)
+- `#/page/:slug` page Markdown (`data/page-{{slug}}.md`, ex. `#/page/about`)
+- `#/developer` `#/developer/typography` `#/developer/buttons` `#/developer/fields` `#/developer/selects` `#/developer/sliders` `#/developer/colors` `#/developer/search` `#/developer/modals` — espace développeur / styleguide en **modale** (extensible : `#/developer/…`) ; lien Paramètres en local uniquement
 
 ## Boutons (design system)
 
@@ -133,7 +141,7 @@ Icône seule : label dans `span.visually-hidden`, SVG en `aria-hidden="true"`.
 Badge : compteur en overlay (coin haut-droit) ; le bouton reste dans son type (y compris `icon-only`). Nom accessible sur le bouton, pas sur le badge.
 Hover et `:focus-visible` partagent le même style (pas d’outline dédié sur les boutons).
 Ghost : texte = secondary ; hover/focus = primary au repos (fond accent / texte contraste).
-Ne pas créer de classes one-shot — réutiliser ce vocabulaire. Galerie : `#/test/buttons`.
+Ne pas créer de classes one-shot — réutiliser ce vocabulaire. Galerie : `#/developer/buttons`.
 
 ## Champs de saisie (design system)
 
@@ -156,21 +164,21 @@ Vocabulaire :
 | Erreur | `form-error` + `is-invalid` / `aria-invalid` sur le contrôle |
 | Taille | (défaut) · `sm` |
 
-Hover : **aucun**. Repos = trait bas inset 2px ; focus = `outline` 2px + `outline-offset` 1px (`ink`, inchangé en erreur). Couleur erreur : `--form-error` (`#ce0000` clair / `#ff5555` dark). Galerie : `#/test/fields`.
+Hover : **aucun**. Repos = trait bas inset 2px ; focus = `outline` 2px + `outline-offset` 1px (`ink`, inchangé en erreur). Couleur erreur : `--form-error` (`#ce0000` clair / `#ff5555` dark). Galerie : `#/developer/fields`.
 
 Exceptions actuelles : alertes form-wide (`#error`, `#theme-error`) sous le bloc de champs.
 
 ## Listes déroulantes (design system — styleguide)
 
-Markup&nbsp;: `select.form-control` (même look qu’un champ texte). Surcouche unobtrusive&nbsp;: `enhanceFormSelects()` / `enhanceFormSelect()` dans `form-select.js` — déclencheur stylé + liste custom (optgroup, clavier, états). Option placeholder (`value=""`) exclue de la liste ; reset `ri-close-circle-fill` (non focusable) pour y revenir. Icônes d’option&nbsp;: `data-icon-left` / `data-icon-right` (clés Remix de `icons.js`, ex. `printer`, `arrow-right`). Le `<select>` natif reste synchronisé. Appliqué : éditeur (thème). Galerie&nbsp;: `#/test/selects`.
+Markup&nbsp;: `select.form-control` (même look qu’un champ texte). Surcouche unobtrusive&nbsp;: `enhanceFormSelects()` / `enhanceFormSelect()` dans `form-select.js` — déclencheur stylé + liste custom (optgroup, clavier, états). Option placeholder (`value=""`) exclue de la liste ; reset `ri-close-circle-fill` (non focusable) pour y revenir. Icônes d’option&nbsp;: `data-icon-left` / `data-icon-right` (clés Remix de `icons.js`, ex. `printer`, `arrow-right`). Le `<select>` natif reste synchronisé. Appliqué : éditeur (thème). Galerie&nbsp;: `#/developer/selects`.
 
 ## Curseurs / range (design system)
 
-Même ordre de champ. Contrôle&nbsp;: `form-range-row` (`input[type=range]` + `output` optionnel). Poignée carrée sans bordure ; focus sur la poignée seule ; erreur = message seulement (pas de teinte rouge sur le curseur). Appliqué : paramètres (colonnes, bordure, coins) · éditeur (zoom). Galerie&nbsp;: `#/test/sliders`.
+Même ordre de champ. Contrôle&nbsp;: `form-range-row` (`input[type=range]` + `output` optionnel). Poignée carrée sans bordure ; focus sur la poignée seule ; erreur = message seulement (pas de teinte rouge sur le curseur). Appliqué : paramètres (colonnes, bordure, coins) · éditeur (zoom). Galerie&nbsp;: `#/developer/sliders`.
 
 ## Couleurs (design system)
 
-Même ordre de champ. Contrôle&nbsp;: `input.form-control` texte dans un wrapper `form-color`, avec pastille à gauche (`input[type=color]`) et bouton effacer (`ri-close-circle-fill`) en overlay à l’intérieur du champ. Clear visible seulement s’il y a une valeur (peut être omis / disabled) ; non focusable (`tabindex="-1"`). Pastille&nbsp;: uniquement si hex valide ; sinon couleur par défaut du champ (`fallback` / `fallbackColor`), sinon damier transparent. Module&nbsp;: `form-color.js`. Appliqué : paramètres · éditeur (fond image) · thèmes. Galerie&nbsp;: `#/test/colors`.
+Même ordre de champ. Contrôle&nbsp;: `input.form-control` texte dans un wrapper `form-color`, avec pastille à gauche (`input[type=color]`) et bouton effacer (`ri-close-circle-fill`) en overlay à l’intérieur du champ. Clear visible seulement s’il y a une valeur (peut être omis / disabled) ; non focusable (`tabindex="-1"`). Pastille&nbsp;: uniquement si hex valide ; sinon couleur par défaut du champ (`fallback` / `fallbackColor`), sinon damier transparent. Module&nbsp;: `form-color.js`. Appliqué : paramètres · éditeur (fond image) · thèmes. Galerie&nbsp;: `#/developer/colors`.
 
 ## Recherche (design system)
 
@@ -187,15 +195,35 @@ Barre centrale (liste)&nbsp;: bloc `search-bar` dans le slot `topbar-search`.
 
 Ouverture du menu de tri&nbsp;: **clic** uniquement (pas au hover ni au seul focus) ; une fois le bouton focusé, clavier comme `form-select` (↑↓ Entrée/Espace Home/End Échap, `aria-activedescendant`). Le menu **reste ouvert** après un choix de critère ou l’inversion du sens (fermeture : clic extérieur, Échap, ou reclic sur le bouton).
 
-Appliqué : topbar liste. Galerie&nbsp;: `#/test/search`.
+Appliqué : topbar liste. Galerie&nbsp;: `#/developer/search`.
+
+## Titres (design system)
+
+Classe = apparence. Tag = plan du document. **Un rang 1 par vue** (page ou dialog). Ne pas sauter de rang.
+
+| Rôle visuel | Classe | Taille |
+|-------------|--------|--------|
+| Titre de vue / dialog | `view-title` | 1.7rem (1.35rem dans `.modal-header`) · 700 |
+| Section | `section-title` | 1.25rem · 700 |
+| Description | `view-desc` | 0.95rem · ink-soft — **pas** un heading |
+
+| Contexte | Titre | Suite |
+|----------|-------|-------|
+| Page (`#main`) | `h1.view-title` | `h2.section-title` |
+| Liste | `h1.visually-hidden` « Cartes » | — |
+| État vide | `h1.view-title` | — |
+| Dialog | `h1.view-title` (`aria-labelledby`) | `h2.section-title` |
+| Page Markdown en modale | `# Titre` ou `# Titre \| Sous-titre` → titre du dialog (retiré du corps) ; ` \| ` optionnel = `view-desc` | `##` → `h2`, `###` → `h3` dans `.md-content` |
+
+Pas des headings&nbsp;: marque topbar, `form-label`, noms de cartes (grille thèmes, Brickcard). Galerie&nbsp;: `#/developer/typography`.
 
 ## Modales (design system)
 
-Coquille&nbsp;: `modal-backdrop` + `modal` (`role="dialog"` / `aria-modal`). Bordure&nbsp;: `2px solid var(--ink)` (comme le focus des champs). Alignement vertical (sur le backdrop)&nbsp;: `modal-backdrop--top` · `modal-backdrop--middle` (**défaut**) · `modal-backdrop--bottom`. Header inversé (fond `ink` / texte `panel`)&nbsp;: titre (`view-title`) + desc optionnelle (`view-desc`) + `btn ghost icon-only modal-close`. Corps&nbsp;: `modal-body`. Pied optionnel&nbsp;: `modal-footer` avec `modal-footer-start` (gauche&nbsp;: sauvegarde / validation) et `modal-footer-end` (droite&nbsp;: danger) — boutons centrés verticalement (normal / `sm`). Séparateur header&nbsp;: `2px solid var(--ink)` (pas de bordure haute sur le footer).
+Coquille&nbsp;: `modal-backdrop` + `modal` (`role="dialog"` / `aria-modal`). Bordure&nbsp;: `2px solid var(--ink)` (comme le focus des champs). Alignement vertical (sur le backdrop)&nbsp;: `modal-backdrop--top` · `modal-backdrop--middle` (**défaut**) · `modal-backdrop--bottom`. Header inversé (fond `ink` / texte `panel`)&nbsp;: titre (`h1.view-title`) + desc optionnelle (`view-desc`) + `btn ghost icon-only modal-close`. Corps&nbsp;: `modal-body`. Pied optionnel&nbsp;: `modal-footer` avec `modal-footer-start` (gauche&nbsp;: sauvegarde / validation) et `modal-footer-end` (droite&nbsp;: danger) — boutons centrés verticalement (normal / `sm`). Séparateur header&nbsp;: `2px solid var(--ink)` (pas de bordure haute sur le footer).
 
 Tailles (3)&nbsp;: `modal--sm` (~640) · `modal--md` (~896, **défaut**) · `modal--lg` (~1152). Toujours bornées au **viewport** (`100vw` / `100dvh`). Responsive ≤&nbsp;640px&nbsp;: **plein écran**, overlay masqué.
 
-Appliqué&nbsp;: paramètres / page MD (`md`) · thèmes + éditeur carte (`lg`) · éditeur de thème (`sm`). Galerie&nbsp;: `#/test/modals`.
+Appliqué&nbsp;: paramètres / page MD (`md`) · thèmes + éditeur carte + espace développeur (`lg`) · éditeur de thème / confirmations (`sm`). Galerie&nbsp;: `#/developer/modals`. Dialogues enfants (thème, supprimer carte) : second `modal-backdrop` dans le même host, sans route.
 
 ## Impression
 
@@ -206,5 +234,6 @@ Appliqué&nbsp;: paramètres / page MD (`md`) · thèmes + éditeur carte (`lg`)
 - Garder le nom produit **Brickcard Generator** / marque **Brickcard** dans l’UI et la doc.
 - Garder les noms de champs **verbeux** sur les modèles Card / LegoTheme.
 - UI française, design minimaliste (pas d’arrondis/ombres UI).
+- **Typo** : Open Sans pour l’UI (`--font-ui`) ; Inter pour le texte des cartes (`--font-card`). Titres : classe = look, tag = plan (voir **Titres**).
 - **Icônes** : toujours partir de [Remix Icon](https://remixicon.com/) (style *fill* de préférence) avant d’inventer un SVG. Réutiliser / étendre `src/js/icons.js` ; en HTML, commenter le nom `ri-*`.
 - Pas de dépendances npm sauf demande explicite.

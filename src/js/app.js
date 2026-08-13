@@ -3,20 +3,13 @@ import { initTheme } from "./theme.js";
 import { initCardDesign } from "./card-design.js";
 import { initListLayout } from "./list-layout.js";
 import { isLocalDevHost } from "./themes-data.js";
-import { APP_VERSION } from "./version.js";
+import { APP_ID, APP_VERSION } from "./version.js";
 import { renderEditor } from "./views/editor.js";
 import { renderList } from "./views/list.js";
 import { renderThemesModal } from "./views/themes.js";
 import { renderPageModal } from "./views/page.js";
 import { renderSettingsModal } from "./views/settings.js";
-import { renderTestIndex } from "./views/test/index.js";
-import { renderTestButtons } from "./views/test/buttons.js";
-import { renderTestFields } from "./views/test/fields.js";
-import { renderTestSelects } from "./views/test/selects.js";
-import { renderTestSliders } from "./views/test/sliders.js";
-import { renderTestColors } from "./views/test/colors.js";
-import { renderTestSearch } from "./views/test/search.js";
-import { renderTestModals } from "./views/test/modals.js";
+import { renderDeveloperModal } from "./views/developer/modal.js";
 import {
   initPrintMenu,
   setPrintMenuVisible,
@@ -25,7 +18,6 @@ import {
 
 const main = document.getElementById("main");
 const modalRoot = document.getElementById("modal-root");
-const brandLink = document.getElementById("brand-link");
 const appVersionEl = document.getElementById("app-version");
 const btnNew = document.getElementById("btn-new-card");
 const btnSettings = document.getElementById("btn-settings");
@@ -45,12 +37,21 @@ let cleanupSettings = null;
 let cleanupThemes = null;
 
 /** @type {null | (() => void)} */
+let cleanupDeveloper = null;
+
+/** @type {null | (() => void)} */
 let cleanupList = null;
+
+/** Dernière route effectivement affichée. */
+let shownRoute = /** @type {ReturnType<typeof parseRoute>|null} */ (null);
+
+let underlayReady = false;
+let underlayStale = false;
 
 let routeToken = 0;
 
-/** Page MD à ouvrir juste après un changement de route (ex. quitter l’éditeur). */
-let pendingPageSlug = null;
+/** Ignore le hashchange qui suit un popstate (Précédent / Suivant). */
+let ignoreHashchange = false;
 
 function toast(message, type = "info") {
   document.querySelectorAll(".toast").forEach((t) => t.remove());
@@ -61,30 +62,106 @@ function toast(message, type = "info") {
   setTimeout(() => el.remove(), 4200);
 }
 
-function parseRoute() {
-  const hash = location.hash.replace(/^#\/?/, "") || "";
-  const [path, query = ""] = hash.split("?");
-  const params = Object.fromEntries(new URLSearchParams(query));
+/**
+ * @param {string} hash
+ * @returns {string}
+ */
+function normalizeHash(hash) {
+  let h = String(hash || "");
+  if (!h || h === "#" || h === "#/") return "#/";
+  if (!h.startsWith("#")) h = `#${h}`;
+  if (!h.startsWith("#/")) h = `#/${h.slice(1)}`;
+  if (h.length > 2 && h.endsWith("/")) h = h.slice(0, -1);
+  const q = h.indexOf("?");
+  if (q !== -1) h = h.slice(0, q);
+  return h;
+}
 
-  if (path === "new") return { name: "editor", cardId: null };
-  if (path.startsWith("edit/")) {
-    return { name: "editor", cardId: path.slice(5) || null };
+/** @param {string} hash */
+function hashUrl(hash) {
+  return `${location.pathname}${location.search}${normalizeHash(hash)}`;
+}
+
+function routeDepth() {
+  return history.state?.app === APP_ID ? Number(history.state.depth) || 0 : 0;
+}
+
+/**
+ * @param {number} depth
+ * @param {string} hash
+ * @param {boolean} replace
+ */
+function setHistoryState(depth, hash, replace) {
+  const state = { app: APP_ID, depth };
+  const url = hashUrl(hash);
+  if (replace) history.replaceState(state, "", url);
+  else history.pushState(state, "", url);
+}
+
+function parsePath(path) {
+  if (!path) return { name: "home" };
+  if (path === "new-card") return { name: "editor", cardId: null };
+  if (path.startsWith("edit-card/")) {
+    const cardId = path.slice("edit-card/".length);
+    if (!cardId) return { name: "unknown" };
+    return { name: "editor", cardId };
   }
-  if (path === "list") return { name: "list" };
   if (path === "themes") return { name: "themes" };
-  if (path === "test" || path === "test/") return { name: "test", page: "index" };
-  if (path.startsWith("test/")) {
-    const page = path.slice(5).replace(/\/$/, "") || "index";
-    return { name: "test", page };
+  if (path === "settings") return { name: "settings" };
+  if (path.startsWith("page/")) {
+    const slug = path.slice("page/".length);
+    if (!slug || slug.includes("/")) return { name: "unknown" };
+    return { name: "page", slug };
   }
-  return { name: "home", params };
+  if (path === "developer") return { name: "developer", page: "index" };
+  if (path.startsWith("developer/")) {
+    const page = path.slice("developer/".length) || "index";
+    return { name: "developer", page };
+  }
+  return { name: "unknown" };
+}
+
+function parseRoute() {
+  return parsePath(normalizeHash(location.hash).slice(2));
+}
+
+/**
+ * @param {string} hash
+ * @param {{ replace?: boolean }} [opts]
+ */
+function navigate(hash, opts = {}) {
+  const target = normalizeHash(hash);
+  const current = normalizeHash(location.hash);
+  const from = parsePath(current.slice(2));
+  const to = parsePath(target.slice(2));
+  const replace =
+    Boolean(opts.replace) ||
+    (from.name === "developer" && to.name === "developer");
+
+  if (replace) {
+    setHistoryState(target === "#/" ? 0 : routeDepth(), target, true);
+    route();
+    return;
+  }
+  if (target === current) {
+    route();
+    return;
+  }
+  setHistoryState(routeDepth() + 1, target, false);
+  route();
+}
+
+/** Croix / Échap / backdrop : ferme l’overlay vers l’accueil (replace). Le Précédent navigateur garde l’historique. */
+function dismissOverlay() {
+  if (normalizeHash(location.hash) === "#/") return;
+  navigate("#/", { replace: true });
 }
 
 function setNewButtonVisible(visible) {
   btnNew.classList.toggle("is-hidden", !visible);
 }
 
-/** Barre de recherche : visible sur la liste (et sous la modale d’édition). */
+/** Barre de recherche : visible sur l’accueil liste (et sous une modale). */
 function setSearchVisible(visible) {
   if (topbarSearch) topbarSearch.hidden = !visible;
 }
@@ -95,54 +172,206 @@ function syncHeaderPrint(cardCount) {
   syncPrintMenu({ cardCount });
 }
 
-function navigate(hash) {
-  if (location.hash === hash) {
-    route();
-  } else {
-    location.hash = hash;
-  }
+function isOverlayRoute(info) {
+  return Boolean(
+    info &&
+      (info.name === "editor" ||
+        info.name === "themes" ||
+        info.name === "settings" ||
+        info.name === "page" ||
+        info.name === "developer")
+  );
 }
 
-function closeCardModal() {
-  if (cleanupEditor) {
-    cleanupEditor();
-    cleanupEditor = null;
-  }
-  if (cleanupPage) {
-    cleanupPage();
-    cleanupPage = null;
-  }
-  if (cleanupSettings) {
-    cleanupSettings();
-    cleanupSettings = null;
-  }
-  if (cleanupThemes) {
-    cleanupThemes();
-    cleanupThemes = null;
-  }
-  if (modalRoot) modalRoot.innerHTML = "";
-  document.body.classList.remove("modal-open");
+function overlayOnClose(name) {
+  return () => {
+    if (parseRoute().name === name) dismissOverlay();
+  };
 }
 
 /**
- * Ouvre une page Markdown (`data/page-{{slug}}.md`) en overlay, sans changer la route.
- * @param {string} slug
+ * Retire les listeners des overlays. Le DOM n’est vidé que si `clearDom`.
+ * `modal-open` n’est retiré que si `dropModalOpen` (destination accueil).
+ * @param {{ clearDom?: boolean, dropModalOpen?: boolean }} [opts]
  */
-async function openPageModal(slug) {
-  if (!modalRoot) {
-    toast("Modale indisponible", "error");
+function teardownOverlays(opts = {}) {
+  const fns = [cleanupEditor, cleanupPage, cleanupSettings, cleanupThemes, cleanupDeveloper];
+  cleanupEditor = null;
+  cleanupPage = null;
+  cleanupSettings = null;
+  cleanupThemes = null;
+  cleanupDeveloper = null;
+  for (const fn of fns) {
+    if (fn) fn();
+  }
+  if (opts.clearDom && modalRoot) modalRoot.innerHTML = "";
+  if (opts.dropModalOpen) document.body.classList.remove("modal-open");
+}
+
+async function ensureUnderlay() {
+  if (underlayReady && !underlayStale) return;
+  let cards;
+  try {
+    cards = await loadCards();
+  } catch (err) {
+    console.error(err);
+    underlayReady = false;
+    main.innerHTML = `<section class="panel"><p class="error">Erreur de stockage : ${err.message || err}</p></section>`;
     return;
   }
-  closeCardModal();
-  cleanupPage = await renderPageModal(modalRoot, {
-    slug,
-    toast,
-    onClose: () => {
-      cleanupPage = null;
-      if (modalRoot) modalRoot.innerHTML = "";
-      document.body.classList.remove("modal-open");
-    },
+  await renderHomeUnderlay(cards);
+  underlayReady = true;
+  underlayStale = false;
+}
+
+async function showOverlay(routeInfo) {
+  if (!modalRoot) {
+    toast("Modale indisponible", "error");
+    dismissOverlay();
+    return;
+  }
+  document.body.classList.add("modal-open");
+
+  if (routeInfo.name === "settings") {
+    cleanupSettings = renderSettingsModal(modalRoot, {
+      onClose: overlayOnClose("settings"),
+      onImport: () => importFile?.click(),
+      onExport: exportCards,
+      onThemes: () => navigate("#/themes"),
+      onStyleguide: isLocalDevHost() ? () => navigate("#/developer") : undefined,
+      onDevReset: isLocalDevHost() ? handleDevReset : undefined,
+    });
+    return;
+  }
+
+  if (routeInfo.name === "themes") {
+    cleanupThemes = await renderThemesModal(modalRoot, {
+      toast,
+      onClose: overlayOnClose("themes"),
+    });
+    return;
+  }
+
+  if (routeInfo.name === "page") {
+    cleanupPage = await renderPageModal(modalRoot, {
+      slug: routeInfo.slug,
+      toast,
+      onClose: overlayOnClose("page"),
+    });
+    if (!cleanupPage) dismissOverlay();
+    return;
+  }
+
+  if (routeInfo.name === "developer") {
+    cleanupDeveloper = renderDeveloperModal(modalRoot, {
+      page: routeInfo.page,
+      onClose: overlayOnClose("developer"),
+    });
+    return;
+  }
+
+  if (routeInfo.name === "editor") {
+    cleanupEditor = await renderEditor(modalRoot, {
+      cardId: routeInfo.cardId,
+      toast,
+      onSaved: () => {
+        toast("Carte enregistrée");
+        underlayStale = true;
+        if (parseRoute().name === "editor") navigate("#/", { replace: true });
+      },
+      onCancel: overlayOnClose("editor"),
+      onDeleted: () => {
+        toast("Carte supprimée");
+        underlayStale = true;
+        if (parseRoute().name === "editor") navigate("#/", { replace: true });
+      },
+    });
+  }
+}
+
+function disposeList() {
+  if (cleanupList) {
+    cleanupList();
+    cleanupList = null;
+  }
+}
+
+function renderEmpty() {
+  main.innerHTML = `
+    <section class="panel empty-view no-print">
+      <div class="brick" aria-hidden="true"></div>
+      <h1 class="view-title">Aucune carte pour l'instant</h1>
+      <p>Crée ta première carte : référence, photo, titre, thème. Tu pourras ensuite les lister et imprimer en lot sur A4 (face + dos).</p>
+      <button type="button" class="btn primary" id="btn-empty-create">Créer ma première carte</button>
+    </section>
+  `;
+  main.querySelector("#btn-empty-create").addEventListener("click", () => {
+    navigate("#/new-card");
   });
+}
+
+const listOpts = {
+  onEdit: (id) => navigate(`#/edit-card/${id}`),
+  onCreate: () => navigate("#/new-card"),
+  toast,
+};
+
+/** Accueil sous une modale, ou page d’accueil seule. */
+async function renderHomeUnderlay(cards) {
+  disposeList();
+  setNewButtonVisible(true);
+  if (!cards.length) {
+    setSearchVisible(false);
+    syncHeaderPrint(0);
+    renderEmpty();
+    return;
+  }
+  setSearchVisible(true);
+  syncHeaderPrint(cards.length);
+  cleanupList = await renderList(main, listOpts);
+}
+
+async function route() {
+  const token = ++routeToken;
+
+  let routeInfo = parseRoute();
+  if (routeInfo.name === "unknown") {
+    history.replaceState({ app: APP_ID, depth: 0 }, "", hashUrl("#/"));
+    routeInfo = { name: "home" };
+  }
+
+  const prev = shownRoute;
+  const nextIsOverlay = isOverlayRoute(routeInfo);
+  const prevIsOverlay = isOverlayRoute(prev);
+
+  if (!nextIsOverlay) {
+    teardownOverlays({ clearDom: true, dropModalOpen: true });
+    shownRoute = routeInfo;
+    await ensureUnderlay();
+    return;
+  }
+
+  if (prev?.name === "developer" && routeInfo.name === "developer") {
+    document.body.classList.add("modal-open");
+    await showOverlay(routeInfo);
+    if (token !== routeToken) return;
+    shownRoute = routeInfo;
+    return;
+  }
+
+  if (!underlayReady || underlayStale) {
+    await ensureUnderlay();
+    if (token !== routeToken) return;
+  }
+
+  if (prevIsOverlay) {
+    teardownOverlays({ clearDom: false, dropModalOpen: false });
+  }
+
+  document.body.classList.add("modal-open");
+  await showOverlay(routeInfo);
+  if (token !== routeToken) return;
+  shownRoute = routeInfo;
 }
 
 async function exportCards() {
@@ -191,8 +420,8 @@ async function handleImportFile() {
       ? ` · ${result.themesImported} thème(s)`
       : "";
     toast(`${result.imported} carte(s) importée(s) · total ${result.total}${themeMsg}`);
-    navigate(result.total ? "#/list" : "#/");
-    await route();
+    underlayStale = true;
+    navigate("#/", { replace: true });
   } catch (err) {
     toast(err.message || "Import impossible", "error");
   }
@@ -219,233 +448,8 @@ async function handleDevReset() {
   }
 }
 
-function openSettingsModal() {
-  if (!modalRoot) {
-    toast("Modale indisponible", "error");
-    return;
-  }
-  closeCardModal();
-  cleanupSettings = renderSettingsModal(modalRoot, {
-    onClose: () => {
-      cleanupSettings = null;
-      if (modalRoot) modalRoot.innerHTML = "";
-      document.body.classList.remove("modal-open");
-    },
-    onImport: () => importFile?.click(),
-    onExport: exportCards,
-    onThemes: () => {
-      openThemesModal();
-    },
-    onStyleguide: isLocalDevHost()
-      ? () => {
-          navigate("#/test");
-        }
-      : undefined,
-    onDevReset: isLocalDevHost() ? handleDevReset : undefined,
-  });
-}
-
-async function openThemesModal() {
-  if (!modalRoot) {
-    toast("Modale indisponible", "error");
-    return;
-  }
-  closeCardModal();
-  cleanupThemes = await renderThemesModal(modalRoot, {
-    toast,
-    onClose: () => {
-      cleanupThemes = null;
-      if (modalRoot) modalRoot.innerHTML = "";
-      document.body.classList.remove("modal-open");
-      if (parseRoute().name === "themes") {
-        loadCards().then((list) => {
-          navigate(list.length ? "#/list" : "#/");
-        });
-      }
-    },
-  });
-}
-
-function disposeList() {
-  if (cleanupList) {
-    cleanupList();
-    cleanupList = null;
-  }
-}
-
-function renderEmpty() {
-  main.innerHTML = `
-    <section class="panel empty-view no-print">
-      <div class="brick" aria-hidden="true"></div>
-      <h2>Aucune carte pour l'instant</h2>
-      <p>Crée ta première carte : référence, photo, titre, thème. Tu pourras ensuite les lister et imprimer en lot sur A4 (face + dos).</p>
-      <button type="button" class="btn primary" id="btn-empty-create">Créer ma première carte</button>
-    </section>
-  `;
-  main.querySelector("#btn-empty-create").addEventListener("click", () => {
-    navigate("#/new");
-  });
-}
-
-const listOpts = {
-  onEdit: (id) => navigate(`#/edit/${id}`),
-  onCreate: () => navigate("#/new"),
-  toast,
-};
-
-/** Liste (ou vide) sous la modale d’édition de carte. */
-async function renderCardsUnderlay(cards) {
-  disposeList();
-  if (!cards.length) {
-    setSearchVisible(false);
-    syncHeaderPrint(0);
-    renderEmpty();
-    return;
-  }
-  setSearchVisible(true);
-  syncHeaderPrint(cards.length);
-  cleanupList = await renderList(main, listOpts);
-}
-
-async function route() {
-  const token = ++routeToken;
-
-  closeCardModal();
-  disposeList();
-  setSearchVisible(false);
-
-  const routeInfo = parseRoute();
-
-  /* Styleguide : pas besoin d’IndexedDB (évite de bloquer toute l’UI si la DB est coincée). */
-  if (routeInfo.name === "test") {
-    setNewButtonVisible(false);
-    setSearchVisible(false);
-    syncHeaderPrint(0);
-    if (routeInfo.page === "buttons") {
-      cleanupList = renderTestButtons(main);
-    } else if (routeInfo.page === "fields") {
-      cleanupList = renderTestFields(main);
-    } else if (routeInfo.page === "selects") {
-      cleanupList = renderTestSelects(main);
-    } else if (routeInfo.page === "sliders") {
-      cleanupList = renderTestSliders(main);
-    } else if (routeInfo.page === "colors") {
-      cleanupList = renderTestColors(main);
-    } else if (routeInfo.page === "search") {
-      cleanupList = renderTestSearch(main);
-    } else if (routeInfo.page === "modals") {
-      cleanupList = renderTestModals(main);
-    } else {
-      cleanupList = renderTestIndex(main);
-    }
-    return;
-  }
-
-  let cards;
-  try {
-    cards = await loadCards();
-  } catch (err) {
-    console.error(err);
-    main.innerHTML = `<section class="panel"><p class="error">Erreur de stockage : ${err.message || err}</p></section>`;
-    return;
-  }
-
-  if (token !== routeToken) return;
-
-  if (routeInfo.name === "themes") {
-    setNewButtonVisible(true);
-    if (!cards.length) {
-      syncHeaderPrint(0);
-      renderEmpty();
-    } else {
-      setSearchVisible(true);
-      syncHeaderPrint(cards.length);
-      cleanupList = await renderList(main, listOpts);
-    }
-    if (token !== routeToken) return;
-    await openThemesModal();
-    return;
-  }
-
-  if (routeInfo.name === "home") {
-    if (!cards.length) {
-      setNewButtonVisible(true);
-      syncHeaderPrint(0);
-      renderEmpty();
-      return;
-    }
-    navigate("#/list");
-    return;
-  }
-
-  if (routeInfo.name === "list") {
-    if (!cards.length) {
-      setNewButtonVisible(true);
-      syncHeaderPrint(0);
-      renderEmpty();
-      if (location.hash !== "#/" && location.hash !== "") {
-        history.replaceState(null, "", `${location.pathname}${location.search}#/`);
-      }
-      return;
-    }
-    setNewButtonVisible(true);
-    setSearchVisible(true);
-    syncHeaderPrint(cards.length);
-    cleanupList = await renderList(main, listOpts);
-    return;
-  }
-
-  if (routeInfo.name === "editor") {
-    if (!modalRoot) {
-      main.innerHTML = `<section class="panel"><p class="error">#modal-root manquant</p></section>`;
-      return;
-    }
-    setNewButtonVisible(true);
-    await renderCardsUnderlay(cards);
-    if (token !== routeToken) return;
-
-    cleanupEditor = await renderEditor(modalRoot, {
-      cardId: routeInfo.cardId,
-      toast,
-      onSaved: () => {
-        toast("Carte enregistrée");
-        navigate("#/list");
-      },
-      onCancel: async () => {
-        const list = await loadCards();
-        navigate(list.length ? "#/list" : "#/");
-      },
-      onDeleted: async () => {
-        toast("Carte supprimée");
-        const list = await loadCards();
-        navigate(list.length ? "#/list" : "#/");
-      },
-    });
-  }
-
-  if (pendingPageSlug) {
-    const slug = pendingPageSlug;
-    pendingPageSlug = null;
-    await openPageModal(slug);
-  }
-}
-
-btnNew.addEventListener("click", () => navigate("#/new"));
-if (btnSettings) btnSettings.addEventListener("click", () => openSettingsModal());
-
-if (brandLink) {
-  brandLink.addEventListener("click", async (e) => {
-    e.preventDefault();
-    const r = parseRoute();
-    if (r.name === "editor") {
-      pendingPageSlug = "about";
-      const cards = await loadCards();
-      navigate(cards.length ? "#/list" : "#/");
-      return;
-    }
-    openPageModal("about");
-  });
-}
+btnNew.addEventListener("click", () => navigate("#/new-card"));
+if (btnSettings) btnSettings.addEventListener("click", () => navigate("#/settings"));
 
 if (importFile) {
   importFile.addEventListener("change", () => {
@@ -453,7 +457,35 @@ if (importFile) {
   });
 }
 
+document.addEventListener("click", (e) => {
+  if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
+    return;
+  }
+  const t = e.target;
+  const el =
+    t instanceof Element ? t : t instanceof Node ? t.parentElement : null;
+  const a = el?.closest("a[href]");
+  if (!a || a.target === "_blank" || a.hasAttribute("download")) return;
+  const href = a.getAttribute("href");
+  if (!href || !href.startsWith("#/")) return;
+  e.preventDefault();
+  navigate(href);
+});
+
+window.addEventListener("popstate", () => {
+  ignoreHashchange = true;
+  if (!history.state || history.state.app !== APP_ID) {
+    history.replaceState({ app: APP_ID, depth: 0 }, "", location.href);
+  }
+  route();
+  setTimeout(() => {
+    ignoreHashchange = false;
+  }, 0);
+});
+
 window.addEventListener("hashchange", () => {
+  if (ignoreHashchange) return;
+  history.replaceState({ app: APP_ID, depth: 0 }, "", location.href);
   route();
 });
 
@@ -472,6 +504,10 @@ async function boot() {
     initPrintMenu({ toast });
     /* Seed thèmes en arrière-plan : ne bloque pas l’empty state après un reset. */
     void loadThemes().catch((err) => console.error(err));
+
+    const initialHash = !location.hash || location.hash === "#" ? "#/" : normalizeHash(location.hash);
+    history.replaceState({ app: APP_ID, depth: 0 }, "", hashUrl(initialHash));
+
     /* Afficher tout de suite l’accueil vide pendant l’ouverture IndexedDB. */
     if (parseRoute().name === "home") {
       setNewButtonVisible(true);
@@ -480,9 +516,6 @@ async function boot() {
     }
     const cards = await loadCards();
     syncHeaderPrint(cards.length);
-    if (!location.hash || location.hash === "#") {
-      history.replaceState(null, "", cards.length ? "#/list" : "#/");
-    }
     await route();
   } catch (err) {
     console.error(err);

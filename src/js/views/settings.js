@@ -58,7 +58,7 @@ export function renderSettingsModal(host, opts) {
       <div class="modal modal--md" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
         <div class="modal-header">
           <div>
-            <h2 class="view-title" id="settings-modal-title">Paramètres</h2>
+            <h1 class="view-title" id="settings-modal-title">Paramètres</h1>
             <p class="view-desc">Options et configuration de l'application</p>
           </div>
           <button type="button" class="btn ghost icon-only modal-close" id="btn-settings-close">
@@ -69,47 +69,40 @@ export function renderSettingsModal(host, opts) {
         <div class="modal-body">
           <div class="settings-sections">
             <section class="settings-panel">
-              <h3 class="settings-panel-title">Affichage</h3>
-              <p class="settings-panel-desc">Thème de l’interface et densité de la liste de cartes.</p>
-              <div class="settings-subblock">
-                <h4 class="settings-subblock-title">Mode d’affichage</h4>
-                <p class="settings-panel-desc settings-panel-desc--tight">Clair, sombre, ou suivre le thème du système.</p>
-                <div class="theme-mode-switch" role="radiogroup" aria-label="Mode d’affichage">
+              <h2 class="section-title">Interface</h2>
+              <div class="form-field">
+                <p class="form-label" id="settings-theme-label">Mode d’affichage</p>
+                <div class="theme-mode-switch" role="radiogroup" aria-labelledby="settings-theme-label">
                   <button type="button" class="btn ${currentTheme === "system" ? "primary" : "secondary"}" data-theme-mode="system" aria-pressed="${currentTheme === "system"}">Système</button>
                   <button type="button" class="btn ${currentTheme === "light" ? "primary" : "secondary"}" data-theme-mode="light" aria-pressed="${currentTheme === "light"}">Clair</button>
                   <button type="button" class="btn ${currentTheme === "dark" ? "primary" : "secondary"}" data-theme-mode="dark" aria-pressed="${currentTheme === "dark"}">Sombre</button>
                 </div>
               </div>
-              <div class="settings-subblock">
-                <h4 class="settings-subblock-title">Liste des cartes</h4>
-                <div class="form-field">
-                  <label class="form-label" for="settings-list-cols">Cartes par ligne (max)</label>
-                  <p class="form-hint" id="settings-list-cols-hint">De ${LIST_COLS_MIN} à ${LIST_COLS_MAX}, ou ∞ (pas de limite). Sur écran étroit, moins de cartes s’affichent par ligne. Défaut&nbsp;: ${DEFAULT_LIST_COLS_MAX}.</p>
-                  <div class="form-range-row">
-                    <input
-                      type="range"
-                      id="settings-list-cols"
-                      min="${LIST_COLS_MIN}"
-                      max="${LIST_COLS_SLIDER_UNLIMITED}"
-                      step="1"
-                      value="${listColsSlider}"
-                      aria-valuemin="${LIST_COLS_MIN}"
-                      aria-valuemax="${LIST_COLS_SLIDER_UNLIMITED}"
-                      aria-valuenow="${listColsSlider}"
-                      aria-valuetext="${formatListColsLabel(listColsMax)}"
-                      aria-describedby="settings-list-cols-out settings-list-cols-hint"
-                    />
-                    <output id="settings-list-cols-out" for="settings-list-cols">${formatListColsLabel(listColsMax)}</output>
-                  </div>
+              <div class="form-field">
+                <label class="form-label" for="settings-list-cols">Nombre de cartes par ligne maximum</label>
+                <div class="form-range-row">
+                  <input
+                    type="range"
+                    id="settings-list-cols"
+                    min="${LIST_COLS_MIN}"
+                    max="${LIST_COLS_SLIDER_UNLIMITED}"
+                    step="1"
+                    value="${listColsSlider}"
+                    aria-valuemin="${LIST_COLS_MIN}"
+                    aria-valuemax="${LIST_COLS_SLIDER_UNLIMITED}"
+                    aria-valuenow="${listColsSlider}"
+                    aria-valuetext="${formatListColsLabel(listColsMax)}"
+                    aria-describedby="settings-list-cols-out"
+                  />
+                  <output id="settings-list-cols-out" for="settings-list-cols">${formatListColsLabel(listColsMax)}</output>
                 </div>
               </div>
             </section>
 
             <section class="settings-panel">
-              <h3 class="settings-panel-title">Design des cartes</h3>
-              <p class="settings-panel-desc">Réglages d’apparence des cartes. Appliqués à l’aperçu et à l’impression. La couleur par défaut sert quand le thème n’a pas de couleur (ou qu’il n’y a pas de thème).</p>
+              <h2 class="section-title">Apparence des cartes</h2>
               <div class="form-field">
-                <label class="form-label" for="settings-face-border">Bordure (face)</label>
+                <label class="form-label" for="settings-face-border">Taille de la bordure (côté face)</label>
                 <div class="form-range-row">
                   <input
                     type="range"
@@ -127,7 +120,7 @@ export function renderSettingsModal(host, opts) {
                 </div>
               </div>
               <div class="form-field">
-                <label class="form-label" for="settings-card-radius">Coins arrondis</label>
+                <label class="form-label" for="settings-card-radius">Arrondi des coins</label>
                 <div class="form-range-row">
                   <input
                     type="range"
@@ -146,7 +139,7 @@ export function renderSettingsModal(host, opts) {
               </div>
               <div class="form-field settings-color-field">
                 <label class="form-label" for="settings-default-color-hex">Couleur par défaut</label>
-                <p class="form-hint" id="settings-default-color-hint">Sans couleur configurée → gris d’usine (${DEFAULT_THEME_COLOR}).</p>
+                <p class="form-hint" id="settings-default-color-hint">Couleur appliquée par défaut aux cartes sans thème ou sans couleur personnalisée.</p>
                 ${formColorMarkup({
                   id: "settings-default-color-hex",
                   value: configuredColor,
@@ -158,34 +151,22 @@ export function renderSettingsModal(host, opts) {
             </section>
 
             <section class="settings-panel">
-              <h3 class="settings-panel-title">Importer</h3>
-              <p class="settings-panel-desc">Charge un fichier JSON pour restaurer ou fusionner tes cartes et thèmes.</p>
-              <button type="button" class="btn primary" id="settings-import">Importer un fichier…</button>
-            </section>
-
-            <section class="settings-panel">
-              <h3 class="settings-panel-title">Sauvegarder</h3>
-              <p class="settings-panel-desc">Télécharge toutes tes cartes et thèmes dans un fichier JSON.</p>
-              <button type="button" class="btn primary" id="settings-export">Télécharger la sauvegarde</button>
-            </section>
-
-            <section class="settings-panel">
-              <h3 class="settings-panel-title">Thèmes LEGO</h3>
-              <p class="settings-panel-desc">Gère les thèmes (nom, couleur, logo) utilisés sur les cartes.</p>
-              <button type="button" class="btn primary" id="settings-themes">Gérer les thèmes</button>
+              <h2 class="section-title">Gestion de la collection</h2>
+              <div class="settings-actions">
+                <button type="button" class="btn primary" id="settings-import">Importer des cartes</button>
+                <button type="button" class="btn primary" id="settings-export">Télécharger une sauvegarde</button>
+                <button type="button" class="btn primary" id="settings-themes">Gérer les thèmes</button>
+              </div>
             </section>
 
             ${
               showDevReset
                 ? `<section class="settings-panel">
-              <h3 class="settings-panel-title">Styleguide (dev)</h3>
-              <p class="settings-panel-desc">Pages de test du design system (<code>#/test</code>). Visible uniquement en local.</p>
-              <button type="button" class="btn primary" id="settings-styleguide">Ouvrir le styleguide</button>
-            </section>
-            <section class="settings-panel settings-panel-danger">
-              <h3 class="settings-panel-title">Reset local (dev)</h3>
-              <p class="settings-panel-desc">Vide IndexedDB, le localStorage et le cache, puis recharge l’app. Visible uniquement en local.</p>
-              <button type="button" class="btn danger" id="settings-dev-reset">Réinitialiser les données locales</button>
+              <h2 class="section-title">Options pour les développeurs</h2>
+              <div class="settings-actions">
+                <button type="button" class="btn primary" id="settings-styleguide">Espace développeur</button>
+                <button type="button" class="btn danger" id="settings-dev-reset">Réinitialiser les données locales</button>
+              </div>
             </section>`
                 : ""
             }
@@ -227,10 +208,7 @@ export function renderSettingsModal(host, opts) {
       },
     });
   }
-  const close = () => {
-    cleanup();
-    onClose();
-  };
+  const close = () => onClose();
 
   function syncThemeButtons(mode) {
     themeBtns.forEach((btn) => {
@@ -295,12 +273,10 @@ export function renderSettingsModal(host, opts) {
   });
 
   host.querySelector("#settings-themes")?.addEventListener("click", () => {
-    close();
     onThemes();
   });
 
   host.querySelector("#settings-styleguide")?.addEventListener("click", () => {
-    close();
     onStyleguide?.();
   });
 
@@ -338,8 +314,6 @@ export function renderSettingsModal(host, opts) {
     document.removeEventListener("keydown", onKey);
     backdrop?.removeEventListener("click", onBackdropClick);
     btnClose?.removeEventListener("click", close);
-    host.innerHTML = "";
-    document.body.classList.remove("modal-open");
   }
 
   return cleanup;

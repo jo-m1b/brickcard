@@ -79,7 +79,7 @@ export async function renderEditor(host, opts) {
       <div class="modal modal--lg" role="dialog" aria-modal="true" aria-labelledby="editor-title">
         <div class="modal-header">
           <div>
-            <h2 class="view-title" id="editor-title">${isEdit ? "Modifier la carte" : "Nouvelle carte"}</h2>
+            <h1 class="view-title" id="editor-title">${isEdit ? "Modifier la carte" : "Nouvelle carte"}</h1>
             <p class="view-desc">${isEdit ? "Les modifications seront appliquées à la carte après l’enregistrement" : "Créer une nouvelle carte pour l'ajouter à la collection"}</p>
           </div>
           <button type="button" class="btn ghost icon-only modal-close" id="btn-modal-close">
@@ -203,7 +203,7 @@ export async function renderEditor(host, opts) {
       <div class="modal modal--sm" role="dialog" aria-modal="true" aria-labelledby="card-delete-title" aria-describedby="card-delete-desc">
         <div class="modal-header">
           <div>
-            <h2 class="view-title" id="card-delete-title">Supprimer&nbsp;?</h2>
+            <h1 class="view-title" id="card-delete-title">Supprimer&nbsp;?</h1>
             <p class="view-desc" id="card-delete-subtitle"></p>
           </div>
           <button type="button" class="btn ghost icon-only modal-close" id="card-delete-close">
@@ -700,8 +700,6 @@ export async function renderEditor(host, opts) {
     imageBgColorField?.destroy();
     window.removeEventListener("resize", syncPreview);
     window.removeEventListener("keydown", onKeydown);
-    document.body.classList.remove("modal-open");
-    host.innerHTML = "";
   };
 }
 

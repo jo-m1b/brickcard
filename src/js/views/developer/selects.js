@@ -5,11 +5,11 @@ import { enhanceFormSelects } from "../../form-select.js";
  * @param {HTMLElement} host
  * @returns {() => void}
  */
-export function renderTestSelects(host) {
+export function renderDeveloperSelects(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker"><a href="#/test">Styleguide</a> / Listes déroulantes</p>
+        <p class="styleguide-kicker"><a href="#/developer">Styleguide</a> / Listes déroulantes</p>
         <h1 class="view-title">Listes déroulantes</h1>
         <p class="view-desc">
           Ordre&nbsp;: label → hint → contrôle → erreur.
@@ -172,11 +172,11 @@ export function renderTestSelects(host) {
       </div>
 
       <p class="styleguide-back">
-        <a href="#/test">← Index styleguide</a>
+        <a href="#/developer">← Index styleguide</a>
         ·
-        <a href="#/test/fields">Champs</a>
+        <a href="#/developer/fields">Champs</a>
         ·
-        <a href="#/list">App</a>
+        <a href="#/">App</a>
       </p>
     </section>
   `;

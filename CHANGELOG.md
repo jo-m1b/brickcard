@@ -5,6 +5,157 @@ Toutes les modifications notables de ce projet sont documentées dans ce fichier
 Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [0.5.27] — 2026-08-13
+
+### Changed
+
+- Croix / Échap / backdrop d’un overlay : retour à l’accueil (`replace`), plus de `history.back()`
+- Styleguide : liens internes `#/developer/…` en `replace` (une seule entrée d’historique)
+
+## [0.5.26] — 2026-08-13
+
+### Changed
+
+- Navigation overlay → overlay : swap du contenu sans fermer/rouvrir (liste et `modal-open` conservés)
+- Espace développeur : changement de galerie sans remonter la coquille
+- Thèmes : suppression / réinit en dialogue enfant (`modal--sm`), plus de `confirm()` natif
+
+## [0.5.25] — 2026-08-13
+
+### Changed
+
+- Espace développeur : modale overlay (`modal--lg`) comme les pages Markdown ; fermeture = Précédent / bouton close
+
+### Removed
+
+- Liens « Retour à l’app » du styleguide (la modale suffit)
+
+## [0.5.24] — 2026-08-13
+
+### Changed
+
+- Routes hash unifiées : `#/` (accueil liste ou empty), `#/new-card`, `#/edit-card/:id`, `#/themes`, `#/settings`, `#/page/:slug` ; fermeture de modale = Précédent navigateur
+
+### Removed
+
+- `#/list`, `#/new`, `#/edit/:id` ; redirections `#/test…` → `#/developer…`
+
+## [0.5.23] — 2026-08-13
+
+### Added
+
+- Pages Markdown : `# Titre | Sous-titre` (premier ` | `) remplit le `view-desc` de la modale ; gras/italique conservés
+
+## [0.5.22] — 2026-08-13
+
+### Changed
+
+- Titres : classe = apparence (`view-title`, `section-title`) ; un `h1` par vue (page ou dialog) ; pages Markdown : `#` = titre de modale, `##` / `###` dans le corps
+
+### Removed
+
+- CSS mort : `settings-panel-title`, `.settings-panel > h4.form-label`, `.empty-view h2`, `.md-content h1`, `.theme-card-body h3`
+
+## [0.5.21] — 2026-08-13
+
+### Changed
+
+- Typo KISS : **Open Sans** pour toute l’UI (`--font-ui`) ; **Inter** réservé aux cartes (`--font-card`) — DM Sans / Bebas Neue retirés
+
+## [0.5.20] — 2026-08-13
+
+### Added
+
+- Espace développeur : page typographie `#/developer/typography` (polices, chrome UI, Markdown)
+
+## [0.5.19] — 2026-08-13
+
+### Changed
+
+- Espace développeur : route `#/developer` (ex-`#/test`) ; dossier `views/developer/` ; anciennes URLs `#/test…` redirigées
+
+## [0.5.18] — 2026-08-13
+
+### Changed
+
+- Paramètres : libellé du bouton styleguide → « Espace développeur »
+
+## [0.5.17] — 2026-08-13
+
+### Changed
+
+- Paramètres : Styleguide + Reset local réunis dans « Options pour les développeurs » (localhost uniquement)
+
+### Removed
+
+- CSS mort `.settings-panel-desc`
+
+## [0.5.16] — 2026-08-13
+
+### Changed
+
+- Paramètres / Gestion de la collection : libellés import/export ; bouton thèmes intégré (section Thèmes retirée)
+
+## [0.5.15] — 2026-08-12
+
+### Changed
+
+- Paramètres : Import / Sauvegarde réunis dans « Gestion de la collection »
+
+## [0.5.14] — 2026-08-12
+
+### Changed
+
+- Paramètres : plus d’espace sous les titres de section `h3`
+
+## [0.5.13] — 2026-08-12
+
+### Changed
+
+- Paramètres : hint de la couleur par défaut des cartes
+
+## [0.5.12] — 2026-08-12
+
+### Changed
+
+- Paramètres / Apparence des cartes : description retirée ; libellés bordure et coins
+
+## [0.5.11] — 2026-08-12
+
+### Changed
+
+- Paramètres : libellé du curseur de densité de liste ; titre / hint redondants retirés
+
+## [0.5.10] — 2026-08-12
+
+### Removed
+
+- Paramètres : wrappers `settings-subblock` (et séparateurs / indentation associés)
+
+## [0.5.9] — 2026-08-12
+
+### Changed
+
+- Paramètres : titres `h4` alignés sur `form-label` ; indentation des `settings-subblock`
+
+## [0.5.8] — 2026-08-12
+
+### Changed
+
+- Paramètres : titres de section « Interface » et « Apparence des cartes »
+
+## [0.5.7] — 2026-08-12
+
+### Removed
+
+- Paramètres / Affichage : descriptions redondantes sous le titre et « Mode d’affichage »
+
+## [0.5.6] — 2026-08-12
+
+### Changed
+
+- Paramètres : sections sans bordure ; titres `h3` plus grands pour se distinguer des `h4`
+
 ## [0.5.5] — 2026-08-12
 
 ### Changed

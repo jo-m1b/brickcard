@@ -3,11 +3,11 @@
  * @param {HTMLElement} host
  * @returns {() => void}
  */
-export function renderTestSliders(host) {
+export function renderDeveloperSliders(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker"><a href="#/test">Styleguide</a> / Curseurs</p>
+        <p class="styleguide-kicker"><a href="#/developer">Styleguide</a> / Curseurs</p>
         <h1 class="view-title">Curseurs (range)</h1>
         <p class="view-desc">
           Ordre&nbsp;: label → hint → contrôle → erreur.
@@ -96,11 +96,11 @@ export function renderTestSliders(host) {
       </div>
 
       <p class="styleguide-back">
-        <a href="#/test">← Index styleguide</a>
+        <a href="#/developer">← Index styleguide</a>
         ·
-        <a href="#/test/fields">Champs</a>
+        <a href="#/developer/fields">Champs</a>
         ·
-        <a href="#/list">App</a>
+        <a href="#/">App</a>
       </p>
     </section>
   `;

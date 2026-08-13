@@ -7,15 +7,15 @@ import {
 
 /**
  * Galerie des champs de saisie (design system — test uniquement).
- * Select : voir `#/test/selects`.
+ * Select : voir `#/developer/selects`.
  * @param {HTMLElement} host
  * @returns {() => void}
  */
-export function renderTestFields(host) {
+export function renderDeveloperFields(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker"><a href="#/test">Styleguide</a> / Champs</p>
+        <p class="styleguide-kicker"><a href="#/developer">Styleguide</a> / Champs</p>
         <h1 class="view-title">Champs de saisie</h1>
         <p class="view-desc">
           Ordre&nbsp;: label → hint → contrôle → erreur.
@@ -24,7 +24,7 @@ export function renderTestFields(host) {
           (text, number, textarea).
           Icône optionnelle&nbsp;: wrapper <code>form-control-wrap</code> +
           <code>form-control-icon</code> (Remix, décoratif).
-          Listes déroulantes&nbsp;: <a href="#/test/selects">page dédiée</a>.
+          Listes déroulantes&nbsp;: <a href="#/developer/selects">page dédiée</a>.
           Compact&nbsp;: <code>sm</code>.
           Repos&nbsp;: fond + trait bas (inset). Focus&nbsp;: cadre avec 1&nbsp;px d’air (pas de hover).
         </p>
@@ -157,11 +157,11 @@ export function renderTestFields(host) {
       </div>
 
       <p class="styleguide-back">
-        <a href="#/test">← Index styleguide</a>
+        <a href="#/developer">← Index styleguide</a>
         ·
-        <a href="#/test/selects">Listes déroulantes</a>
+        <a href="#/developer/selects">Listes déroulantes</a>
         ·
-        <a href="#/list">App</a>
+        <a href="#/">App</a>
       </p>
     </section>
   `;
