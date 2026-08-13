@@ -1,3 +1,5 @@
+import { linkMarkup } from "../../link.js";
+
 /**
  * Galerie des curseurs (range) — design system / test uniquement.
  * @param {HTMLElement} host
@@ -7,17 +9,18 @@ export function renderDeveloperSliders(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker"><a href="#/developer">Styleguide</a> / Curseurs</p>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Curseurs</p>
         <h1 class="view-title">Curseurs (range)</h1>
-        <p class="view-desc">
-          Ordre&nbsp;: label → hint → contrôle → erreur.
-          Contrôle&nbsp;: <code>form-range-row</code> avec
-          <code>input[type=range]</code> (+ <code>output</code> optionnel).
-          Même vocabulaire de champ (<code>form-field</code> / <code>form-label</code> /
-          <code>form-hint</code> / <code>form-error</code>).
-          Appliqué dans les paramètres et l’éditeur (zoom photo).
-        </p>
+        <p class="view-desc">Curseurs range, même ordre de champ.</p>
       </header>
+
+      <p class="styleguide-intro">
+        Contrôle&nbsp;: <code>form-range-row</code> avec
+        <code>input[type=range]</code> (+ <code>output</code> optionnel).
+        Même vocabulaire de champ (<code>form-field</code> / <code>form-label</code> /
+        <code>form-hint</code> / <code>form-error</code>).
+        Appliqué dans les paramètres et l’éditeur (zoom photo).
+      </p>
 
       <div class="styleguide-section">
         <h2 class="styleguide-section-title">Défaut</h2>
@@ -96,11 +99,11 @@ export function renderDeveloperSliders(host) {
       </div>
 
       <p class="styleguide-back">
-        <a href="#/developer">← Index styleguide</a>
+        ${linkMarkup("← Index styleguide", { href: "#/developer" })}
         ·
-        <a href="#/developer/fields">Champs</a>
+        ${linkMarkup("Champs", { href: "#/developer/fields" })}
         ·
-        <a href="#/">App</a>
+        ${linkMarkup("App", { href: "#/" })}
       </p>
     </section>
   `;

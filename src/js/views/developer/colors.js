@@ -1,5 +1,6 @@
 import { bindFormColor } from "../../form-color.js";
 import { ICON_CLOSE_CIRCLE } from "../../icons.js";
+import { linkMarkup } from "../../link.js";
 
 /**
  * Galerie des champs couleur (design system — test uniquement).
@@ -10,18 +11,19 @@ export function renderDeveloperColors(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker"><a href="#/developer">Styleguide</a> / Couleurs</p>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Couleurs</p>
         <h1 class="view-title">Champs couleur</h1>
-        <p class="view-desc">
-          Ordre&nbsp;: label → hint → contrôle → erreur.
-          Contrôle&nbsp;: un vrai <code>input.form-control</code> texte,
-          avec à l’intérieur une pastille (ouvre le color picker) et un bouton
-          effacer (<code>ri-close-circle-fill</code>, visible seulement s’il y a
-          une valeur, non focusable). Wrapper&nbsp;: <code>form-color</code>.
-          Pastille&nbsp;: affiche la valeur, sinon la couleur par défaut du champ,
-          sinon damier (transparent). Appliqué dans l’app.
-        </p>
+        <p class="view-desc">Champ hex, pastille et effacer.</p>
       </header>
+
+      <p class="styleguide-intro">
+        Contrôle&nbsp;: un vrai <code>input.form-control</code> texte,
+        avec à l’intérieur une pastille (ouvre le color picker) et un bouton
+        effacer (<code>ri-close-circle-fill</code>, visible seulement s’il y a
+        une valeur, non focusable). Wrapper&nbsp;: <code>form-color</code>.
+        Pastille&nbsp;: affiche la valeur, sinon la couleur par défaut du champ,
+        sinon damier (transparent). Appliqué dans l’app.
+      </p>
 
       <div class="styleguide-section">
         <h2 class="styleguide-section-title">Défaut</h2>
@@ -188,11 +190,11 @@ export function renderDeveloperColors(host) {
       </div>
 
       <p class="styleguide-back">
-        <a href="#/developer">← Index styleguide</a>
+        ${linkMarkup("← Index styleguide", { href: "#/developer" })}
         ·
-        <a href="#/developer/fields">Champs</a>
+        ${linkMarkup("Champs", { href: "#/developer/fields" })}
         ·
-        <a href="#/">App</a>
+        ${linkMarkup("App", { href: "#/" })}
       </p>
     </section>
   `;

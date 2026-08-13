@@ -153,6 +153,13 @@ body {
   background: var(--bg);
 }
 
+/* Remix Icon : glyphes 24×24, jamais étirés (défaut SVG sans taille = 300×150) */
+svg[viewBox="0 0 24 24"] {
+  aspect-ratio: 1;
+  overflow: visible;
+  flex-shrink: 0;
+}
+
 button,
 input,
 select,
@@ -215,6 +222,11 @@ textarea {
   width: min(100%, 28rem);
   display: flex;
   align-items: center;
+  cursor: text;
+}
+
+.search-bar:focus {
+  outline: none;
 }
 
 .search-bar:has(> .form-control-icon) > .form-control {
@@ -285,6 +297,7 @@ textarea {
   display: flex;
   align-items: center;
   height: 100%;
+  cursor: auto;
 }
 
 /* Bouton tri : carré qui remplit la hauteur utile (marges égales autour au hover) */
@@ -342,6 +355,31 @@ textarea {
   .topbar:not(:has(#topbar-search:not([hidden]))) .topbar-search {
     display: none !important;
   }
+
+  /* Nouvelle carte : icône seule, comme les autres actions du header */
+  #btn-new-card {
+    width: 2.4rem;
+    height: 2.4rem;
+    padding: 0;
+    gap: 0;
+  }
+
+  #btn-new-card > svg {
+    width: 1.45rem;
+    height: 1.45rem;
+  }
+
+  #btn-new-card > span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
 }
 
 .topbar-brand {
@@ -355,6 +393,7 @@ textarea {
   padding: 0.2rem 0.45rem;
   margin: -0.2rem -0.45rem;
   border: 1px solid transparent;
+  position: relative;
 }
 
 .topbar-brand:hover,
@@ -432,7 +471,26 @@ textarea {
   font-variant-numeric: tabular-nums;
 }
 
+@media (max-width: 420px) {
+  .topbar-brand {
+    gap: 0;
+  }
+
+  .brand-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
 .topbar-actions {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
@@ -648,6 +706,236 @@ textarea {
   color: var(--ink);
 }
 
+/* ——— Links (design system) ———
+ * Classe : .link — contenu Markdown des modales : .md-content a
+ * Taille : (défaut) | .sm
+ * Disposition texte+icône : icône à gauche (défaut) | .icon-right
+ * État   : (actif) | .disabled / [aria-disabled]
+ * Externe : target=_blank + icône ri-external-link-fill à droite par défaut
+ */
+:is(a.link, .md-content a) {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  text-decoration-thickness: 1px;
+  cursor: pointer;
+}
+
+:is(a.link, .md-content a):visited {
+  color: var(--ink);
+}
+
+:is(a.link, .md-content a):hover,
+:is(a.link, .md-content a):focus-visible {
+  color: var(--ink);
+  text-decoration-thickness: 2px;
+}
+
+a.link.sm {
+  font-size: 0.85rem;
+}
+
+a.link:has(> svg) {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2em;
+  text-decoration: none;
+}
+
+a.link:has(> svg) > span {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  text-decoration-thickness: 1px;
+}
+
+a.link:has(> svg):hover > span,
+a.link:has(> svg):focus-visible > span {
+  text-decoration-thickness: 2px;
+}
+
+a.link.icon-right {
+  flex-direction: row-reverse;
+}
+
+a.link > svg {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+  fill: currentColor;
+  display: block;
+}
+
+a.link.disabled,
+a.link[aria-disabled="true"] {
+  color: var(--muted);
+  text-decoration: none;
+  cursor: default;
+  pointer-events: none;
+}
+
+a.link.disabled:visited,
+a.link[aria-disabled="true"]:visited {
+  color: var(--muted);
+}
+
+a.link.disabled:has(> svg) > span,
+a.link[aria-disabled="true"]:has(> svg) > span {
+  text-decoration: none;
+}
+
+.modal-header a:not(.btn),
+.modal-header a:not(.btn):visited,
+.modal-header a:not(.btn):hover,
+.modal-header a:not(.btn):focus-visible {
+  color: inherit;
+}
+
+/* ——— Tiles (design system) ———
+ * Liste : ul.tile-list
+ * Tuile : a.tile | button.tile (+ .disabled)
+ * Titre / desc / icône gauche optionnels
+ * Trait bas inset 2px --ink-soft (comme les champs, pas de biseau)
+ * Hover et :focus-visible : inversion (fond ink / texte panel), pas d’outline
+ * Variante : .danger (couleurs --danger-line / --danger-bg, comme les boutons)
+ */
+.tile-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+:is(a.tile, button.tile) {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  width: 100%;
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--line);
+  border-bottom: none;
+  border-radius: 0;
+  box-shadow: inset 0 -2px 0 0 var(--ink-soft);
+  box-sizing: border-box;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+a.tile:visited {
+  color: var(--ink);
+}
+
+:is(a.tile, button.tile):hover,
+:is(a.tile, button.tile):focus,
+:is(a.tile, button.tile):focus-visible {
+  background: var(--ink);
+  color: var(--panel);
+  border-color: var(--ink);
+  box-shadow: none;
+  outline: none;
+}
+
+:is(a.tile, button.tile):hover .tile-desc,
+:is(a.tile, button.tile):focus .tile-desc,
+:is(a.tile, button.tile):focus-visible .tile-desc {
+  color: inherit;
+  opacity: 0.8;
+}
+
+:is(a.tile, button.tile) > svg {
+  width: 1.6rem;
+  height: 1.6rem;
+  aspect-ratio: 1;
+  flex-shrink: 0;
+  fill: currentColor;
+  display: block;
+}
+
+.tile-body {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.tile-title {
+  font-weight: 700;
+}
+
+.tile-desc {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--ink-soft);
+}
+
+:is(a.tile, button.tile).disabled,
+:is(a.tile, button.tile)[aria-disabled="true"],
+button.tile:disabled {
+  color: var(--muted);
+  cursor: default;
+  pointer-events: none;
+}
+
+a.tile.disabled:visited,
+a.tile[aria-disabled="true"]:visited {
+  color: var(--muted);
+}
+
+:is(a.tile, button.tile).disabled .tile-desc,
+:is(a.tile, button.tile)[aria-disabled="true"] .tile-desc,
+button.tile:disabled .tile-desc {
+  color: var(--muted);
+}
+
+:is(a.tile, button.tile).danger {
+  color: var(--danger-line);
+  box-shadow: inset 0 -2px 0 0 var(--danger-line);
+}
+
+a.tile.danger:visited {
+  color: var(--danger-line);
+}
+
+:is(a.tile, button.tile).danger .tile-desc {
+  color: var(--danger-line);
+  opacity: 0.85;
+}
+
+:is(a.tile, button.tile).danger:hover,
+:is(a.tile, button.tile).danger:focus,
+:is(a.tile, button.tile).danger:focus-visible {
+  background: var(--danger-bg);
+  color: var(--danger-line);
+  border-color: var(--danger-line);
+  box-shadow: inset 0 -2px 0 0 var(--danger-line);
+  outline: none;
+}
+
+:is(a.tile, button.tile).danger:hover .tile-desc,
+:is(a.tile, button.tile).danger:focus .tile-desc,
+:is(a.tile, button.tile).danger:focus-visible .tile-desc {
+  color: inherit;
+  opacity: 0.85;
+}
+
+:is(a.tile, button.tile).danger.disabled,
+:is(a.tile, button.tile).danger[aria-disabled="true"],
+button.tile.danger:disabled {
+  color: var(--muted);
+  box-shadow: inset 0 -2px 0 0 var(--muted);
+}
+
+:is(a.tile, button.tile).danger.disabled .tile-desc,
+:is(a.tile, button.tile).danger[aria-disabled="true"] .tile-desc,
+button.tile.danger:disabled .tile-desc {
+  color: var(--muted);
+  opacity: 1;
+}
+
 /* Topbar : icônes un peu plus grandes */
 .topbar-actions .btn.icon-only > svg {
   width: 1.45rem;
@@ -677,10 +965,6 @@ textarea {
 }
 
 /* Menu impression topbar */
-.print-menu {
-  position: relative;
-}
-
 .print-menu[hidden] {
   display: none !important;
 }
@@ -694,8 +978,10 @@ textarea {
 }
 
 .print-menu-panel {
+  --inv-bg: var(--ink);
+  --inv-fg: var(--bg);
   position: absolute;
-  /* Collé au bouton ; padding haut = pont de survol transparent */
+  /* Collé au bord droit des actions (bouton Paramètres) ; padding haut = pont de survol */
   top: 100%;
   right: 0;
   z-index: 320;
@@ -706,7 +992,7 @@ textarea {
   display: grid;
   gap: 0.45rem;
   background: transparent;
-  color: var(--bg);
+  color: var(--inv-fg);
   border: none;
   text-align: left;
   opacity: 0;
@@ -723,7 +1009,7 @@ textarea {
   right: 0;
   bottom: 0;
   z-index: 0;
-  background: var(--ink);
+  background: var(--inv-bg);
   border: 1px solid var(--line-strong);
   pointer-events: none;
 }
@@ -741,71 +1027,40 @@ textarea {
   pointer-events: auto;
 }
 
-.print-menu-summary {
-  margin: 0 0 0.15rem;
+.print-menu-title {
+  margin: 0;
   font-size: 0.95rem;
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.35;
   text-align: center;
 }
 
+.print-menu-desc {
+  margin: 0 0 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 400;
+  line-height: 1.35;
+  text-align: center;
+  opacity: 0.85;
+}
+
+.print-menu-desc[hidden] {
+  display: none !important;
+}
+
+/* Boutons : mêmes variantes DS, tokens inversés (surface = encre de la page) */
 .print-menu-panel .btn {
   width: 100%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
+  --bg: var(--inv-bg);
+  --ink: var(--inv-fg);
+  --panel: var(--inv-bg);
+  --brick-red: var(--inv-fg);
+  --on-accent-fg: var(--inv-bg);
+  --line: color-mix(in srgb, var(--inv-fg) 45%, var(--inv-bg));
 }
 
 .print-menu-panel .btn[hidden] {
   display: none !important;
-}
-
-.print-menu-panel .btn > svg {
-  width: 1rem;
-  height: 1rem;
-  flex-shrink: 0;
-  display: block;
-  fill: currentColor;
-}
-
-.print-menu-panel .btn.secondary {
-  background: transparent;
-  border-color: color-mix(in srgb, var(--bg) 45%, transparent);
-  color: var(--bg);
-}
-
-.print-menu-panel .btn.secondary:hover:not(:disabled),
-.print-menu-panel .btn.secondary:focus-visible {
-  border-color: var(--bg);
-  background: color-mix(in srgb, var(--bg) 12%, transparent);
-  outline: none;
-}
-
-.print-menu-panel .btn.primary {
-  background: var(--bg);
-  color: var(--ink);
-  border-color: var(--bg);
-}
-
-.print-menu-panel .btn.primary:hover:not(:disabled),
-.print-menu-panel .btn.primary:focus-visible {
-  background: var(--bg);
-  color: var(--ink);
-  opacity: 0.9;
-  outline: none;
-}
-
-.print-menu-panel .btn.primary:disabled {
-  opacity: 0.35;
-}
-
-@media (max-width: 640px) {
-  .print-menu-panel {
-    right: auto;
-    left: 50%;
-    transform: translateX(-50%);
-  }
 }
 
 /* Icônes thème (plusieurs SVG dans le même bouton) : n’afficher que le mode actif */
@@ -821,62 +1076,6 @@ html[data-theme="light"] .btn .icon-sun,
 html[data-theme="dark"] .btn .icon-moon,
 html:not([data-theme]) .btn .icon-system {
   display: block;
-}
-
-/* Tooltips titre + description */
-.tooltip {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  z-index: 300;
-  width: max-content;
-  max-width: 240px;
-  padding: 0.55rem 0.7rem;
-  background: var(--ink);
-  color: var(--bg);
-  border: 1px solid var(--line-strong);
-  text-align: left;
-  pointer-events: none;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(-2px);
-  transition: opacity 0.12s ease, transform 0.12s ease, visibility 0.12s;
-}
-
-.tooltip-title {
-  display: block;
-  font-size: 0.82rem;
-  font-weight: 700;
-  margin-bottom: 0.2rem;
-}
-
-.tooltip-desc {
-  display: block;
-  font-size: 0.75rem;
-  font-weight: 400;
-  line-height: 1.35;
-  opacity: 0.9;
-}
-
-.btn:hover .tooltip,
-.btn:focus-visible .tooltip {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-}
-
-@media (max-width: 640px) {
-  .tooltip {
-    right: auto;
-    left: 50%;
-    transform: translate(-50%, -2px);
-    max-width: min(240px, 70vw);
-  }
-
-  .btn:hover .tooltip,
-  .btn:focus-visible .tooltip {
-    transform: translate(-50%, 0);
-  }
 }
 
 /* ——— Panels / views ——— */
@@ -959,6 +1158,11 @@ html:not([data-theme]) .btn .icon-system {
   color: var(--ink-soft);
 }
 
+.empty-view .tile-list {
+  width: min(100%, 28rem);
+  text-align: left;
+}
+
 /* ——— Styleguide / pages de test ——— */
 .styleguide {
   max-width: 52rem;
@@ -974,42 +1178,6 @@ html:not([data-theme]) .btn .icon-system {
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--ink-soft);
-}
-
-.styleguide-kicker a {
-  color: inherit;
-  text-decoration: none;
-}
-
-.styleguide-kicker a:hover {
-  color: var(--ink);
-  text-decoration: underline;
-}
-
-.styleguide-nav {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 0.5rem;
-}
-
-.styleguide-nav-link {
-  display: grid;
-  gap: 0.2rem;
-  padding: 0.85rem 1rem;
-  border: 1px solid var(--line);
-  color: var(--ink);
-  text-decoration: none;
-}
-
-.styleguide-nav-link:hover {
-  border-color: var(--ink);
-}
-
-.styleguide-nav-link span {
-  font-size: 0.85rem;
   color: var(--ink-soft);
 }
 
@@ -1041,16 +1209,18 @@ html:not([data-theme]) .btn .icon-system {
   font-size: 0.9rem;
 }
 
-.styleguide-back a {
-  color: var(--ink);
-}
-
 .modal-body .styleguide {
   max-width: none;
 }
 
 .modal-body .styleguide-kicker {
   margin: 0 0 1.25rem;
+}
+
+.styleguide-intro {
+  margin: 0 0 1.75rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
 }
 
 .styleguide-notes {
@@ -2257,12 +2427,6 @@ body.modal-open {
   background: var(--bg);
 }
 
-.settings-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
 .settings-color-field {
   margin-top: 1rem;
   margin-bottom: 0;
@@ -2324,16 +2488,6 @@ body.modal-open {
 
 .md-content li + li {
   margin-top: 0.25rem;
-}
-
-.md-content a {
-  color: var(--brick-red);
-  text-decoration: underline;
-  text-underline-offset: 0.15em;
-}
-
-.md-content a:hover {
-  text-decoration-thickness: 2px;
 }
 
 .md-content strong {
@@ -2733,7 +2887,7 @@ textarea {
   justify-content: flex-end;
   gap: 1mm;
   flex-shrink: 0;
-  margin: 0;
+  margin: 0 0 0 auto;
   padding: 0;
   line-height: 1;
 }

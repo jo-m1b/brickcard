@@ -11,6 +11,7 @@ import {
 } from "../storage.js";
 import { DEFAULT_THEME_COLOR } from "../themes-data.js";
 import { resolveCardAccent } from "../card-design.js";
+import { confirmDialog } from "../confirm-dialog.js";
 
 /**
  * Modale de gestion des thèmes LEGO.
@@ -39,14 +40,6 @@ export async function renderThemesModal(host, opts) {
   /** @type {((e: KeyboardEvent) => void)|null} */
   let onThemeEscape = null;
 
-  /** @param {KeyboardEvent} e */
-  const onConfirmKey = (e) => {
-    if (e.key !== "Escape" || !isConfirmOpen()) return;
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    closeConfirm();
-  };
-
   /** @type {ReturnType<typeof bindFormColor>|null} */
   let themeColorField = null;
 
@@ -57,55 +50,6 @@ export async function renderThemesModal(host, opts) {
   function isEditorOpen() {
     const el = q("#theme-editor-backdrop");
     return Boolean(el && !el.hidden);
-  }
-
-  function isConfirmOpen() {
-    const el = q("#theme-confirm-backdrop");
-    return Boolean(el && !el.hidden);
-  }
-
-  /** @type {null | { kind: "delete"|"reset", id: string }} */
-  let pendingConfirm = null;
-
-  function closeConfirm() {
-    const el = q("#theme-confirm-backdrop");
-    if (el) el.hidden = true;
-    pendingConfirm = null;
-    const ok = q("#theme-confirm-ok");
-    if (ok) ok.disabled = false;
-    const cancel = q("#theme-confirm-cancel");
-    if (cancel) cancel.disabled = false;
-  }
-
-  /**
-   * @param {{
-   *   kind: "delete"|"reset",
-   *   id: string,
-   *   title: string,
-   *   subtitle: string,
-   *   desc: string,
-   *   okLabel: string,
-   * }} spec
-   */
-  function openConfirm(spec) {
-    closeEditor();
-    pendingConfirm = { kind: spec.kind, id: spec.id };
-    const title = q("#theme-confirm-title");
-    const subtitle = q("#theme-confirm-subtitle");
-    const desc = q("#theme-confirm-desc");
-    const ok = q("#theme-confirm-ok");
-    const el = q("#theme-confirm-backdrop");
-    if (title) title.textContent = spec.title;
-    if (subtitle) subtitle.textContent = spec.subtitle;
-    if (desc) desc.textContent = spec.desc;
-    if (ok) {
-      ok.textContent = spec.okLabel;
-      ok.disabled = false;
-      ok.classList.toggle("danger", spec.kind === "delete");
-      ok.classList.toggle("primary", spec.kind === "reset");
-    }
-    if (el) el.hidden = false;
-    queueMicrotask(() => q("#theme-confirm-cancel")?.focus());
   }
 
   function closeEditor() {
@@ -154,7 +98,6 @@ export async function renderThemesModal(host, opts) {
 
     if (onThemeEscape) window.removeEventListener("keydown", onThemeEscape);
     onThemeEscape = (e) => {
-      if (isConfirmOpen()) return;
       if (e.key === "Escape") {
         e.preventDefault();
         e.stopPropagation();
@@ -335,28 +278,47 @@ export async function renderThemesModal(host, opts) {
         const id = reset.getAttribute("data-reset");
         const theme = themes.find((x) => x.id === id);
         if (!theme) return;
-        openConfirm({
-          kind: "reset",
-          id,
+        closeEditor();
+        const ok = await confirmDialog(host, {
           title: "Réinitialiser ?",
           subtitle: theme.themeName,
-          desc: "Les valeurs d’origine du préréglage remplaceront tes modifications. Continuer ?",
+          message:
+            "Les valeurs d’origine du préréglage remplaceront tes modifications. Continuer ?",
           okLabel: "Réinitialiser",
         });
+        if (!ok) return;
+        try {
+          await resetThemeToPreset(id);
+          toast("Thème réinitialisé");
+          themes = await loadThemes();
+          paintGrid();
+        } catch (err) {
+          toast(err.message || "Erreur", "error");
+        }
         return;
       }
       if (del) {
         const id = del.getAttribute("data-delete");
         const theme = themes.find((x) => x.id === id);
         if (!theme) return;
-        openConfirm({
-          kind: "delete",
-          id,
+        closeEditor();
+        const ok = await confirmDialog(host, {
           title: "Supprimer ?",
           subtitle: theme.themeName,
-          desc: "Attention, la suppression est définitive et ne pourra pas être annulée ! Souhaitez-vous continuer ?",
+          message:
+            "Attention, la suppression est définitive et ne pourra pas être annulée ! Souhaitez-vous continuer ?",
           okLabel: "Supprimer",
+          danger: true,
         });
+        if (!ok) return;
+        try {
+          await deleteTheme(id);
+          toast("Thème supprimé");
+          themes = await loadThemes();
+          paintGrid();
+        } catch (err) {
+          toast(err.message || "Erreur", "error");
+        }
       }
     };
   }
@@ -438,30 +400,6 @@ export async function renderThemesModal(host, opts) {
         </div>
       </div>
     </div>
-
-    <div class="modal-backdrop" id="theme-confirm-backdrop" hidden>
-      <div class="modal modal--sm" role="dialog" aria-modal="true" aria-labelledby="theme-confirm-title" aria-describedby="theme-confirm-desc">
-        <div class="modal-header">
-          <div>
-            <h1 class="view-title" id="theme-confirm-title">Supprimer&nbsp;?</h1>
-            <p class="view-desc" id="theme-confirm-subtitle"></p>
-          </div>
-          <button type="button" class="btn ghost icon-only modal-close" id="theme-confirm-close">
-            ${ICON_CLOSE}
-            <span class="visually-hidden">Fermer</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <p id="theme-confirm-desc" class="modal-confirm-msg"></p>
-        </div>
-        <div class="modal-footer">
-          <div class="modal-footer-end">
-            <button type="button" class="btn secondary" id="theme-confirm-cancel">Annuler</button>
-            <button type="button" class="btn danger" id="theme-confirm-ok">Supprimer</button>
-          </div>
-        </div>
-      </div>
-    </div>
   `;
 
   const backdrop = q("#themes-modal-backdrop");
@@ -477,7 +415,6 @@ export async function renderThemesModal(host, opts) {
   /** @param {KeyboardEvent} e */
   const onKey = (e) => {
     if (e.key !== "Escape") return;
-    if (isConfirmOpen()) return;
     if (isEditorOpen()) return; /* géré par onThemeEscape */
     e.preventDefault();
     close();
@@ -486,54 +423,15 @@ export async function renderThemesModal(host, opts) {
   paintGrid();
   bindList();
   bindEditor();
-  bindConfirm();
 
   backdrop?.addEventListener("click", onBackdropClick);
   btnClose?.addEventListener("click", close);
   document.addEventListener("keydown", onKey);
 
-  function bindConfirm() {
-    const el = q("#theme-confirm-backdrop");
-    const cancel = q("#theme-confirm-cancel");
-    const closeBtn = q("#theme-confirm-close");
-    const ok = q("#theme-confirm-ok");
-
-    el?.addEventListener("click", (e) => {
-      if (e.target === el) closeConfirm();
-    });
-    cancel?.addEventListener("click", closeConfirm);
-    closeBtn?.addEventListener("click", closeConfirm);
-    document.addEventListener("keydown", onConfirmKey, true);
-
-    ok?.addEventListener("click", async () => {
-      if (!pendingConfirm) return;
-      ok.disabled = true;
-      if (cancel) cancel.disabled = true;
-      const { kind, id } = pendingConfirm;
-      try {
-        if (kind === "reset") {
-          await resetThemeToPreset(id);
-          toast("Thème réinitialisé");
-        } else {
-          await deleteTheme(id);
-          toast("Thème supprimé");
-        }
-        themes = await loadThemes();
-        closeConfirm();
-        paintGrid();
-      } catch (err) {
-        toast(err.message || "Erreur", "error");
-        closeConfirm();
-      }
-    });
-  }
-
   function cleanup() {
     themeColorField?.destroy();
     themeColorField = null;
-    closeConfirm();
     closeEditor();
-    document.removeEventListener("keydown", onConfirmKey, true);
     document.removeEventListener("keydown", onKey);
     backdrop?.removeEventListener("click", onBackdropClick);
     btnClose?.removeEventListener("click", close);

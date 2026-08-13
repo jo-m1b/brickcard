@@ -20,6 +20,7 @@ Tout le code applicatif est dans **`src/`**.
 | `src/data/themes-presets.json` | Liste des thèmes LEGO prédéfinis (éditable sans toucher au JS) |
 | `src/data/page-{{slug}}.md` | Pages Markdown en modale (`#/page/:slug`, ex. `page-about.md`) ; `# Titre` ou `# Titre \| Sous-titre` |
 | `src/img/logo-brickcard-generator.svg` | Logo app (brick outline — crédit Joko Sutrisno / Vecteezy) |
+| `src/img/favicon-brickcard-generator.svg` | Favicon (même brique ; clair `#141414` / sombre blanc via `prefers-color-scheme`) |
 | `src/css/styles.css` | Styles écran + `@media print` |
 | `src/js/app.js` | Hash routing (vues + historique), import/export |
 | `src/js/markdown.js` | Parser Markdown léger + `loadMarkdownPage(slug)` |
@@ -32,6 +33,9 @@ Tout le code applicatif est dans **`src/`**.
 | `src/js/print.js` | Impression A4 3×3 + dos miroir |
 | `src/js/version.js` | Version SemVer (`APP_VERSION`) — source unique |
 | `src/js/icons.js` | Icônes UI ([Remix Icon](https://remixicon.com/)) — paths + helpers |
+| `src/js/link.js` | Markup liens (`a.link` / externe / icône) |
+| `src/js/tile.js` | Markup tuiles (`ul.tile-list` / `a.tile`) |
+| `src/js/confirm-dialog.js` | Dialogues `modal--sm` (`openConfirmDialog` / `confirmDialog` / `alertDialog`) — pas de `alert()` / `confirm()` / `prompt()` |
 | `src/js/form-color.js` | Champ couleur (`form-color` / pastille / clear) |
 | `src/js/form-select.js` | Surcouche select (`form-select` / liste custom) |
 | `src/js/views/list.js` | Grille d’aperçus + recherche (barre topbar) |
@@ -113,7 +117,7 @@ Accent d’une Brickcard (`resolveCardAccent`) :
 
 ## Vues
 
-Hash = source de vérité (Précédent / Suivant). Croix / Échap / backdrop d’un overlay → `#/` (`replace`). Liens internes `#/developer/…` → `replace` (une entrée). Hash inconnu → `#/`. Pas d’alias.
+Hash = source de vérité (Précédent / Suivant). Croix / Échap / backdrop d’un overlay → `#/` (`replace`). Hash inconnu → `#/`. Pas d’alias.
 
 Overlays de route (une à la fois, **swap** sans démonter la liste) : `#/settings`, `#/themes`, `#/page/:slug`, `#/new-card`, `#/edit-card/:id`, `#/developer/…`. Dialogues enfants (éditeur de thème, confirmations) : pas d’URL, second backdrop par-dessus la vue courante.
 
@@ -122,7 +126,7 @@ Overlays de route (une à la fois, **swap** sans démonter la liste) : `#/settin
 - `#/themes` gestion des thèmes (modale)
 - `#/settings` paramètres (modale)
 - `#/page/:slug` page Markdown (`data/page-{{slug}}.md`, ex. `#/page/about`)
-- `#/developer` `#/developer/typography` `#/developer/buttons` `#/developer/fields` `#/developer/selects` `#/developer/sliders` `#/developer/colors` `#/developer/search` `#/developer/modals` — espace développeur / styleguide en **modale** (extensible : `#/developer/…`) ; lien Paramètres en local uniquement
+- `#/developer` `#/developer/typography` `#/developer/links` `#/developer/tiles` `#/developer/buttons` `#/developer/fields` `#/developer/selects` `#/developer/sliders` `#/developer/colors` `#/developer/search` `#/developer/modals` — espace développeur / styleguide en **modale** (extensible : `#/developer/…`) ; lien Paramètres en local uniquement
 
 ## Boutons (design system)
 
@@ -142,6 +146,49 @@ Badge : compteur en overlay (coin haut-droit) ; le bouton reste dans son type (y
 Hover et `:focus-visible` partagent le même style (pas d’outline dédié sur les boutons).
 Ghost : texte = secondary ; hover/focus = primary au repos (fond accent / texte contraste).
 Ne pas créer de classes one-shot — réutiliser ce vocabulaire. Galerie : `#/developer/buttons`.
+
+## Liens (design system)
+
+Vocabulaire UI → classes CSS :
+
+| Axe | Options |
+|-----|---------|
+| Classe | `link` |
+| Contenu | texte seul · texte + icône (`svg` + `span`) |
+| Disposition (texte+icône) | icône à gauche (défaut) · `icon-right` |
+| Taille | (défaut) · `sm` |
+| État | (actif) · `disabled` / `aria-disabled` |
+| `href` | adresse |
+| `target` | `_blank` par défaut si externe (`https://`) |
+
+Couleur = texte (`--ink` ; header inversé : `inherit`). Toujours souligné. `:visited` = même couleur (pas de violet navigateur).
+Disabled : plus d’underline, couleur `--muted`, `tabindex="-1"`, non cliquable.
+Externe : `rel="noopener noreferrer"` + icône Remix `ri-external-link-fill` à droite par défaut.
+Helper : `linkMarkup()` dans `link.js`. Markdown (`[texte](url)`) émet déjà `class="link"`.
+Dans une modale, tout lien de contenu passe par `linkMarkup()` / `a.link` (pas d’`<a>` nu).
+Ne pas styler `.topbar-brand` ni `.tile` avec `link`. Galerie : `#/developer/links`.
+
+## Tuiles (design system)
+
+Vocabulaire UI → classes CSS :
+
+| Axe | Options |
+|-----|---------|
+| Liste | `ul.tile-list` |
+| Tuile | `a.tile` (lien) · `button.tile` (action) |
+| Titre | `strong.tile-title` (optionnel) |
+| Description | `span.tile-desc` (optionnel) |
+| Icône | Remix à gauche, centrée verticalement (optionnel) |
+| Variante | (défaut) · `danger` |
+| État | (actif) · `disabled` / `aria-disabled` |
+| `href` | adresse (liens) |
+| `tag` | `a` (défaut) · `button` |
+
+Encadrement 1&nbsp;px (`--line`) ; trait bas inset 2&nbsp;px `var(--ink-soft)` (comme les champs, pas de biseau). Hover et `:focus-visible` : inversion (fond `--ink` / texte `--panel`), trait bas masqué, pas d’outline dédié.
+`danger` : texte et trait `--danger-line` ; hover / focus fond `--danger-bg`, cadre et trait bas `--danger-line` (comme `btn danger`).
+Disabled : couleur `--muted`, `tabindex="-1"`, non cliquable.
+Titre = apparence (`strong`), pas un heading.
+Helper : `tileMarkup()` / `tileListMarkup()` dans `tile.js`. Appliqué : index espace développeur, paramètres (collection / styleguide), état vide. Galerie : `#/developer/tiles`.
 
 ## Champs de saisie (design system)
 
@@ -205,7 +252,7 @@ Classe = apparence. Tag = plan du document. **Un rang 1 par vue** (page ou dialo
 |-------------|--------|--------|
 | Titre de vue / dialog | `view-title` | 1.7rem (1.35rem dans `.modal-header`) · 700 |
 | Section | `section-title` | 1.25rem · 700 |
-| Description | `view-desc` | 0.95rem · ink-soft — **pas** un heading |
+| Description | `view-desc` | 0.95rem · ink-soft — **pas** un heading ; **court** (une ligne). Détail → paragraphe dans le corps |
 
 | Contexte | Titre | Suite |
 |----------|-------|-------|
@@ -223,7 +270,7 @@ Coquille&nbsp;: `modal-backdrop` + `modal` (`role="dialog"` / `aria-modal`). Bor
 
 Tailles (3)&nbsp;: `modal--sm` (~640) · `modal--md` (~896, **défaut**) · `modal--lg` (~1152). Toujours bornées au **viewport** (`100vw` / `100dvh`). Responsive ≤&nbsp;640px&nbsp;: **plein écran**, overlay masqué.
 
-Appliqué&nbsp;: paramètres / page MD (`md`) · thèmes + éditeur carte + espace développeur (`lg`) · éditeur de thème / confirmations (`sm`). Galerie&nbsp;: `#/developer/modals`. Dialogues enfants (thème, supprimer carte) : second `modal-backdrop` dans le même host, sans route.
+Appliqué&nbsp;: paramètres / page MD (`md`) · thèmes + éditeur carte + espace développeur (`lg`) · éditeur de thème / confirmations (`sm`). Galerie&nbsp;: `#/developer/modals`. Dialogues enfants (thème, supprimer carte, reset local, import) : second `modal-backdrop` dans le même host, sans route — helper `confirmDialog()` / `openConfirmDialog()` (`confirm-dialog.js`). Pas de `alert()` / `confirm()` / `prompt()` natifs.
 
 ## Impression
 
@@ -236,4 +283,5 @@ Appliqué&nbsp;: paramètres / page MD (`md`) · thèmes + éditeur carte + espa
 - UI française, design minimaliste (pas d’arrondis/ombres UI).
 - **Typo** : Open Sans pour l’UI (`--font-ui`) ; Inter pour le texte des cartes (`--font-card`). Titres : classe = look, tag = plan (voir **Titres**).
 - **Icônes** : toujours partir de [Remix Icon](https://remixicon.com/) (style *fill* de préférence) avant d’inventer un SVG. Réutiliser / étendre `src/js/icons.js` ; en HTML, commenter le nom `ri-*`.
+- Pas de `alert()` / `confirm()` / `prompt()` natifs : `confirmDialog()` / `openConfirmDialog()` / `alertDialog()` (`confirm-dialog.js`).
 - Pas de dépendances npm sauf demande explicite.

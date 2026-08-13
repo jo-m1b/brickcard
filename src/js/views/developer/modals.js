@@ -1,4 +1,5 @@
 import { ICON_CLOSE } from "../../icons.js";
+import { linkMarkup } from "../../link.js";
 
 /**
  * @typedef {"sm"|"md"|"lg"} ModalSize
@@ -19,16 +20,18 @@ export function renderDeveloperModals(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker"><a href="#/developer">Styleguide</a> / Modales</p>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Modales</p>
         <h1 class="view-title">Modales</h1>
-        <p class="view-desc">
-          Banc d’essai pour uniformiser les dialogues.
-          <strong>3 tailles</strong> (<code>modal--sm</code> / <code>modal--md</code> / <code>modal--lg</code>).
-          Sous <code>640px</code> de largeur&nbsp;: plein écran (plus d’overlay visible).
-          Largeur / hauteur toujours plafonnées au <strong>viewport</strong> (<code>100vw</code> / <code>100dvh</code>), pas au scroll de la page.
-          Les démos s’empilent au-dessus de cette galerie (sans la remplacer).
-        </p>
+        <p class="view-desc">Tailles, alignement, header et pied.</p>
       </header>
+
+      <p class="styleguide-intro">
+        Banc d’essai pour uniformiser les dialogues.
+        <strong>3 tailles</strong> (<code>modal--sm</code> / <code>modal--md</code> / <code>modal--lg</code>).
+        Sous <code>640px</code> de largeur&nbsp;: plein écran (plus d’overlay visible).
+        Largeur / hauteur toujours plafonnées au <strong>viewport</strong> (<code>100vw</code> / <code>100dvh</code>), pas au scroll de la page.
+        Les démos s’empilent au-dessus de cette galerie (sans la remplacer).
+      </p>
 
       <div class="styleguide-section">
         <h2 class="styleguide-section-title">Vocabulaire</h2>
@@ -150,7 +153,7 @@ export function renderDeveloperModals(host) {
       </div>
 
       <p class="styleguide-back">
-        <a href="#/developer">← Styleguide</a>
+        ${linkMarkup("← Styleguide", { href: "#/developer" })}
       </p>
     </section>
   `;

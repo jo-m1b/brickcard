@@ -1,3 +1,5 @@
+import { linkMarkup } from "../../link.js";
+
 /**
  * Galerie typographie du design system (2 polices max).
  * @param {HTMLElement} host
@@ -7,14 +9,17 @@ export function renderDeveloperTypography(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker"><a href="#/developer">Styleguide</a> / Typographie</p>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Typographie</p>
         <h1 class="view-title">Typographie</h1>
         <p class="view-desc">
-          Deux polices seulement&nbsp;: <strong>Open Sans</strong> pour toute l’UI,
-          <strong>Inter</strong> pour le texte des cartes.
-          Classe = apparence&nbsp;; tag <code>h1</code>–<code>h3</code> = plan du document.
+          Open Sans pour l’UI, Inter pour les cartes.
         </p>
       </header>
+
+      <p class="styleguide-intro">
+        Classe = apparence&nbsp;; tag <code>h1</code>–<code>h3</code> = plan du document.
+        Un rang 1 par vue, ne pas sauter de rang.
+      </p>
 
       <div class="styleguide-section">
         <h2 class="styleguide-section-title">Polices</h2>
@@ -191,7 +196,7 @@ export function renderDeveloperTypography(host) {
               <h2>Fonctionnalités</h2>
               <p>
                 Paragraphe de contenu. Texte avec <strong>gras</strong>, <em>italique</em>,
-                un <a href="#/developer">lien</a> et du <code>code inline</code>.
+                un ${linkMarkup("lien", { href: "#/developer" })} et du <code>code inline</code>.
               </p>
               <ul>
                 <li>Liste à puces — premier élément</li>
@@ -249,7 +254,7 @@ const APP_ID = "brickcard-generator";</code></pre>
           <p style="margin: 0 0 0.75rem">
             Paragraphe UI en <strong>Open Sans</strong> (héritée du <code>body</code>).
             Emphase <em>italique</em>, <strong>gras</strong>,
-            <a href="#/developer">lien</a> et <code>code inline</code> (même police, graisse 600).
+            ${linkMarkup("lien", { href: "#/developer" })} et <code>code inline</code> (même police, graisse 600).
           </p>
         </div>
       </div>
@@ -267,6 +272,7 @@ const APP_ID = "brickcard-generator";</code></pre>
               <tr><td><code>view-desc</code></td><td>0.95rem · ink-soft</td></tr>
               <tr><td><code>section-title</code></td><td>1.25rem · 700</td></tr>
               <tr><td><code>styleguide-section-title</code></td><td>1rem · 700 (galerie)</td></tr>
+              <tr><td><code>a.link</code></td><td>héritée · underline · voir galerie Liens</td></tr>
               <tr><td><code>form-label</code></td><td>0.82rem · 600</td></tr>
               <tr><td><code>form-hint</code> / <code>form-error</code></td><td>0.8rem / 0.82rem</td></tr>
               <tr><td><code>brand-name</code></td><td>1.15rem · 700</td></tr>
@@ -278,7 +284,7 @@ const APP_ID = "brickcard-generator";</code></pre>
       </div>
 
       <p class="styleguide-back">
-        <a href="#/developer">← Styleguide</a>
+        ${linkMarkup("← Styleguide", { href: "#/developer" })}
       </p>
     </section>
   `;

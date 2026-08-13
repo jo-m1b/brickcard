@@ -5,6 +5,7 @@ import {
   ICON_PRINTER,
   ICON_SETTINGS,
 } from "../../icons.js";
+import { linkMarkup } from "../../link.js";
 
 /**
  * @param {"primary"|"secondary"|"ghost"|"danger"} variant
@@ -55,17 +56,18 @@ export function renderDeveloperButtons(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker"><a href="#/developer">Styleguide</a> / Boutons</p>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Boutons</p>
         <h1 class="view-title">Boutons</h1>
-        <p class="view-desc">
-          4 variantes × 3 contenus (texte, texte+icône, icône seule).
-          Icône à droite : <code>icon-right</code>.
-          Compact : <code>sm</code>.
-          Badge : <code>btn-badge</code>.
-          Icônes : <a href="https://remixicon.com/" target="_blank" rel="noopener">Remix Icon</a>.
-          Hover et focus clavier partagent le même style.
-        </p>
+        <p class="view-desc">Quatre variantes, texte et icônes.</p>
       </header>
+
+      <p class="styleguide-intro">
+        Icône à droite&nbsp;: <code>icon-right</code>.
+        Compact&nbsp;: <code>sm</code>.
+        Badge&nbsp;: <code>btn-badge</code>.
+        Icônes&nbsp;: ${linkMarkup("Remix Icon", { href: "https://remixicon.com/" })}.
+        Hover et focus clavier partagent le même style.
+      </p>
 
       <div class="styleguide-section">
         <h2 class="styleguide-section-title">Texte seul</h2>
@@ -179,9 +181,9 @@ export function renderDeveloperButtons(host) {
       </div>
 
       <p class="styleguide-back">
-        <a href="#/developer">← Index styleguide</a>
+        ${linkMarkup("← Index styleguide", { href: "#/developer" })}
         ·
-        <a href="#/">App</a>
+        ${linkMarkup("App", { href: "#/" })}
       </p>
     </section>
   `;

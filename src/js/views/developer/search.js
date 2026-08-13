@@ -4,6 +4,7 @@ import {
   ICON_SORT_ASC,
   ICON_SORT_DESC,
 } from "../../icons.js";
+import { linkMarkup } from "../../link.js";
 
 /**
  * @param {string} svg
@@ -21,22 +22,24 @@ export function renderDeveloperSearch(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker"><a href="#/developer">Styleguide</a> / Recherche</p>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Recherche</p>
         <h1 class="view-title">Barre de recherche</h1>
-        <p class="view-desc">
-          Bloc <code>search-bar</code>&nbsp;: <code>input.form-control</code>
-          (<code>type="search"</code>) + trail optionnel (<code>search-count</code>,
-          menu <code>search-sort</code>).
-          Icône&nbsp;: <code>form-control-icon</code> <strong>optionnelle</strong>
-          (défaut recherche&nbsp;: <code>ri-search-line</code>).
-          Même look qu’un champ texte (fond <code>--form-control-bg</code>,
-          trait bas inset, focus cadre <code>ink</code>).
-          Slot topbar&nbsp;: <code>topbar-search</code> centre le bloc.
-          Compteur + tri&nbsp;: visibles seulement s’il y a <strong>au moins 2</strong>
-          éléments. Libellé toujours «&nbsp;cartes&nbsp;».
-          Appliqué : liste des cartes (topbar).
-        </p>
+        <p class="view-desc">Barre de recherche de la liste.</p>
       </header>
+
+      <p class="styleguide-intro">
+        Bloc <code>search-bar</code>&nbsp;: <code>input.form-control</code>
+        (<code>type="search"</code>) + trail optionnel (<code>search-count</code>,
+        menu <code>search-sort</code>).
+        Icône&nbsp;: <code>form-control-icon</code> <strong>optionnelle</strong>
+        (défaut recherche&nbsp;: <code>ri-search-line</code>).
+        Même look qu’un champ texte (fond <code>--form-control-bg</code>,
+        trait bas inset, focus cadre <code>ink</code>).
+        Slot topbar&nbsp;: <code>topbar-search</code> centre le bloc.
+        Compteur + tri&nbsp;: visibles seulement s’il y a <strong>au moins 2</strong>
+        éléments. Libellé toujours «&nbsp;cartes&nbsp;».
+        Appliqué : liste des cartes (topbar).
+      </p>
 
       <div class="styleguide-section">
         <h2 class="styleguide-section-title">Champ seul</h2>
@@ -162,7 +165,7 @@ export function renderDeveloperSearch(host) {
       </div>
 
       <p class="styleguide-back">
-        <a href="#/developer">← Styleguide</a>
+        ${linkMarkup("← Styleguide", { href: "#/developer" })}
       </p>
     </section>
   `;

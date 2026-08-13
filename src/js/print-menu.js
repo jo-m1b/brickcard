@@ -42,14 +42,21 @@ export function setPrintMenuVisible(visible) {
 
 /**
  * Met à jour badge, résumé et boutons selon la sélection et le nombre de cartes.
- * @param {{ cardCount?: number }} [state]
+ * @param {{
+ *   cardCount?: number,
+ *   addableCount?: number,
+ *   searching?: boolean,
+ *   missing?: boolean,
+ * }} [state]
  */
 export function syncPrintMenu(state = {}) {
   const root = document.getElementById("print-menu");
   const btn = document.getElementById("btn-print-menu");
   const countEl = document.getElementById("print-menu-count");
-  const summary = document.getElementById("print-menu-summary");
+  const title = document.getElementById("print-menu-title");
+  const desc = document.getElementById("print-menu-desc");
   const btnSelectAll = document.getElementById("btn-print-select-all");
+  const selectAllLabel = document.getElementById("print-select-all-label");
   const btnSelectNone = document.getElementById("btn-print-select-none");
   const btnRun = document.getElementById("btn-print-run");
   if (!root || !btn) return;
@@ -63,6 +70,24 @@ export function syncPrintMenu(state = {}) {
   if (state.cardCount != null) {
     root.dataset.cardCount = String(cardCount);
   }
+  if (state.addableCount != null) {
+    root.dataset.addableCount = String(state.addableCount);
+  }
+  if (state.searching != null) {
+    root.dataset.searching = state.searching ? "1" : "0";
+  }
+  if (state.missing != null) {
+    root.dataset.missing = state.missing ? "1" : "0";
+  }
+
+  const addableCount =
+    state.addableCount != null
+      ? state.addableCount
+      : Number(root.dataset.addableCount || 0);
+  const searching =
+    state.searching != null ? state.searching : root.dataset.searching === "1";
+  const missing =
+    state.missing != null ? state.missing : root.dataset.missing === "1";
 
   btn.classList.toggle("is-empty", count === 0);
   btn.setAttribute(
@@ -81,17 +106,45 @@ export function syncPrintMenu(state = {}) {
     }
   }
 
-  if (summary) {
+  if (title) {
     if (!count) {
-      summary.textContent = "Aucune carte à imprimer";
+      title.textContent = "Aucune carte à imprimer !";
+    } else {
+      title.textContent = `${count} carte${count > 1 ? "s" : ""} à imprimer`;
+    }
+  }
+
+  if (desc) {
+    if (!count) {
+      desc.textContent =
+        "Sélectionnez les cartes à imprimer parmi celles de la collection";
     } else {
       const pages = Math.ceil(count / CARDS_PER_PAGE);
-      summary.textContent = `${count} carte${count > 1 ? "s" : ""} · ${pages} feuille${pages > 1 ? "s" : ""} A4`;
+      desc.textContent = `${pages} feuille${pages > 1 ? "s" : ""} A4 recto-verso`;
     }
   }
 
   if (btnSelectAll) {
-    btnSelectAll.hidden = cardCount === 0;
+    const showAdd = addableCount >= 2 || (addableCount === 1 && missing);
+    btnSelectAll.hidden = !showAdd;
+    if (showAdd && selectAllLabel) {
+      const oneMissing = missing && addableCount === 1;
+      if (searching) {
+        if (oneMissing) {
+          selectAllLabel.textContent = "Ajouter la carte manquante de la recherche";
+        } else if (missing) {
+          selectAllLabel.textContent = `Ajouter les ${addableCount} cartes manquantes de la recherche`;
+        } else {
+          selectAllLabel.textContent = `Ajouter les ${addableCount} cartes de la recherche`;
+        }
+      } else if (oneMissing) {
+        selectAllLabel.textContent = "Ajouter la carte manquante";
+      } else if (missing) {
+        selectAllLabel.textContent = `Ajouter les ${addableCount} cartes manquantes`;
+      } else {
+        selectAllLabel.textContent = `Ajouter les ${addableCount} cartes`;
+      }
+    }
   }
   if (btnSelectNone) {
     btnSelectNone.hidden = count === 0;

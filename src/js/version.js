@@ -1,5 +1,5 @@
 /** Version applicative — SemVer (https://semver.org/) */
-export const APP_VERSION = "0.5.27";
+export const APP_VERSION = "0.5.55";
 
 /** Identifiant technique (exports JSON, etc.) */
 export const APP_ID = "brickcard-generator";

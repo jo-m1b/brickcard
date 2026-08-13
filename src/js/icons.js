@@ -1,12 +1,13 @@
 /**
- * Icônes UI — [Remix Icon](https://remixicon.com/) (fill), viewBox 24×24.
+ * Icônes UI — [Remix Icon](https://remixicon.com/) (fill), toujours carrées (24×24).
  * Préférer ces glyphes (ou un autre Remix Icon) avant d’inventer un SVG.
+ * Ne pas omettre `width`/`height` : un SVG sans taille intrinsèque vaut 300×150.
  *
  * @param {string} d Attribut `d` du path Remix
  * @returns {string} Markup SVG inline
  */
 export function remixIcon(d) {
-  return `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><path d="${d}"/></svg>`;
+  return `<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><path d="${d}"/></svg>`;
 }
 
 /** Path `d` seuls (HTML inline, commentaires `ri-*`) */
@@ -59,6 +60,28 @@ export const RI = {
   sortAsc: "m19 3l4 5h-3v12h-2V8h-3zm-5 15v2H3v-2zm0-7v2H3v-2zm-2-7v2H3V4z",
   /** ri-sort-desc */
   sortDesc: "M20 4v12h3l-4 5l-4-5h3V4zm-8 14v2H3v-2zm2-7v2H3v-2zm0-7v2H3V4z",
+  /** ri-external-link-fill */
+  externalLink:
+    "M10 6V8H5V19H16V14H18V20C18 20.5523 17.5523 21 17 21H4C3.44772 21 3 20.5523 3 20V7C3 6.44772 3.44772 6 4 6H10ZM21 3V11H19L18.999 6.413L11.2071 14.2071L9.79289 12.7929L17.5849 5H13V3H21Z",
+  /** ri-links-fill */
+  links:
+    "M18.364 15.536L16.95 14.12l1.414-1.414a5 5 0 0 0-7.071-7.071L9.878 7.05 8.464 5.636 9.88 4.222a7 7 0 0 1 9.9 9.9l-1.415 1.414zm-2.828 2.828l-1.415 1.414a7 7 0 0 1-9.9-9.9l1.415-1.414L7.05 9.88l-1.414 1.414a5 5 0 0 0 7.071 7.071l1.414-1.414 1.415 1.414zm-.708-10.607l1.415 1.415-7.071 7.07-1.415-1.414 7.071-7.07z",
+  /** ri-layout-grid-fill */
+  layoutGrid:
+    "M22 13v7a1 1 0 0 1-1 1h-8v-8h9zm-11 0v8H3a1 1 0 0 1-1-1v-7h9zM11 3v8H2V4a1 1 0 0 1 1-1h8zm10 0a1 1 0 0 1 1 1v7h-9V3h8z",
+  /** ri-window-fill */
+  window:
+    "M3 3h18a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm17 8H4v8h16z",
+  /** ri-palette-fill */
+  palette:
+    "M12 2C17.5222 2 22 5.97778 22 10.8889C22 13.9556 19.5111 16.4444 16.4444 16.4444H14.4778C13.5556 16.4444 12.8111 17.1889 12.8111 18.1111C12.8111 18.5333 12.9778 18.9222 13.2333 19.2111C13.5 19.5111 13.6667 19.9 13.6667 20.3333C13.6667 21.2556 12.9 22 12 22C6.47778 22 2 17.5222 2 12C2 6.47778 6.47778 2 12 2ZM10.8111 18.1111C10.8111 16.0843 12.451 14.4444 14.4778 14.4444H16.4444C18.4065 14.4444 20 12.851 20 10.8889C20 7.1392 16.4677 4 12 4C7.58235 4 4 7.58235 4 12C4 16.19 7.2226 19.6285 11.324 19.9718C10.9948 19.4168 10.8111 18.7761 10.8111 18.1111ZM7.5 12C6.67157 12 6 11.3284 6 10.5C6 9.67157 6.67157 9 7.5 9C8.32843 9 9 9.67157 9 10.5C9 11.3284 8.32843 12 7.5 12ZM16.5 12C15.6716 12 15 11.3284 15 10.5C15 9.67157 15.6716 9 16.5 9C17.3284 9 18 9.67157 18 10.5C18 11.3284 17.3284 12 16.5 12ZM12 9C11.1716 9 10.5 8.32843 10.5 7.5C10.5 6.67157 11.1716 6 12 6C12.8284 6 13.5 6.67157 13.5 7.5C13.5 8.32843 12.8284 9 12 9Z",
+  /** ri-equalizer-fill */
+  equalizer:
+    "M6.17 18a3.001 3.001 0 0 1 5.66 0H22v2H11.83a3.001 3.001 0 0 1-5.66 0H2v-2zm6-7a3.001 3.001 0 0 1 5.66 0H22v2h-4.17a3.001 3.001 0 0 1-5.66 0H2v-2zm-6-7a3.001 3.001 0 0 1 5.66 0H22v2H11.83a3.001 3.001 0 0 1-5.66 0H2V4z",
+  /** ri-download-fill */
+  download: "M13 10h5l-6 6-6-6h5V3h2v7zm-9 9h16v2H4v-2z",
+  /** ri-upload-fill */
+  upload: "M11 11H6l6-6 6 6h-5v8h-2v-8zM4 20h16v2H4v-2z",
 };
 
 export const ICON_ADD = remixIcon(RI.add);
@@ -78,6 +101,15 @@ export const ICON_CALENDAR_LINE = remixIcon(RI.calendarLine);
 export const ICON_FILE_TEXT_LINE = remixIcon(RI.fileTextLine);
 export const ICON_SORT_ASC = remixIcon(RI.sortAsc);
 export const ICON_SORT_DESC = remixIcon(RI.sortDesc);
+export const ICON_EXTERNAL_LINK = remixIcon(RI.externalLink);
+export const ICON_LINKS = remixIcon(RI.links);
+export const ICON_LAYOUT_GRID = remixIcon(RI.layoutGrid);
+export const ICON_WINDOW = remixIcon(RI.window);
+export const ICON_PALETTE = remixIcon(RI.palette);
+export const ICON_EQUALIZER = remixIcon(RI.equalizer);
+export const ICON_ARROW_DOWN_S = remixIcon(RI.arrowDownS);
+export const ICON_DOWNLOAD = remixIcon(RI.download);
+export const ICON_UPLOAD = remixIcon(RI.upload);
 
 /**
  * Résout une clé d’icône (`printer`, `arrow-right`, `closeCircle`…) vers le path `d`.

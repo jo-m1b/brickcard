@@ -10,6 +10,8 @@ import { renderThemesModal } from "./views/themes.js";
 import { renderPageModal } from "./views/page.js";
 import { renderSettingsModal } from "./views/settings.js";
 import { renderDeveloperModal } from "./views/developer/modal.js";
+import { tileListMarkup } from "./tile.js";
+import { confirmDialog, openConfirmDialog } from "./confirm-dialog.js";
 import {
   initPrintMenu,
   setPrintMenuVisible,
@@ -132,11 +134,7 @@ function parseRoute() {
 function navigate(hash, opts = {}) {
   const target = normalizeHash(hash);
   const current = normalizeHash(location.hash);
-  const from = parsePath(current.slice(2));
-  const to = parsePath(target.slice(2));
-  const replace =
-    Boolean(opts.replace) ||
-    (from.name === "developer" && to.name === "developer");
+  const replace = Boolean(opts.replace);
 
   if (replace) {
     setHistoryState(target === "#/" ? 0 : routeDepth(), target, true);
@@ -164,6 +162,21 @@ function setNewButtonVisible(visible) {
 /** Barre de recherche : visible sur l’accueil liste (et sous une modale). */
 function setSearchVisible(visible) {
   if (topbarSearch) topbarSearch.hidden = !visible;
+}
+
+/** Accueil liste : curseur dans le champ de recherche (pas sous une modale). */
+function focusHomeSearch() {
+  if (parseRoute().name !== "home") return;
+  if (document.body.classList.contains("modal-open")) return;
+  if (topbarSearch?.hidden) return;
+  const input = document.getElementById("global-search");
+  if (!(input instanceof HTMLInputElement)) return;
+  queueMicrotask(() => {
+    if (parseRoute().name !== "home") return;
+    if (document.body.classList.contains("modal-open")) return;
+    if (topbarSearch?.hidden) return;
+    input.focus({ preventScroll: true });
+  });
 }
 
 /** @param {number} cardCount */
@@ -237,8 +250,6 @@ async function showOverlay(routeInfo) {
       onClose: overlayOnClose("settings"),
       onImport: () => importFile?.click(),
       onExport: exportCards,
-      onThemes: () => navigate("#/themes"),
-      onStyleguide: isLocalDevHost() ? () => navigate("#/developer") : undefined,
       onDevReset: isLocalDevHost() ? handleDevReset : undefined,
     });
     return;
@@ -302,12 +313,16 @@ function renderEmpty() {
       <div class="brick" aria-hidden="true"></div>
       <h1 class="view-title">Aucune carte pour l'instant</h1>
       <p>Crée ta première carte : référence, photo, titre, thème. Tu pourras ensuite les lister et imprimer en lot sur A4 (face + dos).</p>
-      <button type="button" class="btn primary" id="btn-empty-create">Créer ma première carte</button>
+      ${tileListMarkup([
+        {
+          title: "Créer ma première carte",
+          desc: "Référence, photo, titre, thème",
+          href: "#/new-card",
+          icon: "add",
+        },
+      ])}
     </section>
   `;
-  main.querySelector("#btn-empty-create").addEventListener("click", () => {
-    navigate("#/new-card");
-  });
 }
 
 const listOpts = {
@@ -348,6 +363,7 @@ async function route() {
     teardownOverlays({ clearDom: true, dropModalOpen: true });
     shownRoute = routeInfo;
     await ensureUnderlay();
+    focusHomeSearch();
     return;
   }
 
@@ -401,17 +417,31 @@ async function handleImportFile() {
     let mode = "merge";
 
     if (existing > 0) {
-      const merge = confirm(
-        `${existing} carte(s) déjà enregistrée(s).\n\nOK = fusionner avec l’existant (même id mis à jour)\nAnnuler = choisir de remplacer toute la collection`
-      );
-      if (merge) {
-        mode = "merge";
-      } else {
-        const sure = confirm(
-          "Remplacer TOUTES les cartes actuelles par le contenu du fichier ?\nCette action est irréversible (sauf si tu as un export)."
-        );
+      if (!modalRoot) return;
+      const choice = await openConfirmDialog(modalRoot, {
+        title: "Importer ?",
+        subtitle: `${existing} carte(s) déjà enregistrée(s)`,
+        message:
+          "Fusionner met à jour les cartes de même id. Remplacer efface toute la collection actuelle.",
+        actions: [
+          { id: "merge", label: "Fusionner", variant: "primary", slot: "start" },
+          { id: "cancel", label: "Annuler", variant: "secondary", slot: "end" },
+          { id: "replace", label: "Remplacer", variant: "danger", slot: "end" },
+        ],
+      });
+      if (choice == null || choice === "cancel") return;
+      if (choice === "replace") {
+        const sure = await confirmDialog(modalRoot, {
+          title: "Remplacer ?",
+          subtitle: "Toute la collection",
+          message: "Cette action est irréversible (sauf si tu as un export).",
+          okLabel: "Remplacer",
+          danger: true,
+        });
         if (!sure) return;
         mode = "replace";
+      } else {
+        mode = "merge";
       }
     }
 
@@ -428,10 +458,6 @@ async function handleImportFile() {
 }
 
 async function handleDevReset() {
-  const ok = confirm(
-    "Reset local (dev)\n\nCela va supprimer toutes les cartes, thèmes et réglages stockés dans ce navigateur, puis recharger l’app à zéro.\n\nContinuer ?"
-  );
-  if (!ok) return;
   try {
     /* Fermer la modale avant wipe pour éviter un état UI coincé si le reload échoue. */
     if (cleanupSettings) {
@@ -466,6 +492,10 @@ document.addEventListener("click", (e) => {
     t instanceof Element ? t : t instanceof Node ? t.parentElement : null;
   const a = el?.closest("a[href]");
   if (!a || a.target === "_blank" || a.hasAttribute("download")) return;
+  if (a.getAttribute("aria-disabled") === "true" || a.classList.contains("disabled")) {
+    e.preventDefault();
+    return;
+  }
   const href = a.getAttribute("href");
   if (!href || !href.startsWith("#/")) return;
   e.preventDefault();

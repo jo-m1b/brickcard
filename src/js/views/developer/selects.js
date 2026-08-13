@@ -1,4 +1,5 @@
 import { enhanceFormSelects } from "../../form-select.js";
+import { linkMarkup } from "../../link.js";
 
 /**
  * Galerie des listes déroulantes (design system — test uniquement).
@@ -9,24 +10,25 @@ export function renderDeveloperSelects(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker"><a href="#/developer">Styleguide</a> / Listes déroulantes</p>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Listes déroulantes</p>
         <h1 class="view-title">Listes déroulantes</h1>
-        <p class="view-desc">
-          Ordre&nbsp;: label → hint → contrôle → erreur.
-          Markup&nbsp;: <code>select.form-control</code> dans un <code>form-field</code>,
-          amélioré via <code>enhanceFormSelects()</code> (<code>form-select.js</code>)&nbsp;:
-          le select HTML5 reste en place (soumission / secours), le déclencheur
-          est un vrai <code>form-control</code> (trait bas + focus) avec
-          <code>ri-arrow-down-s-line</code> à droite, et la liste ouverte est
-          entièrement stylable. L’option placeholder (<code>value=""</code>,
-          ex. «&nbsp;Choisir&nbsp;») est absente de la liste ; un reset
-          (<code>ri-close-circle-fill</code>, non focusable) permet d’y revenir.
-          Icônes d’option&nbsp;: <code>data-icon-left</code> /
-          <code>data-icon-right</code> (clés Remix de <code>icons.js</code>).
-          Clavier&nbsp;: ↓ ↑ Entrée Échap. Compact&nbsp;: <code>sm</code>.
-          Appliqué : éditeur (choix du thème).
-        </p>
+        <p class="view-desc">Select natif, liste custom.</p>
       </header>
+
+      <p class="styleguide-intro">
+        Markup&nbsp;: <code>select.form-control</code> dans un <code>form-field</code>,
+        amélioré via <code>enhanceFormSelects()</code> (<code>form-select.js</code>)&nbsp;:
+        le select HTML5 reste en place (soumission / secours), le déclencheur
+        est un vrai <code>form-control</code> (trait bas + focus) avec
+        <code>ri-arrow-down-s-line</code> à droite, et la liste ouverte est
+        entièrement stylable. L’option placeholder (<code>value=""</code>,
+        ex. «&nbsp;Choisir&nbsp;») est absente de la liste ; un reset
+        (<code>ri-close-circle-fill</code>, non focusable) permet d’y revenir.
+        Icônes d’option&nbsp;: <code>data-icon-left</code> /
+        <code>data-icon-right</code> (clés Remix de <code>icons.js</code>).
+        Clavier&nbsp;: ↓ ↑ Entrée Échap. Compact&nbsp;: <code>sm</code>.
+        Appliqué : éditeur (choix du thème).
+      </p>
 
       <div class="styleguide-section">
         <h2 class="styleguide-section-title">Défaut</h2>
@@ -172,11 +174,11 @@ export function renderDeveloperSelects(host) {
       </div>
 
       <p class="styleguide-back">
-        <a href="#/developer">← Index styleguide</a>
+        ${linkMarkup("← Index styleguide", { href: "#/developer" })}
         ·
-        <a href="#/developer/fields">Champs</a>
+        ${linkMarkup("Champs", { href: "#/developer/fields" })}
         ·
-        <a href="#/">App</a>
+        ${linkMarkup("App", { href: "#/" })}
       </p>
     </section>
   `;

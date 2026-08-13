@@ -5,6 +5,7 @@
  * Titre de page : `# Titre` ou `# Titre | Sous-titre` (premier ` | ` → `view-desc`).
  */
 
+import { linkMarkup } from "./link.js";
 import { APP_VERSION } from "./version.js";
 
 /**
@@ -33,10 +34,11 @@ function inline(text) {
     return `<img src="${escapeHtml(src)}" alt="${alt}"${t} loading="lazy" />`;
   });
   s = s.replace(/\[([^\]]+)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)/g, (_, label, href, title) => {
-    const t = title ? ` title="${escapeHtml(title)}"` : "";
-    const external = /^https?:\/\//i.test(href);
-    const rel = external ? ' rel="noopener noreferrer" target="_blank"' : "";
-    return `<a href="${escapeHtml(href)}"${t}${rel}>${label}</a>`;
+    return linkMarkup(label, {
+      href,
+      title: title || undefined,
+      html: true,
+    });
   });
 
   const parts = s.split(/(<[^>]+>)/);

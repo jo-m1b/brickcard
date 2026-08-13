@@ -4,6 +4,7 @@ import {
   ICON_HASHTAG,
   ICON_TEXT,
 } from "../../icons.js";
+import { linkMarkup } from "../../link.js";
 
 /**
  * Galerie des champs de saisie (design system — test uniquement).
@@ -15,20 +16,21 @@ export function renderDeveloperFields(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker"><a href="#/developer">Styleguide</a> / Champs</p>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Champs</p>
         <h1 class="view-title">Champs de saisie</h1>
-        <p class="view-desc">
-          Ordre&nbsp;: label → hint → contrôle → erreur.
-          Classes&nbsp;: <code>form-field</code> + <code>form-label</code> /
-          <code>form-hint</code> / <code>form-error</code> + <code>form-control</code>
-          (text, number, textarea).
-          Icône optionnelle&nbsp;: wrapper <code>form-control-wrap</code> +
-          <code>form-control-icon</code> (Remix, décoratif).
-          Listes déroulantes&nbsp;: <a href="#/developer/selects">page dédiée</a>.
-          Compact&nbsp;: <code>sm</code>.
-          Repos&nbsp;: fond + trait bas (inset). Focus&nbsp;: cadre avec 1&nbsp;px d’air (pas de hover).
-        </p>
+        <p class="view-desc">Label, hint, contrôle, erreur.</p>
       </header>
+
+      <p class="styleguide-intro">
+        Classes&nbsp;: <code>form-field</code> + <code>form-label</code> /
+        <code>form-hint</code> / <code>form-error</code> + <code>form-control</code>
+        (text, number, textarea).
+        Icône optionnelle&nbsp;: wrapper <code>form-control-wrap</code> +
+        <code>form-control-icon</code> (Remix, décoratif).
+        Listes déroulantes&nbsp;: ${linkMarkup("page dédiée", { href: "#/developer/selects" })}.
+        Compact&nbsp;: <code>sm</code>.
+        Repos&nbsp;: fond + trait bas (inset). Focus&nbsp;: cadre avec 1&nbsp;px d’air (pas de hover).
+      </p>
 
       <div class="styleguide-section">
         <h2 class="styleguide-section-title">Texte</h2>
@@ -157,11 +159,11 @@ export function renderDeveloperFields(host) {
       </div>
 
       <p class="styleguide-back">
-        <a href="#/developer">← Index styleguide</a>
+        ${linkMarkup("← Index styleguide", { href: "#/developer" })}
         ·
-        <a href="#/developer/selects">Listes déroulantes</a>
+        ${linkMarkup("Listes déroulantes", { href: "#/developer/selects" })}
         ·
-        <a href="#/">App</a>
+        ${linkMarkup("App", { href: "#/" })}
       </p>
     </section>
   `;

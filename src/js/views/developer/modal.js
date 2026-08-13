@@ -1,6 +1,8 @@
 import { ICON_CLOSE } from "../../icons.js";
 import { renderDeveloperIndex } from "./index.js";
 import { renderDeveloperTypography } from "./typography.js";
+import { renderDeveloperLinks } from "./links.js";
+import { renderDeveloperTiles } from "./tiles.js";
 import { renderDeveloperButtons } from "./buttons.js";
 import { renderDeveloperFields } from "./fields.js";
 import { renderDeveloperSelects } from "./selects.js";
@@ -13,6 +15,8 @@ import { renderDeveloperModals } from "./modals.js";
 const PAGES = {
   index: renderDeveloperIndex,
   typography: renderDeveloperTypography,
+  links: renderDeveloperLinks,
+  tiles: renderDeveloperTiles,
   buttons: renderDeveloperButtons,
   fields: renderDeveloperFields,
   selects: renderDeveloperSelects,

@@ -26,6 +26,8 @@ import {
   setListColsMax,
 } from "../list-layout.js";
 import { DEFAULT_THEME_COLOR, isLocalDevHost } from "../themes-data.js";
+import { tileListMarkup } from "../tile.js";
+import { confirmDialog } from "../confirm-dialog.js";
 
 /**
  * Modale de configuration.
@@ -34,14 +36,12 @@ import { DEFAULT_THEME_COLOR, isLocalDevHost } from "../themes-data.js";
  *   onClose: () => void,
  *   onImport: () => void,
  *   onExport: () => void | Promise<void>,
- *   onThemes: () => void,
- *   onStyleguide?: () => void,
  *   onDevReset?: () => void | Promise<void>,
  * }} opts
  * @returns {() => void} cleanup
  */
 export function renderSettingsModal(host, opts) {
-  const { onClose, onImport, onExport, onThemes, onStyleguide, onDevReset } = opts;
+  const { onClose, onImport, onExport, onDevReset } = opts;
   const showDevReset = Boolean(onDevReset) && isLocalDevHost();
   const currentTheme = getTheme();
   const faceBorderMm = getFaceBorderMm();
@@ -152,21 +152,50 @@ export function renderSettingsModal(host, opts) {
 
             <section class="settings-panel">
               <h2 class="section-title">Gestion de la collection</h2>
-              <div class="settings-actions">
-                <button type="button" class="btn primary" id="settings-import">Importer des cartes</button>
-                <button type="button" class="btn primary" id="settings-export">Télécharger une sauvegarde</button>
-                <button type="button" class="btn primary" id="settings-themes">Gérer les thèmes</button>
-              </div>
+              ${tileListMarkup([
+                {
+                  title: "Importer",
+                  desc: "Ajouter, fusionner ou remplacer un lot de cartes à partir d’une sauvegarde JSON",
+                  icon: "upload",
+                  tag: "button",
+                  id: "settings-import",
+                },
+                {
+                  title: "Sauvegarder",
+                  desc: "Télécharger une sauvegarde des cartes et des thèmes au format JSON",
+                  icon: "download",
+                  tag: "button",
+                  id: "settings-export",
+                },
+                {
+                  title: "Gérer les thèmes",
+                  desc: "Créer et personnaliser les thèmes disponibles",
+                  href: "#/themes",
+                  icon: "palette",
+                },
+              ])}
             </section>
 
             ${
               showDevReset
                 ? `<section class="settings-panel">
               <h2 class="section-title">Options pour les développeurs</h2>
-              <div class="settings-actions">
-                <button type="button" class="btn primary" id="settings-styleguide">Espace développeur</button>
-                <button type="button" class="btn danger" id="settings-dev-reset">Réinitialiser les données locales</button>
-              </div>
+              ${tileListMarkup([
+                {
+                  title: "Espace développeur",
+                  desc: "Système de design, exemples et documentation",
+                  href: "#/developer",
+                  icon: "tools",
+                },
+                {
+                  title: "Réinitialiser",
+                  desc: "Supprimer toutes les données locales du navigateur (cartes, thèmes et réglages)",
+                  icon: "close-circle",
+                  tag: "button",
+                  id: "settings-dev-reset",
+                  danger: true,
+                },
+              ])}
             </section>`
                 : ""
             }
@@ -272,17 +301,18 @@ export function renderSettingsModal(host, opts) {
     onExport();
   });
 
-  host.querySelector("#settings-themes")?.addEventListener("click", () => {
-    onThemes();
-  });
-
-  host.querySelector("#settings-styleguide")?.addEventListener("click", () => {
-    onStyleguide?.();
-  });
-
   const resetBtn = host.querySelector("#settings-dev-reset");
   if (resetBtn && onDevReset) {
     resetBtn.addEventListener("click", async () => {
+      const ok = await confirmDialog(host, {
+        title: "Réinitialiser ?",
+        subtitle: "Supprimer toutes les données locales du navigateur",
+        message:
+          "Toutes les cartes, thèmes et réglages de la collection seront supprimés définitivement.",
+        okLabel: "Réinitialiser",
+        danger: true,
+      });
+      if (!ok) return;
       resetBtn.setAttribute("disabled", "true");
       try {
         await onDevReset();

@@ -359,10 +359,16 @@ export async function renderList(main, opts) {
 
   function renderGrid() {
     const list = filtered();
+    const addableCount = list.filter((c) => getPrintQty(c.id) < 1).length;
     syncSearchTrail();
     updateSearchCount();
     syncSortMenu();
-    syncPrintMenu({ cardCount: cards.length });
+    syncPrintMenu({
+      cardCount: cards.length,
+      addableCount,
+      searching: Boolean(searchQuery()),
+      missing: addableCount < list.length,
+    });
 
     els.grid.innerHTML = "";
     els.emptyFilter.hidden = list.length > 0 || cards.length === 0;
@@ -456,8 +462,36 @@ export async function renderList(main, opts) {
     }
   }
 
+  function onSearchBarFocusIn(e) {
+    if (!searchInput || !searchBar) return;
+    if (e.target !== searchBar) return;
+    const from = e.relatedTarget;
+    if (from === searchInput) {
+      const brand = document.getElementById("brand-link");
+      if (brand instanceof HTMLElement) brand.focus();
+      return;
+    }
+    searchInput.focus();
+  }
+
+  /** Clic sur l’icône / le padding : même cible que le champ. */
+  function onSearchBarMouseDown(e) {
+    if (!searchInput || !searchBar) return;
+    const t = /** @type {Node} */ (e.target);
+    if (t === searchInput || searchInput.contains(t)) return;
+    if (sortBtn?.contains(t) || sortMenu?.contains(t)) return;
+    e.preventDefault();
+    searchInput.focus();
+  }
+
   if (searchInput) {
     searchInput.addEventListener("input", onSearchInput);
+  }
+  if (searchBar && searchInput) {
+    searchBar.tabIndex = 0;
+    searchInput.tabIndex = -1;
+    searchBar.addEventListener("focusin", onSearchBarFocusIn);
+    searchBar.addEventListener("mousedown", onSearchBarMouseDown);
   }
 
   /** @param {MouseEvent} e */
@@ -552,6 +586,12 @@ export async function renderList(main, opts) {
   return () => {
     unregisterGrid();
     if (searchInput) searchInput.removeEventListener("input", onSearchInput);
+    if (searchBar) {
+      searchBar.removeEventListener("focusin", onSearchBarFocusIn);
+      searchBar.removeEventListener("mousedown", onSearchBarMouseDown);
+      searchBar.removeAttribute("tabindex");
+    }
+    if (searchInput) searchInput.removeAttribute("tabindex");
     if (sortBtn) {
       sortBtn.removeEventListener("click", onSortBtnClick);
       sortBtn.removeEventListener("keydown", onSortBtnKeydown);

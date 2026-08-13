@@ -13,6 +13,7 @@ import {
 } from "../storage.js";
 import { applyImageTransform, mountCardPreview, refreshCardPreview, mountCardBackPreview, refreshCardBackPreview } from "../card-render.js";
 import { downloadCardPhoto, slugifyFilename } from "../card-export.js";
+import { confirmDialog } from "../confirm-dialog.js";
 
 /**
  * @param {HTMLElement} host Conteneur modale (#modal-root)
@@ -198,40 +199,10 @@ export async function renderEditor(host, opts) {
         </div>
       </div>
     </div>
-
-    <div class="modal-backdrop" id="card-delete-backdrop" hidden>
-      <div class="modal modal--sm" role="dialog" aria-modal="true" aria-labelledby="card-delete-title" aria-describedby="card-delete-desc">
-        <div class="modal-header">
-          <div>
-            <h1 class="view-title" id="card-delete-title">Supprimer&nbsp;?</h1>
-            <p class="view-desc" id="card-delete-subtitle"></p>
-          </div>
-          <button type="button" class="btn ghost icon-only modal-close" id="card-delete-close">
-            ${ICON_CLOSE}
-            <span class="visually-hidden">Fermer</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <p id="card-delete-desc" class="modal-confirm-msg">Attention, la suppression est définitive et ne pourra pas être annulée&nbsp;! Souhaitez-vous continuer&nbsp;?</p>
-        </div>
-        <div class="modal-footer">
-          <div class="modal-footer-end">
-            <button type="button" class="btn secondary" id="card-delete-cancel">Annuler</button>
-            <button type="button" class="btn danger" id="card-delete-confirm">Supprimer</button>
-          </div>
-        </div>
-      </div>
-    </div>
   `;
 
   const refs = {
     backdrop: host.querySelector("#card-editor-backdrop"),
-    deleteBackdrop: host.querySelector("#card-delete-backdrop"),
-    deleteSubtitle: host.querySelector("#card-delete-subtitle"),
-    deleteDesc: host.querySelector("#card-delete-desc"),
-    deleteCancel: host.querySelector("#card-delete-cancel"),
-    deleteClose: host.querySelector("#card-delete-close"),
-    deleteConfirm: host.querySelector("#card-delete-confirm"),
     legoSetRef: host.querySelector("#lego-set-ref"),
     title: host.querySelector("#card-title"),
     releaseYear: host.querySelector("#release-year"),
@@ -574,10 +545,6 @@ export async function renderEditor(host, opts) {
   window.addEventListener("resize", syncPreview);
 
   function requestClose() {
-    if (isDeleteConfirmOpen()) {
-      closeDeleteConfirm();
-      return;
-    }
     opts.onCancel();
   }
 
@@ -587,10 +554,6 @@ export async function renderEditor(host, opts) {
   refs.backdrop.addEventListener("click", (e) => {
     if (e.target === refs.backdrop) requestClose();
   });
-
-  function isDeleteConfirmOpen() {
-    return Boolean(refs.deleteBackdrop && !refs.deleteBackdrop.hidden);
-  }
 
   function cardDeleteSubtitle() {
     const data = draft();
@@ -603,27 +566,9 @@ export async function renderEditor(host, opts) {
     return parts.join(" ");
   }
 
-  function closeDeleteConfirm() {
-    if (!refs.deleteBackdrop) return;
-    refs.deleteBackdrop.hidden = true;
-    if (refs.deleteConfirm) refs.deleteConfirm.disabled = false;
-    if (refs.deleteCancel) refs.deleteCancel.disabled = false;
-  }
-
-  function openDeleteConfirm() {
-    if (!refs.deleteBackdrop || !refs.deleteSubtitle) return;
-    refs.deleteSubtitle.textContent = cardDeleteSubtitle();
-    refs.deleteBackdrop.hidden = false;
-    queueMicrotask(() => refs.deleteCancel?.focus());
-  }
-
   function onKeydown(e) {
     if (e.key !== "Escape") return;
     e.preventDefault();
-    if (isDeleteConfirmOpen()) {
-      closeDeleteConfirm();
-      return;
-    }
     requestClose();
   }
   window.addEventListener("keydown", onKeydown);
@@ -663,20 +608,17 @@ export async function renderEditor(host, opts) {
     }
   });
 
-  if (refs.deleteBtn && existing && refs.deleteBackdrop) {
-    refs.deleteBtn.addEventListener("click", () => {
-      openDeleteConfirm();
-    });
-
-    refs.deleteCancel?.addEventListener("click", closeDeleteConfirm);
-    refs.deleteClose?.addEventListener("click", closeDeleteConfirm);
-    refs.deleteBackdrop.addEventListener("click", (e) => {
-      if (e.target === refs.deleteBackdrop) closeDeleteConfirm();
-    });
-
-    refs.deleteConfirm?.addEventListener("click", async () => {
-      refs.deleteConfirm.disabled = true;
-      refs.deleteCancel.disabled = true;
+  if (refs.deleteBtn && existing) {
+    refs.deleteBtn.addEventListener("click", async () => {
+      const ok = await confirmDialog(host, {
+        title: "Supprimer ?",
+        subtitle: cardDeleteSubtitle(),
+        message:
+          "Attention, la suppression est définitive et ne pourra pas être annulée ! Souhaitez-vous continuer ?",
+        okLabel: "Supprimer",
+        danger: true,
+      });
+      if (!ok) return;
       refs.deleteBtn.disabled = true;
       refs.save.disabled = true;
       try {
@@ -685,7 +627,6 @@ export async function renderEditor(host, opts) {
         else opts.onCancel();
       } catch (err) {
         refs.error.textContent = err.message || "Suppression impossible.";
-        closeDeleteConfirm();
         refs.deleteBtn.disabled = false;
         refs.save.disabled = false;
       }

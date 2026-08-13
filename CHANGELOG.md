@@ -5,6 +5,195 @@ Toutes les modifications notables de ce projet sont documentées dans ce fichier
 Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [0.5.55] — 2026-08-13
+
+### Changed
+
+- Menu Impression : bouton d’ajout aussi pour une seule carte manquante
+
+## [0.5.54] — 2026-08-13
+
+### Changed
+
+- Menu Impression : « manquantes » sur le bouton d’ajout si une partie du lot est déjà dans la file
+
+## [0.5.53] — 2026-08-13
+
+### Changed
+
+- Menu Impression : bouton d’ajout selon le nombre réellement ajoutable (≥ 2) et la recherche
+
+## [0.5.52] — 2026-08-13
+
+### Changed
+
+- Menu Impression : bouton « Vider l’impression »
+
+## [0.5.51] — 2026-08-13
+
+### Changed
+
+- Menu Impression : bouton « Lancer l’impression »
+
+## [0.5.50] — 2026-08-13
+
+### Changed
+
+- Menu Impression : pas de point final sur la description ; espace au-dessus des boutons
+
+## [0.5.49] — 2026-08-13
+
+### Changed
+
+- Menu Impression : libellés du titre et de la description (vide / sélection)
+
+## [0.5.48] — 2026-08-13
+
+### Changed
+
+- Menu Impression : titre, description optionnelle (feuilles A4) et boutons DS inversés sur le fond de l’encart
+
+## [0.5.47] — 2026-08-13
+
+### Changed
+
+- Header : menu Impression toujours collé à droite, aligné sur le bouton Paramètres
+
+## [0.5.46] — 2026-08-13
+
+### Fixed
+
+- Carte : badges (année, pièces, figurines) alignés à droite même sans référence
+
+## [0.5.45] — 2026-08-13
+
+### Removed
+
+- Header : tooltip du bouton Paramètres
+
+## [0.5.44] — 2026-08-13
+
+### Added
+
+- Accueil : focus automatique dans la recherche si la barre est visible ; Tab / clic sur la barre ciblent le champ
+
+## [0.5.43] — 2026-08-13
+
+### Changed
+
+- Header ≤420px : marque réduite à l’icône (nom et version masqués visuellement)
+
+## [0.5.42] — 2026-08-13
+
+### Changed
+
+- Header ≤840px : bouton « Nouvelle carte » en icône seule (le libellé reste accessible)
+
+## [0.5.41] — 2026-08-13
+
+### Fixed
+
+- Avertissement Firefox « Layout was forced before the page was fully loaded » : CSS applicatif avant le script de thème
+
+## [0.5.40] — 2026-08-13
+
+### Changed
+
+- Confirmation du reset local : sous-titre et message alignés sur les tuiles Paramètres
+
+## [0.5.39] — 2026-08-13
+
+### Changed
+
+- Espace développeur : sous-titre « Système de design, exemples et documentation »
+
+## [0.5.38] — 2026-08-13
+
+### Changed
+
+- Paramètres : libellés des tuiles (Importer, Sauvegarder, thèmes, espace dev, Réinitialiser)
+
+## [0.5.37] — 2026-08-13
+
+### Fixed
+
+- Favicon SVG : XML invalide (caractère de contrôle dans le commentaire) — l’icône ne s’affichait pas
+
+### Changed
+
+- Favicon renommé `favicon-brickcard-generator.svg` (comme le logo)
+
+## [0.5.36] — 2026-08-13
+
+### Added
+
+- Favicon SVG (brique du logo) : noir en clair, blanc en dark mode (`prefers-color-scheme`)
+
+## [0.5.35] — 2026-08-13
+
+### Added
+
+- Helper `confirm-dialog.js` : confirmations en `modal--sm` (`confirmDialog` / `openConfirmDialog` / `alertDialog`)
+
+### Changed
+
+- Reset des données locales, import (fusionner / remplacer), suppression de carte et thèmes : plus de `confirm()` natif
+
+## [0.5.34] — 2026-08-13
+
+### Fixed
+
+- Icône palette (tuile Couleurs) : path Remix officiel (`ri-palette-fill`, avec le trou interne)
+- Icônes Remix : taille intrinsèque 24×24 et `aspect-ratio: 1` pour ne plus les aplatir
+
+## [0.5.33] — 2026-08-13
+
+### Changed
+
+- Espace développeur : sous-titres (`view-desc`) courts ; le détail passe dans le corps des galeries
+
+## [0.5.32] — 2026-08-13
+
+### Added
+
+- Tuiles : variante `danger` (couleurs des boutons danger) ; reset local en tuile danger
+
+## [0.5.31] — 2026-08-13
+
+### Changed
+
+- Tuiles : look figé (inversion hover/focus, trait bas inset) ; appliquées aux paramètres, à l’état vide, et aux actions (`button.tile`)
+
+### Removed
+
+- CSS `.settings-actions` (remplacé par `ul.tile-list`)
+
+## [0.5.30] — 2026-08-13
+
+### Added
+
+- Design system : tuiles (`a.tile` / `ul.tile-list`, titre, description, icône, disabled) et galerie `#/developer/tiles`
+
+### Changed
+
+- Index de l’espace développeur : navigation par tuiles (plus de `styleguide-nav-link`)
+
+## [0.5.29] — 2026-08-13
+
+### Fixed
+
+- Espace développeur : Précédent / Suivant suivent les galeries (`#/developer` → `#/developer/links`, etc.) au lieu de sauter l’index
+
+## [0.5.28] — 2026-08-13
+
+### Added
+
+- Design system : liens (`a.link`, tailles, disabled, icône Remix, externe) et galerie `#/developer/links`
+
+### Changed
+
+- Markdown et liens de contenu : couleur texte + underline (plus de bleu / violet visité ni accent rouge)
+
 ## [0.5.27] — 2026-08-13
 
 ### Changed
