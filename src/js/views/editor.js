@@ -14,6 +14,7 @@ import {
 import { applyImageTransform, mountCardPreview, refreshCardPreview, mountCardBackPreview, refreshCardBackPreview } from "../card-render.js";
 import { downloadCardPhoto, slugifyFilename } from "../card-export.js";
 import { confirmDialog } from "../confirm-dialog.js";
+import { partitionThemes } from "../themes-data.js";
 
 /**
  * @param {HTMLElement} host Conteneur modale (#modal-root)
@@ -66,12 +67,19 @@ export async function renderEditor(host, opts) {
       (await getTheme(existing.brickcardThemeId));
   }
 
-  const themeOptions = themes
-    .map(
-      (t) =>
-        `<option value="${escapeAttr(t.id)}" ${existing?.brickcardThemeId === t.id ? "selected" : ""}>${escapeHtml(t.themeName)}</option>`
-    )
-    .join("");
+  const selectedId = existing?.brickcardThemeId || "";
+  /** @param {import("../themes-data.js").LegoTheme} t */
+  function themeOption(t) {
+    return `<option value="${escapeAttr(t.id)}" ${
+      selectedId === t.id ? "selected" : ""
+    }>${escapeHtml(t.themeName)}</option>`;
+  }
+  const { custom: customThemes, builtin: builtinThemes } =
+    partitionThemes(themes);
+  const themeOptions = customThemes.length
+    ? `<optgroup label="Thèmes personnalisés">${customThemes.map(themeOption).join("")}</optgroup>
+                  <optgroup label="Thèmes par défaut">${builtinThemes.map(themeOption).join("")}</optgroup>`
+    : builtinThemes.map(themeOption).join("");
 
   document.body.classList.add("modal-open");
 

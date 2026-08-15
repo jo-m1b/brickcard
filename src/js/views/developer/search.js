@@ -38,7 +38,7 @@ export function renderDeveloperSearch(host) {
         Slot topbar&nbsp;: <code>topbar-search</code> centre le bloc.
         Compteur + tri&nbsp;: visibles seulement s’il y a <strong>au moins 2</strong>
         éléments. Libellé toujours «&nbsp;cartes&nbsp;».
-        Appliqué : liste des cartes (topbar).
+        Appliqué : liste des cartes (topbar) · modale thèmes (compteur + tri).
       </p>
 
       <div class="styleguide-section">

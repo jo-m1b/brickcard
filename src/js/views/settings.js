@@ -36,12 +36,14 @@ import { confirmDialog } from "../confirm-dialog.js";
  *   onClose: () => void,
  *   onImport: () => void,
  *   onExport: () => void | Promise<void>,
+ *   onClearCards?: () => void | Promise<void>,
  *   onDevReset?: () => void | Promise<void>,
+ *   cardCount?: number,
  * }} opts
  * @returns {() => void} cleanup
  */
 export function renderSettingsModal(host, opts) {
-  const { onClose, onImport, onExport, onDevReset } = opts;
+  const { onClose, onImport, onExport, onClearCards, onDevReset, cardCount = 0 } = opts;
   const showDevReset = Boolean(onDevReset) && isLocalDevHost();
   const currentTheme = getTheme();
   const faceBorderMm = getFaceBorderMm();
@@ -169,9 +171,18 @@ export function renderSettingsModal(host, opts) {
                 },
                 {
                   title: "Gérer les thèmes",
-                  desc: "Créer et personnaliser les thèmes disponibles",
+                  desc: "Thèmes par défaut et thèmes personnalisés",
                   href: "#/themes",
                   icon: "palette",
+                },
+                {
+                  title: "Supprimer toutes les cartes",
+                  desc: "Retirer définitivement les cartes, sans modifier les thèmes ni les réglages",
+                  icon: "delete-bin",
+                  tag: "button",
+                  id: "settings-clear-cards",
+                  danger: true,
+                  disabled: cardCount === 0,
                 },
               ])}
             </section>
@@ -300,6 +311,27 @@ export function renderSettingsModal(host, opts) {
   host.querySelector("#settings-export")?.addEventListener("click", () => {
     onExport();
   });
+
+  const clearCardsBtn = host.querySelector("#settings-clear-cards");
+  if (clearCardsBtn && onClearCards) {
+    clearCardsBtn.addEventListener("click", async () => {
+      const ok = await confirmDialog(host, {
+        title: "Supprimer toutes les cartes ?",
+        subtitle: "Vider la collection",
+        message:
+          "Toutes les cartes seront supprimées définitivement. Les thèmes et les réglages sont conservés.",
+        okLabel: "Supprimer",
+        danger: true,
+      });
+      if (!ok) return;
+      clearCardsBtn.setAttribute("disabled", "true");
+      try {
+        await onClearCards();
+      } finally {
+        clearCardsBtn.removeAttribute("disabled");
+      }
+    });
+  }
 
   const resetBtn = host.querySelector("#settings-dev-reset");
   if (resetBtn && onDevReset) {

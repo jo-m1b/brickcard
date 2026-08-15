@@ -17,7 +17,7 @@ Tout le code applicatif est dans **`src/`**.
 | Fichier | Rôle |
 |---------|------|
 | `src/index.html` | Coquille : topbar sticky, `#main`, `#modal-root`, `#print-root` |
-| `src/data/themes-presets.json` | Liste des thèmes LEGO prédéfinis (éditable sans toucher au JS) |
+| `src/data/themes-presets.json` | Liste des thèmes LEGO par défaut (éditable sans toucher au JS) |
 | `src/data/page-{{slug}}.md` | Pages Markdown en modale (`#/page/:slug`, ex. `page-about.md`) ; `# Titre` ou `# Titre \| Sous-titre` |
 | `src/img/logo-brickcard-generator.svg` | Logo app (brick outline — crédit Joko Sutrisno / Vecteezy) |
 | `src/img/favicon-brickcard-generator.svg` | Favicon (même brique ; clair `#141414` / sombre blanc via `prefers-color-scheme`) |
@@ -27,8 +27,8 @@ Tout le code applicatif est dans **`src/`**.
 | `src/js/theme.js` | Thème **UI** system / light / dark |
 | `src/js/card-design.js` | Design cartes (bordure face, CSS vars) — localStorage |
 | `src/js/list-layout.js` | Densité liste (cartes/ligne max) — localStorage |
-| `src/js/themes-data.js` | Charge le JSON, logos SVG générés, accent par défaut |
-| `src/js/storage.js` | IndexedDB cartes + thèmes LEGO, export/import JSON |
+| `src/js/themes-data.js` | Charge le JSON des thèmes par défaut, `logoSrc`, accent par défaut |
+| `src/js/storage.js` | IndexedDB cartes + thèmes **personnalisés**, export/import JSON |
 | `src/js/card-export.js` | Téléchargement de la photo d’une Brickcard |
 | `src/js/print.js` | Impression A4 3×3 + dos miroir |
 | `src/js/version.js` | Version SemVer (`APP_VERSION`) — source unique |
@@ -40,7 +40,8 @@ Tout le code applicatif est dans **`src/`**.
 | `src/js/form-select.js` | Surcouche select (`form-select` / liste custom) |
 | `src/js/views/list.js` | Grille d’aperçus + recherche (barre topbar) |
 | `src/js/views/editor.js` | Éditeur de carte |
-| `src/js/views/themes.js` | Modale gestion thèmes LEGO |
+| `src/js/views/themes.js` | Modale gestion thèmes (mini-cartes, recherche) |
+| `src/js/views/theme-editor.js` | Modale création / édition d’un thème personnalisé |
 | `src/js/views/page.js` | Modale page Markdown |
 | `src/js/views/settings.js` | Modale paramètres |
 | `src/js/views/developer/` | Espace développeur / styleguide UI en modale (`#/developer`, `#/developer/typography`, …) |
@@ -72,24 +73,28 @@ Noms volontaires verbeux (lisibles sans doc) :
 
 Migration auto depuis les anciens noms (`setTitle` → `title`, `setImageDataUrl` → `imageDataUrl`, `legoThemeId` → `brickcardThemeId`, ainsi que `ref`, `image`, `zoom`, …).
 
-## Thèmes prédéfinis (`src/data/themes-presets.json`)
+## Thèmes par défaut (`src/data/themes-presets.json`)
 
-Éditer ce fichier pour ajouter / modifier les thèmes d’usine (pas besoin de toucher au JS).
+Éditer ce fichier pour ajouter / modifier les thèmes par défaut (pas besoin de toucher au JS).
 
 Champs par entrée :
 - `id` (obligatoire), `themeName` (obligatoire)
 - `color` (hex, optionnel) — si omis → pas de couleur propre ; la carte utilise la couleur configurée puis le gris `#6e6e6e`
 - `logoSrc` (optionnel) — chemin depuis `src/` (ex. `img/logo-theme-….png`) ; sans logo / échec de chargement → affichage du **nom** du thème (pas de SVG généré)
 
+Thèmes par défaut : **lecture seule** (ni modification ni suppression). Les thèmes personnalisés ont un id UUID (`createId()`), sont stockés en IndexedDB, et s’éditent via `#/themes/new` / `#/themes/edit/:id`.
+
 ## Modèle thème LEGO (`LegoTheme`)
 
 ```js
 {
-  id: string,
+  id: string,               // par défaut = slug JSON ; personnalisé = UUID (`createId()`)
   themeName: string,        // ex. "CITY"
   color: string,            // hex ; vide = pas de couleur propre (cascade carte)
   logoDataUrl: string,      // SVG ou PNG transparent (data URL ou chemin), optionnel
-  isBuiltin: boolean        // prédéfini = réinitialisable, non supprimable
+  isBuiltin: boolean,       // par défaut = lecture seule, non supprimable
+  createdAt: string,        // ISO (personnalisés) ; vide pour les thèmes par défaut
+  updatedAt: string         // ISO (personnalisés) ; vide pour les thèmes par défaut
 }
 ```
 
@@ -102,16 +107,18 @@ Accent d’une Brickcard (`resolveCardAccent`) :
 
 ## Persistance
 
-- IndexedDB : `brickcard-generator` **v2** — stores `cards` + `themes` (après Reset local : nom `brickcard-generator-<db-gen>`, clé `brickcard-generator:db-gen`)
+- IndexedDB : `brickcard-generator` **v2** — stores `cards` + `themes` (**personnalisés seulement** ; les thèmes par défaut se lisent dans `themes-presets.json`) (après Reset local : nom `brickcard-generator-<db-gen>`, clé `brickcard-generator:db-gen`)
 - Clé thème UI : `brickcard-generator:ui-theme`
 - Clé bordure face : `brickcard-generator:card-face-border-mm` (défaut `3`)
 - Clé arrondi coins : `brickcard-generator:card-radius-mm` (défaut `1.5`, face + dos)
 - Clé couleur carte par défaut : `brickcard-generator:card-default-color` (vide = gris d’usine `#6e6e6e`)
 - Clé sélection impression : `brickcard-generator:print-qty` (`{ [cardId]: qty }`)
 - Clés tri liste : `brickcard-generator:list-sort`, `brickcard-generator:list-sort-dir`
+- Clés tri thèmes : `brickcard-generator:themes-sort`, `brickcard-generator:themes-sort-dir` (défaut `cardCount` / `desc`)
 - Clé colonnes liste max : `brickcard-generator:list-cols-max` (défaut `4`, plage 2–10, ou `infinite`)
 - Cascade accent carte : couleur du thème → couleur configurée → `#6e6e6e`
-- Export JSON **v3** : `{ version: 3, app: "brickcard-generator", cards, themes }` — fichier `brickcard-export-YYYY-MM-DD.json`
+- Export JSON **v3** : `{ version: 3, app: "brickcard-generator", cards, themes }` — `themes` = personnalisés uniquement — fichier `brickcard-export-YYYY-MM-DD.json`
+- Import : ignore les thèmes par défaut (ids de preset / `isBuiltin`) ; ne réécrit pas le JSON
 - APIs async ; serveur HTTP obligatoire en local
 - Au démarrage, purge éventuelle de l’ancienne base `lego-set-cards` (plus utilisée)
 
@@ -119,11 +126,11 @@ Accent d’une Brickcard (`resolveCardAccent`) :
 
 Hash = source de vérité (Précédent / Suivant). Croix / Échap / backdrop d’un overlay → `#/` (`replace`). Hash inconnu → `#/`. Pas d’alias.
 
-Overlays de route (une à la fois, **swap** sans démonter la liste) : `#/settings`, `#/themes`, `#/page/:slug`, `#/new-card`, `#/edit-card/:id`, `#/developer/…`. Dialogues enfants (éditeur de thème, confirmations) : pas d’URL, second backdrop par-dessus la vue courante.
+Overlays de route (une à la fois, **swap** sans démonter la liste) : `#/settings`, `#/themes`, `#/themes/new`, `#/themes/edit/:id`, `#/page/:slug`, `#/new-card`, `#/edit-card/:id`, `#/developer/…`. Dialogues enfants (confirmations) : pas d’URL, second backdrop par-dessus la vue courante.
 
 - `#/` accueil (empty state, liste, ou « aucune carte ne correspond à la recherche »)
 - `#/new-card` `#/edit-card/:id` éditeur de carte (modale)
-- `#/themes` gestion des thèmes (modale)
+- `#/themes` gestion des thèmes (modale) ; `#/themes/new` `#/themes/edit/:id` éditeur de thème **personnalisé** (modale ; fermeture → `#/themes`)
 - `#/settings` paramètres (modale)
 - `#/page/:slug` page Markdown (`data/page-{{slug}}.md`, ex. `#/page/about`)
 - `#/developer` `#/developer/typography` `#/developer/links` `#/developer/tiles` `#/developer/buttons` `#/developer/fields` `#/developer/selects` `#/developer/sliders` `#/developer/colors` `#/developer/search` `#/developer/modals` — espace développeur / styleguide en **modale** (extensible : `#/developer/…`) ; lien Paramètres en local uniquement
@@ -217,7 +224,7 @@ Exceptions actuelles : alertes form-wide (`#error`, `#theme-error`) sous le bloc
 
 ## Listes déroulantes (design system — styleguide)
 
-Markup&nbsp;: `select.form-control` (même look qu’un champ texte). Surcouche unobtrusive&nbsp;: `enhanceFormSelects()` / `enhanceFormSelect()` dans `form-select.js` — déclencheur stylé + liste custom (optgroup, clavier, états). Option placeholder (`value=""`) exclue de la liste ; reset `ri-close-circle-fill` (non focusable) pour y revenir. Icônes d’option&nbsp;: `data-icon-left` / `data-icon-right` (clés Remix de `icons.js`, ex. `printer`, `arrow-right`). Le `<select>` natif reste synchronisé. Appliqué : éditeur (thème). Galerie&nbsp;: `#/developer/selects`.
+Markup&nbsp;: `select.form-control` (même look qu’un champ texte). Surcouche unobtrusive&nbsp;: `enhanceFormSelects()` / `enhanceFormSelect()` dans `form-select.js` — déclencheur stylé + liste custom (optgroup, clavier, états). Option placeholder (`value=""`) exclue de la liste ; reset `ri-close-circle-fill` (non focusable) pour y revenir. Icônes d’option&nbsp;: `data-icon-left` / `data-icon-right` (clés Remix de `icons.js`, ex. `printer`, `arrow-right`). Le `<select>` natif reste synchronisé. Appliqué : éditeur (thème, groupes **Thèmes personnalisés** / **Thèmes par défaut** si personnalisés). Galerie&nbsp;: `#/developer/selects`.
 
 ## Curseurs / range (design system)
 
@@ -242,7 +249,7 @@ Barre centrale (liste)&nbsp;: bloc `search-bar` dans le slot `topbar-search`.
 
 Ouverture du menu de tri&nbsp;: **clic** uniquement (pas au hover ni au seul focus) ; une fois le bouton focusé, clavier comme `form-select` (↑↓ Entrée/Espace Home/End Échap, `aria-activedescendant`). Le menu **reste ouvert** après un choix de critère ou l’inversion du sens (fermeture : clic extérieur, Échap, ou reclic sur le bouton).
 
-Appliqué : topbar liste. Galerie&nbsp;: `#/developer/search`.
+Appliqué : topbar liste · modale thèmes (compteur + tri : nombre de cartes, titre, date de modification si ≥ 2 thèmes personnalisés — thèmes par défaut non concernés ; défaut nombre de cartes décroissant). Galerie&nbsp;: `#/developer/search`.
 
 ## Titres (design system)
 
@@ -270,7 +277,7 @@ Coquille&nbsp;: `modal-backdrop` + `modal` (`role="dialog"` / `aria-modal`). Bor
 
 Tailles (3)&nbsp;: `modal--sm` (~640) · `modal--md` (~896, **défaut**) · `modal--lg` (~1152). Toujours bornées au **viewport** (`100vw` / `100dvh`). Responsive ≤&nbsp;640px&nbsp;: **plein écran**, overlay masqué.
 
-Appliqué&nbsp;: paramètres / page MD (`md`) · thèmes + éditeur carte + espace développeur (`lg`) · éditeur de thème / confirmations (`sm`). Galerie&nbsp;: `#/developer/modals`. Dialogues enfants (thème, supprimer carte, reset local, import) : second `modal-backdrop` dans le même host, sans route — helper `confirmDialog()` / `openConfirmDialog()` (`confirm-dialog.js`). Pas de `alert()` / `confirm()` / `prompt()` natifs.
+Appliqué&nbsp;: paramètres / page MD (`md`) · thèmes + éditeur carte + espace développeur (`lg`) · éditeur de thème personnalisé / confirmations (`sm`). Galerie&nbsp;: `#/developer/modals`. Dialogues enfants (supprimer carte / thème, reset local, import) : second `modal-backdrop` dans le même host, sans route — helper `confirmDialog()` / `openConfirmDialog()` (`confirm-dialog.js`). Pas de `alert()` / `confirm()` / `prompt()` natifs.
 
 ## Impression
 
@@ -285,3 +292,4 @@ Appliqué&nbsp;: paramètres / page MD (`md`) · thèmes + éditeur carte + espa
 - **Icônes** : toujours partir de [Remix Icon](https://remixicon.com/) (style *fill* de préférence) avant d’inventer un SVG. Réutiliser / étendre `src/js/icons.js` ; en HTML, commenter le nom `ri-*`.
 - Pas de `alert()` / `confirm()` / `prompt()` natifs : `confirmDialog()` / `openConfirmDialog()` / `alertDialog()` (`confirm-dialog.js`).
 - Pas de dépendances npm sauf demande explicite.
+- **Version** : n’incrémenter `APP_VERSION` (ni le `?v=` de cache, ni une entrée datée dans `CHANGELOG.md`) **que sur demande explicite**. Entre deux versions, noter les changements sous `## [Unreleased]`.

@@ -10,7 +10,9 @@
  * @property {string} themeName Affichage (ex. "Aquazone", "CITY")
  * @property {string} color Couleur du thème (cartes), hex #rrggbb ou "" si non définie
  * @property {string} logoDataUrl Logo PNG/SVG/WebP (data URL ou chemin relatif), optionnel
- * @property {boolean} isBuiltin Thème d'usine (réinitialisable, non supprimable)
+ * @property {boolean} isBuiltin Thème par défaut (lecture seule, non supprimable)
+ * @property {string} createdAt ISO (personnalisés) ; vide pour les thèmes par défaut
+ * @property {string} updatedAt ISO (personnalisés) ; vide pour les thèmes par défaut
  */
 
 /**
@@ -130,6 +132,8 @@ export async function getPresetThemes() {
           isBuiltin: true,
           color,
           logoDataUrl,
+          createdAt: "",
+          updatedAt: "",
         };
       });
     })().catch((err) => {
@@ -144,6 +148,22 @@ export async function getPresetThemes() {
 export async function getPresetTheme(id) {
   const all = await getPresetThemes();
   return all.find((t) => t.id === id) || null;
+}
+
+/**
+ * @param {LegoTheme[]} themes
+ * @returns {{ custom: LegoTheme[], builtin: LegoTheme[] }}
+ */
+export function partitionThemes(themes) {
+  /** @type {LegoTheme[]} */
+  const custom = [];
+  /** @type {LegoTheme[]} */
+  const builtin = [];
+  for (const t of themes) {
+    if (t.isBuiltin) builtin.push(t);
+    else custom.push(t);
+  }
+  return { custom, builtin };
 }
 
 /**

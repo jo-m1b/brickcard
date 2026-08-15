@@ -82,6 +82,9 @@ export const RI = {
   download: "M13 10h5l-6 6-6-6h5V3h2v7zm-9 9h16v2H4v-2z",
   /** ri-upload-fill */
   upload: "M11 11H6l6-6 6 6h-5v8h-2v-8zM4 20h16v2H4v-2z",
+  /** ri-delete-bin-fill */
+  deleteBin:
+    "M17 6H22V8H20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V8H2V6H7V3C7 2.44772 7.44772 2 8 2H16C16.5523 2 17 2.44772 17 3V6ZM9 11V17H11V11H9ZM13 11V17H15V11H13ZM9 4V6H15V4H9Z",
 };
 
 export const ICON_ADD = remixIcon(RI.add);
@@ -110,6 +113,7 @@ export const ICON_EQUALIZER = remixIcon(RI.equalizer);
 export const ICON_ARROW_DOWN_S = remixIcon(RI.arrowDownS);
 export const ICON_DOWNLOAD = remixIcon(RI.download);
 export const ICON_UPLOAD = remixIcon(RI.upload);
+export const ICON_DELETE_BIN = remixIcon(RI.deleteBin);
 
 /**
  * Résout une clé d’icône (`printer`, `arrow-right`, `closeCircle`…) vers le path `d`.

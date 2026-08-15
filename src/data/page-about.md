@@ -7,7 +7,7 @@ Usage typique : imprimer, plastifier, glisser dans une pochette transparente ave
 ## Fonctionnalités
 
 - Création et édition de plusieurs cartes
-- Thèmes LEGO prédéfinis (nom, logo, couleur) + thèmes perso
+- Thèmes LEGO par défaut (nom, logo, couleur) + thèmes personnalisés
 - Sauvegarde dans le navigateur (IndexedDB)
 - Export / import JSON (cartes + thèmes)
 - Impression A4 : 9 cartes par feuille, face + dos alignés
@@ -19,6 +19,6 @@ Tout reste **dans ton navigateur**. Aucun compte, aucun serveur d’application 
 ## Crédits
 
 - Logo de l’app : icône *brick outline* par [Joko Sutrisno](https://www.vecteezy.com/members/108458460840346680378) via [Vecteezy](https://www.vecteezy.com/vector-art/12802525-brick-outline-icon)
-- Logos de thèmes LEGO prédéfinis : issus de [Brickipedia — List of themes](https://brickipedia.fandom.com/wiki/List_of_themes)
+- Logos de thèmes LEGO par défaut : issus de [Brickipedia — List of themes](https://brickipedia.fandom.com/wiki/List_of_themes)
 
 LEGO® est une marque de The LEGO Group. Ce projet n’est pas affilié ni sponsorisé par The LEGO Group.

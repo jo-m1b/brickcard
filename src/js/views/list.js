@@ -370,6 +370,18 @@ export async function renderList(main, opts) {
       missing: addableCount < list.length,
     });
 
+    const active = document.activeElement;
+    /** @type {{ id: string, which: "inc" | "dec" } | null} */
+    let restoreFocus = null;
+    if (active instanceof HTMLElement && els.grid.contains(active)) {
+      const tile = active.closest(".card-tile");
+      const id = tile?.dataset.id;
+      if (id) {
+        if (active.closest("[data-qty-inc]")) restoreFocus = { id, which: "inc" };
+        else if (active.closest("[data-qty-dec]")) restoreFocus = { id, which: "dec" };
+      }
+    }
+
     els.grid.innerHTML = "";
     els.emptyFilter.hidden = list.length > 0 || cards.length === 0;
 
@@ -400,6 +412,21 @@ export async function renderList(main, opts) {
       actions.innerHTML = printQtyMarkup(card.id, qty);
       tile.appendChild(actions);
       els.grid.appendChild(tile);
+    }
+
+    if (restoreFocus) {
+      const tile = els.grid.querySelector(
+        `.card-tile[data-id="${CSS.escape(restoreFocus.id)}"]`
+      );
+      /** @type {HTMLElement|null} */
+      let el = null;
+      if (restoreFocus.which === "inc") {
+        el = tile?.querySelector("[data-qty-inc]") ?? null;
+      } else {
+        el = tile?.querySelector("[data-qty-dec]:not([hidden])") ?? null;
+        if (!el) el = tile?.querySelector("[data-qty-inc]") ?? null;
+      }
+      el?.focus({ preventScroll: true });
     }
   }
 

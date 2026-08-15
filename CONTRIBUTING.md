@@ -2,11 +2,11 @@
 
 Merci de ton intérêt pour Brickcard Generator.
 
-## Ajouter ou modifier des thèmes prédéfinis
+## Ajouter ou modifier des thèmes par défaut
 
 1. Mets le logo dans `src/img/` (ex. `logo-theme-mon-theme.png` / `.webp` / `.svg`)
 2. Déclare le thème dans `src/data/themes-presets.json` (`id`, `themeName`, `logoSrc` optionnel et/ou `color` — sans couleur → gris `#6e6e6e` ; sans logo → le nom s’affiche sur la carte)
-3. En local : un thème **déjà** en IndexedDB n’est pas réécrit au refresh (tes couleurs / logos restent). Pour un nouveau thème JSON, recharge la page. Pour forcer le retour usine d’un préréglage : bouton **Réinitialiser** sur le thème, ou reset dev dans Paramètres.
+3. Recharge la page. Les thèmes par défaut se lisent dans le JSON (lecture seule dans l’app). Reset dev dans Paramètres pour tout remettre à zéro.
 
 ## Crédits & sources
 
@@ -14,7 +14,7 @@ Quand tu ajoutes des assets, documente leur provenance ici et dans le [README](R
 
 ### Logos de thèmes
 
-Une grande partie des logos de thèmes prédéfinis provient de :
+Une grande partie des logos de thèmes par défaut provient de :
 
 **[Brickipedia — List of themes](https://brickipedia.fandom.com/wiki/List_of_themes)**
 

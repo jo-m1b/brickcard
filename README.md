@@ -11,7 +11,7 @@ Usage typique : imprimer, plastifier et glisser dans une pochette transparente a
 ## Fonctionnalités
 
 - Création / édition de plusieurs cartes (référence, photo, titre, thème, année, pièces…)
-- Thèmes LEGO prédéfinis (nom, logo, couleur) modifiables + thèmes perso
+- Thèmes LEGO par défaut (nom, logo, couleur) + thèmes personnalisés
 - Sauvegarde automatique dans le navigateur (**IndexedDB**, grande capacité)
 - Export / import JSON (cartes + thèmes)
 - Liste filtrable (recherche)
@@ -82,7 +82,7 @@ High quality, clean line art, no text, no logos, no watermarks.
 ## Crédits
 
 - Logo de l’app (`src/img/logo-brickcard-generator.svg`) : icône *brick outline* par [Joko Sutrisno](https://www.vecteezy.com/members/108458460840346680378) via [Vecteezy](https://www.vecteezy.com/vector-art/12802525-brick-outline-icon) (attribution requise).
-- Logos de certains thèmes LEGO prédéfinis (`src/img/logo-theme-*`) : issus de [Brickipedia — List of themes](https://brickipedia.fandom.com/wiki/List_of_themes) (contenu communautaire / Fandom). LEGO® est une marque de The LEGO Group ; ce projet n’est pas affilié ni sponsorisé par The LEGO Group.
+- Logos de certains thèmes LEGO par défaut (`src/img/logo-theme-*`) : issus de [Brickipedia — List of themes](https://brickipedia.fandom.com/wiki/List_of_themes) (contenu communautaire / Fandom). LEGO® est une marque de The LEGO Group ; ce projet n’est pas affilié ni sponsorisé par The LEGO Group.
 
 Voir aussi [CONTRIBUTING.md](CONTRIBUTING.md).
 

@@ -1,4 +1,4 @@
-import { loadCards, loadThemes, exportToJson, importFromJson, wipeAllLocalData } from "./storage.js";
+import { loadCards, loadThemes, exportToJson, importFromJson, wipeAllLocalData, deleteAllCards } from "./storage.js";
 import { initTheme } from "./theme.js";
 import { initCardDesign } from "./card-design.js";
 import { initListLayout } from "./list-layout.js";
@@ -7,6 +7,7 @@ import { APP_ID, APP_VERSION } from "./version.js";
 import { renderEditor } from "./views/editor.js";
 import { renderList } from "./views/list.js";
 import { renderThemesModal } from "./views/themes.js";
+import { renderThemeEditor } from "./views/theme-editor.js";
 import { renderPageModal } from "./views/page.js";
 import { renderSettingsModal } from "./views/settings.js";
 import { renderDeveloperModal } from "./views/developer/modal.js";
@@ -17,6 +18,7 @@ import {
   setPrintMenuVisible,
   syncPrintMenu,
 } from "./print-menu.js";
+import { clearPrintQty } from "./print-qty.js";
 
 const main = document.getElementById("main");
 const modalRoot = document.getElementById("modal-root");
@@ -108,7 +110,20 @@ function parsePath(path) {
     if (!cardId) return { name: "unknown" };
     return { name: "editor", cardId };
   }
-  if (path === "themes") return { name: "themes" };
+  if (path === "themes") return { name: "themes", page: "list" };
+  if (path === "themes/new") return { name: "themes", page: "new" };
+  if (path.startsWith("themes/edit/")) {
+    const raw = path.slice("themes/edit/".length);
+    if (!raw) return { name: "unknown" };
+    let themeId = raw;
+    try {
+      themeId = decodeURIComponent(raw);
+    } catch {
+      /* id tel quel */
+    }
+    if (!themeId) return { name: "unknown" };
+    return { name: "themes", page: "edit", themeId };
+  }
   if (path === "settings") return { name: "settings" };
   if (path.startsWith("page/")) {
     const slug = path.slice("page/".length);
@@ -162,21 +177,6 @@ function setNewButtonVisible(visible) {
 /** Barre de recherche : visible sur l’accueil liste (et sous une modale). */
 function setSearchVisible(visible) {
   if (topbarSearch) topbarSearch.hidden = !visible;
-}
-
-/** Accueil liste : curseur dans le champ de recherche (pas sous une modale). */
-function focusHomeSearch() {
-  if (parseRoute().name !== "home") return;
-  if (document.body.classList.contains("modal-open")) return;
-  if (topbarSearch?.hidden) return;
-  const input = document.getElementById("global-search");
-  if (!(input instanceof HTMLInputElement)) return;
-  queueMicrotask(() => {
-    if (parseRoute().name !== "home") return;
-    if (document.body.classList.contains("modal-open")) return;
-    if (topbarSearch?.hidden) return;
-    input.focus({ preventScroll: true });
-  });
 }
 
 /** @param {number} cardCount */
@@ -246,20 +246,58 @@ async function showOverlay(routeInfo) {
   document.body.classList.add("modal-open");
 
   if (routeInfo.name === "settings") {
+    let cardCount = 0;
+    try {
+      cardCount = (await loadCards()).length;
+    } catch {
+      /* ignore */
+    }
     cleanupSettings = renderSettingsModal(modalRoot, {
       onClose: overlayOnClose("settings"),
       onImport: () => importFile?.click(),
       onExport: exportCards,
+      onClearCards: handleClearCards,
       onDevReset: isLocalDevHost() ? handleDevReset : undefined,
+      cardCount,
     });
     return;
   }
 
   if (routeInfo.name === "themes") {
-    cleanupThemes = await renderThemesModal(modalRoot, {
-      toast,
-      onClose: overlayOnClose("themes"),
+    if (routeInfo.page === "list") {
+      cleanupThemes = await renderThemesModal(modalRoot, {
+        onClose: overlayOnClose("themes"),
+        onCreate: () => navigate("#/themes/new"),
+        onEdit: (id) => navigate(`#/themes/edit/${encodeURIComponent(id)}`),
+      });
+      return;
+    }
+
+    cleanupThemes = await renderThemeEditor(modalRoot, {
+      themeId: routeInfo.page === "edit" ? routeInfo.themeId : null,
+      onClose: () => {
+        if (parseRoute().name === "themes") {
+          navigate("#/themes", { replace: true });
+        }
+      },
+      onSaved: () => {
+        toast("Thème enregistré");
+        underlayStale = true;
+        if (parseRoute().name === "themes") {
+          navigate("#/themes", { replace: true });
+        }
+      },
+      onDeleted: () => {
+        toast("Thème supprimé");
+        underlayStale = true;
+        if (parseRoute().name === "themes") {
+          navigate("#/themes", { replace: true });
+        }
+      },
     });
+    if (!cleanupThemes) {
+      navigate("#/themes", { replace: true });
+    }
     return;
   }
 
@@ -363,11 +401,19 @@ async function route() {
     teardownOverlays({ clearDom: true, dropModalOpen: true });
     shownRoute = routeInfo;
     await ensureUnderlay();
-    focusHomeSearch();
     return;
   }
 
   if (prev?.name === "developer" && routeInfo.name === "developer") {
+    document.body.classList.add("modal-open");
+    await showOverlay(routeInfo);
+    if (token !== routeToken) return;
+    shownRoute = routeInfo;
+    return;
+  }
+
+  if (prev?.name === "themes" && routeInfo.name === "themes") {
+    teardownOverlays({ clearDom: false, dropModalOpen: false });
     document.body.classList.add("modal-open");
     await showOverlay(routeInfo);
     if (token !== routeToken) return;
@@ -454,6 +500,18 @@ async function handleImportFile() {
     navigate("#/", { replace: true });
   } catch (err) {
     toast(err.message || "Import impossible", "error");
+  }
+}
+
+async function handleClearCards() {
+  try {
+    await deleteAllCards();
+    clearPrintQty();
+    toast("Toutes les cartes ont été supprimées");
+    underlayStale = true;
+    navigate("#/", { replace: true });
+  } catch (err) {
+    toast(err.message || "Impossible de supprimer les cartes", "error");
   }
 }
 

@@ -5,6 +5,37 @@ Toutes les modifications notables de ce projet sont documentées dans ce fichier
 Le format s’inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [Unreleased]
+
+## [0.6.0] — 2026-08-15
+
+### Added
+
+- Thèmes : tri dans la barre de recherche (nombre de cartes, titre, date de modification si ≥ 2 thèmes personnalisés ; défaut nombre de cartes décroissant)
+- Thèmes : mini-cartes au look Brickcard (fond couleur, coins `--card-radius`, titre contrasté en haut ; logo Brickcard si le thème n’en a pas)
+- Thèmes : routes `#/themes/new` et `#/themes/edit/:id` (vraie modale d’édition des thèmes personnalisés)
+- Paramètres : tuile danger pour supprimer toutes les cartes (thèmes et réglages conservés)
+- Thèmes par défaut : 113 thèmes Brickipedia ajoutés (id + nom, tri alphabétique)
+- Thèmes par défaut : couleur d’accent pour chaque thème (hex uniques)
+- Thèmes par défaut : logos officiels (`img/logo-theme-{{id}}`, SVG privilégié puis WebP / PNG / JPG) pour 121 thèmes ; Games, Homemaker et Make & Create n’ont pas de logo distinct trouvé
+
+### Fixed
+
+- Liste : le focus clavier n’entoure plus que la carte ; léger zoom au survol et au focus
+- Liste : le focus reste sur + / − / l’icône d’impression après un clic (quantité)
+
+### Changed
+
+- Thèmes par défaut : lecture seule (plus de modification ni de réinitialisation)
+- Thèmes personnalisés : id UUID ; IndexedDB et export JSON ne conservent que les thèmes personnalisés
+- Éditeur de carte : liste des thèmes en groupes (Thèmes personnalisés / Thèmes par défaut)
+- Thèmes : titre et description de la modale alignés sur la tuile Paramètres
+- Thèmes : bouton « Nouveau thème » dans le pied (gauche), avec icône +
+
+### Removed
+
+- Accueil : plus de focus automatique dans la recherche (clavier virtuel sur mobile)
+
 ## [0.5.55] — 2026-08-13
 
 ### Changed

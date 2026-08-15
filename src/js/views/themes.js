@@ -1,409 +1,444 @@
-import { ICON_CLOSE } from "../icons.js";
-import { bindFormColor, formColorMarkup } from "../form-color.js";
 import {
-  loadThemes,
-  upsertTheme,
-  deleteTheme,
-  resetThemeToPreset,
-  compressThemeImage,
-  fetchImageAsFile,
-  createId,
-} from "../storage.js";
-import { DEFAULT_THEME_COLOR } from "../themes-data.js";
+  ICON_ADD,
+  ICON_CLOSE,
+  ICON_FILTER_3,
+  ICON_SEARCH_LINE,
+  ICON_SORT_ASC,
+  ICON_SORT_DESC,
+} from "../icons.js";
+import { loadCards, loadThemes } from "../storage.js";
+import { contrastText, partitionThemes } from "../themes-data.js";
 import { resolveCardAccent } from "../card-design.js";
-import { confirmDialog } from "../confirm-dialog.js";
+import { BRAND_LOGO_SRC } from "../card-render.js";
+
+/** @param {string} hay @param {string} needle */
+function includesCI(hay, needle) {
+  return hay.toLowerCase().includes(needle.toLowerCase());
+}
+
+const SORT_KEY = "brickcard-generator:themes-sort";
+const SORT_DIR_KEY = "brickcard-generator:themes-sort-dir";
+
+/** @typedef {"cardCount"|"themeName"|"updatedAt"} ThemesSortKey */
+/** @typedef {"asc"|"desc"} ThemesSortDir */
+
+/** @type {ThemesSortKey[]} */
+const SORT_KEYS = ["cardCount", "themeName", "updatedAt"];
+
+/** @param {ThemesSortKey} key @returns {ThemesSortDir} */
+function defaultSortDir(key) {
+  return key === "themeName" ? "asc" : "desc";
+}
+
+/** @returns {ThemesSortKey} */
+function loadSortKey() {
+  try {
+    const v = localStorage.getItem(SORT_KEY);
+    if (v && SORT_KEYS.includes(/** @type {ThemesSortKey} */ (v))) {
+      return /** @type {ThemesSortKey} */ (v);
+    }
+  } catch {
+    /* ignore */
+  }
+  return "cardCount";
+}
+
+/** @param {ThemesSortKey} key */
+function saveSortKey(key) {
+  try {
+    localStorage.setItem(SORT_KEY, key);
+  } catch {
+    /* ignore */
+  }
+}
+
+/** @param {ThemesSortKey} sortKey @returns {ThemesSortDir} */
+function loadSortDir(sortKey) {
+  try {
+    const v = localStorage.getItem(SORT_DIR_KEY);
+    if (v === "asc" || v === "desc") return v;
+  } catch {
+    /* ignore */
+  }
+  return defaultSortDir(sortKey);
+}
+
+/** @param {ThemesSortDir} dir */
+function saveSortDir(dir) {
+  try {
+    localStorage.setItem(SORT_DIR_KEY, dir);
+  } catch {
+    /* ignore */
+  }
+}
 
 /**
- * Modale de gestion des thèmes LEGO.
+ * @param {import("../themes-data.js").LegoTheme} a
+ * @param {import("../themes-data.js").LegoTheme} b
+ * @param {ThemesSortKey} key
+ * @param {Map<string, number>} usage
+ */
+function compareThemesAsc(a, b, key, usage) {
+  if (key === "cardCount") {
+    return (usage.get(a.id) || 0) - (usage.get(b.id) || 0);
+  }
+  return String(a.themeName || "").localeCompare(String(b.themeName || ""), "fr", {
+    sensitivity: "base",
+  });
+}
+
+/** Conserve la requête en swap liste ↔ éditeur. */
+let rememberedQuery = "";
+
+/**
+ * Modale de gestion des thèmes LEGO (`#/themes`).
  * @param {HTMLElement} host Conteneur modale (#modal-root)
  * @param {{
  *   onClose: () => void,
- *   toast: (msg: string, type?: string) => void,
+ *   onCreate: () => void,
+ *   onEdit: (id: string) => void,
  * }} opts
  * @returns {Promise<() => void>} cleanup
  */
 export async function renderThemesModal(host, opts) {
-  const { onClose, toast } = opts;
-  let themes = await loadThemes();
+  const { onClose, onCreate, onEdit } = opts;
+  const [themes, cards] = await Promise.all([loadThemes(), loadCards()]);
+  const { custom, builtin } = partitionThemes(themes);
+
+  /** @type {Map<string, number>} */
+  const usage = new Map();
+  for (const card of cards) {
+    const id = card.brickcardThemeId;
+    if (!id) continue;
+    usage.set(id, (usage.get(id) || 0) + 1);
+  }
+
+  /** @type {ThemesSortKey} */
+  let sortKey = loadSortKey();
+  /** @type {ThemesSortDir} */
+  let sortDir = loadSortDir(sortKey);
+
+  function canSortByDate() {
+    return custom.length >= 2;
+  }
+
+  if (sortKey === "updatedAt" && !canSortByDate()) {
+    sortKey = "cardCount";
+    sortDir = defaultSortDir("cardCount");
+  }
 
   document.body.classList.add("modal-open");
-
-  /** @type {{ id: string|null, themeName: string, color: string, logoDataUrl: string, isBuiltin: boolean }} */
-  let draft = {
-    id: null,
-    themeName: "",
-    color: "",
-    logoDataUrl: "",
-    isBuiltin: false,
-  };
-
-  /** @type {((e: KeyboardEvent) => void)|null} */
-  let onThemeEscape = null;
-
-  /** @type {ReturnType<typeof bindFormColor>|null} */
-  let themeColorField = null;
-
-  function q(sel) {
-    return host.querySelector(sel);
-  }
-
-  function isEditorOpen() {
-    const el = q("#theme-editor-backdrop");
-    return Boolean(el && !el.hidden);
-  }
-
-  function closeEditor() {
-    const backdrop = q("#theme-editor-backdrop");
-    if (backdrop) backdrop.hidden = true;
-    if (onThemeEscape) {
-      window.removeEventListener("keydown", onThemeEscape);
-      onThemeEscape = null;
-    }
-  }
-
-  function openEditor(theme) {
-    draft = {
-      id: theme?.id || null,
-      themeName: theme?.themeName || "",
-      color: theme?.color || "",
-      logoDataUrl: theme?.logoDataUrl || "",
-      isBuiltin: Boolean(theme?.isBuiltin),
-    };
-
-    const colorDisplay = draft.color || resolveCardAccent(theme);
-    const backdrop = q("#theme-editor-backdrop");
-    if (!backdrop) return;
-    backdrop.hidden = false;
-
-    q("#theme-editor-title").textContent = theme
-      ? `Modifier « ${theme.themeName} »`
-      : "Nouveau thème";
-    q("#theme-name").value = draft.themeName;
-    themeColorField?.setValue(draft.color, colorDisplay);
-    q("#theme-error").textContent = "";
-    q("#theme-logo-url").value = "";
-    q("#theme-logo").value = "";
-
-    const preview = q("#theme-logo-preview");
-    const clearBtn = q("#theme-logo-clear");
-    if (draft.logoDataUrl) {
-      preview.src = draft.logoDataUrl;
-      preview.hidden = false;
-      clearBtn.hidden = false;
-    } else {
-      preview.hidden = true;
-      preview.removeAttribute("src");
-      clearBtn.hidden = true;
-    }
-
-    if (onThemeEscape) window.removeEventListener("keydown", onThemeEscape);
-    onThemeEscape = (e) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        e.stopPropagation();
-        closeEditor();
-      }
-    };
-    window.addEventListener("keydown", onThemeEscape);
-
-    queueMicrotask(() => q("#theme-name")?.focus());
-  }
-
-  function paintGrid() {
-    const grid = q("#themes-grid");
-    if (!grid) return;
-    grid.innerHTML = themes
-      .map((t) => {
-        const accent = resolveCardAccent(t);
-        return `
-      <article class="theme-card" data-id="${escapeAttr(t.id)}" style="--swatch:${escapeAttr(accent)}">
-        <div class="theme-card-swatch" style="background:${escapeAttr(accent)}"></div>
-        ${
-          t.logoDataUrl
-            ? `<img class="theme-card-logo" src="${escapeAttr(t.logoDataUrl)}" alt="" />`
-            : `<div class="theme-card-logo is-empty" aria-hidden="true"></div>`
-        }
-        <div class="theme-card-body">
-          <p class="theme-card-name">${escapeHtml(t.themeName)}</p>
-          <p class="list-meta">${t.isBuiltin ? "Prédéfini" : "Personnalisé"} · ${escapeHtml(t.color || "couleur par défaut")}${t.logoDataUrl ? "" : " · sans logo"}</p>
-          <div class="row-actions">
-            <button type="button" class="btn ghost sm" data-edit="${escapeAttr(t.id)}">Modifier</button>
-            ${
-              t.isBuiltin
-                ? `<button type="button" class="btn ghost sm" data-reset="${escapeAttr(t.id)}">Réinitialiser</button>`
-                : `<button type="button" class="btn danger sm" data-delete="${escapeAttr(t.id)}">Supprimer</button>`
-            }
-          </div>
-        </div>
-      </article>`;
-      })
-      .join("");
-
-    grid.querySelectorAll("img.theme-card-logo").forEach((img) => {
-      img.onerror = () => {
-        const empty = document.createElement("div");
-        empty.className = "theme-card-logo is-empty";
-        empty.setAttribute("aria-hidden", "true");
-        img.replaceWith(empty);
-      };
-    });
-  }
-
-  function bindEditor() {
-    const colorRoot = /** @type {HTMLElement|null} */ (
-      q("#theme-color-hex")?.closest("[data-form-color]")
-    );
-    if (colorRoot) {
-      themeColorField = bindFormColor(colorRoot, {
-        fallbackColor: DEFAULT_THEME_COLOR,
-        onChange(value) {
-          draft.color = value || "";
-          if (!value) {
-            themeColorField?.setValue("", resolveCardAccent(null));
-          }
-        },
-      });
-    }
-
-    async function applyThemeLogoFile(file) {
-      draft.logoDataUrl = await compressThemeImage(file);
-      const preview = q("#theme-logo-preview");
-      preview.src = draft.logoDataUrl;
-      preview.hidden = false;
-      q("#theme-logo-clear").hidden = false;
-      q("#theme-logo-url").value = "";
-      q("#theme-error").textContent = "";
-    }
-
-    q("#theme-logo").onchange = async (e) => {
-      const file = e.target.files && e.target.files[0];
-      if (!file) return;
-      try {
-        await applyThemeLogoFile(file);
-      } catch {
-        q("#theme-error").textContent =
-          "Logo invalide — utilise un SVG, PNG ou WebP.";
-      }
-    };
-
-    const logoUrlInput = q("#theme-logo-url");
-    const logoUrlBtn = q("#theme-logo-url-btn");
-
-    async function loadThemeLogoFromUrl() {
-      const url = logoUrlInput.value.trim();
-      const err = q("#theme-error");
-      if (!url) {
-        err.textContent = "Indique une URL de logo.";
-        return;
-      }
-      logoUrlBtn.disabled = true;
-      err.textContent = "";
-      try {
-        const file = await fetchImageAsFile(url);
-        await applyThemeLogoFile(file);
-      } catch (ex) {
-        err.textContent = ex.message || "Téléchargement du logo impossible.";
-      } finally {
-        logoUrlBtn.disabled = false;
-      }
-    }
-
-    logoUrlBtn.onclick = () => loadThemeLogoFromUrl();
-    logoUrlInput.onkeydown = (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        loadThemeLogoFromUrl();
-      }
-    };
-
-    q("#theme-logo-clear").onclick = () => {
-      draft.logoDataUrl = "";
-      const preview = q("#theme-logo-preview");
-      preview.hidden = true;
-      preview.removeAttribute("src");
-      q("#theme-logo-clear").hidden = true;
-      q("#theme-logo").value = "";
-      logoUrlInput.value = "";
-    };
-
-    q("#theme-cancel").onclick = closeEditor;
-    q("#theme-modal-close").onclick = closeEditor;
-
-    const themeBackdrop = q("#theme-editor-backdrop");
-    themeBackdrop.onclick = (e) => {
-      if (e.target === themeBackdrop) closeEditor();
-    };
-
-    q("#theme-save").onclick = async () => {
-      const themeName = q("#theme-name").value.trim();
-      const err = q("#theme-error");
-      if (!themeName) {
-        err.textContent = "Le nom est obligatoire.";
-        return;
-      }
-      err.textContent = "";
-      try {
-        await upsertTheme({
-          id: draft.id || createId(),
-          themeName,
-          color: draft.color,
-          logoDataUrl: draft.logoDataUrl || "",
-          isBuiltin: draft.isBuiltin,
-        });
-        toast("Thème enregistré");
-        themes = await loadThemes();
-        closeEditor();
-        paintGrid();
-      } catch (ex) {
-        err.textContent = ex.message || "Enregistrement impossible.";
-      }
-    };
-  }
-
-  function bindList() {
-    q("#btn-add-theme").onclick = () => openEditor(null);
-
-    q("#themes-grid").onclick = async (e) => {
-      const t = /** @type {HTMLElement} */ (e.target);
-      const edit = t.closest("[data-edit]");
-      const reset = t.closest("[data-reset]");
-      const del = t.closest("[data-delete]");
-
-      if (edit) {
-        const theme = themes.find((x) => x.id === edit.getAttribute("data-edit"));
-        if (theme) openEditor(theme);
-        return;
-      }
-      if (reset) {
-        const id = reset.getAttribute("data-reset");
-        const theme = themes.find((x) => x.id === id);
-        if (!theme) return;
-        closeEditor();
-        const ok = await confirmDialog(host, {
-          title: "Réinitialiser ?",
-          subtitle: theme.themeName,
-          message:
-            "Les valeurs d’origine du préréglage remplaceront tes modifications. Continuer ?",
-          okLabel: "Réinitialiser",
-        });
-        if (!ok) return;
-        try {
-          await resetThemeToPreset(id);
-          toast("Thème réinitialisé");
-          themes = await loadThemes();
-          paintGrid();
-        } catch (err) {
-          toast(err.message || "Erreur", "error");
-        }
-        return;
-      }
-      if (del) {
-        const id = del.getAttribute("data-delete");
-        const theme = themes.find((x) => x.id === id);
-        if (!theme) return;
-        closeEditor();
-        const ok = await confirmDialog(host, {
-          title: "Supprimer ?",
-          subtitle: theme.themeName,
-          message:
-            "Attention, la suppression est définitive et ne pourra pas être annulée ! Souhaitez-vous continuer ?",
-          okLabel: "Supprimer",
-          danger: true,
-        });
-        if (!ok) return;
-        try {
-          await deleteTheme(id);
-          toast("Thème supprimé");
-          themes = await loadThemes();
-          paintGrid();
-        } catch (err) {
-          toast(err.message || "Erreur", "error");
-        }
-      }
-    };
-  }
 
   host.innerHTML = `
     <div class="modal-backdrop" id="themes-modal-backdrop" role="presentation">
       <div class="modal modal--lg" role="dialog" aria-modal="true" aria-labelledby="themes-modal-title">
         <div class="modal-header">
           <div>
-            <h1 class="view-title" id="themes-modal-title">Thèmes LEGO</h1>
-            <p class="view-desc">Nom, couleur et logo optionnel. Les préréglages sont modifiables et réinitialisables.</p>
+            <h1 class="view-title" id="themes-modal-title">Gérer les thèmes</h1>
+            <p class="view-desc">Thèmes par défaut et thèmes personnalisés</p>
           </div>
           <button type="button" class="btn ghost icon-only modal-close" id="btn-themes-close">
             ${ICON_CLOSE}
             <span class="visually-hidden">Fermer</span>
           </button>
         </div>
-        <div class="modal-body">
-          <div class="themes-toolbar">
-            <button type="button" class="btn primary" id="btn-add-theme">Nouveau thème</button>
-          </div>
-          <div class="themes-grid" id="themes-grid"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="modal-backdrop" id="theme-editor-backdrop" hidden>
-      <div class="modal modal--sm" role="dialog" aria-modal="true" aria-labelledby="theme-editor-title">
-        <div class="modal-header">
-          <div>
-            <h1 class="view-title" id="theme-editor-title">Modifier le thème</h1>
-            <p class="view-desc">Nom, couleur et logo optionnel.</p>
-          </div>
-          <button type="button" class="btn ghost icon-only modal-close" id="theme-modal-close">
-            ${ICON_CLOSE}
-            <span class="visually-hidden">Fermer</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <div class="form-field">
-            <label class="form-label form-label--required" for="theme-name">Nom</label>
-            <input class="form-control" type="text" id="theme-name" placeholder="CITY" autocomplete="off" />
-          </div>
-          <div class="form-field">
-            <label class="form-label" for="theme-color-hex">Couleur</label>
-            <p class="form-hint" id="theme-color-hint">Optionnel — sinon couleur par défaut des cartes.</p>
-            ${formColorMarkup({
-              id: "theme-color-hex",
-              value: "",
-              fallback: DEFAULT_THEME_COLOR,
-              placeholder: DEFAULT_THEME_COLOR,
-              describedBy: "theme-color-hint",
-            })}
-          </div>
-          <div class="form-field">
-            <label class="form-label" for="theme-logo">Logo</label>
-            <p class="form-hint" id="theme-logo-hint">Optionnel — SVG, PNG ou WebP (fichier ou URL). L’URL n’est pas conservée.</p>
-            <div class="file-row" role="group" aria-describedby="theme-logo-hint">
-              <label class="btn primary file-btn">
-                Parcourir…
-                <input type="file" id="theme-logo" accept="image/svg+xml,image/png,image/webp,.svg,.png,.webp" />
-              </label>
-              <button type="button" class="btn ghost sm" id="theme-logo-clear" hidden>Retirer</button>
+        <div class="themes-toolbar">
+          <div class="search-bar" id="themes-search-bar">
+            <span class="form-control-icon" aria-hidden="true">${ICON_SEARCH_LINE}</span>
+            <input
+              class="form-control"
+              type="search"
+              id="themes-search"
+              placeholder="Rechercher un thème…"
+              autocomplete="off"
+              aria-label="Rechercher un thème"
+              aria-describedby="themes-search-count"
+            />
+            <div class="search-bar-trail" id="themes-search-trail">
+              <span class="search-count" id="themes-search-count" aria-live="polite"></span>
+              <div class="search-sort">
+                <button
+                  type="button"
+                  class="btn ghost sm icon-only search-sort-btn"
+                  id="themes-sort-btn"
+                  aria-haspopup="listbox"
+                  aria-expanded="false"
+                  aria-controls="themes-sort-menu"
+                >
+                  ${ICON_FILTER_3}
+                  <span class="visually-hidden">Trier les thèmes</span>
+                </button>
+              </div>
             </div>
-            <div class="url-import">
-              <span class="file-or">ou URL</span>
-              <input type="text" id="theme-logo-url" inputmode="url" placeholder="https://…/logo.png" autocomplete="off" spellcheck="false" />
-              <button type="button" class="btn secondary sm" id="theme-logo-url-btn">Charger</button>
+            <div class="search-sort-menu form-select-list" id="themes-sort-menu" role="listbox" hidden>
+              <div class="form-select-option" role="option" id="themes-sort-opt-cardCount" data-sort="cardCount" aria-selected="false">
+                <span class="form-select-option-label">Nombre de cartes</span>
+                <span class="form-select-icon form-select-icon--right" hidden></span>
+              </div>
+              <div class="form-select-option" role="option" id="themes-sort-opt-themeName" data-sort="themeName" aria-selected="false">
+                <span class="form-select-option-label">Titre</span>
+                <span class="form-select-icon form-select-icon--right" hidden></span>
+              </div>
+              <div class="form-select-option" role="option" id="themes-sort-opt-updatedAt" data-sort="updatedAt" aria-selected="false">
+                <span class="form-select-option-label">Date de modification</span>
+                <span class="form-select-icon form-select-icon--right" hidden></span>
+              </div>
             </div>
-            <img id="theme-logo-preview" class="theme-preview-img" alt="" hidden />
           </div>
-          <p class="form-error" id="theme-error" role="alert"></p>
+        </div>
+        <div class="modal-body">
+          <section class="themes-section" id="themes-section-custom" hidden>
+            <h2 class="section-title">Thèmes personnalisés</h2>
+            <div class="themes-grid" id="themes-grid-custom"></div>
+          </section>
+          <section class="themes-section" id="themes-section-builtin" hidden>
+            <h2 class="section-title">Thèmes par défaut</h2>
+            <div class="themes-grid" id="themes-grid-builtin"></div>
+          </section>
+          <div class="empty-table" id="themes-empty-filter" hidden>Aucun thème ne correspond à la recherche.</div>
         </div>
         <div class="modal-footer">
           <div class="modal-footer-start">
-            <button type="button" class="btn primary" id="theme-save">Enregistrer</button>
-            <button type="button" class="btn secondary sm" id="theme-cancel">Annuler</button>
+            <button type="button" class="btn primary" id="btn-add-theme">
+              ${ICON_ADD}
+              <span>Nouveau thème</span>
+            </button>
           </div>
         </div>
       </div>
     </div>
   `;
 
+  const q = (sel) => host.querySelector(sel);
   const backdrop = q("#themes-modal-backdrop");
   const btnClose = q("#btn-themes-close");
+  const searchBar = q("#themes-search-bar");
+  const searchInput = q("#themes-search");
+  const searchCount = q("#themes-search-count");
+  const sortBtn = q("#themes-sort-btn");
+  const sortMenu = q("#themes-sort-menu");
+  const customSection = q("#themes-section-custom");
+  const builtinSection = q("#themes-section-builtin");
+  const customGrid = q("#themes-grid-custom");
+  const builtinGrid = q("#themes-grid-builtin");
+  const emptyFilter = q("#themes-empty-filter");
+
+  searchInput.value = rememberedQuery;
+
+  function searchQuery() {
+    return (searchInput?.value || "").trim();
+  }
+
+  /** @param {import("../themes-data.js").LegoTheme} theme */
+  function matchesSearch(theme) {
+    const needle = searchQuery();
+    if (!needle) return true;
+    return includesCI(theme.themeName, needle);
+  }
+
+  /**
+   * @param {import("../themes-data.js").LegoTheme[]} list
+   * @param {ThemesSortKey} key
+   * @param {ThemesSortDir} [dirKey]
+   * @returns {import("../themes-data.js").LegoTheme[]}
+   */
+  function sorted(list, key, dirKey = sortDir) {
+    const dir = dirKey === "asc" ? 1 : -1;
+    return list.slice().sort((a, b) => {
+      if (key === "updatedAt") {
+        const ad = a.updatedAt || "";
+        const bd = b.updatedAt || "";
+        if (ad && bd) {
+          const cmp = ad.localeCompare(bd) * dir;
+          if (cmp !== 0) return cmp;
+        } else if (ad && !bd) return -1;
+        else if (!ad && bd) return 1;
+      } else {
+        const cmp = compareThemesAsc(a, b, key, usage) * dir;
+        if (cmp !== 0) return cmp;
+      }
+      return String(a.themeName || "").localeCompare(String(b.themeName || ""), "fr", {
+        sensitivity: "base",
+      });
+    });
+  }
+
+  function updateSearchCount(shown) {
+    const total = themes.length;
+    const query = searchQuery();
+    if (!total) {
+      searchCount.textContent = "0 thèmes";
+      return;
+    }
+    searchCount.textContent = query
+      ? `${shown} / ${total} thèmes`
+      : `${total} thèmes`;
+  }
+
+  /** @returns {HTMLElement[]} */
+  function sortOptionEls() {
+    if (!sortMenu) return [];
+    return /** @type {HTMLElement[]} */ (
+      [...sortMenu.querySelectorAll("[data-sort]")].filter(
+        (el) => el instanceof HTMLElement && !el.hidden
+      )
+    );
+  }
+
+  let sortActiveIndex = -1;
+
+  function clearSortActive() {
+    sortActiveIndex = -1;
+    sortOptionEls().forEach((el) => el.classList.remove("is-active"));
+    sortBtn?.removeAttribute("aria-activedescendant");
+  }
+
+  /** @param {number} index @param {boolean} [scroll] */
+  function setSortActive(index, scroll = false) {
+    const opts = sortOptionEls();
+    if (!opts.length || !sortBtn) return;
+    let i = index;
+    if (i < 0) i = opts.length - 1;
+    if (i >= opts.length) i = 0;
+    sortActiveIndex = i;
+    opts.forEach((el, n) => el.classList.toggle("is-active", n === i));
+    const active = opts[i];
+    if (active?.id) {
+      sortBtn.setAttribute("aria-activedescendant", active.id);
+      if (scroll) active.scrollIntoView({ block: "nearest" });
+    }
+  }
+
+  function isSortMenuOpen() {
+    return Boolean(sortMenu && !sortMenu.hidden);
+  }
+
+  function syncSortMenu() {
+    if (!sortMenu || !sortBtn) return;
+    const dateOpt = q("#themes-sort-opt-updatedAt");
+    if (dateOpt instanceof HTMLElement) {
+      dateOpt.hidden = !canSortByDate();
+    }
+    sortOptionEls().forEach((el) => {
+      const key = el.getAttribute("data-sort");
+      const on = key === sortKey;
+      el.setAttribute("aria-selected", on ? "true" : "false");
+      el.classList.toggle("is-selected", on);
+      const iconSlot = el.querySelector(".form-select-icon--right");
+      if (!(iconSlot instanceof HTMLElement)) return;
+      if (on) {
+        iconSlot.hidden = false;
+        iconSlot.innerHTML = sortDir === "asc" ? ICON_SORT_ASC : ICON_SORT_DESC;
+        iconSlot.title = sortDir === "asc" ? "Croissant" : "Décroissant";
+      } else {
+        iconSlot.hidden = true;
+        iconSlot.innerHTML = "";
+        iconSlot.removeAttribute("title");
+      }
+    });
+  }
+
+  /**
+   * @param {boolean} open
+   * @param {{ focusBtn?: boolean }} [opts]
+   */
+  function setSortMenuOpen(open, opts = {}) {
+    if (!sortMenu || !sortBtn) return;
+    sortMenu.hidden = !open;
+    sortBtn.setAttribute("aria-expanded", open ? "true" : "false");
+    if (open) {
+      syncSortMenu();
+      const selectedIdx = sortOptionEls().findIndex((el) =>
+        el.classList.contains("is-selected")
+      );
+      if (selectedIdx >= 0) setSortActive(selectedIdx, true);
+      else clearSortActive();
+    } else {
+      clearSortActive();
+    }
+    if (opts.focusBtn) sortBtn.focus();
+  }
+
+  /** @param {string} key */
+  function applySortKey(key) {
+    if (key === "updatedAt" && !canSortByDate()) return;
+    if (!SORT_KEYS.includes(/** @type {ThemesSortKey} */ (key))) return;
+    const next = /** @type {ThemesSortKey} */ (key);
+    if (next !== sortKey) {
+      sortKey = next;
+      sortDir = defaultSortDir(next);
+      saveSortKey(sortKey);
+      saveSortDir(sortDir);
+    } else {
+      sortDir = sortDir === "asc" ? "desc" : "asc";
+      saveSortDir(sortDir);
+    }
+    paint();
+    const idx = sortOptionEls().findIndex(
+      (el) => el.getAttribute("data-sort") === sortKey
+    );
+    if (idx >= 0) setSortActive(idx);
+  }
+
+  function paint() {
+    const dateSort = sortKey === "updatedAt" && canSortByDate();
+    const customShown = sorted(custom.filter(matchesSearch), dateSort ? "updatedAt" : sortKey);
+    const builtinShown = sorted(
+      builtin.filter(matchesSearch),
+      dateSort ? "themeName" : sortKey,
+      dateSort ? "asc" : sortDir
+    );
+    const shown = customShown.length + builtinShown.length;
+
+    customGrid.innerHTML = customShown
+      .map((t) => themeTileMarkup(t, usage.get(t.id) || 0, true))
+      .join("");
+    builtinGrid.innerHTML = builtinShown
+      .map((t) => themeTileMarkup(t, usage.get(t.id) || 0, false))
+      .join("");
+
+    customSection.hidden = customShown.length === 0;
+    builtinSection.hidden = builtinShown.length === 0;
+    emptyFilter.hidden = shown > 0;
+    updateSearchCount(shown);
+    syncSortMenu();
+
+    host.querySelectorAll("img.theme-tile-logo").forEach((img) => {
+      img.onerror = () => {
+        if (img.classList.contains("is-brand")) {
+          img.remove();
+          return;
+        }
+        img.classList.add("is-brand");
+        img.src = BRAND_LOGO_SRC;
+      };
+    });
+  }
+
+  function onSearchInput() {
+    rememberedQuery = searchInput.value;
+    paint();
+  }
+
+  function onSearchBarFocusIn(e) {
+    if (!searchInput || !searchBar) return;
+    if (e.target !== searchBar) return;
+    const from = e.relatedTarget;
+    if (from === searchInput) {
+      btnClose?.focus();
+      return;
+    }
+    searchInput.focus();
+  }
+
+  function onSearchBarMouseDown(e) {
+    if (!searchInput || !searchBar) return;
+    const t = /** @type {Node} */ (e.target);
+    if (t === searchInput || searchInput.contains(t)) return;
+    if (sortBtn?.contains(t) || sortMenu?.contains(t)) return;
+    e.preventDefault();
+    searchInput.focus();
+  }
 
   const close = () => onClose();
 
@@ -414,30 +449,162 @@ export async function renderThemesModal(host, opts) {
 
   /** @param {KeyboardEvent} e */
   const onKey = (e) => {
+    if (e.key === "Escape" && isSortMenuOpen()) {
+      e.preventDefault();
+      setSortMenuOpen(false, { focusBtn: true });
+      return;
+    }
     if (e.key !== "Escape") return;
-    if (isEditorOpen()) return; /* géré par onThemeEscape */
     e.preventDefault();
     close();
   };
 
-  paintGrid();
-  bindList();
-  bindEditor();
+  /** @param {MouseEvent} e */
+  function onDocClick(e) {
+    if (!isSortMenuOpen()) return;
+    const t = /** @type {Node} */ (e.target);
+    if (sortMenu?.contains(t) || sortBtn?.contains(t)) return;
+    setSortMenuOpen(false);
+  }
+
+  /** @param {KeyboardEvent} e */
+  function onSortBtnKeydown(e) {
+    if (!sortBtn || !sortMenu) return;
+    const open = isSortMenuOpen();
+    if (
+      e.key === "ArrowDown" ||
+      e.key === "ArrowUp" ||
+      e.key === "Enter" ||
+      e.key === " "
+    ) {
+      e.preventDefault();
+      if (!open) {
+        setSortMenuOpen(true);
+        if (e.key === "ArrowUp") {
+          setSortActive(sortOptionEls().length - 1, true);
+        }
+        return;
+      }
+      if (e.key === "ArrowDown") setSortActive(sortActiveIndex + 1, true);
+      else if (e.key === "ArrowUp") setSortActive(sortActiveIndex - 1, true);
+      else if (e.key === "Enter" || e.key === " ") {
+        const opt = sortOptionEls()[sortActiveIndex];
+        const key = opt?.getAttribute("data-sort");
+        if (key) applySortKey(key);
+      }
+    } else if (e.key === "Home" && open) {
+      e.preventDefault();
+      setSortActive(0, true);
+    } else if (e.key === "End" && open) {
+      e.preventDefault();
+      setSortActive(sortOptionEls().length - 1, true);
+    }
+  }
+
+  /** @param {MouseEvent} e */
+  function onSortBtnClick(e) {
+    e.stopPropagation();
+    setSortMenuOpen(!isSortMenuOpen());
+  }
+
+  /** @param {MouseEvent} e */
+  function onSortMenuClick(e) {
+    const t = /** @type {HTMLElement} */ (e.target);
+    const opt = t.closest?.("[data-sort]");
+    if (!opt || !sortMenu?.contains(opt)) return;
+    e.stopPropagation();
+    const key = opt.getAttribute("data-sort");
+    if (key) applySortKey(key);
+  }
+
+  /** @param {PointerEvent} e */
+  function onSortMenuPointer(e) {
+    if (!isSortMenuOpen() || !sortMenu) return;
+    const t = /** @type {HTMLElement} */ (e.target);
+    const opt = t.closest?.(".form-select-option");
+    if (!opt || !sortMenu.contains(opt)) return;
+    const idx = sortOptionEls().indexOf(/** @type {HTMLElement} */ (opt));
+    if (idx >= 0) setSortActive(idx);
+  }
+
+  /** @param {MouseEvent} e */
+  function onGridClick(e) {
+    const t = /** @type {HTMLElement} */ (e.target);
+    const tile = t.closest("[data-edit]");
+    if (!tile) return;
+    const id = tile.getAttribute("data-edit");
+    if (id) onEdit(id);
+  }
+
+  paint();
+
+  q("#btn-add-theme").onclick = () => onCreate();
+  customGrid.addEventListener("click", onGridClick);
+  customGrid.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    const t = /** @type {HTMLElement} */ (e.target);
+    const tile = t.closest("[data-edit]");
+    if (!tile) return;
+    e.preventDefault();
+    const id = tile.getAttribute("data-edit");
+    if (id) onEdit(id);
+  });
+
+  searchInput.addEventListener("input", onSearchInput);
+  searchBar.tabIndex = 0;
+  searchInput.tabIndex = -1;
+  searchBar.addEventListener("focusin", onSearchBarFocusIn);
+  searchBar.addEventListener("mousedown", onSearchBarMouseDown);
+
+  sortBtn.addEventListener("click", onSortBtnClick);
+  sortBtn.addEventListener("keydown", onSortBtnKeydown);
+  sortMenu.addEventListener("click", onSortMenuClick);
+  sortMenu.addEventListener("pointerenter", onSortMenuPointer, true);
+  document.addEventListener("click", onDocClick);
 
   backdrop?.addEventListener("click", onBackdropClick);
   btnClose?.addEventListener("click", close);
   document.addEventListener("keydown", onKey);
 
-  function cleanup() {
-    themeColorField?.destroy();
-    themeColorField = null;
-    closeEditor();
+  return () => {
     document.removeEventListener("keydown", onKey);
+    document.removeEventListener("click", onDocClick);
     backdrop?.removeEventListener("click", onBackdropClick);
     btnClose?.removeEventListener("click", close);
-  }
+  };
+}
 
-  return cleanup;
+/**
+ * @param {import("../themes-data.js").LegoTheme} theme
+ * @param {number} count
+ * @param {boolean} editable
+ */
+function themeTileMarkup(theme, count, editable) {
+  const accent = resolveCardAccent(theme);
+  const fg = contrastText(accent);
+  const countLabel =
+    count <= 1 ? `${count} carte` : `${count} cartes`;
+  const name = escapeHtml(theme.themeName);
+  const hasThemeLogo = Boolean(theme.logoDataUrl);
+  const logoSrc = hasThemeLogo ? theme.logoDataUrl : BRAND_LOGO_SRC;
+  const logoClass = hasThemeLogo ? "theme-tile-logo" : "theme-tile-logo is-brand";
+  const logo = `<div class="theme-tile-logo-wrap"><img class="${logoClass}" src="${escapeAttr(logoSrc)}" alt="" /></div>`;
+  const label = editable
+    ? `Modifier « ${escapeAttr(theme.themeName)} », ${countLabel}`
+    : `${escapeAttr(theme.themeName)}, ${countLabel}`;
+  const attrs = editable
+    ? `role="button" tabindex="0" data-edit="${escapeAttr(theme.id)}"`
+    : "";
+  const fgClass = fg === "#ffffff" ? " is-light-fg" : "";
+
+  return `
+    <article class="theme-tile${editable ? " is-editable" : ""}${fgClass}" style="--theme-accent:${escapeAttr(accent)};--theme-accent-fg:${escapeAttr(fg)}" ${attrs} aria-label="${label}">
+      <div class="theme-tile-face">
+        <p class="theme-tile-name">${name}</p>
+        ${logo}
+      </div>
+      <p class="theme-tile-count">${countLabel}</p>
+    </article>`;
 }
 
 function escapeHtml(str) {

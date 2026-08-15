@@ -1,9 +1,9 @@
 /**
- * Persistance IndexedDB (cartes + thèmes) + export/import JSON.
- * Seed des thèmes LEGO prédéfinis au premier lancement.
+ * Persistance IndexedDB (cartes + thèmes personnalisés) + export/import JSON.
+ * Les thèmes par défaut viennent du JSON, pas d’IndexedDB.
  */
 
-import { getPresetThemes, getPresetTheme, parseHexColor, isLocalDevHost, clearPresetCache } from "./themes-data.js";
+import { getPresetThemes, getPresetTheme, parseHexColor, clearPresetCache } from "./themes-data.js";
 
 const DB_NAME_BASE = "brickcard-generator";
 const DB_GEN_KEY = "brickcard-generator:db-gen";
@@ -265,6 +265,8 @@ export async function wipeAllLocalData() {
     localStorage.removeItem("brickcard-generator:migrate-empty-theme-color-v1");
     localStorage.removeItem("brickcard-generator:list-sort");
     localStorage.removeItem("brickcard-generator:list-sort-dir");
+    localStorage.removeItem("brickcard-generator:themes-sort");
+    localStorage.removeItem("brickcard-generator:themes-sort-dir");
     localStorage.removeItem("brickcard-generator:list-cols-max");
     localStorage.removeItem("brickcard-generator:print-qty");
     localStorage.removeItem("lego-set-cards:v1");
@@ -290,11 +292,20 @@ export async function wipeAllLocalData() {
   }
 }
 
+/** @param {LegoTheme[]} list */
+function sortThemesByName(list) {
+  return list.sort((a, b) => a.themeName.localeCompare(b.themeName, "fr"));
+}
+
+/** @returns {Promise<Set<string>>} */
+async function presetIdSet() {
+  const presets = await getPresetThemes();
+  return new Set(presets.map((t) => t.id));
+}
+
 /**
- * Insère les thèmes prédéfinis manquants.
- * Ne réécrit pas un thème déjà présent (conserve les couleurs / logos personnalisés).
- * Migration one-shot éventuelle : réécrit les builtins depuis le JSON.
- * En local : retire aussi les builtins absents du JSON.
+ * Purge les thèmes par défaut encore stockés en IndexedDB
+ * (ils se lisent désormais uniquement depuis le JSON).
  */
 async function seedThemesIfNeeded() {
   if (seedPromise) return seedPromise;
@@ -304,46 +315,16 @@ async function seedThemesIfNeeded() {
     const existing = await reqToPromise(
       db.transaction(STORE_THEMES, "readonly").objectStore(STORE_THEMES).getAll()
     );
-    const presets = await getPresetThemes();
-    const presetIds = new Set(presets.map((t) => t.id));
-    const have = new Set((existing || []).map((t) => t.id));
-
-    const MIGRATE_EMPTY_COLOR_KEY = "brickcard-generator:migrate-empty-theme-color-v1";
-    let needEmptyColorMigrate = false;
-    try {
-      needEmptyColorMigrate = !localStorage.getItem(MIGRATE_EMPTY_COLOR_KEY);
-    } catch {
-      /* ignore */
-    }
+    const presetIds = await presetIdSet();
+    const stale = (existing || []).filter(
+      (row) => row && (row.isBuiltin || row.builtin || presetIds.has(row.id))
+    );
+    if (!stale.length) return;
 
     const tx = db.transaction(STORE_THEMES, "readwrite");
     const store = tx.objectStore(STORE_THEMES);
-
-    if (needEmptyColorMigrate) {
-      for (const preset of presets) store.put(preset);
-      for (const row of existing || []) {
-        if (row.isBuiltin && !presetIds.has(row.id)) store.delete(row.id);
-      }
-    } else {
-      for (const preset of presets) {
-        if (!have.has(preset.id)) store.put(preset);
-      }
-      if (isLocalDevHost()) {
-        for (const row of existing || []) {
-          if (row.isBuiltin && !presetIds.has(row.id)) store.delete(row.id);
-        }
-      }
-    }
-
+    for (const row of stale) store.delete(row.id);
     await txDone(tx);
-
-    if (needEmptyColorMigrate) {
-      try {
-        localStorage.setItem(MIGRATE_EMPTY_COLOR_KEY, "1");
-      } catch {
-        /* ignore */
-      }
-    }
   })();
 
   try {
@@ -410,6 +391,8 @@ function normalizeTheme(t) {
     color: parseHexColor(t.color ?? t.accentColor),
     logoDataUrl: String(t.logoDataUrl ?? t.image ?? ""),
     isBuiltin: Boolean(t.isBuiltin ?? t.builtin),
+    createdAt: String(t.createdAt || "").trim(),
+    updatedAt: String(t.updatedAt || "").trim(),
   };
 }
 
@@ -523,6 +506,15 @@ export async function deleteCard(id) {
   return loadCards();
 }
 
+/** Vide le store des cartes uniquement (thèmes et réglages inchangés). */
+export async function deleteAllCards() {
+  await ready();
+  const db = await openDb();
+  const tx = db.transaction(STORE_CARDS, "readwrite");
+  tx.objectStore(STORE_CARDS).clear();
+  await txDone(tx);
+}
+
 /** @param {string} id @returns {Promise<Card|null>} */
 export async function getCard(id) {
   await ready();
@@ -533,28 +525,46 @@ export async function getCard(id) {
   return isValidCard(card) ? normalizeCard(card) : null;
 }
 
-/** @returns {Promise<LegoTheme[]>} */
-export async function loadThemes() {
+/** @returns {Promise<LegoTheme[]>} thèmes personnalisés IndexedDB (sans les thèmes par défaut) */
+async function loadCustomThemes() {
   await ready();
   const db = await openDb();
   const rows = await reqToPromise(
     db.transaction(STORE_THEMES, "readonly").objectStore(STORE_THEMES).getAll()
   );
-  return (rows || [])
-    .filter(isValidTheme)
-    .map(normalizeTheme)
-    .sort((a, b) => a.themeName.localeCompare(b.themeName, "fr"));
+  const presetIds = await presetIdSet();
+  return sortThemesByName(
+    (rows || [])
+      .filter(isValidTheme)
+      .map(normalizeTheme)
+      .filter((t) => !t.isBuiltin && !presetIds.has(t.id))
+      .map((t) => ({ ...t, isBuiltin: false }))
+  );
+}
+
+/** Personnalisés (alpha) puis thèmes par défaut (alpha). */
+export async function loadThemes() {
+  const [custom, presets] = await Promise.all([
+    loadCustomThemes(),
+    getPresetThemes(),
+  ]);
+  return [...custom, ...sortThemesByName([...presets])];
 }
 
 /** @param {string} id @returns {Promise<LegoTheme|null>} */
 export async function getTheme(id) {
   if (!id) return null;
+  const preset = await getPresetTheme(id);
+  if (preset) return preset;
   await ready();
   const db = await openDb();
   const theme = await reqToPromise(
     db.transaction(STORE_THEMES, "readonly").objectStore(STORE_THEMES).get(id)
   );
-  return isValidTheme(theme) ? normalizeTheme(theme) : null;
+  if (!isValidTheme(theme)) return null;
+  const normalized = normalizeTheme(theme);
+  if (normalized.isBuiltin) return null;
+  return { ...normalized, isBuiltin: false };
 }
 
 /**
@@ -563,23 +573,32 @@ export async function getTheme(id) {
  */
 export async function upsertTheme(input) {
   await ready();
-  const db = await openDb();
+  const presetIds = await presetIdSet();
   const id = input.id || createId();
+  if (presetIds.has(id)) {
+    throw new Error("Les thèmes par défaut ne peuvent pas être modifiés.");
+  }
+
+  const db = await openDb();
   const existing = await reqToPromise(
     db.transaction(STORE_THEMES, "readonly").objectStore(STORE_THEMES).get(id)
   );
+  if (existing && (existing.isBuiltin || existing.builtin)) {
+    throw new Error("Les thèmes par défaut ne peuvent pas être modifiés.");
+  }
 
   const logoDataUrl = String(input.logoDataUrl ?? input.image ?? "");
   const color = parseHexColor(input.color ?? input.accentColor);
+  const now = new Date().toISOString();
 
   const theme = normalizeTheme({
     ...input,
     id,
     logoDataUrl,
     color,
-    isBuiltin: existing
-      ? Boolean(existing.isBuiltin ?? existing.builtin)
-      : Boolean(input.isBuiltin ?? input.builtin),
+    isBuiltin: false,
+    createdAt: existing?.createdAt || now,
+    updatedAt: now,
   });
 
   if (!theme.themeName) {
@@ -592,27 +611,20 @@ export async function upsertTheme(input) {
   return theme;
 }
 
-/** Restaure un thème builtin à ses valeurs d'usine. */
-export async function resetThemeToPreset(id) {
-  const preset = await getPresetTheme(id);
-  if (!preset) throw new Error("Ce thème n'est pas un préréglage.");
-  await ready();
-  const db = await openDb();
-  const tx = db.transaction(STORE_THEMES, "readwrite");
-  tx.objectStore(STORE_THEMES).put(preset);
-  await txDone(tx);
-  return preset;
-}
-
-/** Supprime un thème custom uniquement. */
+/** Supprime un thème personnalisé uniquement. */
 export async function deleteTheme(id) {
   await ready();
-  const theme = await getTheme(id);
-  if (!theme) return;
-  if (theme.isBuiltin) {
-    throw new Error("Les thèmes prédéfinis ne peuvent pas être supprimés (réinitialise-les plutôt).");
+  if (await getPresetTheme(id)) {
+    throw new Error("Les thèmes par défaut ne peuvent pas être supprimés.");
   }
   const db = await openDb();
+  const existing = await reqToPromise(
+    db.transaction(STORE_THEMES, "readonly").objectStore(STORE_THEMES).get(id)
+  );
+  if (!existing) return;
+  if (existing.isBuiltin || existing.builtin) {
+    throw new Error("Les thèmes par défaut ne peuvent pas être supprimés.");
+  }
   const tx = db.transaction(STORE_THEMES, "readwrite");
   tx.objectStore(STORE_THEMES).delete(id);
   await txDone(tx);
@@ -620,7 +632,7 @@ export async function deleteTheme(id) {
 
 /** @returns {Promise<{ cards: number, themes: number }>} */
 export async function exportToJson() {
-  const [cards, themes] = await Promise.all([loadCards(), loadThemes()]);
+  const [cards, themes] = await Promise.all([loadCards(), loadCustomThemes()]);
   const payload = {
     version: EXPORT_VERSION,
     app: "brickcard-generator",
@@ -686,15 +698,18 @@ export async function importFromJson(input, mode = "merge") {
 
   let themesImported = 0;
   if (incomingThemes.length) {
-    const validThemes = incomingThemes.filter(isValidTheme).map(normalizeTheme);
+    const presetIds = await presetIdSet();
+    const validThemes = incomingThemes
+      .filter(isValidTheme)
+      .map(normalizeTheme)
+      .filter((t) => !t.isBuiltin && !presetIds.has(t.id))
+      .map((t) => ({ ...t, isBuiltin: false }));
     if (mode === "replace") {
-      // Conserve les builtins manquants, remplace le reste
       await ready();
       const db = await openDb();
       const tx = db.transaction(STORE_THEMES, "readwrite");
       const store = tx.objectStore(STORE_THEMES);
       store.clear();
-      for (const preset of await getPresetThemes()) store.put(preset);
       for (const theme of validThemes) store.put(theme);
       await txDone(tx);
       themesImported = validThemes.length;
