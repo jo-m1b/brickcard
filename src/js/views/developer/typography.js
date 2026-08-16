@@ -108,10 +108,12 @@ export function renderDeveloperTypography(host) {
             · <code>section-title</code> 1.25rem / 700
             · <code>styleguide-section-title</code> 1rem — interne galerie seulement.
           </p>
-          <div class="empty-view" style="padding: 1.75rem 1.5rem; border: 1px dashed var(--line); margin-top: 1rem">
-            <div class="brick" aria-hidden="true"></div>
-            <p class="view-title">État vide</p>
-            <p>Même classe <code>view-title</code> (c’est le titre de la vue).</p>
+          <div class="empty-view" style="padding: 4.5rem 1.5rem 1.75rem; border: 1px dashed var(--line); margin-top: 1rem">
+            <div class="empty-view-body">
+              <div class="brick" aria-hidden="true"></div>
+              <p class="view-title">État vide</p>
+              <p>Même classe <code>view-title</code> (c’est le titre de la vue).</p>
+            </div>
           </div>
         </div>
       </div>

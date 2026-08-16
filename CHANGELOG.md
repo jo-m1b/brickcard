@@ -7,9 +7,12 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [0.7.0] — 2026-08-16
+
 ### Added
 
 - Accueil : écran de chargement (brique + « Chargement... ») jusqu’à IndexedDB cartes + thèmes
+- Chargement : animation CSS (pulse brique, plots, points) ; respect de `prefers-reduced-motion`
 - Accueil vide : « Bienvenue », texte, tuiles Nouvelle carte / Importer une sauvegarde
 - Recherche sans résultat (cartes et thèmes) : état vide brique + « Oups ! »
 - Impression : nom de fichier PDF proposé via `document.title` (`brickcard-YYYY-MM-DD-grille-…`)
@@ -19,6 +22,9 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 ### Changed
 
 - Accueil : plus d’affichage empty optimiste pendant l’ouverture IndexedDB
+- Accueil vide : texte en deux lignes ; descriptions des tuiles sur une seule ligne (retour à la ligne si l’écran est trop étroit)
+- États vides / chargement : centrage vertical sur le texte (brique collée au-dessus)
+- Thèmes : hauteur de modale fixe (plus de yoyo selon la recherche)
 - Impression : titre de modale « Paramètres d’impression » ; champ « Grille d’impression » ; Recto-verso en 2 boutons (Alterner / Regrouper)
 - Impression : réglage de grille 1×1 à 10×10 ; récap menu et modale alignés ; la modale reste ouverte pendant l’impression
 - Impression : côtés des cartes en 3 boutons Face / Dos (recto / verso réservés aux feuilles A4) ; Annuler à droite, à gauche de Lancer l’impression

@@ -1126,11 +1126,11 @@ html:not([data-theme]) .btn .icon-system {
   padding: 3.5rem 1.5rem;
   margin: 0;
   display: grid;
-  gap: 0.75rem;
-  justify-items: center;
   place-content: center;
+  place-items: center;
   box-sizing: border-box;
   width: 100%;
+  overflow: visible;
 }
 
 .empty-view[hidden] {
@@ -1153,12 +1153,23 @@ html:not([data-theme]) .btn .icon-system {
   flex: 1 1 auto;
 }
 
+/* Titre + texte + tuiles : c’est ce bloc qui est centré. La brique est hors flux, au-dessus. */
+.empty-view-body {
+  position: relative;
+  display: grid;
+  gap: 0.75rem;
+  justify-items: center;
+}
+
 .empty-view .brick {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
   width: 56px;
   height: 40px;
+  margin: 0 0 0.75rem;
   background: var(--brick-red);
-  position: relative;
-  margin-bottom: 0.75rem;
   border: 1px solid var(--line-strong);
 }
 
@@ -1182,6 +1193,71 @@ html:not([data-theme]) .btn .icon-system {
   right: 8px;
 }
 
+/* Chargement : pulse brique + plots + points (uniquement tant que #main est busy) */
+#main[aria-busy="true"] .empty-view .brick {
+  animation: loading-brick-pulse 1.4s ease-in-out infinite;
+}
+
+#main[aria-busy="true"] .empty-view .brick::before,
+#main[aria-busy="true"] .empty-view .brick::after {
+  animation: loading-stud-blink 1.4s ease-in-out infinite;
+}
+
+#main[aria-busy="true"] .empty-view .brick::after {
+  animation-delay: 0.35s;
+}
+
+.loading-dots > span {
+  display: inline-block;
+  animation: loading-dot 1.2s ease-in-out infinite;
+  opacity: 0.2;
+}
+
+.loading-dots > span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.loading-dots > span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes loading-brick-pulse {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@keyframes loading-stud-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.15;
+  }
+}
+
+@keyframes loading-dot {
+  0%,
+  80%,
+  100% {
+    opacity: 0.2;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #main[aria-busy="true"] .empty-view .brick,
+  #main[aria-busy="true"] .empty-view .brick::before,
+  #main[aria-busy="true"] .empty-view .brick::after,
+  .loading-dots > span {
+    animation: none;
+    opacity: 1;
+  }
+}
+
 .empty-view .view-title {
   margin: 0;
 }
@@ -1190,11 +1266,30 @@ html:not([data-theme]) .btn .icon-system {
   margin: 0;
   max-width: 28rem;
   color: var(--ink-soft);
+  white-space: pre-line;
 }
 
 .empty-view .tile-list {
-  width: min(100%, 28rem);
+  width: max-content;
+  max-width: 100%;
+  margin-top: 1.25rem;
   text-align: left;
+}
+
+.empty-view .tile-title,
+.empty-view .tile-desc {
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .empty-view .tile-list {
+    width: min(100%, 28rem);
+  }
+
+  .empty-view .tile-title,
+  .empty-view .tile-desc {
+    white-space: normal;
+  }
 }
 
 /* ——— Styleguide / pages de test ——— */
@@ -2333,6 +2428,11 @@ button.form-select-trigger.sm {
   --modal-width: 72rem; /* ~1152px */
 }
 
+/* Thèmes : hauteur fixe (évite le yoyo selon le nombre de résultats) */
+#themes-modal-backdrop > .modal {
+  height: var(--modal-max-h);
+}
+
 .modal-header {
   --modal-header-inset: 0.65rem;
   --inv-bg: var(--ink);
@@ -2369,10 +2469,6 @@ button.form-select-trigger.sm {
   --on-accent-fg: var(--inv-bg);
 }
 
-.modal:has(> .modal-body > .empty-view:not([hidden])) {
-  height: var(--modal-max-h);
-}
-
 .modal-body {
   padding: 1.25rem;
   min-height: 0;
@@ -2384,6 +2480,7 @@ button.form-select-trigger.sm {
   display: grid;
   place-content: center;
   place-items: center;
+  overflow: visible;
 }
 
 .modal-confirm-msg {

@@ -44,5 +44,5 @@ export function emptyViewMarkup(opts) {
   const hidden = opts.hidden ? " hidden" : "";
   const text = opts.text ? `<p>${escapeHtml(opts.text)}</p>` : "";
   const tiles = opts.tiles?.length ? tileListMarkup(opts.tiles) : "";
-  return `<section class="empty-view no-print"${idAttr}${hidden}><div class="brick" aria-hidden="true"></div><${tag} class="view-title">${escapeHtml(opts.title)}</${tag}>${text}${tiles}</section>`;
+  return `<section class="empty-view no-print"${idAttr}${hidden}><div class="empty-view-body"><div class="brick" aria-hidden="true"></div><${tag} class="view-title">${escapeHtml(opts.title)}</${tag}>${text}${tiles}</div></section>`;
 }

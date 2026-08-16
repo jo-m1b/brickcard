@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Brickcard Generator</title>
   <link rel="icon" href="img/favicon-brickcard-generator.svg" type="image/svg+xml" sizes="any" />
-  <link rel="stylesheet" href="css/styles.css?v=0.6.0" />
+  <link rel="stylesheet" href="css/styles.css?v=0.7.0" />
   <script>
     /* Après styles.css (script bloquant) : pas de flush layout avant CSS, pas de flash thème */
     (function () {
@@ -160,8 +160,10 @@
 
     <main id="main" class="main" aria-busy="true">
       <section class="empty-view no-print">
-        <div class="brick" aria-hidden="true"></div>
-        <h1 class="view-title">Chargement...</h1>
+        <div class="empty-view-body">
+          <div class="brick" aria-hidden="true"></div>
+          <h1 class="view-title">Chargement<span class="visually-hidden">...</span><span class="loading-dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span></h1>
+        </div>
       </section>
     </main>
   </div>
@@ -172,6 +174,6 @@
 
   <div id="print-root" class="print-root" aria-hidden="true"></div>
 
-  <script type="module" src="js/app.js?v=0.6.0"></script>
+  <script type="module" src="js/app.js?v=0.7.0"></script>
 </body>
 </html>
