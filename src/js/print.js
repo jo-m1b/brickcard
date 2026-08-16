@@ -1,11 +1,16 @@
 /**
- * Impression A4 : grille 3×3 (9 cartes / page), faces puis dos alignés.
+ * Impression A4 : grille variable (1×1 à 10×10), faces / dos, miroir colonne.
  *
  * Alignement face/dos : miroir horizontal (flip sur le bord long en portrait).
  */
 
 import { renderCardFace, renderCardBack, applyImageTransform } from "./card-render.js";
 import { loadThemes } from "./storage.js";
+import {
+  computePrintLayout,
+  formatPrintPdfBasename,
+  getPrintSettings,
+} from "./print-settings.js";
 
 export const PRINT_COLS = 3;
 export const PRINT_ROWS = 3;
@@ -39,18 +44,21 @@ export function mirrorIndex(index, cols = PRINT_COLS) {
  * @param {import("./storage.js").Card[]} pageCards
  * @param {"front"|"back"} side
  * @param {Map<string, import("./themes-data.js").LegoTheme>} themeMap
+ * @param {import("./print-settings.js").PrintLayout} layout
  */
-function buildSheet(pageCards, side, themeMap) {
+function buildSheet(pageCards, side, themeMap, layout) {
+  const { cols, rows, scale, cardsPerPage } = layout;
   const sheet = document.createElement("section");
   sheet.className = `print-sheet print-sheet--${side}`;
-  sheet.style.setProperty("--cols", String(PRINT_COLS));
-  sheet.style.setProperty("--rows", String(PRINT_ROWS));
+  sheet.style.setProperty("--cols", String(cols));
+  sheet.style.setProperty("--rows", String(rows));
+  sheet.style.setProperty("--print-scale", String(scale));
 
   /** @type {(import("./storage.js").Card|null)[]} */
-  const slots = Array.from({ length: CARDS_PER_PAGE }, () => null);
+  const slots = Array.from({ length: cardsPerPage }, () => null);
 
   pageCards.forEach((card, i) => {
-    slots[side === "front" ? i : mirrorIndex(i)] = card;
+    slots[side === "front" ? i : mirrorIndex(i, cols)] = card;
   });
 
   for (const card of slots) {
@@ -79,13 +87,33 @@ function buildSheet(pageCards, side, themeMap) {
 /**
  * @param {import("./storage.js").Card[]} cards
  * @param {Map<string, import("./themes-data.js").LegoTheme>} themeMap
+ * @param {import("./print-settings.js").PrintLayout} layout
+ * @param {import("./print-settings.js").PrintSettings} settings
  */
-function buildPrintDocument(cards, themeMap) {
+function buildPrintDocument(cards, themeMap, layout, settings) {
   const root = document.createElement("div");
   root.className = "print-document";
-  for (const pageCards of chunk(cards, CARDS_PER_PAGE)) {
-    root.appendChild(buildSheet(pageCards, "front", themeMap));
-    root.appendChild(buildSheet(pageCards, "back", themeMap));
+  const pages = chunk(cards, layout.cardsPerPage);
+
+  /** @param {"front"|"back"} side */
+  function appendSide(side) {
+    for (const pageCards of pages) {
+      root.appendChild(buildSheet(pageCards, side, themeMap, layout));
+    }
+  }
+
+  if (settings.cardSidesToPrint === "faceOnly") {
+    appendSide("front");
+  } else if (settings.cardSidesToPrint === "backOnly") {
+    appendSide("back");
+  } else if (settings.sheetRectoVerso === "grouped") {
+    appendSide("front");
+    appendSide("back");
+  } else {
+    for (const pageCards of pages) {
+      root.appendChild(buildSheet(pageCards, "front", themeMap, layout));
+      root.appendChild(buildSheet(pageCards, "back", themeMap, layout));
+    }
   }
   return root;
 }
@@ -145,9 +173,11 @@ export async function printCards(cards, opts = {}) {
 
   const themes = await loadThemes();
   const themeMap = new Map(themes.map((t) => [t.id, t]));
+  const settings = getPrintSettings();
+  const layout = computePrintLayout(settings.printGrid);
 
   printRoot.innerHTML = "";
-  printRoot.appendChild(buildPrintDocument(cards, themeMap));
+  printRoot.appendChild(buildPrintDocument(cards, themeMap, layout, settings));
   // display:none → clientWidth/Height à 0 ; forcer un layout hors écran pour le cadrage.
   printRoot.classList.add("is-preparing");
 
@@ -160,10 +190,12 @@ export async function printCards(cards, opts = {}) {
   };
   window.addEventListener("beforeprint", onBeforePrint);
 
+  const previousTitle = document.title;
   let cleaned = false;
   const cleanup = () => {
     if (cleaned) return;
     cleaned = true;
+    document.title = previousTitle;
     printRoot.classList.remove("is-preparing");
     printRoot.innerHTML = "";
     window.removeEventListener("beforeprint", onBeforePrint);
@@ -173,6 +205,7 @@ export async function printCards(cards, opts = {}) {
 
   window.addEventListener("afterprint", cleanup);
   await new Promise((r) => setTimeout(r, 80));
+  document.title = formatPrintPdfBasename(cards.length, settings);
   window.print();
   setTimeout(cleanup, 2500);
 }

@@ -58,10 +58,10 @@ export function renderDeveloperButtons(host) {
       <header class="styleguide-header">
         <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Boutons</p>
         <h1 class="view-title">Boutons</h1>
-        <p class="view-desc">Quatre variantes, texte et icônes.</p>
       </header>
 
       <p class="styleguide-intro">
+        Quatre variantes, texte et icônes.
         Icône à droite&nbsp;: <code>icon-right</code>.
         Compact&nbsp;: <code>sm</code>.
         Badge&nbsp;: <code>btn-badge</code>.

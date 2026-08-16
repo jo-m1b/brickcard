@@ -97,7 +97,7 @@
       </div>
 
       <div class="topbar-actions" id="topbar-actions">
-        <button type="button" class="btn primary" id="btn-new-card">
+        <button type="button" class="btn primary is-hidden" id="btn-new-card">
           <!-- ri-add-fill -->
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
             <path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2z"/>
@@ -158,7 +158,12 @@
       </div>
     </header>
 
-    <main id="main" class="main"></main>
+    <main id="main" class="main" aria-busy="true">
+      <section class="empty-view no-print">
+        <div class="brick" aria-hidden="true"></div>
+        <h1 class="view-title">Chargement...</h1>
+      </section>
+    </main>
   </div>
 
   <input type="file" id="import-file" accept="application/json,.json" hidden />

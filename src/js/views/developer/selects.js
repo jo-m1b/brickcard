@@ -12,7 +12,6 @@ export function renderDeveloperSelects(host) {
       <header class="styleguide-header">
         <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Listes déroulantes</p>
         <h1 class="view-title">Listes déroulantes</h1>
-        <p class="view-desc">Select natif, liste custom.</p>
       </header>
 
       <p class="styleguide-intro">

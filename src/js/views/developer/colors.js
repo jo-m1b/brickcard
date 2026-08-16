@@ -13,7 +13,6 @@ export function renderDeveloperColors(host) {
       <header class="styleguide-header">
         <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Couleurs</p>
         <h1 class="view-title">Champs couleur</h1>
-        <p class="view-desc">Champ hex, pastille et effacer.</p>
       </header>
 
       <p class="styleguide-intro">

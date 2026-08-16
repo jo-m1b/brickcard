@@ -41,7 +41,6 @@ function escapeAttr(s) {
  * @param {HTMLElement} host Conteneur (`#modal-root`)
  * @param {{
  *   title: string,
- *   subtitle?: string,
  *   message: string,
  *   actions?: ConfirmAction[],
  * }} opts
@@ -49,7 +48,6 @@ function escapeAttr(s) {
  */
 export function openConfirmDialog(host, opts) {
   const title = opts.title || "Confirmer ?";
-  const subtitle = opts.subtitle ? String(opts.subtitle) : "";
   const message = opts.message ? String(opts.message) : "";
   const actions =
     opts.actions && opts.actions.length
@@ -65,10 +63,6 @@ export function openConfirmDialog(host, opts) {
     backdrop.className = "modal-backdrop";
     backdrop.id = `${uid}-backdrop`;
     backdrop.setAttribute("role", "presentation");
-
-    const subtitleHtml = subtitle
-      ? `<p class="view-desc" id="${uid}-subtitle">${escapeHtml(subtitle)}</p>`
-      : "";
 
     const startBtns = actions.filter((a) => (a.slot || "end") === "start");
     const endBtns = actions.filter((a) => (a.slot || "end") !== "start");
@@ -92,9 +86,8 @@ export function openConfirmDialog(host, opts) {
         <div class="modal-header">
           <div>
             <h1 class="view-title" id="${uid}-title">${escapeHtml(title)}</h1>
-            ${subtitleHtml}
           </div>
-          <button type="button" class="btn ghost icon-only modal-close" data-confirm-dismiss>
+          <button type="button" class="btn primary icon-only modal-close" data-confirm-dismiss>
             ${ICON_CLOSE}
             <span class="visually-hidden">Fermer</span>
           </button>
@@ -172,7 +165,6 @@ export function openConfirmDialog(host, opts) {
  * @param {HTMLElement} host
  * @param {{
  *   title: string,
- *   subtitle?: string,
  *   message: string,
  *   okLabel?: string,
  *   cancelLabel?: string,
@@ -183,7 +175,6 @@ export function openConfirmDialog(host, opts) {
 export async function confirmDialog(host, opts) {
   const result = await openConfirmDialog(host, {
     title: opts.title,
-    subtitle: opts.subtitle,
     message: opts.message,
     actions: [
       { id: "cancel", label: opts.cancelLabel || "Annuler", variant: "secondary", slot: "end" },
@@ -204,7 +195,6 @@ export async function confirmDialog(host, opts) {
  * @param {HTMLElement} host
  * @param {{
  *   title: string,
- *   subtitle?: string,
  *   message: string,
  *   okLabel?: string,
  * }} opts
@@ -213,7 +203,6 @@ export async function confirmDialog(host, opts) {
 export async function alertDialog(host, opts) {
   await openConfirmDialog(host, {
     title: opts.title,
-    subtitle: opts.subtitle,
     message: opts.message,
     actions: [{ id: "ok", label: opts.okLabel || "OK", variant: "primary", slot: "end" }],
   });

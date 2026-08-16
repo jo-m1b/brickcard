@@ -1,3 +1,4 @@
+import { ICON_CLOSE } from "../../icons.js";
 import { linkMarkup } from "../../link.js";
 
 /**
@@ -11,12 +12,10 @@ export function renderDeveloperTypography(host) {
       <header class="styleguide-header">
         <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Typographie</p>
         <h1 class="view-title">Typographie</h1>
-        <p class="view-desc">
-          Open Sans pour l’UI, Inter pour les cartes.
-        </p>
       </header>
 
       <p class="styleguide-intro">
+        Open Sans pour l’UI, Inter pour les cartes.
         Classe = apparence&nbsp;; tag <code>h1</code>–<code>h3</code> = plan du document.
         Un rang 1 par vue, ne pas sauter de rang.
       </p>
@@ -102,14 +101,15 @@ export function renderDeveloperTypography(host) {
         </p>
         <div class="styleguide-type-demo">
           <p class="view-title">Titre de vue (view-title)</p>
-          <p class="view-desc">Description de vue (view-desc) — ink-soft, 0.95rem. Pas un heading.</p>
+          <p class="view-desc">Description de vue (view-desc) — ink-soft, 0.95rem. Pas un heading, pas dans le header de modale.</p>
           <p class="section-title">Section (section-title)</p>
           <p class="styleguide-hint" style="margin-top: 0">
             <code>view-title</code> 1.7rem / 700 (1.35rem dans <code>.modal-header</code>)
             · <code>section-title</code> 1.25rem / 700
             · <code>styleguide-section-title</code> 1rem — interne galerie seulement.
           </p>
-          <div class="empty-view" style="padding: 1.5rem 0; border: 1px dashed var(--line); margin-top: 1rem">
+          <div class="empty-view" style="padding: 1.75rem 1.5rem; border: 1px dashed var(--line); margin-top: 1rem">
+            <div class="brick" aria-hidden="true"></div>
             <p class="view-title">État vide</p>
             <p>Même classe <code>view-title</code> (c’est le titre de la vue).</p>
           </div>
@@ -139,18 +139,23 @@ export function renderDeveloperTypography(host) {
                 <td>—</td>
               </tr>
               <tr>
-                <td>État vide</td>
+                <td>État vide (accueil, chargement)</td>
                 <td><code>h1.view-title</code></td>
-                <td>—</td>
+                <td>brique CSS ; texte / tuiles optionnels</td>
+              </tr>
+              <tr>
+                <td>État vide (recherche liste / thèmes)</td>
+                <td><code>p.view-title</code></td>
+                <td><code>h1</code> déjà sur la vue / dialog</td>
               </tr>
               <tr>
                 <td>Dialog</td>
-                <td><code>h1.view-title</code> + <code>aria-labelledby</code></td>
+                <td><code>h1.view-title</code> + <code>aria-labelledby</code> (titre court ; confirmations un peu plus longues)</td>
                 <td><code>h2.section-title</code></td>
               </tr>
               <tr>
                 <td>Page Markdown en modale</td>
-                <td><code># Titre</code> ou <code># Titre | Sous-titre</code> → titre du dialog (retiré du corps). <code> | </code> optionnel = <code>view-desc</code></td>
+                <td><code># Titre</code> → titre du dialog (retiré du corps)</td>
                 <td><code>##</code> → <code>h2</code> · <code>###</code> → <code>h3</code> dans <code>.md-content</code></td>
               </tr>
             </tbody>
@@ -168,8 +173,11 @@ export function renderDeveloperTypography(host) {
           <div class="modal-header">
             <div>
               <p class="view-title">Paramètres</p>
-              <p class="view-desc">Options et configuration de l'application</p>
             </div>
+            <button type="button" class="btn primary icon-only modal-close" tabindex="-1">
+              ${ICON_CLOSE}
+              <span class="visually-hidden">Fermer</span>
+            </button>
           </div>
           <div class="modal-body">
             <h2 class="section-title">Interface</h2>
@@ -181,23 +189,24 @@ export function renderDeveloperTypography(host) {
       <div class="styleguide-section">
         <h2 class="styleguide-section-title">Dialog — Markdown (<code>md-content</code>)</h2>
         <p class="form-hint" style="margin-bottom: 0.75rem">
-          Fichier&nbsp;: <code># Titre</code> ou <code># Titre | Sous-titre</code> (le <code> | </code> remplit <code>view-desc</code>), puis <code>##</code> / <code>###</code>.
+          Fichier&nbsp;: <code># Titre</code>, puis <code>##</code> / <code>###</code>.
           Pas de <code>h1</code> dans le corps. Intertitres plus petits que le header (1.2rem / 1.05rem).
         </p>
         <div class="styleguide-dialog-demo">
           <div class="modal-header">
             <div>
-              <p class="view-title">À propos</p>
-              <p class="view-desc"><strong>Brickcard Generator</strong> · version d’exemple</p>
+              <p class="view-title">Brickcard Generator</p>
             </div>
+            <button type="button" class="btn primary icon-only modal-close" tabindex="-1">
+              ${ICON_CLOSE}
+              <span class="visually-hidden">Fermer</span>
+            </button>
           </div>
           <div class="modal-body">
             <article class="md-content">
+              <p><strong>Version 0.x.x.</strong> Paragraphe de contenu. Texte avec <strong>gras</strong>, <em>italique</em>,
+                un ${linkMarkup("lien", { href: "#/developer" })} et du <code>code inline</code>.</p>
               <h2>Fonctionnalités</h2>
-              <p>
-                Paragraphe de contenu. Texte avec <strong>gras</strong>, <em>italique</em>,
-                un ${linkMarkup("lien", { href: "#/developer" })} et du <code>code inline</code>.
-              </p>
               <ul>
                 <li>Liste à puces — premier élément</li>
                 <li>Deuxième élément</li>
@@ -269,7 +278,7 @@ const APP_ID = "brickcard-generator";</code></pre>
             <tbody>
               <tr><td><code>body</code></td><td>héritée · 400</td></tr>
               <tr><td><code>view-title</code></td><td>1.7rem · 700 (1.35rem en header de modale)</td></tr>
-              <tr><td><code>view-desc</code></td><td>0.95rem · ink-soft</td></tr>
+              <tr><td><code>view-desc</code></td><td>0.95rem · ink-soft (vues, pas le header de modale)</td></tr>
               <tr><td><code>section-title</code></td><td>1.25rem · 700</td></tr>
               <tr><td><code>styleguide-section-title</code></td><td>1rem · 700 (galerie)</td></tr>
               <tr><td><code>a.link</code></td><td>héritée · underline · voir galerie Liens</td></tr>

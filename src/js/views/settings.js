@@ -28,6 +28,15 @@ import {
 import { DEFAULT_THEME_COLOR, isLocalDevHost } from "../themes-data.js";
 import { tileListMarkup } from "../tile.js";
 import { confirmDialog } from "../confirm-dialog.js";
+import { syncPrintMenu } from "../print-menu.js";
+import {
+  PRINT_GRID_MAX,
+  PRINT_GRID_MIN,
+  computePrintLayout,
+  formatPrintGridSize,
+  getPrintSettings,
+  setPrintSettings,
+} from "../print-settings.js";
 
 /**
  * Modale de configuration.
@@ -52,6 +61,8 @@ export function renderSettingsModal(host, opts) {
   const configuredColorDisplay = getConfiguredCardColorDisplay();
   const listColsMax = getListColsMax();
   const listColsSlider = listColsToSlider(listColsMax);
+  const printSettings = getPrintSettings();
+  const printGridSize = formatPrintGridSize(computePrintLayout(printSettings.printGrid));
 
   document.body.classList.add("modal-open");
 
@@ -61,9 +72,8 @@ export function renderSettingsModal(host, opts) {
         <div class="modal-header">
           <div>
             <h1 class="view-title" id="settings-modal-title">Paramètres</h1>
-            <p class="view-desc">Options et configuration de l'application</p>
           </div>
-          <button type="button" class="btn ghost icon-only modal-close" id="btn-settings-close">
+          <button type="button" class="btn primary icon-only modal-close" id="btn-settings-close">
             ${ICON_CLOSE}
             <span class="visually-hidden">Fermer</span>
           </button>
@@ -153,6 +163,45 @@ export function renderSettingsModal(host, opts) {
             </section>
 
             <section class="settings-panel">
+              <h2 class="section-title">Impression</h2>
+              <div class="form-field">
+                <label class="form-label" for="settings-print-grid">Grille d’impression</label>
+                <div class="form-range-row">
+                  <input
+                    type="range"
+                    id="settings-print-grid"
+                    min="${PRINT_GRID_MIN}"
+                    max="${PRINT_GRID_MAX}"
+                    step="1"
+                    value="${printSettings.printGrid}"
+                    aria-valuemin="${PRINT_GRID_MIN}"
+                    aria-valuemax="${PRINT_GRID_MAX}"
+                    aria-valuenow="${printSettings.printGrid}"
+                    aria-valuetext="${printGridSize}"
+                    aria-describedby="settings-print-grid-out"
+                  />
+                  <output id="settings-print-grid-out" for="settings-print-grid">${printGridSize}</output>
+                </div>
+              </div>
+              <div class="form-field">
+                <p class="form-label" id="settings-card-sides-label">Côtés des cartes à imprimer</p>
+                <div class="theme-mode-switch" role="radiogroup" aria-labelledby="settings-card-sides-label">
+                  <button type="button" class="btn ${printSettings.cardSidesToPrint === "faceAndBack" ? "primary" : "secondary"}" data-card-sides="faceAndBack" aria-pressed="${printSettings.cardSidesToPrint === "faceAndBack"}">Face et dos</button>
+                  <button type="button" class="btn ${printSettings.cardSidesToPrint === "faceOnly" ? "primary" : "secondary"}" data-card-sides="faceOnly" aria-pressed="${printSettings.cardSidesToPrint === "faceOnly"}">Face seulement</button>
+                  <button type="button" class="btn ${printSettings.cardSidesToPrint === "backOnly" ? "primary" : "secondary"}" data-card-sides="backOnly" aria-pressed="${printSettings.cardSidesToPrint === "backOnly"}">Dos seulement</button>
+                </div>
+              </div>
+              <div class="form-field" id="settings-recto-verso-field">
+                <p class="form-label" id="settings-recto-verso-label">Recto-verso</p>
+                <div class="theme-mode-switch" role="radiogroup" aria-labelledby="settings-recto-verso-label" aria-describedby="settings-recto-verso-hint">
+                  <button type="button" class="btn ${printSettings.sheetRectoVerso === "alternate" ? "primary" : "secondary"}" data-sheet-recto-verso="alternate" aria-pressed="${printSettings.sheetRectoVerso === "alternate"}">Alterner</button>
+                  <button type="button" class="btn ${printSettings.sheetRectoVerso === "grouped" ? "primary" : "secondary"}" data-sheet-recto-verso="grouped" aria-pressed="${printSettings.sheetRectoVerso === "grouped"}">Regrouper</button>
+                </div>
+                <p class="form-hint" id="settings-recto-verso-hint"></p>
+              </div>
+            </section>
+
+            <section class="settings-panel">
               <h2 class="section-title">Gestion de la collection</h2>
               ${tileListMarkup([
                 {
@@ -233,6 +282,14 @@ export function renderSettingsModal(host, opts) {
     host.querySelector("#settings-list-cols")
   );
   const listColsOut = host.querySelector("#settings-list-cols-out");
+  const printGridInput = /** @type {HTMLInputElement|null} */ (
+    host.querySelector("#settings-print-grid")
+  );
+  const printGridOut = host.querySelector("#settings-print-grid-out");
+  const printSidesBtns = Array.from(host.querySelectorAll("[data-card-sides]"));
+  const printDuplexBtns = Array.from(host.querySelectorAll("[data-sheet-recto-verso]"));
+  const printDuplexField = host.querySelector("#settings-recto-verso-field");
+  const printDuplexHint = host.querySelector("#settings-recto-verso-hint");
 
   const defaultColorRoot = /** @type {HTMLElement|null} */ (
     host.querySelector("#settings-default-color-hex")?.closest("[data-form-color]")
@@ -304,6 +361,72 @@ export function renderSettingsModal(host, opts) {
     cardRadiusInput.addEventListener("change", syncCardRadius);
   }
 
+  let currentPrintSettings = printSettings;
+
+  function syncPrintSidesButtons(cardSidesToPrint) {
+    printSidesBtns.forEach((btn) => {
+      const on = btn.getAttribute("data-card-sides") === cardSidesToPrint;
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+      btn.classList.toggle("primary", on);
+      btn.classList.toggle("secondary", !on);
+    });
+  }
+
+  function syncPrintDuplexButtons(sheetRectoVerso) {
+    printDuplexBtns.forEach((btn) => {
+      const on = btn.getAttribute("data-sheet-recto-verso") === sheetRectoVerso;
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+      btn.classList.toggle("primary", on);
+      btn.classList.toggle("secondary", !on);
+    });
+  }
+
+  function refreshPrintSettingsUi() {
+    if (printDuplexField instanceof HTMLElement) {
+      printDuplexField.hidden = currentPrintSettings.cardSidesToPrint !== "faceAndBack";
+    }
+    if (printDuplexHint instanceof HTMLElement) {
+      printDuplexHint.textContent =
+        currentPrintSettings.sheetRectoVerso === "grouped"
+          ? "Tous les rectos d’abord, puis retourner la pile pour ensuite imprimer tous les versos."
+          : "Une feuille à la fois (imprimante recto-verso).";
+    }
+    syncPrintSidesButtons(currentPrintSettings.cardSidesToPrint);
+    syncPrintDuplexButtons(currentPrintSettings.sheetRectoVerso);
+    syncPrintMenu();
+  }
+
+  /** @param {Partial<typeof currentPrintSettings>} partial */
+  function persistPrintSettings(partial) {
+    currentPrintSettings = setPrintSettings(partial);
+    refreshPrintSettingsUi();
+  }
+
+  refreshPrintSettingsUi();
+
+  printGridInput?.addEventListener("input", () => {
+    const printGrid = Number(printGridInput.value);
+    persistPrintSettings({ printGrid });
+    const size = formatPrintGridSize(computePrintLayout(currentPrintSettings.printGrid));
+    printGridInput.setAttribute("aria-valuenow", String(printGrid));
+    printGridInput.setAttribute("aria-valuetext", size);
+    if (printGridOut) printGridOut.textContent = size;
+  });
+  printSidesBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const cardSidesToPrint = btn.getAttribute("data-card-sides");
+      if (!cardSidesToPrint) return;
+      persistPrintSettings({ cardSidesToPrint });
+    });
+  });
+  printDuplexBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const sheetRectoVerso = btn.getAttribute("data-sheet-recto-verso");
+      if (!sheetRectoVerso) return;
+      persistPrintSettings({ sheetRectoVerso });
+    });
+  });
+
   host.querySelector("#settings-import")?.addEventListener("click", () => {
     onImport();
   });
@@ -317,7 +440,6 @@ export function renderSettingsModal(host, opts) {
     clearCardsBtn.addEventListener("click", async () => {
       const ok = await confirmDialog(host, {
         title: "Supprimer toutes les cartes ?",
-        subtitle: "Vider la collection",
         message:
           "Toutes les cartes seront supprimées définitivement. Les thèmes et les réglages sont conservés.",
         okLabel: "Supprimer",
@@ -337,8 +459,7 @@ export function renderSettingsModal(host, opts) {
   if (resetBtn && onDevReset) {
     resetBtn.addEventListener("click", async () => {
       const ok = await confirmDialog(host, {
-        title: "Réinitialiser ?",
-        subtitle: "Supprimer toutes les données locales du navigateur",
+        title: "Réinitialiser toutes les données locales ?",
         message:
           "Toutes les cartes, thèmes et réglages de la collection seront supprimés définitivement.",
         okLabel: "Réinitialiser",

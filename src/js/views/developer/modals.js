@@ -22,7 +22,6 @@ export function renderDeveloperModals(host) {
       <header class="styleguide-header">
         <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Modales</p>
         <h1 class="view-title">Modales</h1>
-        <p class="view-desc">Tailles, alignement, header et pied.</p>
       </header>
 
       <p class="styleguide-intro">
@@ -59,7 +58,7 @@ export function renderDeveloperModals(host) {
               </tr>
               <tr>
                 <td>Header</td>
-                <td><code>modal-header</code> : <code>h1.view-title</code> + desc optionnelle + <code>modal-close</code></td>
+                <td><code>modal-header</code> : <code>h1.view-title</code> + <code>btn primary icon-only modal-close</code> (couleurs inversées)</td>
               </tr>
               <tr>
                 <td>Corps</td>
@@ -116,9 +115,13 @@ export function renderDeveloperModals(host) {
 
       <div class="styleguide-section">
         <h2 class="styleguide-section-title">Header</h2>
+        <p class="form-hint" style="margin-bottom: 0.65rem">
+          Titre court + bouton fermer (<code>btn primary icon-only</code>, couleurs inversées).
+          Les confirmations peuvent avoir un titre plus long (il passe à la ligne).
+        </p>
         <div class="styleguide-row">
-          <button type="button" class="btn secondary" data-demo-modal="header-plain">Titre seul</button>
-          <button type="button" class="btn secondary" data-demo-modal="header-desc">Titre + description</button>
+          <button type="button" class="btn secondary" data-demo-modal="header-plain">Titre court</button>
+          <button type="button" class="btn secondary" data-demo-modal="header-confirm">Titre de confirmation</button>
         </div>
       </div>
 
@@ -173,7 +176,6 @@ export function renderDeveloperModals(host) {
    *   size?: ModalSize,
    *   align?: ModalAlign,
    *   title: string,
-   *   desc?: string,
    *   bodyHtml: string,
    *   footerHtml?: string,
    * }} spec
@@ -190,7 +192,6 @@ export function renderDeveloperModals(host) {
       align === "top" || align === "bottom" || align === "middle"
         ? ` modal-backdrop--${align}`
         : " modal-backdrop--middle";
-    const desc = spec.desc ? `<p class="view-desc">${spec.desc}</p>` : "";
     const footer = spec.footerHtml
       ? `<div class="modal-footer">${spec.footerHtml}</div>`
       : "";
@@ -206,9 +207,8 @@ export function renderDeveloperModals(host) {
           <div class="modal-header">
             <div>
               <h1 class="view-title" id="demo-modal-title">${spec.title}</h1>
-              ${desc}
             </div>
-            <button type="button" class="btn ghost icon-only modal-close" id="demo-modal-close">
+            <button type="button" class="btn primary icon-only modal-close" id="demo-modal-close">
               ${ICON_CLOSE}
               <span class="visually-hidden">Fermer</span>
             </button>
@@ -271,8 +271,7 @@ export function renderDeveloperModals(host) {
       openDemo({
         size,
         title: `Modale ${sizeLabels[size] || size}`,
-        desc: `Classe <code>modal--${size}</code>. Sous 640px&nbsp;: plein écran.`,
-        bodyHtml: `<p>Corps de démo. Sur grand écran, la largeur suit la taille. Sur smartphone, la modale occupe tout l’écran.</p>`,
+        bodyHtml: `<p>Classe <code>modal--${size}</code>. Sous 640px&nbsp;: plein écran.</p><p>Corps de démo. Sur grand écran, la largeur suit la taille. Sur smartphone, la modale occupe tout l’écran.</p>`,
       });
       return;
     }
@@ -283,25 +282,29 @@ export function renderDeveloperModals(host) {
         size: "sm",
         align,
         title: `Alignée en ${alignLabels[align] || align}`,
-        desc: `Classe <code>modal-backdrop--${align}</code> sur le backdrop.`,
-        bodyHtml: `<p>Petite modale pour bien voir le positionnement vertical. Le défaut sans classe (ou <code>--middle</code>) centre verticalement.</p>`,
+        bodyHtml: `<p>Classe <code>modal-backdrop--${align}</code> sur le backdrop.</p><p>Petite modale pour bien voir le positionnement vertical. Le défaut sans classe (ou <code>--middle</code>) centre verticalement.</p>`,
       });
       return;
     }
     if (kind === "header-plain") {
       openDemo({
         size: "md",
-        title: "Titre seul",
-        bodyHtml: `<p>Header sans <code>view-desc</code>.</p>`,
+        title: "Paramètres",
+        bodyHtml: `<p>Header&nbsp;: titre court + <code>btn primary icon-only modal-close</code> (couleurs inversées sur le header ink).</p>`,
       });
       return;
     }
-    if (kind === "header-desc") {
+    if (kind === "header-confirm") {
       openDemo({
-        size: "md",
-        title: "Titre + description",
-        desc: "Sous-titre optionnel via <code>view-desc</code>, comme Paramètres ou l’éditeur.",
-        bodyHtml: `<p>Le bouton fermer reste en haut à droite (<code>modal-close</code>).</p>`,
+        size: "sm",
+        title: "Supprimer la carte &quot;Saucer Centurien&quot; (#6939) ?",
+        bodyHtml: `<p class="modal-confirm-msg">Attention, la suppression est définitive et ne pourra pas être annulée&nbsp;! Souhaitez-vous continuer&nbsp;?</p>`,
+        footerHtml: `
+          <div class="modal-footer-end">
+            <button type="button" class="btn secondary" data-demo-close>Annuler</button>
+            <button type="button" class="btn danger" data-demo-close>Supprimer</button>
+          </div>
+        `,
       });
       return;
     }
@@ -309,8 +312,7 @@ export function renderDeveloperModals(host) {
       openDemo({
         size: "lg",
         title: "Contenu long",
-        desc: "modal--lg — le body défile",
-        bodyHtml: longBodyHtml(),
+        bodyHtml: `<p><code>modal--lg</code> — le body défile.</p>${longBodyHtml()}`,
       });
       return;
     }
@@ -318,8 +320,7 @@ export function renderDeveloperModals(host) {
       openDemo({
         size: "md",
         title: "Footer à deux zones",
-        desc: "Gauche&nbsp;: validation · Droite&nbsp;: danger. Tailles mixte (normal + <code>sm</code>).",
-        bodyHtml: `<p>Les boutons restent alignés verticalement au centre du footer, quelle que soit leur taille.</p>`,
+        bodyHtml: `<p>Gauche&nbsp;: validation · Droite&nbsp;: danger. Tailles mixte (normal + <code>sm</code>).</p><p>Les boutons restent alignés verticalement au centre du footer, quelle que soit leur taille.</p>`,
         footerHtml: `
           <div class="modal-footer-start">
             <button type="button" class="btn primary" data-demo-close>Sauvegarder</button>
@@ -335,9 +336,8 @@ export function renderDeveloperModals(host) {
     if (kind === "footer-danger") {
       openDemo({
         size: "sm",
-        title: "Confirmer la suppression",
-        desc: "Exemple compact&nbsp;: annuler à gauche, supprimer à droite.",
-        bodyHtml: `<p>Cette action est irréversible (démo).</p>`,
+        title: "Supprimer le thème &quot;Star Wars&quot; ?",
+        bodyHtml: `<p class="modal-confirm-msg">Cette action est irréversible (démo).</p>`,
         footerHtml: `
           <div class="modal-footer-start">
             <button type="button" class="btn secondary sm" data-demo-close>Annuler</button>

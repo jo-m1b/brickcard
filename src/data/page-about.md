@@ -1,6 +1,6 @@
-# Brickcard Generator | Version **{{APP_VERSION}}**
+# Brickcard Generator
 
-Sert à créer des cartes format poker (63 × 88 mm) qui décrivent un set LEGO — référence, photo, titre, thème, année, nombre de pièces.
+**Version {{APP_VERSION}}.** Sert à créer des cartes format poker (63 × 88 mm) qui décrivent un set LEGO — référence, photo, titre, thème, année, nombre de pièces.
 
 Usage typique : imprimer, plastifier, glisser dans une pochette transparente avec un set dont la boîte a disparu — pour retrouver facilement le set et ses références (plans).
 

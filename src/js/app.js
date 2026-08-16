@@ -11,7 +11,7 @@ import { renderThemeEditor } from "./views/theme-editor.js";
 import { renderPageModal } from "./views/page.js";
 import { renderSettingsModal } from "./views/settings.js";
 import { renderDeveloperModal } from "./views/developer/modal.js";
-import { tileListMarkup } from "./tile.js";
+import { emptyViewMarkup } from "./empty-view.js";
 import { confirmDialog, openConfirmDialog } from "./confirm-dialog.js";
 import {
   initPrintMenu,
@@ -346,21 +346,26 @@ function disposeList() {
 }
 
 function renderEmpty() {
-  main.innerHTML = `
-    <section class="panel empty-view no-print">
-      <div class="brick" aria-hidden="true"></div>
-      <h1 class="view-title">Aucune carte pour l'instant</h1>
-      <p>Crée ta première carte : référence, photo, titre, thème. Tu pourras ensuite les lister et imprimer en lot sur A4 (face + dos).</p>
-      ${tileListMarkup([
-        {
-          title: "Créer ma première carte",
-          desc: "Référence, photo, titre, thème",
-          href: "#/new-card",
-          icon: "add",
-        },
-      ])}
-    </section>
-  `;
+  main.innerHTML = emptyViewMarkup({
+    title: "Bienvenue",
+    text: "Aucune carte pour l'instant dans la collection. Il faut créer ou importer de nouvelles cartes pour ensuite pouvoir les lister et les imprimer en lot.",
+    tiles: [
+      {
+        title: "Nouvelle carte",
+        desc: "Créer une première carte pour l'ajouter à la collection",
+        href: "#/new-card",
+        icon: "add",
+      },
+      {
+        title: "Importer une sauvegarde",
+        desc: "Ajouter un lot de cartes à la collection à partir d'une sauvegarde",
+        icon: "upload",
+        tag: "button",
+        id: "empty-import",
+      },
+    ],
+  });
+  main.querySelector("#empty-import")?.addEventListener("click", () => importFile?.click());
 }
 
 const listOpts = {
@@ -465,8 +470,7 @@ async function handleImportFile() {
     if (existing > 0) {
       if (!modalRoot) return;
       const choice = await openConfirmDialog(modalRoot, {
-        title: "Importer ?",
-        subtitle: `${existing} carte(s) déjà enregistrée(s)`,
+        title: `Importer dans une collection de ${existing} carte${existing > 1 ? "s" : ""} ?`,
         message:
           "Fusionner met à jour les cartes de même id. Remplacer efface toute la collection actuelle.",
         actions: [
@@ -478,8 +482,7 @@ async function handleImportFile() {
       if (choice == null || choice === "cancel") return;
       if (choice === "replace") {
         const sure = await confirmDialog(modalRoot, {
-          title: "Remplacer ?",
-          subtitle: "Toute la collection",
+          title: "Remplacer toute la collection ?",
           message: "Cette action est irréversible (sauf si tu as un export).",
           okLabel: "Remplacer",
           danger: true,
@@ -590,24 +593,17 @@ async function boot() {
     initCardDesign();
     initListLayout();
     initPrintMenu({ toast });
-    /* Seed thèmes en arrière-plan : ne bloque pas l’empty state après un reset. */
-    void loadThemes().catch((err) => console.error(err));
 
     const initialHash = !location.hash || location.hash === "#" ? "#/" : normalizeHash(location.hash);
     history.replaceState({ app: APP_ID, depth: 0 }, "", hashUrl(initialHash));
 
-    /* Afficher tout de suite l’accueil vide pendant l’ouverture IndexedDB. */
-    if (parseRoute().name === "home") {
-      setNewButtonVisible(true);
-      syncHeaderPrint(0);
-      renderEmpty();
-    }
-    const cards = await loadCards();
-    syncHeaderPrint(cards.length);
+    await Promise.all([loadCards(), loadThemes()]);
+    main.removeAttribute("aria-busy");
     await route();
   } catch (err) {
     console.error(err);
     if (main) {
+      main.removeAttribute("aria-busy");
       main.innerHTML = `<section class="panel"><p class="error">Erreur au démarrage : ${err.message}</p></section>`;
     }
   }

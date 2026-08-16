@@ -18,7 +18,6 @@ export function renderDeveloperFields(host) {
       <header class="styleguide-header">
         <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Champs</p>
         <h1 class="view-title">Champs de saisie</h1>
-        <p class="view-desc">Label, hint, contrôle, erreur.</p>
       </header>
 
       <p class="styleguide-intro">

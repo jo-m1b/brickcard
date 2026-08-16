@@ -12,10 +12,10 @@ export function renderDeveloperLinks(host) {
       <header class="styleguide-header">
         <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Liens</p>
         <h1 class="view-title">Liens</h1>
-        <p class="view-desc">Texte souligné, couleur d’encre.</p>
       </header>
 
       <p class="styleguide-intro">
+        Texte souligné, couleur d’encre.
         Classe <code>link</code>. Compact&nbsp;: <code>sm</code>.
         Icône à droite&nbsp;: <code>icon-right</code>.
         Externe (<code>https://</code>)&nbsp;: <code>target="_blank"</code> + icône

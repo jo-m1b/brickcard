@@ -1,5 +1,7 @@
 import { loadCards } from "./storage.js";
-import { printCards, CARDS_PER_PAGE } from "./print.js";
+import { printCards } from "./print.js";
+import { openPrintDialog } from "./print-dialog.js";
+import { formatPrintMenuDesc } from "./print-settings.js";
 import {
   getPrintQty,
   setPrintQty,
@@ -119,8 +121,7 @@ export function syncPrintMenu(state = {}) {
       desc.textContent =
         "Sélectionnez les cartes à imprimer parmi celles de la collection";
     } else {
-      const pages = Math.ceil(count / CARDS_PER_PAGE);
-      desc.textContent = `${pages} feuille${pages > 1 ? "s" : ""} A4 recto-verso`;
+      desc.textContent = formatPrintMenuDesc(count);
     }
   }
 
@@ -245,12 +246,23 @@ export function initPrintMenu(options) {
       for (let i = 0; i < qty; i++) toPrint.push(card);
     }
     if (!toPrint.length) return;
-    btnRun.disabled = true;
     setOpen(false);
+    const host = document.getElementById("modal-root");
+    if (!host) return;
     try {
-      await printCards(toPrint);
+      await openPrintDialog(host, {
+        cardCount: toPrint.length,
+        onSettingsChange: () => syncPrintMenu(),
+        onPrint: async () => {
+          try {
+            await printCards(toPrint);
+          } catch (err) {
+            opts?.toast(err.message || "Erreur d'impression", "error");
+          }
+        },
+      });
     } catch (err) {
-      opts?.toast(err.message || "Erreur d'impression", "error");
+      opts?.toast(err.message || "Impossible d’ouvrir les paramètres d’impression", "error");
     } finally {
       syncPrintMenu();
     }

@@ -13,7 +13,6 @@ export function renderDeveloperTiles(host) {
       <header class="styleguide-header">
         <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Tuiles</p>
         <h1 class="view-title">Tuiles</h1>
-        <p class="view-desc">Titre, description, icône, disabled, danger.</p>
       </header>
 
       <p class="styleguide-intro">

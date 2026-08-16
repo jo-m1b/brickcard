@@ -27,9 +27,8 @@ export async function renderPageModal(host, opts) {
         <div class="modal-header">
           <div>
             <h1 class="view-title" id="page-modal-title">${page.title}</h1>
-            ${page.desc ? `<p class="view-desc" id="page-modal-desc">${page.desc}</p>` : ""}
           </div>
-          <button type="button" class="btn ghost icon-only modal-close" id="btn-page-close">
+          <button type="button" class="btn primary icon-only modal-close" id="btn-page-close">
             ${ICON_CLOSE}
             <span class="visually-hidden">Fermer</span>
           </button>
@@ -44,7 +43,7 @@ export async function renderPageModal(host, opts) {
   const body = host.querySelector("#page-md-body");
   if (body) body.innerHTML = page.html;
 
-  // Le # du markdown = titre du dialog (h1) ; ` | ` optionnel = view-desc. ## / ### restent h2 / h3.
+  // Le # du markdown = titre du dialog (h1). ## / ### restent h2 / h3.
   const firstH1 = body?.querySelector("h1");
   if (firstH1) firstH1.remove();
 

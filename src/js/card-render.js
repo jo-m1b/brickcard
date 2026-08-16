@@ -6,6 +6,12 @@ import { resolveImageBackground } from "./storage.js";
 
 /** Logo app (chemin relatif depuis `src/`). */
 export const BRAND_LOGO_SRC = "img/logo-brickcard-generator.svg";
+export const BRAND_LOGO_SRC_WHITE = "img/logo-brickcard-generator-white.svg";
+
+/** @param {boolean} lightFg texte / logo blancs sur fond coloré */
+export function brandLogoSrc(lightFg) {
+  return lightFg ? BRAND_LOGO_SRC_WHITE : BRAND_LOGO_SRC;
+}
 
 /** Nom court affiché sous le logo sur les cartes. */
 export const BRAND_NAME = "Brickcard";
@@ -132,7 +138,12 @@ function applyThemeLogo(root, legoTheme) {
  * @param {string} accentFg
  */
 function syncAccentFgClass(root, accentFg) {
-  root.classList.toggle("is-light-fg", accentFg === "#ffffff");
+  const lightFg = accentFg === "#ffffff";
+  root.classList.toggle("is-light-fg", lightFg);
+  const src = brandLogoSrc(lightFg);
+  root.querySelectorAll(".card-brand-logo").forEach((img) => {
+    if (img.getAttribute("src") !== src) img.setAttribute("src", src);
+  });
 }
 
 /** Icônes méta (header) — valeurs seules, sans libellé. */

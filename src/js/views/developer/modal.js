@@ -36,31 +36,21 @@ const PAGES = {
 let session = null;
 
 /**
- * Titre / desc du dialog = header de la galerie (comme les pages Markdown).
+ * Titre du dialog = header de la galerie (comme les pages Markdown).
  * Le kicker (fil d’Ariane) reste dans le corps s’il contient un lien.
  * @param {HTMLElement} body
  * @param {HTMLElement} titleEl
- * @param {HTMLElement} descEl
  */
-function liftStyleguideHeader(body, titleEl, descEl) {
+function liftStyleguideHeader(body, titleEl) {
   const head = body.querySelector(".styleguide-header");
   if (!head) return;
 
   const h1 = head.querySelector("h1");
-  const desc = head.querySelector(".view-desc");
   const kicker = head.querySelector(".styleguide-kicker");
 
   if (h1) {
     titleEl.innerHTML = h1.innerHTML;
     h1.remove();
-  }
-  if (desc && desc.innerHTML.trim()) {
-    descEl.innerHTML = desc.innerHTML;
-    descEl.hidden = false;
-    desc.remove();
-  } else {
-    descEl.hidden = true;
-    descEl.replaceChildren();
   }
 
   if (kicker && kicker.querySelector("a")) {
@@ -113,9 +103,8 @@ export function renderDeveloperModal(host, opts) {
         <div class="modal-header">
           <div>
             <h1 class="view-title" id="developer-modal-title">Espace développeur</h1>
-            <p class="view-desc" id="developer-modal-desc" hidden></p>
           </div>
-          <button type="button" class="btn ghost icon-only modal-close" id="btn-developer-close">
+          <button type="button" class="btn primary icon-only modal-close" id="btn-developer-close">
             ${ICON_CLOSE}
             <span class="visually-hidden">Fermer</span>
           </button>
@@ -128,7 +117,6 @@ export function renderDeveloperModal(host, opts) {
 
   const body = host.querySelector("#developer-modal-body");
   const titleEl = host.querySelector("#developer-modal-title");
-  const descEl = host.querySelector("#developer-modal-desc");
   const backdrop = host.querySelector("#developer-modal-backdrop");
   const btnClose = host.querySelector("#btn-developer-close");
   const demoRoot = host.querySelector("#developer-demo-root");
@@ -139,10 +127,10 @@ export function renderDeveloperModal(host, opts) {
   function setPage(nextPage) {
     pageCleanup();
     if (demoRoot) demoRoot.innerHTML = "";
-    if (!body || !titleEl || !descEl) return;
+    if (!body || !titleEl) return;
     const renderPage = PAGES[nextPage] || PAGES.index;
     pageCleanup = renderPage(body) || (() => {});
-    liftStyleguideHeader(body, titleEl, descEl);
+    liftStyleguideHeader(body, titleEl);
     stripAppBackLinks(body);
   }
 

@@ -7,6 +7,31 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Added
+
+- Accueil : écran de chargement (brique + « Chargement... ») jusqu’à IndexedDB cartes + thèmes
+- Accueil vide : « Bienvenue », texte, tuiles Nouvelle carte / Importer une sauvegarde
+- Recherche sans résultat (cartes et thèmes) : état vide brique + « Oups ! »
+- Impression : nom de fichier PDF proposé via `document.title` (`brickcard-YYYY-MM-DD-grille-…`)
+- Impression : modale de paramètres (grille 1×1–10×10, côtés des cartes, recto-verso) ; récapitulatif ; réglages persistés
+- Paramètres : section Impression (grille, côtés des cartes, recto-verso)
+
+### Changed
+
+- Accueil : plus d’affichage empty optimiste pendant l’ouverture IndexedDB
+- Impression : titre de modale « Paramètres d’impression » ; champ « Grille d’impression » ; Recto-verso en 2 boutons (Alterner / Regrouper)
+- Impression : réglage de grille 1×1 à 10×10 ; récap menu et modale alignés ; la modale reste ouverte pendant l’impression
+- Impression : côtés des cartes en 3 boutons Face / Dos (recto / verso réservés aux feuilles A4) ; Annuler à droite, à gauche de Lancer l’impression
+- Impression : clés persistées `printGrid` / `cardSidesToPrint` / `sheetRectoVerso` (pas de migration de l’ancien format)
+- Menu Impression : description « Grille N×N » puis nombre de feuilles
+- Modales : plus de sous-titre dans le header ; bouton fermer en `primary` icône seule (couleurs inversées sur le header ink)
+- Confirmations : titre explicite (carte, thème, import, reset) à la place d’un sous-titre
+- Pages Markdown : `# Titre` seul ; la version À propos passe dans le premier paragraphe
+
+### Fixed
+
+- Impression : logo Brickcard blanc net (fichier SVG dédié, plus de filtre `invert`)
+
 ## [0.6.0] — 2026-08-15
 
 ### Added

@@ -172,10 +172,19 @@ textarea {
   margin: 0 auto;
   padding: 0 1.25rem 3rem;
   display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
   gap: 1.25rem;
   max-width: 100%;
   overflow-x: clip;
   box-sizing: border-box;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 /* ——— Topbar sticky ——— */
@@ -1042,6 +1051,7 @@ button.tile.danger:disabled .tile-desc {
   line-height: 1.35;
   text-align: center;
   opacity: 0.85;
+  white-space: pre-line;
 }
 
 .print-menu-desc[hidden] {
@@ -1114,9 +1124,33 @@ html:not([data-theme]) .btn .icon-system {
 .empty-view {
   text-align: center;
   padding: 3.5rem 1.5rem;
+  margin: 0;
   display: grid;
   gap: 0.75rem;
   justify-items: center;
+  place-content: center;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.empty-view[hidden] {
+  display: none !important;
+}
+
+.main > .empty-view,
+.main > .panel:has(> .empty-view:not([hidden])) {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.main > .panel:has(> .empty-view:not([hidden])) {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+.main > .panel:has(> .empty-view:not([hidden])) > .empty-view {
+  flex: 1 1 auto;
 }
 
 .empty-view .brick {
@@ -1152,7 +1186,7 @@ html:not([data-theme]) .btn .icon-system {
   margin: 0;
 }
 
-.empty-view p {
+.empty-view p:not(.view-title) {
   margin: 0;
   max-width: 28rem;
   color: var(--ink-soft);
@@ -1355,6 +1389,10 @@ html:not([data-theme]) .btn .icon-system {
   margin-bottom: 1rem;
 }
 
+.form-field[hidden] {
+  display: none;
+}
+
 .field-row .form-field {
   margin-bottom: 0;
 }
@@ -1377,6 +1415,15 @@ html:not([data-theme]) .btn .icon-system {
   font-size: 0.8rem;
   line-height: 1.35;
   color: var(--ink-soft);
+}
+
+.form-hint strong {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.theme-mode-switch + .form-hint {
+  text-align: center;
 }
 
 .form-error {
@@ -2200,12 +2247,6 @@ button.form-select-trigger.sm {
   line-height: 1;
 }
 
-.empty-table {
-  text-align: center;
-  padding: 2rem 1rem;
-  color: var(--ink-soft);
-}
-
 /* ——— Modales ———
    Dimensions toujours bornées au viewport (vw / dvh), jamais à la largeur
    scrollable du document — sinon un overflow horizontal de l’app élargit la modale. */
@@ -2293,40 +2334,43 @@ button.form-select-trigger.sm {
 }
 
 .modal-header {
+  --modal-header-inset: 0.65rem;
+  --inv-bg: var(--ink);
+  --inv-fg: var(--bg);
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1.1rem 1.25rem;
+  padding: var(--modal-header-inset) var(--modal-header-inset) var(--modal-header-inset) 1.25rem;
   border-bottom: 2px solid var(--ink);
   flex-shrink: 0;
-  /* Essai : header inversé */
   background: var(--ink);
   color: var(--panel);
 }
 
 .modal-header .view-title {
   margin: 0;
+  min-width: 0;
   font-size: 1.35rem;
   color: inherit;
 }
 
-.modal-header .view-desc {
-  margin: 0.35rem 0 0;
-  color: inherit;
-  opacity: 0.8;
+.modal-header > div {
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
-.modal-header .modal-close.btn.ghost {
-  color: var(--panel);
-  border-color: transparent;
+/* Même mécanisme que le menu impression : le primary DS, tokens inversés */
+.modal-header .modal-close {
+  --bg: var(--inv-bg);
+  --ink: var(--inv-fg);
+  --panel: var(--inv-bg);
+  --brick-red: var(--inv-fg);
+  --on-accent-fg: var(--inv-bg);
 }
 
-.modal-header .modal-close.btn.ghost:hover,
-.modal-header .modal-close.btn.ghost:focus-visible {
-  background: var(--panel);
-  color: var(--ink);
-  border-color: var(--panel);
+.modal:has(> .modal-body > .empty-view:not([hidden])) {
+  height: var(--modal-max-h);
 }
 
 .modal-body {
@@ -2334,6 +2378,12 @@ button.form-select-trigger.sm {
   min-height: 0;
   flex: 1 1 auto;
   overflow: auto;
+}
+
+.modal-body:has(> .empty-view:not([hidden])) {
+  display: grid;
+  place-content: center;
+  place-items: center;
 }
 
 .modal-confirm-msg {
@@ -2467,7 +2517,7 @@ body.modal-open {
 
 .theme-mode-switch {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
   gap: 0.4rem;
 }
 
@@ -2880,10 +2930,6 @@ textarea {
   opacity: 0.9;
 }
 
-.theme-tile.is-light-fg .theme-tile-logo.is-brand {
-  filter: brightness(0) invert(1);
-}
-
 .theme-tile-count {
   margin: 0;
   font-size: 0.78rem;
@@ -3082,11 +3128,6 @@ textarea {
   opacity: 0.9;
 }
 
-.card.is-light-fg .card-brand-logo,
-.card-back.is-light-fg .card-brand-logo {
-  filter: brightness(0) invert(1);
-}
-
 .card-brand-name {
   margin: 0;
   font-family: var(--font-card);
@@ -3215,18 +3256,20 @@ textarea {
 }
 
 .print-sheet {
+  --print-scale: 1;
   width: 210mm;
   height: 297mm;
   padding: 5mm;
   display: grid;
-  grid-template-columns: repeat(var(--cols), var(--card-w));
-  grid-template-rows: repeat(var(--rows), var(--card-h));
-  gap: 5mm 3mm;
+  grid-template-columns: repeat(var(--cols), calc(var(--card-w) * var(--print-scale)));
+  grid-template-rows: repeat(var(--rows), calc(var(--card-h) * var(--print-scale)));
+  gap: calc(5mm * var(--print-scale)) calc(3mm * var(--print-scale));
   justify-content: center;
   align-content: center;
   box-sizing: border-box;
   page-break-after: always;
   break-after: page;
+  overflow: hidden;
   background: #fff;
 }
 
@@ -3236,8 +3279,17 @@ textarea {
 }
 
 .print-slot {
-  width: var(--card-w);
-  height: var(--card-h);
+  width: calc(var(--card-w) * var(--print-scale));
+  height: calc(var(--card-h) * var(--print-scale));
+  overflow: hidden;
+}
+
+.print-slot > .card,
+.print-slot > .card-back {
+  transform: scale(var(--print-scale));
+  transform-origin: top left;
+  margin-right: calc(var(--card-w) * (var(--print-scale) - 1));
+  margin-bottom: calc(var(--card-h) * (var(--print-scale) - 1));
 }
 
 .print-slot.is-empty {
@@ -3357,7 +3409,7 @@ textarea {
    * Bleed 0,5 mm — le gap horizontal feuille est ~3 mm.
    */
   .print-sheet--back {
-    overflow: visible;
+    overflow: hidden;
   }
 
   .print-sheet--back .print-slot {

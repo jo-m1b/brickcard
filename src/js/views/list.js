@@ -12,6 +12,7 @@ import {
   clearPrintMenuHooks,
   syncPrintMenu,
 } from "../print-menu.js";
+import { emptyViewMarkup } from "../empty-view.js";
 import { registerCardsGrid } from "../list-layout.js";
 import { mountCardPreview } from "../card-render.js";
 
@@ -172,7 +173,13 @@ export async function renderList(main, opts) {
     <section class="panel">
       <h1 class="visually-hidden">Cartes</h1>
       <div class="cards-grid" id="cards-grid"></div>
-      <div class="empty-table" id="empty-filter" hidden>Aucune carte ne correspond à la recherche.</div>
+      ${emptyViewMarkup({
+        id: "empty-filter",
+        hidden: true,
+        titleTag: "p",
+        title: "Oups !",
+        text: "Aucune carte ne correspond à la recherche.",
+      })}
     </section>
   `;
 

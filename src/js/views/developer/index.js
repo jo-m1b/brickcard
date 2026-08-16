@@ -12,8 +12,8 @@ export function renderDeveloperIndex(host) {
       <header class="styleguide-header">
         <p class="styleguide-kicker">Styleguide</p>
         <h1 class="view-title">Espace développeur</h1>
-        <p class="view-desc">Système de design, exemples et documentation</p>
       </header>
+      <p class="styleguide-intro">Système de design, exemples et documentation.</p>
       ${tileListMarkup([
         {
           title: "Typographie",

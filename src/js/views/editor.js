@@ -89,9 +89,8 @@ export async function renderEditor(host, opts) {
         <div class="modal-header">
           <div>
             <h1 class="view-title" id="editor-title">${isEdit ? "Modifier la carte" : "Nouvelle carte"}</h1>
-            <p class="view-desc">${isEdit ? "Les modifications seront appliquées à la carte après l’enregistrement" : "Créer une nouvelle carte pour l'ajouter à la collection"}</p>
           </div>
-          <button type="button" class="btn ghost icon-only modal-close" id="btn-modal-close">
+          <button type="button" class="btn primary icon-only modal-close" id="btn-modal-close">
             ${ICON_CLOSE}
             <span class="visually-hidden">Fermer</span>
           </button>
@@ -563,15 +562,14 @@ export async function renderEditor(host, opts) {
     if (e.target === refs.backdrop) requestClose();
   });
 
-  function cardDeleteSubtitle() {
+  function cardDeleteTitle() {
     const data = draft();
     const refRaw = data.legoSetRef.replace(/^#+\s*/, "").trim();
     const title = data.title.replace(/\s*\n\s*/g, " ").trim();
-    if (!refRaw && !title) return existing?.id || "";
-    const parts = [];
-    if (refRaw) parts.push(`#${refRaw}`);
-    if (title) parts.push(title);
-    return parts.join(" ");
+    if (title && refRaw) return `Supprimer la carte "${title}" (#${refRaw}) ?`;
+    if (title) return `Supprimer la carte "${title}" ?`;
+    if (refRaw) return `Supprimer la carte (#${refRaw}) ?`;
+    return "Supprimer cette carte ?";
   }
 
   function onKeydown(e) {
@@ -619,8 +617,7 @@ export async function renderEditor(host, opts) {
   if (refs.deleteBtn && existing) {
     refs.deleteBtn.addEventListener("click", async () => {
       const ok = await confirmDialog(host, {
-        title: "Supprimer ?",
-        subtitle: cardDeleteSubtitle(),
+        title: cardDeleteTitle(),
         message:
           "Attention, la suppression est définitive et ne pourra pas être annulée ! Souhaitez-vous continuer ?",
         okLabel: "Supprimer",

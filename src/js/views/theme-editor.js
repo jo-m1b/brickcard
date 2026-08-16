@@ -51,9 +51,8 @@ export async function renderThemeEditor(host, opts) {
                 ? `Modifier « ${escapeHtml(existing.themeName)} »`
                 : "Nouveau thème"
             }</h1>
-            <p class="view-desc">Nom, couleur et logo optionnel.</p>
           </div>
-          <button type="button" class="btn ghost icon-only modal-close" id="theme-modal-close">
+          <button type="button" class="btn primary icon-only modal-close" id="theme-modal-close">
             ${ICON_CLOSE}
             <span class="visually-hidden">Fermer</span>
           </button>
@@ -243,8 +242,7 @@ export async function renderThemeEditor(host, opts) {
   if (deleteBtn) {
     deleteBtn.onclick = async () => {
       const ok = await confirmDialog(host, {
-        title: "Supprimer ?",
-        subtitle: existing.themeName,
+        title: `Supprimer le thème "${existing.themeName}" ?`,
         message:
           "Attention, la suppression est définitive et ne pourra pas être annulée ! Souhaitez-vous continuer ?",
         okLabel: "Supprimer",

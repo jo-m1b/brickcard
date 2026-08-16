@@ -24,7 +24,6 @@ export function renderDeveloperSearch(host) {
       <header class="styleguide-header">
         <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Recherche</p>
         <h1 class="view-title">Barre de recherche</h1>
-        <p class="view-desc">Barre de recherche de la liste.</p>
       </header>
 
       <p class="styleguide-intro">

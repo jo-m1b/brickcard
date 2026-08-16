@@ -9,7 +9,8 @@ import {
 import { loadCards, loadThemes } from "../storage.js";
 import { contrastText, partitionThemes } from "../themes-data.js";
 import { resolveCardAccent } from "../card-design.js";
-import { BRAND_LOGO_SRC } from "../card-render.js";
+import { brandLogoSrc } from "../card-render.js";
+import { emptyViewMarkup } from "../empty-view.js";
 
 /** @param {string} hay @param {string} needle */
 function includesCI(hay, needle) {
@@ -135,9 +136,8 @@ export async function renderThemesModal(host, opts) {
         <div class="modal-header">
           <div>
             <h1 class="view-title" id="themes-modal-title">Gérer les thèmes</h1>
-            <p class="view-desc">Thèmes par défaut et thèmes personnalisés</p>
           </div>
-          <button type="button" class="btn ghost icon-only modal-close" id="btn-themes-close">
+          <button type="button" class="btn primary icon-only modal-close" id="btn-themes-close">
             ${ICON_CLOSE}
             <span class="visually-hidden">Fermer</span>
           </button>
@@ -195,7 +195,13 @@ export async function renderThemesModal(host, opts) {
             <h2 class="section-title">Thèmes par défaut</h2>
             <div class="themes-grid" id="themes-grid-builtin"></div>
           </section>
-          <div class="empty-table" id="themes-empty-filter" hidden>Aucun thème ne correspond à la recherche.</div>
+          ${emptyViewMarkup({
+            id: "themes-empty-filter",
+            hidden: true,
+            titleTag: "p",
+            title: "Oups !",
+            text: "Aucun thème ne correspond à la recherche.",
+          })}
         </div>
         <div class="modal-footer">
           <div class="modal-footer-start">
@@ -410,7 +416,8 @@ export async function renderThemesModal(host, opts) {
           return;
         }
         img.classList.add("is-brand");
-        img.src = BRAND_LOGO_SRC;
+        const lightFg = img.closest(".theme-tile")?.classList.contains("is-light-fg");
+        img.src = brandLogoSrc(Boolean(lightFg));
       };
     });
   }
@@ -586,7 +593,9 @@ function themeTileMarkup(theme, count, editable) {
     count <= 1 ? `${count} carte` : `${count} cartes`;
   const name = escapeHtml(theme.themeName);
   const hasThemeLogo = Boolean(theme.logoDataUrl);
-  const logoSrc = hasThemeLogo ? theme.logoDataUrl : BRAND_LOGO_SRC;
+  const logoSrc = hasThemeLogo
+    ? theme.logoDataUrl
+    : brandLogoSrc(fg === "#ffffff");
   const logoClass = hasThemeLogo ? "theme-tile-logo" : "theme-tile-logo is-brand";
   const logo = `<div class="theme-tile-logo-wrap"><img class="${logoClass}" src="${escapeAttr(logoSrc)}" alt="" /></div>`;
   const label = editable

@@ -18,8 +18,9 @@ Tout le code applicatif est dans **`src/`**.
 |---------|------|
 | `src/index.html` | Coquille : topbar sticky, `#main`, `#modal-root`, `#print-root` |
 | `src/data/themes-presets.json` | Liste des thèmes LEGO par défaut (éditable sans toucher au JS) |
-| `src/data/page-{{slug}}.md` | Pages Markdown en modale (`#/page/:slug`, ex. `page-about.md`) ; `# Titre` ou `# Titre \| Sous-titre` |
-| `src/img/logo-brickcard-generator.svg` | Logo app (brick outline — crédit Joko Sutrisno / Vecteezy) |
+| `src/data/page-{{slug}}.md` | Pages Markdown en modale (`#/page/:slug`, ex. `page-about.md`) ; `# Titre` → titre du dialog |
+| `src/img/logo-brickcard-generator.svg` | Logo app noir (brick outline — crédit Joko Sutrisno / Vecteezy) |
+| `src/img/logo-brickcard-generator-white.svg` | Même logo, fill blanc (cartes / thèmes à fond coloré) |
 | `src/img/favicon-brickcard-generator.svg` | Favicon (même brique ; clair `#141414` / sombre blanc via `prefers-color-scheme`) |
 | `src/css/styles.css` | Styles écran + `@media print` |
 | `src/js/app.js` | Hash routing (vues + historique), import/export |
@@ -30,11 +31,16 @@ Tout le code applicatif est dans **`src/`**.
 | `src/js/themes-data.js` | Charge le JSON des thèmes par défaut, `logoSrc`, accent par défaut |
 | `src/js/storage.js` | IndexedDB cartes + thèmes **personnalisés**, export/import JSON |
 | `src/js/card-export.js` | Téléchargement de la photo d’une Brickcard |
-| `src/js/print.js` | Impression A4 3×3 + dos miroir |
+| `src/js/print.js` | Impression A4 (grille variable, faces/dos, miroir) |
+| `src/js/print-menu.js` | Menu header impression (sélection, badge, lancer) |
+| `src/js/print-qty.js` | Quantités d’impression — localStorage |
+| `src/js/print-settings.js` | Réglages d’impression (grille, côtés, recto-verso) — localStorage |
+| `src/js/print-dialog.js` | Modale paramètres d’impression (sans route) |
 | `src/js/version.js` | Version SemVer (`APP_VERSION`) — source unique |
 | `src/js/icons.js` | Icônes UI ([Remix Icon](https://remixicon.com/)) — paths + helpers |
 | `src/js/link.js` | Markup liens (`a.link` / externe / icône) |
 | `src/js/tile.js` | Markup tuiles (`ul.tile-list` / `a.tile`) |
+| `src/js/empty-view.js` | Markup états vides / chargement (`section.empty-view`, brique CSS) |
 | `src/js/confirm-dialog.js` | Dialogues `modal--sm` (`openConfirmDialog` / `confirmDialog` / `alertDialog`) — pas de `alert()` / `confirm()` / `prompt()` |
 | `src/js/form-color.js` | Champ couleur (`form-color` / pastille / clear) |
 | `src/js/form-select.js` | Surcouche select (`form-select` / liste custom) |
@@ -43,7 +49,7 @@ Tout le code applicatif est dans **`src/`**.
 | `src/js/views/themes.js` | Modale gestion thèmes (mini-cartes, recherche) |
 | `src/js/views/theme-editor.js` | Modale création / édition d’un thème personnalisé |
 | `src/js/views/page.js` | Modale page Markdown |
-| `src/js/views/settings.js` | Modale paramètres |
+| `src/js/views/settings.js` | Modale paramètres (interface, cartes, impression, collection) |
 | `src/js/views/developer/` | Espace développeur / styleguide UI en modale (`#/developer`, `#/developer/typography`, …) |
 | `CHANGELOG.md` | Historique des versions (Keep a Changelog) |
 
@@ -113,6 +119,7 @@ Accent d’une Brickcard (`resolveCardAccent`) :
 - Clé arrondi coins : `brickcard-generator:card-radius-mm` (défaut `1.5`, face + dos)
 - Clé couleur carte par défaut : `brickcard-generator:card-default-color` (vide = gris d’usine `#6e6e6e`)
 - Clé sélection impression : `brickcard-generator:print-qty` (`{ [cardId]: qty }`)
+- Clé réglages impression : `brickcard-generator:print-settings` (`{ printGrid: 1–10, cardSidesToPrint: "faceAndBack"|"faceOnly"|"backOnly", sheetRectoVerso: "alternate"|"grouped" }`, défaut `3` / `faceAndBack` / `alternate`)
 - Clés tri liste : `brickcard-generator:list-sort`, `brickcard-generator:list-sort-dir`
 - Clés tri thèmes : `brickcard-generator:themes-sort`, `brickcard-generator:themes-sort-dir` (défaut `cardCount` / `desc`)
 - Clé colonnes liste max : `brickcard-generator:list-cols-max` (défaut `4`, plage 2–10, ou `infinite`)
@@ -120,15 +127,16 @@ Accent d’une Brickcard (`resolveCardAccent`) :
 - Export JSON **v3** : `{ version: 3, app: "brickcard-generator", cards, themes }` — `themes` = personnalisés uniquement — fichier `brickcard-export-YYYY-MM-DD.json`
 - Import : ignore les thèmes par défaut (ids de preset / `isBuiltin`) ; ne réécrit pas le JSON
 - APIs async ; serveur HTTP obligatoire en local
+- Au démarrage, `boot()` attend `loadCards()` + `loadThemes()` avant `route()` (écran « Chargement... » dans `#main`)
 - Au démarrage, purge éventuelle de l’ancienne base `lego-set-cards` (plus utilisée)
 
 ## Vues
 
 Hash = source de vérité (Précédent / Suivant). Croix / Échap / backdrop d’un overlay → `#/` (`replace`). Hash inconnu → `#/`. Pas d’alias.
 
-Overlays de route (une à la fois, **swap** sans démonter la liste) : `#/settings`, `#/themes`, `#/themes/new`, `#/themes/edit/:id`, `#/page/:slug`, `#/new-card`, `#/edit-card/:id`, `#/developer/…`. Dialogues enfants (confirmations) : pas d’URL, second backdrop par-dessus la vue courante.
+Overlays de route (une à la fois, **swap** sans démonter la liste) : `#/settings`, `#/themes`, `#/themes/new`, `#/themes/edit/:id`, `#/page/:slug`, `#/new-card`, `#/edit-card/:id`, `#/developer/…`. Dialogues enfants (confirmations, paramètres d’impression) : pas d’URL, second backdrop par-dessus la vue courante.
 
-- `#/` accueil (empty state, liste, ou « aucune carte ne correspond à la recherche »)
+- `#/` accueil (empty « Bienvenue », liste, ou recherche sans résultat « Oups ! »)
 - `#/new-card` `#/edit-card/:id` éditeur de carte (modale)
 - `#/themes` gestion des thèmes (modale) ; `#/themes/new` `#/themes/edit/:id` éditeur de thème **personnalisé** (modale ; fermeture → `#/themes`)
 - `#/settings` paramètres (modale)
@@ -220,7 +228,7 @@ Vocabulaire :
 
 Hover : **aucun**. Repos = trait bas inset 2px ; focus = `outline` 2px + `outline-offset` 1px (`ink`, inchangé en erreur). Couleur erreur : `--form-error` (`#ce0000` clair / `#ff5555` dark). Galerie : `#/developer/fields`.
 
-Exceptions actuelles : alertes form-wide (`#error`, `#theme-error`) sous le bloc de champs.
+Exceptions actuelles : alertes form-wide (`#error`, `#theme-error`) sous le bloc de champs ; impression (Recto-verso) : `form-hint` sous les boutons, texte selon le choix.
 
 ## Listes déroulantes (design system — styleguide)
 
@@ -228,7 +236,7 @@ Markup&nbsp;: `select.form-control` (même look qu’un champ texte). Surcouche 
 
 ## Curseurs / range (design system)
 
-Même ordre de champ. Contrôle&nbsp;: `form-range-row` (`input[type=range]` + `output` optionnel). Poignée carrée sans bordure ; focus sur la poignée seule ; erreur = message seulement (pas de teinte rouge sur le curseur). Appliqué : paramètres (colonnes, bordure, coins) · éditeur (zoom). Galerie&nbsp;: `#/developer/sliders`.
+Même ordre de champ. Contrôle&nbsp;: `form-range-row` (`input[type=range]` + `output` optionnel). Poignée carrée sans bordure ; focus sur la poignée seule ; erreur = message seulement (pas de teinte rouge sur le curseur). Appliqué : paramètres (colonnes, bordure, coins, grille d’impression) · éditeur (zoom) · impression (grille). Galerie&nbsp;: `#/developer/sliders`.
 
 ## Couleurs (design system)
 
@@ -259,29 +267,32 @@ Classe = apparence. Tag = plan du document. **Un rang 1 par vue** (page ou dialo
 |-------------|--------|--------|
 | Titre de vue / dialog | `view-title` | 1.7rem (1.35rem dans `.modal-header`) · 700 |
 | Section | `section-title` | 1.25rem · 700 |
-| Description | `view-desc` | 0.95rem · ink-soft — **pas** un heading ; **court** (une ligne). Détail → paragraphe dans le corps |
+| Description | `view-desc` | 0.95rem · ink-soft — **pas** un heading ; **court** (une ligne). Pas dans le header de modale. Détail → paragraphe dans le corps |
 
 | Contexte | Titre | Suite |
 |----------|-------|-------|
 | Page (`#main`) | `h1.view-title` | `h2.section-title` |
 | Liste | `h1.visually-hidden` « Cartes » | — |
-| État vide | `h1.view-title` | — |
-| Dialog | `h1.view-title` (`aria-labelledby`) | `h2.section-title` |
-| Page Markdown en modale | `# Titre` ou `# Titre \| Sous-titre` → titre du dialog (retiré du corps) ; ` \| ` optionnel = `view-desc` | `##` → `h2`, `###` → `h3` dans `.md-content` |
+| État vide (accueil, chargement) | `h1.view-title` | brique CSS ; texte / tuiles optionnels |
+| État vide (recherche liste / thèmes) | `p.view-title` | `h1` déjà sur la vue / dialog |
+| Dialog | `h1.view-title` (`aria-labelledby`) — titre **court** ; confirmations : un peu plus long, avec le sujet | `h2.section-title` |
+| Page Markdown en modale | `# Titre` → titre du dialog (retiré du corps) | `##` → `h2`, `###` → `h3` dans `.md-content` |
 
 Pas des headings&nbsp;: marque topbar, `form-label`, noms de cartes (grille thèmes, Brickcard). Galerie&nbsp;: `#/developer/typography`.
 
+États vides (`section.empty-view`, helper `emptyViewMarkup` dans `empty-view.js`)&nbsp;: brique CSS + titre + texte optionnel + tuiles optionnelles, centrés dans `#main` ou le `modal-body`. Accueil sans carte&nbsp;: «&nbsp;Bienvenue&nbsp;» + tuiles Nouvelle carte / Importer une sauvegarde. Recherche sans résultat (cartes ou thèmes)&nbsp;: «&nbsp;Oups&nbsp;!&nbsp;». Premier affichage&nbsp;: «&nbsp;Chargement...&nbsp;» jusqu’à cartes + thèmes prêts.
+
 ## Modales (design system)
 
-Coquille&nbsp;: `modal-backdrop` + `modal` (`role="dialog"` / `aria-modal`). Bordure&nbsp;: `2px solid var(--ink)` (comme le focus des champs). Alignement vertical (sur le backdrop)&nbsp;: `modal-backdrop--top` · `modal-backdrop--middle` (**défaut**) · `modal-backdrop--bottom`. Header inversé (fond `ink` / texte `panel`)&nbsp;: titre (`h1.view-title`) + desc optionnelle (`view-desc`) + `btn ghost icon-only modal-close`. Corps&nbsp;: `modal-body`. Pied optionnel&nbsp;: `modal-footer` avec `modal-footer-start` (gauche&nbsp;: sauvegarde / validation) et `modal-footer-end` (droite&nbsp;: danger) — boutons centrés verticalement (normal / `sm`). Séparateur header&nbsp;: `2px solid var(--ink)` (pas de bordure haute sur le footer).
+Coquille&nbsp;: `modal-backdrop` + `modal` (`role="dialog"` / `aria-modal`). Bordure&nbsp;: `2px solid var(--ink)` (comme le focus des champs). Alignement vertical (sur le backdrop)&nbsp;: `modal-backdrop--top` · `modal-backdrop--middle` (**défaut**) · `modal-backdrop--bottom`. Header inversé (fond `ink` / texte `panel`)&nbsp;: titre (`h1.view-title`, court) + `btn primary icon-only modal-close` (même variante DS, tokens inversés comme le menu impression&nbsp;: repos fond `--bg` / hover fond `--ink` + bordure `--bg`). Bouton fermer centré verticalement, même inset haut / droite / bas. Corps&nbsp;: `modal-body`. Pied optionnel&nbsp;: `modal-footer` avec `modal-footer-start` (gauche&nbsp;: sauvegarde / validation) et `modal-footer-end` (droite&nbsp;: danger) — boutons centrés verticalement (normal / `sm`). Séparateur header&nbsp;: `2px solid var(--ink)` (pas de bordure haute sur le footer).
 
 Tailles (3)&nbsp;: `modal--sm` (~640) · `modal--md` (~896, **défaut**) · `modal--lg` (~1152). Toujours bornées au **viewport** (`100vw` / `100dvh`). Responsive ≤&nbsp;640px&nbsp;: **plein écran**, overlay masqué.
 
-Appliqué&nbsp;: paramètres / page MD (`md`) · thèmes + éditeur carte + espace développeur (`lg`) · éditeur de thème personnalisé / confirmations (`sm`). Galerie&nbsp;: `#/developer/modals`. Dialogues enfants (supprimer carte / thème, reset local, import) : second `modal-backdrop` dans le même host, sans route — helper `confirmDialog()` / `openConfirmDialog()` (`confirm-dialog.js`). Pas de `alert()` / `confirm()` / `prompt()` natifs.
+Appliqué&nbsp;: paramètres / page MD (`md`) · thèmes + éditeur carte + espace développeur (`lg`) · éditeur de thème personnalisé / confirmations / paramètres d’impression (`sm`). Galerie&nbsp;: `#/developer/modals`. Dialogues enfants (supprimer carte / thème, reset local, import, impression) : second `modal-backdrop` dans le même host, sans route — helper `confirmDialog()` / `openConfirmDialog()` (`confirm-dialog.js`) ou `openPrintDialog()` (`print-dialog.js`) ; titre un peu plus long et explicite (ex. `Supprimer la carte "Saucer Centurien" (#6939) ?`). Pas de `alert()` / `confirm()` / `prompt()` natifs.
 
 ## Impression
 
-9 cartes / A4 ; face puis dos ; miroir horizontal (flip bord long). Dos : label **Brickcard**.
+A4 portrait ; **grille** 1×1 à 10×10 (défaut **3×3** poker 63×88 mm). Autres tailles : échelle pour remplir la largeur (agrandir à 1–2, réduire à 4–10) ; cartes entières seulement. Côtés des cartes : face+dos (défaut) / face / dos. Recto-verso des feuilles A4 : alterner (défaut) ou regrouper (tous les rectos, puis tous les versos). Miroir horizontal au dos (flip bord long). Les mêmes réglages sont dans Paramètres (`#/settings`, section Impression) et dans la modale au clic « Lancer l’impression » (`print-dialog.js`, reste ouverte pendant l’impression). Pendant `window.print()`, `document.title` = nom proposé du PDF (`brickcard-YYYY-MM-DD-grille-NxN-…`, sans `.pdf`). Dos : label **Brickcard**.
 
 ## Conventions
 

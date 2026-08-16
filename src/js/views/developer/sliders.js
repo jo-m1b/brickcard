@@ -11,7 +11,6 @@ export function renderDeveloperSliders(host) {
       <header class="styleguide-header">
         <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Curseurs</p>
         <h1 class="view-title">Curseurs (range)</h1>
-        <p class="view-desc">Curseurs range, même ordre de champ.</p>
       </header>
 
       <p class="styleguide-intro">
