@@ -348,7 +348,7 @@ function disposeList() {
 function renderEmpty() {
   main.innerHTML = emptyViewMarkup({
     title: "Bienvenue",
-    text: "Aucune carte pour l'instant dans la collection !\nCréez de nouvelles cartes ou importez une sauvegarde.",
+    text: "Aucune carte pour l'instant dans la collection !",
     tiles: [
       {
         title: "Nouvelle carte",

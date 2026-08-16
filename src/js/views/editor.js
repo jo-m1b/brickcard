@@ -289,7 +289,6 @@ export async function renderEditor(host, opts) {
     return {
       legoSetRef: refs.legoSetRef.value.trim(),
       title: refs.title.value.trim(),
-      description: "",
       brickcardThemeId: refs.brickcardThemeId.value,
       pieceCount: pieceCountVal === "" ? null : Number(pieceCountVal),
       figurineCount: figurineCountVal === "" ? null : Number(figurineCountVal),

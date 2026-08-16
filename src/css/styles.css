@@ -1,3 +1,20 @@
+/* Polices auto-hébergées (SIL OFL) — src/fonts/ */
+@font-face {
+  font-family: "Open Sans";
+  font-style: normal;
+  font-weight: 300 800;
+  font-display: swap;
+  src: url("../fonts/OpenSans-Variable.woff2") format("woff2-variations");
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("../fonts/InterVariable.woff2") format("woff2-variations");
+}
+
 /* Thème clair (défaut) */
 :root {
   color-scheme: light;
@@ -179,6 +196,10 @@ textarea {
   box-sizing: border-box;
   min-height: 100vh;
   min-height: 100dvh;
+}
+
+.app:has(> .main > .empty-view) {
+  padding-bottom: 0;
 }
 
 .main {
@@ -508,6 +529,11 @@ textarea {
 
 .topbar-actions.is-hidden,
 .btn.is-hidden {
+  display: none !important;
+}
+
+/* Chargement : uniquement la marque (logo + nom + version) */
+.app:has(> .main[aria-busy="true"]) .topbar-actions {
   display: none !important;
 }
 
@@ -1123,14 +1149,13 @@ html:not([data-theme]) .btn .icon-system {
 /* ——— Empty state ——— */
 .empty-view {
   text-align: center;
-  padding: 3.5rem 1.5rem;
+  padding: 0.75rem 1rem;
   margin: 0;
   display: grid;
   place-content: center;
   place-items: center;
   box-sizing: border-box;
   width: 100%;
-  overflow: visible;
 }
 
 .empty-view[hidden] {
@@ -1141,6 +1166,7 @@ html:not([data-theme]) .btn .icon-system {
 .main > .panel:has(> .empty-view:not([hidden])) {
   flex: 1 1 auto;
   min-height: 0;
+  overflow: hidden;
 }
 
 .main > .panel:has(> .empty-view:not([hidden])) {

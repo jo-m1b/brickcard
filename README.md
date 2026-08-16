@@ -44,6 +44,7 @@ Puis ouvrir : [http://127.0.0.1:8765/](http://127.0.0.1:8765/)
     ├── data/
     │   ├── themes-presets.json
     │   └── page-about.md          # pages Markdown : page-{{slug}}.md
+    ├── fonts/                     # Open Sans + Inter (woff2) + OFL
     ├── img/
     ├── css/styles.css
     └── js/
@@ -84,6 +85,8 @@ High quality, clean line art, no text, no logos, no watermarks.
 
 - Logo de l’app (`src/img/logo-brickcard-generator.svg`) : icône *brick outline* par [Joko Sutrisno](https://www.vecteezy.com/members/108458460840346680378) via [Vecteezy](https://www.vecteezy.com/vector-art/12802525-brick-outline-icon) (attribution requise).
 - Logos de certains thèmes LEGO par défaut (`src/img/logo-theme-*`) : issus de [Brickipedia — List of themes](https://brickipedia.fandom.com/wiki/List_of_themes) (contenu communautaire / Fandom). LEGO® est une marque de The LEGO Group ; ce projet n’est pas affilié ni sponsorisé par The LEGO Group.
+- Police **Open Sans** (UI, `src/fonts/OpenSans-Variable.woff2`) : conçue par [Steve Matteson](https://fonts.google.com/specimen/Open+Sans), maintenue par [The Open Sans Project Authors](https://github.com/googlefonts/opensans). Licence [SIL Open Font License 1.1](https://scripts.sil.org/OFL) (`src/fonts/OFL-OpenSans.txt`).
+- Police **Inter** (texte des cartes, `src/fonts/InterVariable.woff2`) : conçue par [Rasmus Andersson](https://rsms.me/) / [Inter](https://rsms.me/inter/) ([dépôt](https://github.com/rsms/inter)). Licence [SIL Open Font License 1.1](https://scripts.sil.org/OFL) (`src/fonts/OFL-Inter.txt`).
 
 Voir aussi [CONTRIBUTING.md](CONTRIBUTING.md).
 

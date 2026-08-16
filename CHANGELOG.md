@@ -7,6 +7,20 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Changed
+
+- Polices : Open Sans et Inter auto-hébergées (`src/fonts/`, woff2 variable) ; plus de CDN Google Fonts
+- Accueil vide : plus que « Aucune carte pour l'instant dans la collection ! »
+- États vides : padding réduit ; plus de scroll vertical dû à la brique hors flux
+- Chargement : header réduit à la marque (logo + nom + version)
+- Cartes : champ `description` retiré (modèle, IndexedDB à l’enregistrement, export / import)
+- Logo thème Batman : recadré (brique LEGO retirée)
+- Logo thème Disney : recadré (brique LEGO retirée)
+- Logo thème Fortnite : recadré (brique LEGO retirée)
+- Logo thème Hero Factory : recadré (brique LEGO retirée)
+- Logo thème Mixels : recadré (brique LEGO retirée)
+- Logo thème Racers : recadré (brique LEGO retirée)
+
 ## [0.7.1] — 2026-08-16
 
 ### Added

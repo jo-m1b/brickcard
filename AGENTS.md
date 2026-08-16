@@ -27,7 +27,7 @@ Tout le code applicatif est dans **`src/`**.
 | `src/img/favicon.ico` / `favicon-96x96.png` | Favicon raster (onglet) |
 | `src/img/apple-touch-icon.png` | Icône iOS 180×180 |
 | `src/img/web-app-manifest-192x192.png` / `512x512.png` | Icônes PWA (any + maskable) |
-| `src/css/styles.css` | Styles écran + `@media print` |
+| `src/fonts/` | Open Sans + Inter (woff2 variable, latin-ext) + licences SIL OFL |
 | `src/js/app.js` | Hash routing (vues + historique), import/export |
 | `src/js/markdown.js` | Parser Markdown léger + `loadMarkdownPage(slug)` |
 | `src/js/theme.js` | Thème **UI** system / light / dark |
@@ -67,7 +67,6 @@ Noms volontaires verbeux (lisibles sans doc) :
   id: string,
   legoSetRef: string,       // ex. "6140/6109"
   title: string,            // titre de la Brickcard (`\n` = saut de ligne)
-  description: string,      // legacy / import ; plus exposé dans l’UI
   brickcardThemeId: string, // id du thème Brickcard
   pieceCount: number|null,
   figurineCount: number|null, // nombre de figurines, optionnel
@@ -304,7 +303,7 @@ A4 portrait ; **grille** 1×1 à 10×10 (défaut **3×3** poker 63×88 mm). Autr
 - Garder le nom produit **Brickcard Generator** / marque **Brickcard** dans l’UI et la doc.
 - Garder les noms de champs **verbeux** sur les modèles Card / LegoTheme.
 - UI française, design minimaliste (pas d’arrondis/ombres UI).
-- **Typo** : Open Sans pour l’UI (`--font-ui`) ; Inter pour le texte des cartes (`--font-card`). Titres : classe = look, tag = plan (voir **Titres**).
+- **Typo** : Open Sans pour l’UI (`--font-ui`) ; Inter pour le texte des cartes (`--font-card`) — fichiers dans `src/fonts/`, pas de CDN. Titres : classe = look, tag = plan (voir **Titres**).
 - **Icônes** : toujours partir de [Remix Icon](https://remixicon.com/) (style *fill* de préférence) avant d’inventer un SVG. Réutiliser / étendre `src/js/icons.js` ; en HTML, commenter le nom `ri-*`.
 - Pas de `alert()` / `confirm()` / `prompt()` natifs : `confirmDialog()` / `openConfirmDialog()` / `alertDialog()` (`confirm-dialog.js`).
 - Pas de dépendances npm sauf demande explicite.

@@ -20,5 +20,7 @@ Tout reste **dans ton navigateur**. Aucun compte, aucun serveur d’application 
 
 - Logo de l’app : icône *brick outline* par [Joko Sutrisno](https://www.vecteezy.com/members/108458460840346680378) via [Vecteezy](https://www.vecteezy.com/vector-art/12802525-brick-outline-icon)
 - Logos de thèmes LEGO par défaut : issus de [Brickipedia — List of themes](https://brickipedia.fandom.com/wiki/List_of_themes)
+- Police **Open Sans** (interface) : [Steve Matteson](https://fonts.google.com/specimen/Open+Sans) / [The Open Sans Project Authors](https://github.com/googlefonts/opensans), [SIL Open Font License 1.1](https://scripts.sil.org/OFL)
+- Police **Inter** (texte des cartes) : [Rasmus Andersson](https://rsms.me/) / [The Inter Project Authors](https://rsms.me/inter/), [SIL Open Font License 1.1](https://scripts.sil.org/OFL)
 
 LEGO® est une marque de The LEGO Group. Ce projet n’est pas affilié ni sponsorisé par The LEGO Group.

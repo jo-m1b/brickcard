@@ -17,7 +17,6 @@ const EXPORT_VERSION = 3;
  * @property {string} id
  * @property {string} legoSetRef Référence set (ex. "6140/6109")
  * @property {string} title Titre de la Brickcard (`\n` = saut de ligne)
- * @property {string} description Legacy / import (plus édité dans l’UI)
  * @property {string} brickcardThemeId Id du thème Brickcard associé
  * @property {number|null} pieceCount Nombre de pièces
  * @property {number|null} figurineCount Nombre de figurines (optionnel)
@@ -367,7 +366,6 @@ function normalizeCard(c) {
     id: typeof c.id === "string" && c.id ? c.id : createId(),
     legoSetRef: String(c.legoSetRef ?? c.ref ?? "").trim(),
     title: String(c.title ?? c.setTitle ?? "").trim(),
-    description: String(c.description ?? c.subtitle ?? "").trim(),
     brickcardThemeId: String(
       c.brickcardThemeId ?? c.legoThemeId ?? c.themeId ?? ""
     ).trim(),
