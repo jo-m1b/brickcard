@@ -17,11 +17,16 @@ Tout le code applicatif est dans **`src/`**.
 | Fichier | Rôle |
 |---------|------|
 | `src/index.html` | Coquille : topbar sticky, `#main`, `#modal-root`, `#print-root` |
+| `src/manifest.webmanifest` | Manifest PWA (nom, icônes, `standalone`) |
+| `src/sw.js` | Service worker (cache same-origin ; `CACHE` = `APP_VERSION`) |
 | `src/data/themes-presets.json` | Liste des thèmes LEGO par défaut (éditable sans toucher au JS) |
 | `src/data/page-{{slug}}.md` | Pages Markdown en modale (`#/page/:slug`, ex. `page-about.md`) ; `# Titre` → titre du dialog |
 | `src/img/logo-brickcard-generator.svg` | Logo app noir (brick outline — crédit Joko Sutrisno / Vecteezy) |
 | `src/img/logo-brickcard-generator-white.svg` | Même logo, fill blanc (cartes / thèmes à fond coloré) |
-| `src/img/favicon-brickcard-generator.svg` | Favicon (même brique ; clair `#141414` / sombre blanc via `prefers-color-scheme`) |
+| `src/img/favicon-brickcard-generator.svg` | Favicon SVG (clair `#141414` / sombre blanc via `prefers-color-scheme`) |
+| `src/img/favicon.ico` / `favicon-96x96.png` | Favicon raster (onglet) |
+| `src/img/apple-touch-icon.png` | Icône iOS 180×180 |
+| `src/img/web-app-manifest-192x192.png` / `512x512.png` | Icônes PWA (any + maskable) |
 | `src/css/styles.css` | Styles écran + `@media print` |
 | `src/js/app.js` | Hash routing (vues + historique), import/export |
 | `src/js/markdown.js` | Parser Markdown léger + `loadMarkdownPage(slug)` |
@@ -303,4 +308,4 @@ A4 portrait ; **grille** 1×1 à 10×10 (défaut **3×3** poker 63×88 mm). Autr
 - **Icônes** : toujours partir de [Remix Icon](https://remixicon.com/) (style *fill* de préférence) avant d’inventer un SVG. Réutiliser / étendre `src/js/icons.js` ; en HTML, commenter le nom `ri-*`.
 - Pas de `alert()` / `confirm()` / `prompt()` natifs : `confirmDialog()` / `openConfirmDialog()` / `alertDialog()` (`confirm-dialog.js`).
 - Pas de dépendances npm sauf demande explicite.
-- **Version** : n’incrémenter `APP_VERSION` (ni le `?v=` de cache, ni une entrée datée dans `CHANGELOG.md`) **que sur demande explicite**. Entre deux versions, noter les changements sous `## [Unreleased]`.
+- **Version** : n’incrémenter `APP_VERSION` (ni le `?v=` de cache, ni `CACHE` dans `sw.js`, ni une entrée datée dans `CHANGELOG.md`) **que sur demande explicite**. Entre deux versions, noter les changements sous `## [Unreleased]`.

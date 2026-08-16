@@ -7,6 +7,12 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [0.7.1] — 2026-08-16
+
+### Added
+
+- PWA : manifest, icônes d’install (192/512, apple-touch), service worker (HTTPS / localhost)
+
 ## [0.7.0] — 2026-08-16
 
 ### Added

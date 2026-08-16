@@ -593,6 +593,7 @@ async function boot() {
     initCardDesign();
     initListLayout();
     initPrintMenu({ toast });
+    registerServiceWorker();
 
     const initialHash = !location.hash || location.hash === "#" ? "#/" : normalizeHash(location.hash);
     history.replaceState({ app: APP_ID, depth: 0 }, "", hashUrl(initialHash));
@@ -607,6 +608,18 @@ async function boot() {
       main.innerHTML = `<section class="panel"><p class="error">Erreur au démarrage : ${err.message}</p></section>`;
     }
   }
+}
+
+function registerServiceWorker() {
+  if (!("serviceWorker" in navigator)) return;
+  const host = location.hostname;
+  const secure =
+    location.protocol === "https:" ||
+    host === "localhost" ||
+    host === "127.0.0.1" ||
+    host === "[::1]";
+  if (!secure) return;
+  navigator.serviceWorker.register("sw.js").catch((err) => console.error(err));
 }
 
 boot();

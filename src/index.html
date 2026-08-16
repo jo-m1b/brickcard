@@ -4,8 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Brickcard Generator</title>
+  <meta name="theme-color" content="#141414" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Brickcard" />
+  <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="img/favicon-brickcard-generator.svg" type="image/svg+xml" sizes="any" />
-  <link rel="stylesheet" href="css/styles.css?v=0.7.0" />
+  <link rel="icon" href="img/favicon-96x96.png" type="image/png" sizes="96x96" />
+  <link rel="icon" href="img/favicon.ico" sizes="48x48" />
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png" sizes="180x180" />
+  <link rel="stylesheet" href="css/styles.css?v=0.7.1" />
   <script>
     /* Après styles.css (script bloquant) : pas de flush layout avant CSS, pas de flash thème */
     (function () {
@@ -174,6 +182,6 @@
 
   <div id="print-root" class="print-root" aria-hidden="true"></div>
 
-  <script type="module" src="js/app.js?v=0.7.0"></script>
+  <script type="module" src="js/app.js?v=0.7.1"></script>
 </body>
 </html>
