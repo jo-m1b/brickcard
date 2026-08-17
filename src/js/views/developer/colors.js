@@ -193,6 +193,8 @@ export function renderDeveloperColors(host) {
         ·
         ${linkMarkup("Champs", { href: "#/developer/fields" })}
         ·
+        ${linkMarkup("Images", { href: "#/developer/images" })}
+        ·
         ${linkMarkup("App", { href: "#/" })}
       </p>
     </section>

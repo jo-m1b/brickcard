@@ -26,12 +26,17 @@ const EXPORT_VERSION = 3;
  * @property {number} imageZoom Zoom de cadrage photo (1 = cover / 100 % ; < 1 = dézoom)
  * @property {number} imageOffsetX Décalage horizontal photo (fraction)
  * @property {number} imageOffsetY Décalage vertical photo (fraction)
- * @property {string} createdAt ISO
  * @property {string} updatedAt ISO
  */
 
 /** Fond image par défaut (images transparentes). */
 export const DEFAULT_IMAGE_BACKGROUND = "#ffffff";
+
+/** Erreur générique de chargement d’image (fichier ou URL). */
+export const IMAGE_LOAD_ERROR = "Erreur de chargement de l’image !";
+export const IMAGE_LOAD_ERROR_FORMAT = `${IMAGE_LOAD_ERROR} Format invalide (SVG, PNG, WebP, JPG…).`;
+export const IMAGE_LOAD_ERROR_CORS = `${IMAGE_LOAD_ERROR} Réseau ou CORS - le site source refuse le chargement.`;
+export const IMAGE_URL_INVALID = "L’URL de l’image est invalide.";
 
 /**
  * @typedef {import("./themes-data.js").LegoTheme} LegoTheme
@@ -99,7 +104,7 @@ function isValidCard(card) {
 function isValidTheme(theme) {
   if (!theme || typeof theme.id !== "string") return false;
   const hasName =
-    typeof theme.themeName === "string" || typeof theme.name === "string";
+    typeof theme.name === "string" || typeof theme.themeName === "string";
   const hasLogoField =
     typeof theme.logoDataUrl === "string" ||
     typeof theme.image === "string" ||
@@ -294,7 +299,7 @@ export async function wipeAllLocalData() {
 
 /** @param {LegoTheme[]} list */
 function sortThemesByName(list) {
-  return list.sort((a, b) => a.themeName.localeCompare(b.themeName, "fr"));
+  return list.sort((a, b) => a.name.localeCompare(b.name, "fr"));
 }
 
 /** @returns {Promise<Set<string>>} */
@@ -377,8 +382,7 @@ function normalizeCard(c) {
     imageZoom: Number(c.imageZoom ?? c.zoom) || 1,
     imageOffsetX: Number(c.imageOffsetX ?? c.offsetX) || 0,
     imageOffsetY: Number(c.imageOffsetY ?? c.offsetY) || 0,
-    createdAt: c.createdAt || now,
-    updatedAt: c.updatedAt || now,
+    updatedAt: c.updatedAt || c.createdAt || now,
   };
 }
 
@@ -386,12 +390,14 @@ function normalizeCard(c) {
 function normalizeTheme(t) {
   return {
     id: typeof t.id === "string" && t.id ? t.id : createId(),
-    themeName: String(t.themeName ?? t.name ?? "").trim() || "THÈME",
+    name: String(t.name ?? t.themeName ?? "").trim() || "THÈME",
     color: parseHexColor(t.color ?? t.accentColor),
     logoDataUrl: String(t.logoDataUrl ?? t.image ?? ""),
+    logoZoom: Math.min(2.5, Math.max(0.25, Number(t.logoZoom) || 1)),
+    logoOffsetX: Number(t.logoOffsetX) || 0,
+    logoOffsetY: Number(t.logoOffsetY) || 0,
     isBuiltin: Boolean(t.isBuiltin ?? t.builtin),
-    createdAt: String(t.createdAt || "").trim(),
-    updatedAt: String(t.updatedAt || "").trim(),
+    updatedAt: String(t.updatedAt || t.createdAt || "").trim(),
   };
 }
 
@@ -461,7 +467,7 @@ export async function saveCards(cards) {
 }
 
 /**
- * @param {Omit<Card, "id" | "createdAt" | "updatedAt"> & { id?: string }} input
+ * @param {Omit<Card, "id" | "updatedAt"> & { id?: string }} input
  * @returns {Promise<Card>}
  */
 export async function upsertCard(input) {
@@ -470,14 +476,9 @@ export async function upsertCard(input) {
   const now = new Date().toISOString();
   const id = input.id || createId();
 
-  const existing = await reqToPromise(
-    db.transaction(STORE_CARDS, "readonly").objectStore(STORE_CARDS).get(id)
-  );
-
   const card = normalizeCard({
     ...input,
     id,
-    createdAt: existing?.createdAt || now,
     updatedAt: now,
   });
 
@@ -596,11 +597,10 @@ export async function upsertTheme(input) {
     logoDataUrl,
     color,
     isBuiltin: false,
-    createdAt: existing?.createdAt || now,
     updatedAt: now,
   });
 
-  if (!theme.themeName) {
+  if (!theme.name) {
     throw new Error("Le nom du thème est obligatoire.");
   }
 
@@ -731,16 +731,16 @@ export async function importFromJson(input, mode = "merge") {
  */
 export async function fetchImageAsFile(urlString) {
   const raw = String(urlString || "").trim();
-  if (!raw) throw new Error("Indique une URL d’image.");
+  if (!raw) throw new Error(IMAGE_URL_INVALID);
 
   let url;
   try {
     url = new URL(raw);
   } catch {
-    throw new Error("URL invalide.");
+    throw new Error(IMAGE_URL_INVALID);
   }
   if (url.protocol !== "http:" && url.protocol !== "https:") {
-    throw new Error("L’URL doit commencer par http:// ou https://");
+    throw new Error(IMAGE_URL_INVALID);
   }
 
   let res;
@@ -751,13 +751,11 @@ export async function fetchImageAsFile(urlString) {
       cache: "no-cache",
     });
   } catch {
-    throw new Error(
-      "Téléchargement impossible (réseau ou CORS : le site source refuse le chargement depuis le navigateur)."
-    );
+    throw new Error(IMAGE_LOAD_ERROR_CORS);
   }
 
   if (!res.ok) {
-    throw new Error(`Téléchargement échoué (HTTP ${res.status}).`);
+    throw new Error(`${IMAGE_LOAD_ERROR} HTTP ${res.status}.`);
   }
 
   const blob = await res.blob();
@@ -775,7 +773,7 @@ export async function fetchImageAsFile(urlString) {
   }
 
   if (!type.startsWith("image/") && type !== "image/svg+xml") {
-    throw new Error("Le lien ne pointe pas vers une image.");
+    throw new Error(IMAGE_LOAD_ERROR_FORMAT);
   }
 
   const name = pathName.includes(".") ? pathName : `image.${type.split("/")[1] || "png"}`;
@@ -811,7 +809,7 @@ export function compressImage(file, opts = {}) {
         }
         if (!width || !height) {
           cleanup();
-          reject(new Error("Image invalide (dimensions nulles)."));
+          reject(new Error(IMAGE_LOAD_ERROR));
           return;
         }
 
@@ -825,7 +823,7 @@ export function compressImage(file, opts = {}) {
         const ctx = canvas.getContext("2d");
         if (!ctx) {
           cleanup();
-          reject(new Error("Canvas non supporté"));
+          reject(new Error(IMAGE_LOAD_ERROR));
           return;
         }
         if (keepAlpha) {
@@ -840,14 +838,14 @@ export function compressImage(file, opts = {}) {
           : canvas.toDataURL("image/jpeg", quality);
         cleanup();
         resolve(dataUrl);
-      } catch (err) {
+      } catch {
         cleanup();
-        reject(err);
+        reject(new Error(IMAGE_LOAD_ERROR));
       }
     };
     img.onerror = () => {
       cleanup();
-      reject(new Error("Impossible de décoder l'image (format non supporté ?)."));
+      reject(new Error(IMAGE_LOAD_ERROR));
     };
     img.src = url;
   });
@@ -868,12 +866,12 @@ export function compressThemeImage(file) {
       reader.onload = () => {
         const text = String(reader.result || "");
         if (!text.trim()) {
-          reject(new Error("SVG vide"));
+          reject(new Error(IMAGE_LOAD_ERROR));
           return;
         }
         resolve(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(text)}`);
       };
-      reader.onerror = () => reject(new Error("Impossible de lire le SVG"));
+      reader.onerror = () => reject(new Error(IMAGE_LOAD_ERROR));
       reader.readAsText(file);
     });
   }
@@ -894,20 +892,20 @@ export function compressThemeImage(file) {
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext("2d");
-        if (!ctx) throw new Error("Canvas non supporté");
+        if (!ctx) throw new Error(IMAGE_LOAD_ERROR);
         ctx.clearRect(0, 0, width, height);
         ctx.drawImage(img, 0, 0, width, height);
         const dataUrl = canvas.toDataURL("image/png");
         URL.revokeObjectURL(url);
         resolve(dataUrl);
-      } catch (err) {
+      } catch {
         URL.revokeObjectURL(url);
-        reject(err);
+        reject(new Error(IMAGE_LOAD_ERROR));
       }
     };
     img.onerror = () => {
       URL.revokeObjectURL(url);
-      reject(new Error("Impossible de charger l'image"));
+      reject(new Error(IMAGE_LOAD_ERROR));
     };
     img.src = url;
   });

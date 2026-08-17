@@ -219,8 +219,8 @@ export function renderSettingsModal(host, opts) {
                   id: "settings-export",
                 },
                 {
-                  title: "Gérer les thèmes",
-                  desc: "Thèmes par défaut et thèmes personnalisés",
+                  title: "Thèmes",
+                  desc: "Gérer et personnaliser les thèmes disponibles",
                   href: "#/themes",
                   icon: "palette",
                 },

@@ -102,14 +102,14 @@ export function openPrintDialog(host, opts) {
             <p class="form-hint" id="${uid}-recto-verso-hint"></p>
           </div>
         </div>
-        <div class="modal-footer">
+        <div class="modal-footer modal-footer--primary-first">
           <div class="modal-footer-end">
-            <button type="button" class="btn secondary sm" data-print-dismiss>
-              Annuler
-            </button>
             <button type="button" class="btn primary" data-print-run>
               ${ICON_PRINTER}
               <span>Lancer l’impression</span>
+            </button>
+            <button type="button" class="btn secondary sm" data-print-dismiss>
+              Annuler
             </button>
           </div>
         </div>

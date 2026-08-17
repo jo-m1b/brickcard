@@ -21,12 +21,12 @@ Tout le code applicatif est dans **`src/`**.
 | `src/sw.js` | Service worker (cache same-origin ; `CACHE` = `APP_VERSION`) |
 | `src/data/themes-presets.json` | Liste des thèmes LEGO par défaut (éditable sans toucher au JS) |
 | `src/data/page-{{slug}}.md` | Pages Markdown en modale (`#/page/:slug`, ex. `page-about.md`) ; `# Titre` → titre du dialog |
-| `src/img/logo-brickcard-generator.svg` | Logo app noir (brick outline — crédit Joko Sutrisno / Vecteezy) |
-| `src/img/logo-brickcard-generator-white.svg` | Même logo, fill blanc (cartes / thèmes à fond coloré) |
-| `src/img/favicon-brickcard-generator.svg` | Favicon SVG (clair `#141414` / sombre blanc via `prefers-color-scheme`) |
-| `src/img/favicon.ico` / `favicon-96x96.png` | Favicon raster (onglet) |
-| `src/img/apple-touch-icon.png` | Icône iOS 180×180 |
-| `src/img/web-app-manifest-192x192.png` / `512x512.png` | Icônes PWA (any + maskable) |
+| `src/img/brickcard-generator-logo.svg` | Logo app noir (brick outline — crédit Joko Sutrisno / Vecteezy) |
+| `src/img/brickcard-generator-logo-white.svg` | Même logo, fill blanc (cartes / thèmes à fond coloré) |
+| `src/img/brickcard-generator-favicon.svg` | Favicon SVG (clair `#141414` / sombre blanc via `prefers-color-scheme`) |
+| `src/img/brickcard-generator-favicon.ico` / `brickcard-generator-favicon-96x96.png` | Favicon raster (onglet) |
+| `src/img/brickcard-generator-apple-touch-icon.png` | Icône iOS 180×180 |
+| `src/img/brickcard-generator-web-app-manifest-192x192.png` / `512x512.png` | Icônes PWA (any + maskable) |
 | `src/fonts/` | Open Sans + Inter (woff2 variable, latin-ext) + licences SIL OFL |
 | `src/js/app.js` | Hash routing (vues + historique), import/export |
 | `src/js/markdown.js` | Parser Markdown léger + `loadMarkdownPage(slug)` |
@@ -48,6 +48,7 @@ Tout le code applicatif est dans **`src/`**.
 | `src/js/empty-view.js` | Markup états vides / chargement (`section.empty-view`, brique CSS) |
 | `src/js/confirm-dialog.js` | Dialogues `modal--sm` (`openConfirmDialog` / `confirmDialog` / `alertDialog`) — pas de `alert()` / `confirm()` / `prompt()` |
 | `src/js/form-color.js` | Champ couleur (`form-color` / pastille / clear) |
+| `src/js/form-image.js` | Champ image (`form-image` / fichier, URL, fond, cadrage) |
 | `src/js/form-select.js` | Surcouche select (`form-select` / liste custom) |
 | `src/js/views/list.js` | Grille d’aperçus + recherche (barre topbar) |
 | `src/js/views/editor.js` | Éditeur de carte |
@@ -76,21 +77,20 @@ Noms volontaires verbeux (lisibles sans doc) :
   imageZoom: number,        // cadrage photo, 1 = cover (100 %) ; < 1 = dézoom
   imageOffsetX: number,     // cadrage photo (fraction largeur)
   imageOffsetY: number,     // cadrage photo (fraction hauteur)
-  createdAt: string,
   updatedAt: string
 }
 ```
 
-Migration auto depuis les anciens noms (`setTitle` → `title`, `setImageDataUrl` → `imageDataUrl`, `legoThemeId` → `brickcardThemeId`, ainsi que `ref`, `image`, `zoom`, …).
+Migration auto depuis les anciens noms (`setTitle` → `title`, `setImageDataUrl` → `imageDataUrl`, `legoThemeId` → `brickcardThemeId`, ainsi que `ref`, `image`, `zoom`, …). `createdAt` ignoré.
 
 ## Thèmes par défaut (`src/data/themes-presets.json`)
 
 Éditer ce fichier pour ajouter / modifier les thèmes par défaut (pas besoin de toucher au JS).
 
 Champs par entrée :
-- `id` (obligatoire), `themeName` (obligatoire)
+- `id` (obligatoire), `name` (obligatoire)
 - `color` (hex, optionnel) — si omis → pas de couleur propre ; la carte utilise la couleur configurée puis le gris `#6e6e6e`
-- `logoSrc` (optionnel) — chemin depuis `src/` (ex. `img/logo-theme-….png`) ; sans logo / échec de chargement → affichage du **nom** du thème (pas de SVG généré)
+- `logoSrc` (optionnel) — chemin depuis `src/` (ex. `img/theme-logo-….png`) ; sans logo / échec de chargement → affichage du **nom** du thème (pas de SVG généré)
 
 Thèmes par défaut : **lecture seule** (ni modification ni suppression). Les thèmes personnalisés ont un id UUID (`createId()`), sont stockés en IndexedDB, et s’éditent via `#/themes/new` / `#/themes/edit/:id`.
 
@@ -99,14 +99,18 @@ Thèmes par défaut : **lecture seule** (ni modification ni suppression). Les th
 ```js
 {
   id: string,               // par défaut = slug JSON ; personnalisé = UUID (`createId()`)
-  themeName: string,        // ex. "CITY"
+  name: string,             // ex. "CITY"
   color: string,            // hex ; vide = pas de couleur propre (cascade carte)
   logoDataUrl: string,      // SVG ou PNG transparent (data URL ou chemin), optionnel
+  logoZoom: number,         // largeur du logo, 1 = 75 % de la carte (max 2.5 = 250 %) ; le cadre (moitié basse, inset 3 mm) recadre si dépassement
+  logoOffsetX: number,      // décalage logo (fraction largeur de la moitié basse)
+  logoOffsetY: number,      // décalage logo (fraction hauteur de la moitié basse)
   isBuiltin: boolean,       // par défaut = lecture seule, non supprimable
-  createdAt: string,        // ISO (personnalisés) ; vide pour les thèmes par défaut
   updatedAt: string         // ISO (personnalisés) ; vide pour les thèmes par défaut
 }
 ```
+
+Migration auto depuis l’ancien champ `themeName` → `name`. `createdAt` ignoré.
 
 Ne pas confondre avec le thème **UI** (`theme.js` : clair/sombre).
 
@@ -138,14 +142,14 @@ Accent d’une Brickcard (`resolveCardAccent`) :
 
 Hash = source de vérité (Précédent / Suivant). Croix / Échap / backdrop d’un overlay → `#/` (`replace`). Hash inconnu → `#/`. Pas d’alias.
 
-Overlays de route (une à la fois, **swap** sans démonter la liste) : `#/settings`, `#/themes`, `#/themes/new`, `#/themes/edit/:id`, `#/page/:slug`, `#/new-card`, `#/edit-card/:id`, `#/developer/…`. Dialogues enfants (confirmations, paramètres d’impression) : pas d’URL, second backdrop par-dessus la vue courante.
+Overlays de route (une à la fois, **swap** sans démonter la liste) : `#/settings`, `#/themes`, `#/themes/new`, `#/themes/edit/:id`, `#/page/:slug`, `#/new-card`, `#/edit-card/:id`, `#/developer/…`. Dialogues enfants (confirmations, paramètres d’impression, URL d’image) : pas d’URL, second backdrop par-dessus la vue courante.
 
 - `#/` accueil (empty « Bienvenue », liste, ou recherche sans résultat « Oups ! »)
 - `#/new-card` `#/edit-card/:id` éditeur de carte (modale)
 - `#/themes` gestion des thèmes (modale) ; `#/themes/new` `#/themes/edit/:id` éditeur de thème **personnalisé** (modale ; fermeture → `#/themes`)
 - `#/settings` paramètres (modale)
 - `#/page/:slug` page Markdown (`data/page-{{slug}}.md`, ex. `#/page/about`)
-- `#/developer` `#/developer/typography` `#/developer/links` `#/developer/tiles` `#/developer/buttons` `#/developer/fields` `#/developer/selects` `#/developer/sliders` `#/developer/colors` `#/developer/search` `#/developer/modals` — espace développeur / styleguide en **modale** (extensible : `#/developer/…`) ; lien Paramètres en local uniquement
+- `#/developer` `#/developer/typography` `#/developer/links` `#/developer/tiles` `#/developer/buttons` `#/developer/fields` `#/developer/selects` `#/developer/sliders` `#/developer/colors` `#/developer/images` `#/developer/search` `#/developer/modals` — espace développeur / styleguide en **modale** (extensible : `#/developer/…`) ; lien Paramètres en local uniquement
 
 ## Boutons (design system)
 
@@ -240,11 +244,22 @@ Markup&nbsp;: `select.form-control` (même look qu’un champ texte). Surcouche 
 
 ## Curseurs / range (design system)
 
-Même ordre de champ. Contrôle&nbsp;: `form-range-row` (`input[type=range]` + `output` optionnel). Poignée carrée sans bordure ; focus sur la poignée seule ; erreur = message seulement (pas de teinte rouge sur le curseur). Appliqué : paramètres (colonnes, bordure, coins, grille d’impression) · éditeur (zoom) · impression (grille). Galerie&nbsp;: `#/developer/sliders`.
+Même ordre de champ. Contrôle&nbsp;: `form-range-row` (`input[type=range]` + `output` optionnel). Poignée carrée sans bordure ; focus sur la poignée seule ; erreur = message seulement (pas de teinte rouge sur le curseur). Appliqué : paramètres (colonnes, bordure, coins, grille d’impression) · impression (grille). Galerie&nbsp;: `#/developer/sliders`.
 
 ## Couleurs (design system)
 
-Même ordre de champ. Contrôle&nbsp;: `input.form-control` texte dans un wrapper `form-color`, avec pastille à gauche (`input[type=color]`) et bouton effacer (`ri-close-circle-fill`) en overlay à l’intérieur du champ. Clear visible seulement s’il y a une valeur (peut être omis / disabled) ; non focusable (`tabindex="-1"`). Pastille&nbsp;: uniquement si hex valide ; sinon couleur par défaut du champ (`fallback` / `fallbackColor`), sinon damier transparent. Module&nbsp;: `form-color.js`. Appliqué : paramètres · éditeur (fond image) · thèmes. Galerie&nbsp;: `#/developer/colors`.
+Même ordre de champ. Contrôle&nbsp;: `input.form-control` texte dans un wrapper `form-color`, avec pastille à gauche (`input[type=color]`) et bouton effacer (`ri-close-circle-fill`) en overlay à l’intérieur du champ. Clear visible seulement s’il y a une valeur (peut être omis / disabled) ; non focusable (`tabindex="-1"`). Pastille&nbsp;: uniquement si hex valide ; sinon couleur par défaut du champ (`fallback` / `fallbackColor`), sinon damier transparent. Module&nbsp;: `form-color.js`. Appliqué : paramètres · thèmes · champ image (fond). Galerie&nbsp;: `#/developer/colors`.
+
+## Images (design system)
+
+Contrôle&nbsp;: wrapper `form-image` (`formImageMarkup()` / `bindFormImage()` dans `form-image.js`). `processFile(file) => Promise<dataUrl>` obligatoire (`compressImage` pour les cartes, `compressThemeImage` pour les logos). Deux vues&nbsp;:
+
+- **Vide** — texte « Aucune image ! Charger une nouvelle image : » + **Depuis mes fichiers** (`btn primary`, `<input type="file">` caché) et **Depuis une URL** (`btn secondary sm`). URL → modale enfant `modal--sm` sans route (titre « Charger depuis une URL », champ URL, `form-error` sous l’input) ; pied à droite **Annuler** `secondary sm` + **Charger** `primary` ; fermeture seulement si le chargement réussit (Échap / backdrop / X = dismiss). Pipeline : `fetchImageAsFile` puis `processFile` (l’URL n’est pas conservée).
+- **Image** — champ **Fond de l’image** (`form-color`, sans hint) puis aperçu `.form-image-crop` (`tabindex="0"`). Overlays : 3 badges centrés (`btn primary sm`, apparence seulement : zoom `%`, alignements `%` signés ; `ri-zoom-in-fill` / `ri-align-item-horizontal-center-fill` / `ri-align-item-vertical-center-fill`) ; reset `btn ghost sm icon-only` (`ri-close-circle-fill`) en haut à droite si cadrage ≠ 100 % / 0 / 0 ; **Supprimer** (gauche) et **Télécharger** (droite) `btn primary sm` (supprimer : `confirmDialog`). Tabulation aperçu : reset (s’il est visible) → Télécharger → Supprimer. Cadrage au focus (glisser / molette / flèches / `+` `−`). Ratio : `--form-image-aspect` (défaut `1 / 1`). Fond de l’aperçu = couleur du champ, live.
+
+Option `withBackgroundColor: false` : pas de champ fond ; l’aperçu utilise `previewBackground` / `setPreviewBackground()` (thèmes : couleur du thème, live). Option `fit: "logo"` : le zoom règle la **largeur** du logo (1 = 75 % de la largeur de carte, max 250 %), pas un cover. Enregistré sur le thème (`logoZoom` / `logoOffsetX` / `logoOffsetY`) et appliqué au dos et aux mini-cartes (centré dans le cadre ; décalage = fraction du cadre ; rogné s’il dépasse). Ratio thème : `--form-image-aspect: 63 / 44`.
+
+Appliqué : éditeur de carte · éditeur de thème personnalisé. Galerie&nbsp;: `#/developer/images`.
 
 ## Recherche (design system)
 
@@ -288,11 +303,11 @@ Pas des headings&nbsp;: marque topbar, `form-label`, noms de cartes (grille thè
 
 ## Modales (design system)
 
-Coquille&nbsp;: `modal-backdrop` + `modal` (`role="dialog"` / `aria-modal`). Bordure&nbsp;: `2px solid var(--ink)` (comme le focus des champs). Alignement vertical (sur le backdrop)&nbsp;: `modal-backdrop--top` · `modal-backdrop--middle` (**défaut**) · `modal-backdrop--bottom`. Header inversé (fond `ink` / texte `panel`)&nbsp;: titre (`h1.view-title`, court) + `btn primary icon-only modal-close` (même variante DS, tokens inversés comme le menu impression&nbsp;: repos fond `--bg` / hover fond `--ink` + bordure `--bg`). Bouton fermer centré verticalement, même inset haut / droite / bas. Corps&nbsp;: `modal-body`. Pied optionnel&nbsp;: `modal-footer` avec `modal-footer-start` (gauche&nbsp;: sauvegarde / validation) et `modal-footer-end` (droite&nbsp;: danger) — boutons centrés verticalement (normal / `sm`). Séparateur header&nbsp;: `2px solid var(--ink)` (pas de bordure haute sur le footer).
+Coquille&nbsp;: `modal-backdrop` + `modal` (`role="dialog"` / `aria-modal`). Bordure&nbsp;: `2px solid var(--ink)` (comme le focus des champs). Alignement vertical (sur le backdrop)&nbsp;: `modal-backdrop--top` · `modal-backdrop--middle` (**défaut**) · `modal-backdrop--bottom`. Header inversé (fond `ink` / texte `panel`)&nbsp;: titre (`h1.view-title`, court) + `btn primary icon-only modal-close` (même variante DS, tokens inversés comme le menu impression&nbsp;: repos fond `--bg` / hover fond `--ink` + bordure `--bg`). Bouton fermer centré verticalement, même inset haut / droite / bas. Corps&nbsp;: `modal-body`. Pied optionnel&nbsp;: `modal-footer` avec `modal-footer-start` (gauche&nbsp;: sauvegarde / validation) et `modal-footer-end` (droite&nbsp;: danger) — boutons centrés verticalement (normal / `sm`). Exception `modal-footer--primary-first` (éditeur de carte, éditeur de thème, paramètres d’impression)&nbsp;: visuel Annuler puis action primaire à droite (éditeurs&nbsp;: Supprimer à gauche) ; ordre clavier (DOM) primaire → Annuler → Supprimer. Séparateur header&nbsp;: `2px solid var(--ink)` (pas de bordure haute sur le footer).
 
 Tailles (3)&nbsp;: `modal--sm` (~640) · `modal--md` (~896, **défaut**) · `modal--lg` (~1152). Toujours bornées au **viewport** (`100vw` / `100dvh`). Responsive ≤&nbsp;640px&nbsp;: **plein écran**, overlay masqué.
 
-Appliqué&nbsp;: paramètres / page MD (`md`) · thèmes + éditeur carte + espace développeur (`lg` ; thèmes : hauteur toujours `var(--modal-max-h)`, le corps défile) · éditeur de thème personnalisé / confirmations / paramètres d’impression (`sm`). Galerie&nbsp;: `#/developer/modals`. Dialogues enfants (supprimer carte / thème, reset local, import, impression) : second `modal-backdrop` dans le même host, sans route — helper `confirmDialog()` / `openConfirmDialog()` (`confirm-dialog.js`) ou `openPrintDialog()` (`print-dialog.js`) ; titre un peu plus long et explicite (ex. `Supprimer la carte "Saucer Centurien" (#6939) ?`). Pas de `alert()` / `confirm()` / `prompt()` natifs.
+Appliqué&nbsp;: paramètres / page MD (`md`) · thèmes + éditeur carte + éditeur de thème personnalisé + espace développeur (`lg` ; thèmes : hauteur toujours `var(--modal-max-h)`, le corps défile) · confirmations / paramètres d’impression / chargement d’image depuis une URL (`sm`). Galerie&nbsp;: `#/developer/modals`. Dialogues enfants (supprimer carte / thème / image, reset local, import, impression, URL d’image) : second `modal-backdrop` dans le même host, sans route — helper `confirmDialog()` / `openConfirmDialog()` (`confirm-dialog.js`) ou `openPrintDialog()` (`print-dialog.js`) ; titre un peu plus long et explicite (ex. `Supprimer la carte "Saucer Centurien" (#6939) ?`). Pas de `alert()` / `confirm()` / `prompt()` natifs.
 
 ## Impression
 

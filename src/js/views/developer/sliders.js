@@ -18,7 +18,7 @@ export function renderDeveloperSliders(host) {
         <code>input[type=range]</code> (+ <code>output</code> optionnel).
         Même vocabulaire de champ (<code>form-field</code> / <code>form-label</code> /
         <code>form-hint</code> / <code>form-error</code>).
-        Appliqué dans les paramètres et l’éditeur (zoom photo).
+        Appliqué dans les paramètres.
       </p>
 
       <div class="styleguide-section">

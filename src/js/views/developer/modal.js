@@ -8,6 +8,7 @@ import { renderDeveloperFields } from "./fields.js";
 import { renderDeveloperSelects } from "./selects.js";
 import { renderDeveloperSliders } from "./sliders.js";
 import { renderDeveloperColors } from "./colors.js";
+import { renderDeveloperImages } from "./images.js";
 import { renderDeveloperSearch } from "./search.js";
 import { renderDeveloperModals } from "./modals.js";
 
@@ -22,6 +23,7 @@ const PAGES = {
   selects: renderDeveloperSelects,
   sliders: renderDeveloperSliders,
   colors: renderDeveloperColors,
+  images: renderDeveloperImages,
   search: renderDeveloperSearch,
   modals: renderDeveloperModals,
 };

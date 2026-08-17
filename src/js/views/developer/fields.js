@@ -27,6 +27,7 @@ export function renderDeveloperFields(host) {
         Icône optionnelle&nbsp;: wrapper <code>form-control-wrap</code> +
         <code>form-control-icon</code> (Remix, décoratif).
         Listes déroulantes&nbsp;: ${linkMarkup("page dédiée", { href: "#/developer/selects" })}.
+        Images&nbsp;: ${linkMarkup("page dédiée", { href: "#/developer/images" })}.
         Compact&nbsp;: <code>sm</code>.
         Repos&nbsp;: fond + trait bas (inset). Focus&nbsp;: cadre avec 1&nbsp;px d’air (pas de hover).
       </p>
@@ -161,6 +162,8 @@ export function renderDeveloperFields(host) {
         ${linkMarkup("← Index styleguide", { href: "#/developer" })}
         ·
         ${linkMarkup("Listes déroulantes", { href: "#/developer/selects" })}
+        ·
+        ${linkMarkup("Images", { href: "#/developer/images" })}
         ·
         ${linkMarkup("App", { href: "#/" })}
       </p>

@@ -202,7 +202,7 @@ export async function renderList(main, opts) {
     const haystack = [
       card.legoSetRef || "",
       card.title || "",
-      legoTheme?.themeName || "",
+      legoTheme?.name || "",
       card.releaseYear != null ? String(card.releaseYear) : "",
     ].join("\n");
     return includesCI(haystack, q);

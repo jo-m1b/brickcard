@@ -4,7 +4,7 @@
  * Alignement face/dos : miroir horizontal (flip sur le bord long en portrait).
  */
 
-import { renderCardFace, renderCardBack, applyImageTransform } from "./card-render.js";
+import { renderCardFace, renderCardBack, applyImageTransform, applyThemeLogoTransform } from "./card-render.js";
 import { loadThemes } from "./storage.js";
 import {
   computePrintLayout,
@@ -152,6 +152,16 @@ function reapplyTransforms(root) {
       imageZoom: Number(cardEl.dataset.imageZoom) || 1,
       imageOffsetX: Number(cardEl.dataset.imageOffsetX) || 0,
       imageOffsetY: Number(cardEl.dataset.imageOffsetY) || 0,
+    });
+  });
+  root.querySelectorAll(".card-back.card-back--has-theme-logo").forEach((back) => {
+    const img = back.querySelector(".card-theme-logo");
+    const box = back.querySelector(".card-theme");
+    if (!(img instanceof HTMLImageElement) || !box || box.hasAttribute("hidden")) return;
+    applyThemeLogoTransform(img, box, {
+      logoZoom: Number(back.dataset.logoZoom) || 1,
+      logoOffsetX: Number(back.dataset.logoOffsetX) || 0,
+      logoOffsetY: Number(back.dataset.logoOffsetY) || 0,
     });
   });
 }

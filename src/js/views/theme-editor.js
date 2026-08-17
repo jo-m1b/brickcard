@@ -1,16 +1,21 @@
 import { ICON_CLOSE } from "../icons.js";
 import { bindFormColor, formColorMarkup } from "../form-color.js";
+import { bindFormImage, formImageMarkup } from "../form-image.js";
+import { slugifyFilename } from "../card-export.js";
 import {
   upsertTheme,
   deleteTheme,
   compressThemeImage,
-  fetchImageAsFile,
   createId,
   getTheme,
 } from "../storage.js";
+import { mountCardBackPreview, refreshCardBackPreview } from "../card-render.js";
 import { DEFAULT_THEME_COLOR } from "../themes-data.js";
 import { resolveCardAccent } from "../card-design.js";
 import { confirmDialog } from "../confirm-dialog.js";
+
+const THEME_LOGO_ACCEPT =
+  "image/svg+xml,image/png,image/webp,.svg,.png,.webp";
 
 /**
  * Modale d’édition d’un thème personnalisé (`#/themes/new`, `#/themes/edit/:id`).
@@ -31,24 +36,39 @@ export async function renderThemeEditor(host, opts) {
 
   document.body.classList.add("modal-open");
 
-  /** @type {{ id: string|null, themeName: string, color: string, logoDataUrl: string }} */
+  /** @type {{
+   *   id: string|null,
+   *   name: string,
+   *   color: string,
+   *   logoDataUrl: string,
+   *   logoZoom: number,
+   *   logoOffsetX: number,
+   *   logoOffsetY: number,
+   * }} */
   const draft = {
     id: existing?.id || null,
-    themeName: existing?.themeName || "",
+    name: existing?.name || "",
     color: existing?.color || "",
     logoDataUrl: existing?.logoDataUrl || "",
+    logoZoom: existing?.logoZoom || 1,
+    logoOffsetX: existing?.logoOffsetX || 0,
+    logoOffsetY: existing?.logoOffsetY || 0,
   };
 
   const colorDisplay = draft.color || resolveCardAccent(existing);
 
+  function themeCropBackground() {
+    return resolveCardAccent({ color: draft.color });
+  }
+
   host.innerHTML = `
     <div class="modal-backdrop" id="theme-editor-backdrop" role="presentation">
-      <div class="modal modal--sm" role="dialog" aria-modal="true" aria-labelledby="theme-editor-title">
+      <div class="modal modal--lg" role="dialog" aria-modal="true" aria-labelledby="theme-editor-title">
         <div class="modal-header">
           <div>
             <h1 class="view-title" id="theme-editor-title">${
               existing
-                ? `Modifier « ${escapeHtml(existing.themeName)} »`
+                ? `Modifier « ${escapeHtml(existing.name)} »`
                 : "Nouveau thème"
             }</h1>
           </div>
@@ -58,54 +78,54 @@ export async function renderThemeEditor(host, opts) {
           </button>
         </div>
         <div class="modal-body">
-          <div class="form-field">
-            <label class="form-label form-label--required" for="theme-name">Nom</label>
-            <input class="form-control" type="text" id="theme-name" placeholder="CITY" autocomplete="off" />
-          </div>
-          <div class="form-field">
-            <label class="form-label" for="theme-color-hex">Couleur</label>
-            <p class="form-hint" id="theme-color-hint">Optionnel — sinon couleur par défaut des cartes.</p>
-            ${formColorMarkup({
-              id: "theme-color-hex",
-              value: draft.color,
-              fallback: DEFAULT_THEME_COLOR,
-              placeholder: DEFAULT_THEME_COLOR,
-              describedBy: "theme-color-hint",
-            })}
-          </div>
-          <div class="form-field">
-            <label class="form-label" for="theme-logo">Logo</label>
-            <p class="form-hint" id="theme-logo-hint">Optionnel — SVG, PNG ou WebP (fichier ou URL). L’URL n’est pas conservée.</p>
-            <div class="file-row" role="group" aria-describedby="theme-logo-hint">
-              <label class="btn primary file-btn">
-                Parcourir…
-                <input type="file" id="theme-logo" accept="image/svg+xml,image/png,image/webp,.svg,.png,.webp" />
-              </label>
-              <button type="button" class="btn ghost sm" id="theme-logo-clear" ${
-                draft.logoDataUrl ? "" : "hidden"
-              }>Retirer</button>
+          <div class="editor-layout">
+            <aside class="preview-wrap">
+              <div class="card-preview" id="theme-preview-back-host" aria-label="Aperçu du dos"></div>
+            </aside>
+            <div>
+              <div class="form-field">
+                <label class="form-label form-label--required" for="theme-name">Nom</label>
+                <input class="form-control" type="text" id="theme-name" placeholder="CITY" autocomplete="off" />
+                <p class="form-error" id="theme-name-error" role="alert" hidden></p>
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="theme-color-hex">Couleur par défaut</label>
+                <p class="form-hint" id="theme-color-hint">Couleur appliquée par défaut aux cartes de ce thème</p>
+                ${formColorMarkup({
+                  id: "theme-color-hex",
+                  value: draft.color,
+                  fallback: DEFAULT_THEME_COLOR,
+                  placeholder: DEFAULT_THEME_COLOR,
+                  describedBy: "theme-color-hint",
+                })}
+              </div>
+              <div class="form-field" style="--form-image-aspect: 63 / 44">
+                <label class="form-label" id="theme-logo-label">Logo</label>
+                ${formImageMarkup({
+                  id: "theme-logo",
+                  labelledBy: "theme-logo-label",
+                  accept: THEME_LOGO_ACCEPT,
+                  dataUrl: draft.logoDataUrl,
+                  zoom: draft.logoZoom,
+                  offsetX: draft.logoOffsetX,
+                  offsetY: draft.logoOffsetY,
+                  withBackgroundColor: false,
+                  previewBackground: colorDisplay,
+                  fit: "logo",
+                })}
+              </div>
+              <p class="form-error" id="theme-error" role="alert"></p>
             </div>
-            <div class="url-import">
-              <span class="file-or">ou URL</span>
-              <input type="text" id="theme-logo-url" inputmode="url" placeholder="https://…/logo.png" autocomplete="off" spellcheck="false" />
-              <button type="button" class="btn secondary sm" id="theme-logo-url-btn">Charger</button>
-            </div>
-            <img id="theme-logo-preview" class="theme-preview-img" alt="" ${
-              draft.logoDataUrl
-                ? `src="${escapeAttr(draft.logoDataUrl)}"`
-                : "hidden"
-            } />
           </div>
-          <p class="form-error" id="theme-error" role="alert"></p>
         </div>
-        <div class="modal-footer">
-          <div class="modal-footer-start">
+        <div class="modal-footer modal-footer--primary-first">
+          <div class="modal-footer-end">
             <button type="button" class="btn primary" id="theme-save">Enregistrer</button>
             <button type="button" class="btn secondary sm" id="theme-cancel">Annuler</button>
           </div>
           ${
             existing
-              ? `<div class="modal-footer-end">
+              ? `<div class="modal-footer-start">
             <button type="button" class="btn danger" id="theme-delete">Supprimer</button>
           </div>`
               : ""
@@ -118,20 +138,45 @@ export async function renderThemeEditor(host, opts) {
   const q = (sel) => host.querySelector(sel);
   const backdrop = q("#theme-editor-backdrop");
   const nameInput = q("#theme-name");
+  const nameError = q("#theme-name-error");
   const errEl = q("#theme-error");
-  const preview = q("#theme-logo-preview");
-  const clearBtn = q("#theme-logo-clear");
-  const logoInput = q("#theme-logo");
-  const logoUrlInput = q("#theme-logo-url");
-  const logoUrlBtn = q("#theme-logo-url-btn");
+  const logoRoot = /** @type {HTMLElement|null} */ (q("#theme-logo"));
+  const previewHost = /** @type {HTMLElement} */ (q("#theme-preview-back-host"));
 
-  nameInput.value = draft.themeName;
+  nameInput.value = draft.name;
+
+  /** @returns {import("../themes-data.js").LegoTheme} */
+  function previewTheme() {
+    return {
+      id: draft.id || "",
+      name: nameInput.value.trim(),
+      color: draft.color,
+      logoDataUrl: draft.logoDataUrl,
+      logoZoom: draft.logoZoom,
+      logoOffsetX: draft.logoOffsetX,
+      logoOffsetY: draft.logoOffsetY,
+      isBuiltin: false,
+      updatedAt: "",
+    };
+  }
+
+  /** @type {HTMLElement} */
+  let previewBack = mountCardBackPreview(previewHost, {}, {
+    legoTheme: previewTheme(),
+  });
+
+  function syncPreview() {
+    refreshCardBackPreview(previewBack, {}, { legoTheme: previewTheme() });
+  }
 
   const colorRoot = /** @type {HTMLElement|null} */ (
     q("#theme-color-hex")?.closest("[data-form-color]")
   );
   /** @type {ReturnType<typeof bindFormColor>|null} */
   let themeColorField = null;
+  /** @type {ReturnType<typeof bindFormImage>|null} */
+  let logoField = null;
+
   if (colorRoot) {
     themeColorField = bindFormColor(colorRoot, {
       fallbackColor: DEFAULT_THEME_COLOR,
@@ -140,64 +185,53 @@ export async function renderThemeEditor(host, opts) {
         if (!value) {
           themeColorField?.setValue("", resolveCardAccent(null));
         }
+        logoField?.setPreviewBackground(themeCropBackground());
+        syncPreview();
       },
     });
   }
   themeColorField?.setValue(draft.color, colorDisplay);
 
-  async function applyThemeLogoFile(file) {
-    draft.logoDataUrl = await compressThemeImage(file);
-    preview.src = draft.logoDataUrl;
-    preview.hidden = false;
-    clearBtn.hidden = false;
-    logoUrlInput.value = "";
-    errEl.textContent = "";
+  if (logoRoot) {
+    logoField = bindFormImage(logoRoot, {
+      processFile: compressThemeImage,
+      dialogHost: host,
+      previewBackground: colorDisplay,
+      fit: "logo",
+      downloadBasename: () => {
+        const name = slugifyFilename(nameInput.value);
+        return name !== "brickcard" ? `theme-logo-${name}` : "theme-logo";
+      },
+      onChange(value) {
+        draft.logoDataUrl = value.dataUrl || "";
+        if (draft.logoDataUrl) {
+          draft.logoZoom = value.zoom;
+          draft.logoOffsetX = value.offsetX;
+          draft.logoOffsetY = value.offsetY;
+        } else {
+          draft.logoZoom = 1;
+          draft.logoOffsetX = 0;
+          draft.logoOffsetY = 0;
+        }
+        syncPreview();
+      },
+    });
   }
 
-  logoInput.onchange = async (e) => {
-    const file = e.target.files && e.target.files[0];
-    if (!file) return;
-    try {
-      await applyThemeLogoFile(file);
-    } catch {
-      errEl.textContent = "Logo invalide — utilise un SVG, PNG ou WebP.";
-    }
-  };
-
-  async function loadThemeLogoFromUrl() {
-    const url = logoUrlInput.value.trim();
-    if (!url) {
-      errEl.textContent = "Indique une URL de logo.";
-      return;
-    }
-    logoUrlBtn.disabled = true;
-    errEl.textContent = "";
-    try {
-      const file = await fetchImageAsFile(url);
-      await applyThemeLogoFile(file);
-    } catch (ex) {
-      errEl.textContent = ex.message || "Téléchargement du logo impossible.";
-    } finally {
-      logoUrlBtn.disabled = false;
-    }
+  function setNameError(message) {
+    const msg = String(message || "");
+    nameError.textContent = msg;
+    nameError.hidden = !msg;
+    nameInput.classList.toggle("is-invalid", Boolean(msg));
+    nameInput.setAttribute("aria-invalid", msg ? "true" : "false");
+    if (msg) nameInput.setAttribute("aria-describedby", "theme-name-error");
+    else nameInput.removeAttribute("aria-describedby");
   }
 
-  logoUrlBtn.onclick = () => loadThemeLogoFromUrl();
-  logoUrlInput.onkeydown = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      loadThemeLogoFromUrl();
-    }
-  };
-
-  clearBtn.onclick = () => {
-    draft.logoDataUrl = "";
-    preview.hidden = true;
-    preview.removeAttribute("src");
-    clearBtn.hidden = true;
-    logoInput.value = "";
-    logoUrlInput.value = "";
-  };
+  nameInput.addEventListener("input", () => {
+    if (nameError.textContent) setNameError("");
+    syncPreview();
+  });
 
   function requestClose() {
     onClose();
@@ -216,20 +250,27 @@ export async function renderThemeEditor(host, opts) {
     requestClose();
   }
   window.addEventListener("keydown", onKey);
+  window.addEventListener("resize", syncPreview);
 
   q("#theme-save").onclick = async () => {
-    const themeName = nameInput.value.trim();
-    if (!themeName) {
-      errEl.textContent = "Le nom est obligatoire.";
+    const name = nameInput.value.trim();
+    if (!name) {
+      errEl.textContent = "";
+      setNameError("Le nom est obligatoire.");
+      nameInput.focus();
       return;
     }
+    setNameError("");
     errEl.textContent = "";
     try {
       await upsertTheme({
         id: draft.id || createId(),
-        themeName,
+        name,
         color: draft.color,
         logoDataUrl: draft.logoDataUrl || "",
+        logoZoom: draft.logoZoom,
+        logoOffsetX: draft.logoOffsetX,
+        logoOffsetY: draft.logoOffsetY,
         isBuiltin: false,
       });
       onSaved();
@@ -242,7 +283,7 @@ export async function renderThemeEditor(host, opts) {
   if (deleteBtn) {
     deleteBtn.onclick = async () => {
       const ok = await confirmDialog(host, {
-        title: `Supprimer le thème "${existing.themeName}" ?`,
+        title: `Supprimer le thème "${existing.name}" ?`,
         message:
           "Attention, la suppression est définitive et ne pourra pas être annulée ! Souhaitez-vous continuer ?",
         okLabel: "Supprimer",
@@ -262,7 +303,9 @@ export async function renderThemeEditor(host, opts) {
 
   return () => {
     themeColorField?.destroy();
+    logoField?.destroy();
     window.removeEventListener("keydown", onKey);
+    window.removeEventListener("resize", syncPreview);
   };
 }
 
@@ -272,8 +315,4 @@ function escapeHtml(str) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
-}
-
-function escapeAttr(str) {
-  return escapeHtml(str).replace(/'/g, "&#39;");
 }

@@ -73,7 +73,7 @@ export function renderDeveloperModals(host) {
         </div>
         <p class="form-hint" style="margin-top: 0.75rem">
           Appliqué dans l’app&nbsp;: paramètres / page MD (<code>modal--md</code>),
-          thèmes + éditeur carte + espace développeur (<code>modal--lg</code>), éditeur de thème (<code>modal--sm</code>).
+          thèmes + éditeur carte + éditeur de thème + espace développeur (<code>modal--lg</code>).
         </p>
       </div>
 
@@ -85,9 +85,8 @@ export function renderDeveloperModals(host) {
               <tr><th>Usage</th><th>Taille</th></tr>
             </thead>
             <tbody>
-              <tr><td>Éditeur de thème</td><td><code>modal--sm</code></td></tr>
               <tr><td>Paramètres / page MD</td><td><code>modal--md</code></td></tr>
-              <tr><td>Thèmes LEGO / éditeur carte / espace développeur</td><td><code>modal--lg</code></td></tr>
+              <tr><td>Thèmes LEGO / éditeur carte / éditeur de thème / espace développeur</td><td><code>modal--lg</code></td></tr>
             </tbody>
           </table>
         </div>

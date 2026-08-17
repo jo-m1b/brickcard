@@ -7,11 +7,13 @@
 /**
  * @typedef {Object} LegoTheme
  * @property {string} id
- * @property {string} themeName Affichage (ex. "Aquazone", "CITY")
+ * @property {string} name Affichage (ex. "Aquazone", "CITY")
  * @property {string} color Couleur du thème (cartes), hex #rrggbb ou "" si non définie
  * @property {string} logoDataUrl Logo PNG/SVG/WebP (data URL ou chemin relatif), optionnel
+ * @property {number} logoZoom Zoom largeur logo (1 = 75 % de la largeur de carte)
+ * @property {number} logoOffsetX Décalage horizontal logo (fraction de la boîte)
+ * @property {number} logoOffsetY Décalage vertical logo (fraction de la boîte)
  * @property {boolean} isBuiltin Thème par défaut (lecture seule, non supprimable)
- * @property {string} createdAt ISO (personnalisés) ; vide pour les thèmes par défaut
  * @property {string} updatedAt ISO (personnalisés) ; vide pour les thèmes par défaut
  */
 
@@ -19,9 +21,9 @@
  * Entrée dans data/themes-presets.json
  * @typedef {Object} PresetMeta
  * @property {string} id
- * @property {string} themeName
+ * @property {string} name
  * @property {string} [color] Hex ; omis → pas de couleur propre (cascade carte)
- * @property {string} [logoSrc] Chemin relatif depuis src/ (ex. "img/logo-theme-….png")
+ * @property {string} [logoSrc] Chemin relatif depuis src/ (ex. "img/theme-logo-….png")
  */
 
 const PRESETS_URL = "data/themes-presets.json";
@@ -67,7 +69,7 @@ async function loadPresetMeta() {
         if (!Array.isArray(list) || !list.length) {
           throw new Error("themes-presets.json : tableau « themes » manquant ou vide");
         }
-        return list.filter((t) => t && typeof t.id === "string" && t.themeName);
+        return list.filter((t) => t && typeof t.id === "string" && (t.name || t.themeName));
       })
       .catch((err) => {
         presetMetaPromise = null;
@@ -119,7 +121,7 @@ export async function getPresetThemes() {
       const meta = await loadPresetMeta();
       return meta.map((entry) => {
         const color = parseHexColor(entry.color ?? entry.accentColor);
-        const themeName = String(entry.themeName).trim();
+        const name = String(entry.name ?? entry.themeName ?? "").trim();
         let logoDataUrl = "";
         if (entry.logoSrc) {
           const path = String(entry.logoSrc).split("?")[0];
@@ -128,11 +130,13 @@ export async function getPresetThemes() {
 
         return {
           id: entry.id,
-          themeName,
+          name,
           isBuiltin: true,
           color,
           logoDataUrl,
-          createdAt: "",
+          logoZoom: 1,
+          logoOffsetX: 0,
+          logoOffsetY: 0,
           updatedAt: "",
         };
       });

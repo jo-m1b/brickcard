@@ -38,7 +38,6 @@
   --selection-bg: transparent;
   --selection-line: transparent;
   --table-head: #fafafa;
-  --photo-zone: #ffffff;
   --thumb-bg: #f5f5f5;
   --form-control-bg: #f0f0f0;
   --form-error: #ce0000;
@@ -48,6 +47,9 @@
   --toast-fg: #ffffff;
   --card-w: 63mm;
   --card-h: 88mm;
+  /* Inset du cadre logo (dos) = bordure face d’usine ; ne suit pas le réglage. */
+  --card-logo-inset: 3mm;
+  --card-logo-inset-tile: 1mm;
   --cols: 3;
   --rows: 3;
   --list-cols-max: 4;
@@ -73,7 +75,6 @@
     --selection-bg: transparent;
     --selection-line: transparent;
     --table-head: #1a1a1a;
-    --photo-zone: #161616;
     --thumb-bg: #2a2a2a;
     --form-control-bg: #1c1c1c;
     --form-error: #ff5555;
@@ -103,7 +104,6 @@
   --selection-bg: transparent;
   --selection-line: transparent;
   --table-head: #1a1a1a;
-  --photo-zone: #161616;
   --thumb-bg: #2a2a2a;
   --form-control-bg: #1c1c1c;
   --form-error: #ff5555;
@@ -132,7 +132,6 @@
   --selection-bg: transparent;
   --selection-line: transparent;
   --table-head: #fafafa;
-  --photo-zone: #ffffff;
   --thumb-bg: #f5f5f5;
   --form-control-bg: #f0f0f0;
   --form-error: #ce0000;
@@ -1862,6 +1861,190 @@ html:not([data-theme]) .btn .icon-system {
   pointer-events: none;
 }
 
+/* ——— Images (design system) ———
+ * Contrôle : `.form-image` (vide : fichier / URL ; image : fond optionnel + aperçu).
+ * Aperçu : `.form-image-crop` (focus = glisser / molette / flèches / +−).
+ * Ratio : `--form-image-aspect` (défaut 1 / 1).
+ * Fond : champ `form-color` (éditeur carte) ou couleur externe (`withBackgroundColor: false`, thèmes).
+ * Badges overlay : `.btn.primary.sm` (apparence, non cliquables).
+ * Reset : `.btn.ghost.sm.icon-only` positionné en overlay. */
+.form-image {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.form-image-empty[hidden],
+.form-image-filled[hidden] {
+  display: none !important;
+}
+
+.form-image-empty-text {
+  margin: 0 0 0.65rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1.35;
+}
+
+.form-image-empty-text strong {
+  font-weight: 700;
+}
+
+.form-image-empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.form-image-empty .form-error {
+  margin-top: 0.35rem;
+}
+
+.form-image-empty .form-error:empty {
+  display: none;
+}
+
+.form-image-filled {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.form-image-filled > .form-field {
+  margin-bottom: 0;
+}
+
+.form-image-crop {
+  position: relative;
+  width: 100%;
+  aspect-ratio: var(--form-image-aspect, 1 / 1);
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  cursor: default;
+  touch-action: pan-y;
+  user-select: none;
+  container-type: inline-size;
+}
+
+.form-image-crop:focus,
+.form-image-crop.is-editing {
+  outline: 2px solid var(--ink);
+  outline-offset: 1px;
+  cursor: grab;
+  touch-action: none;
+}
+
+.form-image-crop.is-editing:active {
+  cursor: grabbing;
+}
+
+.form-image-crop-img {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 1;
+  max-width: none;
+  transform-origin: center center;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.form-image-crop--logo {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  container-type: size;
+}
+
+.form-image-crop--logo .form-image-crop-img {
+  position: relative;
+  left: auto;
+  top: auto;
+  flex-shrink: 0;
+  width: calc(75% * min(var(--logo-zoom, 1), 2.5));
+  height: auto;
+  max-width: none;
+  max-height: none;
+  object-fit: contain;
+  transform: translate(
+    calc(var(--logo-offset-x, 0) * 100cqw),
+    calc(var(--logo-offset-y, 0) * 100cqh)
+  );
+}
+
+.form-image-crop-img[hidden] {
+  display: none !important;
+}
+
+.form-image-crop-badges {
+  position: absolute;
+  top: 0.5rem;
+  left: 50%;
+  z-index: 2;
+  transform: translateX(-50%);
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  gap: 0.35rem;
+  max-width: calc(100% - 0.5rem);
+  pointer-events: none;
+}
+
+.form-image-crop-badge {
+  pointer-events: none;
+  cursor: default;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Valeur : signe + 3 chiffres + % (`+100%`) — évite le yoyo de largeur. */
+.form-image-crop-badge > span {
+  display: inline-block;
+  min-width: 5ch;
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+@container (max-width: 17.5rem) {
+  .form-image-crop-badges {
+    flex-wrap: wrap;
+    max-width: calc(100% - 2.5rem);
+  }
+}
+
+.form-image-crop-reset {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.35rem;
+  z-index: 3;
+}
+
+.form-image-crop-reset[hidden] {
+  display: none !important;
+}
+
+.form-image-crop-bar {
+  position: absolute;
+  right: 0.5rem;
+  bottom: 0.5rem;
+  left: 0.5rem;
+  z-index: 2;
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+
+.form-image-crop-bar > .btn {
+  pointer-events: auto;
+}
+
 input.form-control,
 textarea.form-control,
 select.form-control,
@@ -2536,6 +2719,17 @@ button.form-select-trigger.sm {
   margin-left: auto;
 }
 
+/* Visuel : Annuler puis action primaire à droite (éditeur : Supprimer à gauche) ;
+   tabulation : primaire → Annuler → Supprimer */
+.modal-footer--primary-first .modal-footer-start {
+  order: 1;
+}
+
+.modal-footer--primary-first .modal-footer-end {
+  order: 2;
+  flex-direction: row-reverse;
+}
+
 .modal-footer .btn {
   /* Aligne les hauteurs mixte (normal + sm) sur l’axe vertical */
   align-self: center;
@@ -2743,7 +2937,7 @@ body.modal-open {
 /* ——— Editor ——— */
 .editor-layout {
   display: grid;
-  grid-template-columns: minmax(280px, 1fr) minmax(240px, 300px);
+  grid-template-columns: minmax(240px, 300px) minmax(280px, 1fr);
   gap: 1.5rem;
   align-items: start;
 }
@@ -2775,132 +2969,6 @@ textarea:not(.form-control):focus {
 textarea {
   resize: vertical;
   min-height: 72px;
-}
-
-.photo-zone {
-  border: 1px dashed var(--line);
-  border-radius: 0;
-  background: var(--photo-zone);
-  padding: 1rem;
-  display: grid;
-  gap: 0.85rem;
-}
-
-.photo-zone.has-image {
-  border-style: solid;
-}
-
-.file-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  align-items: center;
-}
-
-.file-or {
-  font-size: 0.82rem;
-  color: var(--muted);
-  font-weight: 500;
-}
-
-.url-import {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  align-items: center;
-  width: 100%;
-}
-
-.url-import input[type="url"],
-.url-import input[type="text"] {
-  flex: 1 1 12rem;
-  min-width: 0;
-  margin: 0;
-  padding: 0.45rem 0.65rem;
-  font-size: 0.88rem;
-}
-
-/* Label fichier : même look que .btn.primary, input invisible par-dessus */
-.file-btn {
-  position: relative;
-  overflow: hidden;
-}
-
-.file-btn input {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.file-name {
-  font-size: 0.85rem;
-  color: var(--ink-soft);
-}
-
-.cropper {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  border-radius: 0;
-  overflow: hidden;
-  background: #ffffff;
-  border: 1px solid var(--line);
-  cursor: grab;
-  touch-action: none;
-  user-select: none;
-}
-
-.image-bg-field {
-  margin: 0.65rem 0 0.75rem;
-}
-
-.cropper:active {
-  cursor: grabbing;
-}
-
-.cropper img {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  max-width: none;
-  transform-origin: center center;
-  pointer-events: none;
-  will-change: transform;
-}
-
-.cropper .placeholder {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  color: #888;
-  font-size: 0.9rem;
-  text-align: center;
-  padding: 1rem;
-  pointer-events: none;
-}
-
-.controls {
-  display: grid;
-  gap: 0.55rem;
-}
-
-.controls.disabled {
-  opacity: 0.45;
-  pointer-events: none;
-}
-
-.controls .form-field {
-  margin-bottom: 0;
-}
-
-.editor-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-  align-items: center;
 }
 
 /* Erreurs page / panel (hors design system form-field) */
@@ -3025,12 +3093,14 @@ textarea {
 }
 
 .theme-tile-logo-wrap {
+  position: relative;
   min-height: 0;
   width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
 .theme-tile-logo {
@@ -3040,6 +3110,39 @@ textarea {
   width: auto;
   height: auto;
   object-fit: contain;
+}
+
+.theme-tile-logo-wrap--crop {
+  box-sizing: border-box;
+  justify-self: stretch;
+  align-self: stretch;
+  width: auto;
+  height: auto;
+  min-width: 0;
+  min-height: 0;
+  margin: var(--card-logo-inset-tile, 1mm);
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+  container-type: size;
+}
+
+.theme-tile-logo-wrap--crop .theme-tile-logo:not(.is-brand) {
+  position: static;
+  left: auto;
+  top: auto;
+  display: block;
+  flex-shrink: 0;
+  width: calc(var(--theme-tile-w) * 0.75 * min(var(--logo-zoom, 1), 2.5));
+  height: auto;
+  max-width: none;
+  max-height: none;
+  object-fit: contain;
+  transform: translate(
+    calc(var(--logo-offset-x, 0) * 100cqw),
+    calc(var(--logo-offset-y, 0) * 100cqh)
+  );
+  pointer-events: none;
 }
 
 .theme-tile-logo.is-brand {
@@ -3064,23 +3167,6 @@ textarea {
 .nested-panel {
   margin-top: 0.5rem;
   background: var(--input-bg);
-}
-
-.theme-preview-img {
-  height: 40px;
-  width: auto;
-  max-width: 120px;
-  object-fit: contain;
-  border: 1px solid var(--line);
-  background:
-    linear-gradient(45deg, #ccc 25%, transparent 25%),
-    linear-gradient(-45deg, #ccc 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, #ccc 75%),
-    linear-gradient(-45deg, transparent 75%, #ccc 75%);
-  background-size: 8px 8px;
-  background-position: 0 0, 0 4px, 4px -4px, -4px 0;
-  background-color: #eee;
-  padding: 2px;
 }
 
 /*
@@ -3371,6 +3457,59 @@ textarea {
 
 .card-back .card-theme-logo[hidden] {
   display: none !important;
+}
+
+.card-back--has-theme-logo {
+  grid-template-rows: 1fr 1fr;
+}
+
+.card-back--has-theme-logo .card-brand {
+  grid-row: 1;
+  align-self: stretch;
+  justify-self: stretch;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+.card-back--has-theme-logo .card-theme {
+  grid-row: 2;
+  align-self: stretch;
+  justify-self: stretch;
+  box-sizing: border-box;
+  width: auto;
+  height: auto;
+  min-width: 0;
+  min-height: 0;
+  max-width: none;
+  margin: var(--card-logo-inset, 3mm);
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  container-type: size;
+}
+
+.card-back--has-theme-logo .card-theme-logo {
+  position: static;
+  left: auto;
+  top: auto;
+  z-index: 1;
+  display: block;
+  flex-shrink: 0;
+  width: calc(var(--card-w) * 0.75 * min(var(--logo-zoom, 1), 2.5));
+  height: auto;
+  max-width: none;
+  max-height: none;
+  object-fit: contain;
+  transform: translate(
+    calc(var(--logo-offset-x, 0) * 100cqw),
+    calc(var(--logo-offset-y, 0) * 100cqh)
+  );
+  pointer-events: none;
 }
 
 /* ——— Print layout ——— */

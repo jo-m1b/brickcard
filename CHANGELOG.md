@@ -7,19 +7,42 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [0.7.2] — 2026-08-17
+
+### Added
+
+- Champ image (design system) : `form-image` (fichier / URL, fond, cadrage au focus : glisser, molette, flèches, `+`/`−`) ; galerie `#/developer/images`
+- Thèmes personnalisés : taille / position du logo (`logoZoom`, `logoOffsetX`, `logoOffsetY`) ; dos de carte splité (branding haut / logo bas) ; mini-cartes
+
 ### Changed
 
+- Dos : cadre du logo (moitié basse, inset 3 mm fixe) ; logo à 75 % de la largeur de carte (zoom 100 %, max 250 %), centré, décalage X/Y, rogné s’il dépasse
+- Mini-cartes thèmes : même affichage logo que le dos (75 % × zoom, décalage X/Y, rogné par le cadre)
+- Éditeur de carte et logos de thèmes personnalisés : champ `form-image` (thèmes : pas de fond personnalisable, aperçu sur la couleur du thème)
+- Éditeur de thème : aperçu du dos à gauche (`.preview-wrap`) ; modale `lg` (comme l’éditeur de carte)
+- Éditeur de thème : libellés couleur ; erreur du nom sous le champ ; pied comme l’éditeur de carte (Supprimer à gauche, Annuler / Enregistrer à droite)
+- Thèmes : champ `themeName` renommé en `name` (import / IndexedDB encore acceptés)
+- Cartes et thèmes : champ `createdAt` retiré (`updatedAt` suffit ; import encore accepté comme repli)
 - Polices : Open Sans et Inter auto-hébergées (`src/fonts/`, woff2 variable) ; plus de CDN Google Fonts
 - Accueil vide : plus que « Aucune carte pour l'instant dans la collection ! »
 - États vides : padding réduit ; plus de scroll vertical dû à la brique hors flux
 - Chargement : header réduit à la marque (logo + nom + version)
 - Cartes : champ `description` retiré (modèle, IndexedDB à l’enregistrement, export / import)
+- Logos thèmes (raster → WebP) : Adventurers, Alpha Team, Art, DOTS, Dreamzzz, Power Miners, Speed Racer, The Lord of the Rings, Trolls World Tour, Wicked
+- Logos thèmes (raster → SVG) : Avatar, Bluey, Education, Mindstorms, Minions: The Rise of Gru, Pokémon, Star Trek, Stranger Things, Studios, Teenage Mutant Ninja Turtles, The Legend of Zelda, Transformers, Vidiyo
+- Logos thèmes mis à jour : Avatar: The Last Airbender, DUPLO, Rock Raiders, SpongeBob SquarePants
+- Thème Xtra : logo retiré (affichage du nom)
 - Logo thème Batman : recadré (brique LEGO retirée)
 - Logo thème Disney : recadré (brique LEGO retirée)
 - Logo thème Fortnite : recadré (brique LEGO retirée)
 - Logo thème Hero Factory : recadré (brique LEGO retirée)
 - Logo thème Mixels : recadré (brique LEGO retirée)
-- Logo thème Racers : recadré (brique LEGO retirée)
+- Éditeur de carte : titre selon titre/ref (`Modifier la carte` / `Modifier « #ref »` / `Modifier « titre »` / `Modifier « titre (#ref) »`) ; aperçu à gauche, formulaire à droite ; footer visuel Supprimer à gauche, Annuler puis Enregistrer à droite ; tabulation Enregistrer → Annuler → Supprimer
+- Impression : modale paramètres, tabulation Lancer l’impression → Annuler (visuel inchangé)
+- Thèmes : titre de modale « Thèmes » ; bouton Nouveau thème à droite
+- Paramètres : tuile Thèmes (« Gérer et personnaliser les thèmes disponibles »)
+- Images app : préfixe `brickcard-generator-` (logo, favicon, apple-touch, manifeste PWA)
+- Logos thèmes : préfixe `theme-logo-` (ex. `theme-logo-unikitty.png`)
 
 ## [0.7.1] — 2026-08-16
 

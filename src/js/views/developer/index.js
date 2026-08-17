@@ -64,6 +64,12 @@ export function renderDeveloperIndex(host) {
           icon: "palette",
         },
         {
+          title: "Images",
+          desc: "image — fichier, URL, fond, cadrage",
+          href: "#/developer/images",
+          icon: "upload",
+        },
+        {
           title: "Recherche",
           desc: "search-bar — champ, compteur, tri",
           href: "#/developer/search",

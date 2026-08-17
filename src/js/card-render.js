@@ -5,8 +5,8 @@ import { resolveCardAccent } from "./card-design.js";
 import { resolveImageBackground } from "./storage.js";
 
 /** Logo app (chemin relatif depuis `src/`). */
-export const BRAND_LOGO_SRC = "img/logo-brickcard-generator.svg";
-export const BRAND_LOGO_SRC_WHITE = "img/logo-brickcard-generator-white.svg";
+export const BRAND_LOGO_SRC = "img/brickcard-generator-logo.svg";
+export const BRAND_LOGO_SRC_WHITE = "img/brickcard-generator-logo-white.svg";
 
 /** @param {boolean} lightFg texte / logo blancs sur fond coloré */
 export function brandLogoSrc(lightFg) {
@@ -75,6 +75,29 @@ export function bindCardImage(imgEl, boxEl, card) {
   });
 }
 
+/**
+ * Zoom / décalage d’un logo de thème (`--logo-zoom`, `--logo-offset-x/y`).
+ * `--logo-zoom` : 1 = largeur 75 % de la carte.
+ * @param {HTMLElement|null|undefined} imgEl
+ * @param {HTMLElement} boxEl
+ * @param {Pick<import("./themes-data.js").LegoTheme, "logoZoom"|"logoOffsetX"|"logoOffsetY">|null|undefined} theme
+ */
+export function applyThemeLogoTransform(imgEl, boxEl, theme) {
+  const host =
+    (boxEl instanceof HTMLElement && boxEl.closest(".card-back")) || boxEl;
+  if (!(host instanceof HTMLElement)) return;
+  const zoomRaw = Number(theme?.logoZoom);
+  const zoom = zoomRaw > 0 ? Math.min(2.5, zoomRaw) : 1;
+  host.style.setProperty("--logo-zoom", String(zoom));
+  host.style.setProperty("--logo-offset-x", String(Number(theme?.logoOffsetX) || 0));
+  host.style.setProperty("--logo-offset-y", String(Number(theme?.logoOffsetY) || 0));
+  if (imgEl instanceof HTMLElement) {
+    imgEl.style.removeProperty("width");
+    imgEl.style.removeProperty("height");
+    imgEl.style.removeProperty("transform");
+  }
+}
+
 /** Markup branding (logo + nom), face (sous l’image) et dos. */
 function cardBrandMarkup() {
   return `
@@ -110,6 +133,23 @@ function applyThemeLogo(root, legoTheme) {
     themeLogo.hidden = true;
     themeLogo.alt = "";
     themeWrap.hidden = true;
+    root.classList.remove("card-back--has-theme-logo");
+    delete root.dataset.logoZoom;
+    delete root.dataset.logoOffsetX;
+    delete root.dataset.logoOffsetY;
+    root.style.removeProperty("--logo-zoom");
+    root.style.removeProperty("--logo-offset-x");
+    root.style.removeProperty("--logo-offset-y");
+  };
+
+  const showThemeLogo = () => {
+    root.classList.add("card-back--has-theme-logo");
+    root.dataset.logoZoom = String(legoTheme?.logoZoom || 1);
+    root.dataset.logoOffsetX = String(legoTheme?.logoOffsetX || 0);
+    root.dataset.logoOffsetY = String(legoTheme?.logoOffsetY || 0);
+    applyThemeLogoTransform(themeLogo, themeWrap, legoTheme);
+    themeLogo.hidden = false;
+    themeWrap.hidden = false;
   };
 
   if (!logoUrl) {
@@ -117,19 +157,16 @@ function applyThemeLogo(root, legoTheme) {
     return;
   }
 
-  themeLogo.onload = () => {
-    themeLogo.hidden = false;
-    themeWrap.hidden = false;
-  };
+  themeLogo.onload = showThemeLogo;
   themeLogo.onerror = hideThemeLogo;
-  themeLogo.alt = legoTheme?.themeName || "";
+  themeLogo.alt = legoTheme?.name || "";
   if (themeLogo.getAttribute("src") !== logoUrl) {
     themeLogo.hidden = true;
     themeWrap.hidden = true;
+    root.classList.remove("card-back--has-theme-logo");
     themeLogo.src = logoUrl;
-  } else if (themeLogo.complete && themeLogo.naturalWidth) {
-    themeLogo.hidden = false;
-    themeWrap.hidden = false;
+  } else if (themeLogo.complete) {
+    showThemeLogo();
   }
 }
 

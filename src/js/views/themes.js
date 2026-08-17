@@ -9,7 +9,7 @@ import {
 import { loadCards, loadThemes } from "../storage.js";
 import { contrastText, partitionThemes } from "../themes-data.js";
 import { resolveCardAccent } from "../card-design.js";
-import { brandLogoSrc } from "../card-render.js";
+import { applyThemeLogoTransform, brandLogoSrc } from "../card-render.js";
 import { emptyViewMarkup } from "../empty-view.js";
 
 /** @param {string} hay @param {string} needle */
@@ -20,21 +20,22 @@ function includesCI(hay, needle) {
 const SORT_KEY = "brickcard-generator:themes-sort";
 const SORT_DIR_KEY = "brickcard-generator:themes-sort-dir";
 
-/** @typedef {"cardCount"|"themeName"|"updatedAt"} ThemesSortKey */
+/** @typedef {"cardCount"|"name"|"updatedAt"} ThemesSortKey */
 /** @typedef {"asc"|"desc"} ThemesSortDir */
 
 /** @type {ThemesSortKey[]} */
-const SORT_KEYS = ["cardCount", "themeName", "updatedAt"];
+const SORT_KEYS = ["cardCount", "name", "updatedAt"];
 
 /** @param {ThemesSortKey} key @returns {ThemesSortDir} */
 function defaultSortDir(key) {
-  return key === "themeName" ? "asc" : "desc";
+  return key === "name" ? "asc" : "desc";
 }
 
 /** @returns {ThemesSortKey} */
 function loadSortKey() {
   try {
-    const v = localStorage.getItem(SORT_KEY);
+    const raw = localStorage.getItem(SORT_KEY);
+    const v = raw === "themeName" ? "name" : raw;
     if (v && SORT_KEYS.includes(/** @type {ThemesSortKey} */ (v))) {
       return /** @type {ThemesSortKey} */ (v);
     }
@@ -83,7 +84,7 @@ function compareThemesAsc(a, b, key, usage) {
   if (key === "cardCount") {
     return (usage.get(a.id) || 0) - (usage.get(b.id) || 0);
   }
-  return String(a.themeName || "").localeCompare(String(b.themeName || ""), "fr", {
+  return String(a.name || "").localeCompare(String(b.name || ""), "fr", {
     sensitivity: "base",
   });
 }
@@ -135,7 +136,7 @@ export async function renderThemesModal(host, opts) {
       <div class="modal modal--lg" role="dialog" aria-modal="true" aria-labelledby="themes-modal-title">
         <div class="modal-header">
           <div>
-            <h1 class="view-title" id="themes-modal-title">Gérer les thèmes</h1>
+            <h1 class="view-title" id="themes-modal-title">Thèmes</h1>
           </div>
           <button type="button" class="btn primary icon-only modal-close" id="btn-themes-close">
             ${ICON_CLOSE}
@@ -175,7 +176,7 @@ export async function renderThemesModal(host, opts) {
                 <span class="form-select-option-label">Nombre de cartes</span>
                 <span class="form-select-icon form-select-icon--right" hidden></span>
               </div>
-              <div class="form-select-option" role="option" id="themes-sort-opt-themeName" data-sort="themeName" aria-selected="false">
+              <div class="form-select-option" role="option" id="themes-sort-opt-name" data-sort="name" aria-selected="false">
                 <span class="form-select-option-label">Titre</span>
                 <span class="form-select-icon form-select-icon--right" hidden></span>
               </div>
@@ -204,7 +205,7 @@ export async function renderThemesModal(host, opts) {
           })}
         </div>
         <div class="modal-footer">
-          <div class="modal-footer-start">
+          <div class="modal-footer-end">
             <button type="button" class="btn primary" id="btn-add-theme">
               ${ICON_ADD}
               <span>Nouveau thème</span>
@@ -239,7 +240,7 @@ export async function renderThemesModal(host, opts) {
   function matchesSearch(theme) {
     const needle = searchQuery();
     if (!needle) return true;
-    return includesCI(theme.themeName, needle);
+    return includesCI(theme.name, needle);
   }
 
   /**
@@ -263,7 +264,7 @@ export async function renderThemesModal(host, opts) {
         const cmp = compareThemesAsc(a, b, key, usage) * dir;
         if (cmp !== 0) return cmp;
       }
-      return String(a.themeName || "").localeCompare(String(b.themeName || ""), "fr", {
+      return String(a.name || "").localeCompare(String(b.name || ""), "fr", {
         sensitivity: "base",
       });
     });
@@ -386,12 +387,25 @@ export async function renderThemesModal(host, opts) {
     if (idx >= 0) setSortActive(idx);
   }
 
+  function applyTileLogoCrops() {
+    host.querySelectorAll(".theme-tile-logo-wrap--crop").forEach((wrap) => {
+      if (!(wrap instanceof HTMLElement)) return;
+      const img = wrap.querySelector("img.theme-tile-logo:not(.is-brand)");
+      if (!(img instanceof HTMLImageElement)) return;
+      applyThemeLogoTransform(img, wrap, {
+        logoZoom: Number(wrap.dataset.logoZoom) || 1,
+        logoOffsetX: Number(wrap.dataset.logoOffsetX) || 0,
+        logoOffsetY: Number(wrap.dataset.logoOffsetY) || 0,
+      });
+    });
+  }
+
   function paint() {
     const dateSort = sortKey === "updatedAt" && canSortByDate();
     const customShown = sorted(custom.filter(matchesSearch), dateSort ? "updatedAt" : sortKey);
     const builtinShown = sorted(
       builtin.filter(matchesSearch),
-      dateSort ? "themeName" : sortKey,
+      dateSort ? "name" : sortKey,
       dateSort ? "asc" : sortDir
     );
     const shown = customShown.length + builtinShown.length;
@@ -416,9 +430,21 @@ export async function renderThemesModal(host, opts) {
           return;
         }
         img.classList.add("is-brand");
+        img.closest(".theme-tile-logo-wrap")?.classList.remove("theme-tile-logo-wrap--crop");
         const lightFg = img.closest(".theme-tile")?.classList.contains("is-light-fg");
         img.src = brandLogoSrc(Boolean(lightFg));
       };
+      if (img.classList.contains("is-brand")) return;
+      const wrap = img.closest(".theme-tile-logo-wrap--crop");
+      const apply = () => {
+        if (!(wrap instanceof HTMLElement)) return;
+        applyThemeLogoTransform(img, wrap, {
+          logoZoom: Number(wrap.dataset.logoZoom) || 1,
+          logoOffsetX: Number(wrap.dataset.logoOffsetX) || 0,
+          logoOffsetY: Number(wrap.dataset.logoOffsetY) || 0,
+        });
+      };
+      apply();
     });
   }
 
@@ -572,10 +598,12 @@ export async function renderThemesModal(host, opts) {
   backdrop?.addEventListener("click", onBackdropClick);
   btnClose?.addEventListener("click", close);
   document.addEventListener("keydown", onKey);
+  window.addEventListener("resize", applyTileLogoCrops);
 
   return () => {
     document.removeEventListener("keydown", onKey);
     document.removeEventListener("click", onDocClick);
+    window.removeEventListener("resize", applyTileLogoCrops);
     backdrop?.removeEventListener("click", onBackdropClick);
     btnClose?.removeEventListener("click", close);
   };
@@ -591,16 +619,22 @@ function themeTileMarkup(theme, count, editable) {
   const fg = contrastText(accent);
   const countLabel =
     count <= 1 ? `${count} carte` : `${count} cartes`;
-  const name = escapeHtml(theme.themeName);
+  const name = escapeHtml(theme.name);
   const hasThemeLogo = Boolean(theme.logoDataUrl);
   const logoSrc = hasThemeLogo
     ? theme.logoDataUrl
     : brandLogoSrc(fg === "#ffffff");
   const logoClass = hasThemeLogo ? "theme-tile-logo" : "theme-tile-logo is-brand";
-  const logo = `<div class="theme-tile-logo-wrap"><img class="${logoClass}" src="${escapeAttr(logoSrc)}" alt="" /></div>`;
+  const wrapClass = hasThemeLogo
+    ? "theme-tile-logo-wrap theme-tile-logo-wrap--crop"
+    : "theme-tile-logo-wrap";
+  const cropAttrs = hasThemeLogo
+    ? ` data-logo-zoom="${escapeAttr(String(theme.logoZoom || 1))}" data-logo-offset-x="${escapeAttr(String(theme.logoOffsetX || 0))}" data-logo-offset-y="${escapeAttr(String(theme.logoOffsetY || 0))}" style="--logo-zoom:${escapeAttr(String(theme.logoZoom || 1))};--logo-offset-x:${escapeAttr(String(theme.logoOffsetX || 0))};--logo-offset-y:${escapeAttr(String(theme.logoOffsetY || 0))}"`
+    : "";
+  const logo = `<div class="${wrapClass}"${cropAttrs}><img class="${logoClass}" src="${escapeAttr(logoSrc)}" alt="" /></div>`;
   const label = editable
-    ? `Modifier « ${escapeAttr(theme.themeName)} », ${countLabel}`
-    : `${escapeAttr(theme.themeName)}, ${countLabel}`;
+    ? `Modifier « ${escapeAttr(theme.name)} », ${countLabel}`
+    : `${escapeAttr(theme.name)}, ${countLabel}`;
   const attrs = editable
     ? `role="button" tabindex="0" data-edit="${escapeAttr(theme.id)}"`
     : "";
