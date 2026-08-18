@@ -4,8 +4,8 @@ Merci de ton intérêt pour Brickcard Generator.
 
 ## Ajouter ou modifier des thèmes par défaut
 
-1. Mets le logo dans `src/img/` (ex. `theme-logo-mon-theme.png` / `.webp` / `.svg`)
-2. Déclare le thème dans `src/data/themes-presets.json` (`id`, `name`, `logoSrc` optionnel et/ou `color` — sans couleur → gris `#6e6e6e` ; sans logo → le nom s’affiche sur la carte)
+1. Mets le logo dans `src/data/` (ex. `theme-logo-mon-theme.png` / `.webp` / `.svg`)
+2. Déclare le thème dans `src/data/themes-presets.json` (`id`, `name`, `logoSrc` optionnel ex. `data/theme-logo-mon-theme.png`, et/ou `color` — sans couleur → gris `#6e6e6e` ; sans logo → le nom s’affiche sur la carte)
 3. Recharge la page. Les thèmes par défaut se lisent dans le JSON (lecture seule dans l’app). Reset dev dans Paramètres pour tout remettre à zéro.
 
 ## Crédits & sources

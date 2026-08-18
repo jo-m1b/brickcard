@@ -1,6 +1,6 @@
 /**
  * Thèmes LEGO prédéfinis — métadonnées dans `data/themes-presets.json`.
- * Logos : chemin relatif (`logoSrc`, ex. img/…) — optionnel, pas de fallback généré.
+ * Logos : chemin relatif (`logoSrc`, ex. data/theme-logo-…) — optionnel, pas de fallback généré.
  * Sans `color` → chaîne vide ; l’affichage carte utilise la couleur configurée puis le gris d’usine.
  */
 
@@ -23,7 +23,10 @@
  * @property {string} id
  * @property {string} name
  * @property {string} [color] Hex ; omis → pas de couleur propre (cascade carte)
- * @property {string} [logoSrc] Chemin relatif depuis src/ (ex. "img/theme-logo-….png")
+ * @property {string} [logoSrc] Chemin relatif depuis src/ (ex. "data/theme-logo-….png")
+ * @property {number} [logoZoom] Largeur logo (1 = 75 % de la carte) ; omis → 1
+ * @property {number} [logoOffsetX] Décalage horizontal ; omis → 0
+ * @property {number} [logoOffsetY] Décalage vertical ; omis → 0
  */
 
 const PRESETS_URL = "data/themes-presets.json";
@@ -49,8 +52,29 @@ let presetMetaPromise = null;
 /** @type {Promise<LegoTheme[]>|null} */
 let presetThemesPromise = null;
 
+/**
+ * Arrondi à 2 décimales. `0.00` (et `-0`) → `0`.
+ * @param {unknown} raw
+ * @returns {number}
+ */
+export function roundCropCoord(raw) {
+  const v = Number(raw);
+  if (!Number.isFinite(v)) return 0;
+  const rounded = Number(v.toFixed(2));
+  return rounded === 0 ? 0 : rounded;
+}
+
+/**
+ * Borne le zoom logo (même plage que les thèmes personnalisés), arrondi à 2 décimales.
+ * @param {unknown} raw
+ * @returns {number}
+ */
+export function clampLogoZoom(raw) {
+  return roundCropCoord(Math.min(2.5, Math.max(0.25, Number(raw) || 1)));
+}
+
 /** @returns {Promise<PresetMeta[]>} */
-async function loadPresetMeta() {
+export async function loadPresetMeta() {
   if (!presetMetaPromise) {
     const url = isLocalDevHost()
       ? `${PRESETS_URL}?_=${Date.now()}`
@@ -134,9 +158,9 @@ export async function getPresetThemes() {
           isBuiltin: true,
           color,
           logoDataUrl,
-          logoZoom: 1,
-          logoOffsetX: 0,
-          logoOffsetY: 0,
+          logoZoom: clampLogoZoom(entry.logoZoom),
+          logoOffsetX: roundCropCoord(entry.logoOffsetX),
+          logoOffsetY: roundCropCoord(entry.logoOffsetY),
           updatedAt: "",
         };
       });

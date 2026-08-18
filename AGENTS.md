@@ -20,6 +20,7 @@ Tout le code applicatif est dans **`src/`**.
 | `src/manifest.webmanifest` | Manifest PWA (nom, icônes, `standalone`) |
 | `src/sw.js` | Service worker (cache same-origin ; `CACHE` = `APP_VERSION`) |
 | `src/data/themes-presets.json` | Liste des thèmes LEGO par défaut (éditable sans toucher au JS) |
+| `src/data/theme-logo-*` | Logos des thèmes par défaut (PNG / SVG / WebP / JPEG) |
 | `src/data/page-{{slug}}.md` | Pages Markdown en modale (`#/page/:slug`, ex. `page-about.md`) ; `# Titre` → titre du dialog |
 | `src/img/brickcard-generator-logo.svg` | Logo app noir (brick outline — crédit Joko Sutrisno / Vecteezy) |
 | `src/img/brickcard-generator-logo-white.svg` | Même logo, fill blanc (cartes / thèmes à fond coloré) |
@@ -36,7 +37,8 @@ Tout le code applicatif est dans **`src/`**.
 | `src/js/list-layout.js` | Densité liste (cartes/ligne max) — localStorage |
 | `src/js/themes-data.js` | Charge le JSON des thèmes par défaut, `logoSrc`, accent par défaut |
 | `src/js/storage.js` | IndexedDB cartes + thèmes **personnalisés**, export/import JSON |
-| `src/js/card-export.js` | Téléchargement de la photo d’une Brickcard |
+| `src/js/card-export.js` | Téléchargement (photo Brickcard, blob, URL same-origin) |
+| `src/js/preset-draft.js` | Brouillon isolé des thèmes par défaut (outil `#/developer/theme-presets`) |
 | `src/js/print.js` | Impression A4 (grille variable, faces/dos, miroir) |
 | `src/js/print-menu.js` | Menu header impression (sélection, badge, lancer) |
 | `src/js/print-qty.js` | Quantités d’impression — localStorage |
@@ -57,7 +59,7 @@ Tout le code applicatif est dans **`src/`**.
 | `src/js/views/theme-editor.js` | Modale création / édition d’un thème personnalisé |
 | `src/js/views/page.js` | Modale page Markdown |
 | `src/js/views/settings.js` | Modale paramètres (interface, cartes, impression, collection) |
-| `src/js/views/developer/` | Espace développeur / styleguide UI en modale (`#/developer`, `#/developer/typography`, …) |
+| `src/js/views/developer/` | Espace développeur / styleguide UI en modale (`#/developer`, `#/developer/typography`, …) ; outil thèmes par défaut `#/developer/theme-presets` |
 | `CHANGELOG.md` | Historique des versions (Keep a Changelog) |
 
 ## Modèle carte (`Card`)
@@ -75,9 +77,9 @@ Noms volontaires verbeux (lisibles sans doc) :
   releaseYear: number|null, // année de sortie, optionnel
   imageDataUrl: string,     // photo data URL (JPEG/PNG) — optionnel
   imageBackgroundColor: string, // fond zone image (hex) ; vide = blanc à l’affichage
-  imageZoom: number,        // cadrage photo, 1 = cover (100 %) ; < 1 = dézoom
-  imageOffsetX: number,     // cadrage photo (fraction largeur)
-  imageOffsetY: number,     // cadrage photo (fraction hauteur)
+  imageZoom: number,        // cadrage photo, 1 = cover (100 %) ; < 1 = dézoom ; arrondi 2 décimales (`0.00` → 0)
+  imageOffsetX: number,     // cadrage photo (fraction largeur) ; arrondi 2 décimales
+  imageOffsetY: number,     // cadrage photo (fraction hauteur) ; arrondi 2 décimales
   updatedAt: string
 }
 ```
@@ -91,9 +93,12 @@ Migration auto depuis les anciens noms (`setTitle` → `title`, `setImageDataUrl
 Champs par entrée :
 - `id` (obligatoire), `name` (obligatoire)
 - `color` (hex, optionnel) — si omis → pas de couleur propre ; la carte utilise la couleur configurée puis le gris `#6e6e6e`
-- `logoSrc` (optionnel) — chemin depuis `src/` (ex. `img/theme-logo-….png`) ; sans logo / échec de chargement → affichage du **nom** du thème (pas de SVG généré)
+- `logoSrc` (optionnel) — chemin depuis `src/` (ex. `data/theme-logo-….png`) ; sans logo / échec de chargement → affichage du **nom** du thème (pas de SVG généré)
+- `logoZoom` / `logoOffsetX` / `logoOffsetY` (optionnels) — cadrage du logo (1 / 0 / 0 si omis) ; mêmes unités que les thèmes personnalisés ; export outil : arrondi 2 décimales, `0.00` → omis (`logoZoom` de `1` aussi)
 
-Thèmes par défaut : **lecture seule** (ni modification ni suppression). Les thèmes personnalisés ont un id UUID (`createId()`), sont stockés en IndexedDB, et s’éditent via `#/themes/new` / `#/themes/edit/:id`.
+Thèmes par défaut : **lecture seule** dans l’app (ni modification ni suppression). Les thèmes personnalisés ont un id UUID (`createId()`), sont stockés en IndexedDB, et s’éditent via `#/themes/new` / `#/themes/edit/:id`.
+
+Outil développeur `#/developer/theme-presets` : copie locale isolée (IndexedDB `brickcard-generator-preset-draft`) pour éditer id/slug, nom, couleur, logo et cadrage, puis **télécharger** `themes-presets.json` + `theme-logo-{id}.{ext}` à placer soi-même dans `data/`. Ne lit/écrit jamais les stores `cards` / `themes` ni les réglages. Au premier chargement (ou après « Supprimer le brouillon ») : seed depuis le JSON. Reset local de la collection **ne** touche **pas** ce brouillon.
 
 ## Modèle thème LEGO (`LegoTheme`)
 
@@ -103,9 +108,9 @@ Thèmes par défaut : **lecture seule** (ni modification ni suppression). Les th
   name: string,             // ex. "CITY"
   color: string,            // hex ; vide = pas de couleur propre (cascade carte)
   logoDataUrl: string,      // SVG ou PNG transparent (data URL ou chemin), optionnel
-  logoZoom: number,         // largeur du logo, 1 = 75 % de la carte (max 2.5 = 250 %) ; le cadre (moitié basse, inset 3 mm) recadre si dépassement
-  logoOffsetX: number,      // décalage logo (fraction largeur de la moitié basse)
-  logoOffsetY: number,      // décalage logo (fraction hauteur de la moitié basse)
+  logoZoom: number,         // largeur du logo, 1 = 75 % de la carte (max 2.5 = 250 %) ; arrondi 2 décimales ; le cadre (moitié basse, inset 3 mm) recadre si dépassement
+  logoOffsetX: number,      // décalage logo (fraction largeur de la moitié basse) ; arrondi 2 décimales (`0.00` → 0)
+  logoOffsetY: number,      // décalage logo (fraction hauteur de la moitié basse) ; arrondi 2 décimales
   isBuiltin: boolean,       // par défaut = lecture seule, non supprimable
   updatedAt: string         // ISO (personnalisés) ; vide pour les thèmes par défaut
 }
@@ -123,6 +128,7 @@ Accent d’une Brickcard (`resolveCardAccent`) :
 ## Persistance
 
 - IndexedDB : `brickcard-generator` **v2** — stores `cards` + `themes` (**personnalisés seulement** ; les thèmes par défaut se lisent dans `themes-presets.json`) (après Reset local : nom `brickcard-generator-<db-gen>`, clé `brickcard-generator:db-gen`)
+- IndexedDB outil presets : `brickcard-generator-preset-draft` — brouillon `#/developer/theme-presets` uniquement (indépendant du Reset local)
 - Clé thème UI : `brickcard-generator:ui-theme`
 - Clé bordure face : `brickcard-generator:card-face-border-mm` (défaut `3`)
 - Clé arrondi coins : `brickcard-generator:card-radius-mm` (défaut `1.5`, face + dos)
@@ -143,14 +149,14 @@ Accent d’une Brickcard (`resolveCardAccent`) :
 
 Hash = source de vérité (Précédent / Suivant). Croix / Échap / backdrop d’un overlay → `#/` (`replace`). Hash inconnu → `#/`. Pas d’alias.
 
-Overlays de route (une à la fois, **swap** sans démonter la liste) : `#/settings`, `#/themes`, `#/themes/new`, `#/themes/edit/:id`, `#/page/:slug`, `#/new-card`, `#/edit-card/:id`, `#/developer/…`. Dialogues enfants (confirmations, paramètres d’impression, URL d’image) : pas d’URL, second backdrop par-dessus la vue courante.
+Overlays de route (une à la fois, **swap** sans démonter la liste) : `#/settings`, `#/themes`, `#/themes/new`, `#/themes/edit/:id`, `#/page/:slug`, `#/new-card`, `#/edit-card/:id`, `#/developer/…`. Dialogues enfants (confirmations, paramètres d’impression, URL d’image, éditeur de thème preset) : pas d’URL, second backdrop par-dessus la vue courante.
 
 - `#/` accueil (empty « Bienvenue », liste, ou recherche sans résultat « Oups ! »)
 - `#/new-card` `#/edit-card/:id` éditeur de carte (modale)
 - `#/themes` gestion des thèmes (modale) ; `#/themes/new` `#/themes/edit/:id` éditeur de thème **personnalisé** (modale ; fermeture → `#/themes`)
 - `#/settings` paramètres (modale)
 - `#/page/:slug` page Markdown (`data/page-{{slug}}.md`, ex. `#/page/about`)
-- `#/developer` `#/developer/typography` `#/developer/links` `#/developer/tiles` `#/developer/buttons` `#/developer/fields` `#/developer/selects` `#/developer/sliders` `#/developer/colors` `#/developer/images` `#/developer/search` `#/developer/modals` — espace développeur / styleguide en **modale** (extensible : `#/developer/…`) ; lien Paramètres en local uniquement
+- `#/developer` `#/developer/typography` `#/developer/links` `#/developer/tiles` `#/developer/buttons` `#/developer/fields` `#/developer/selects` `#/developer/sliders` `#/developer/colors` `#/developer/images` `#/developer/search` `#/developer/modals` `#/developer/theme-presets` — espace développeur / styleguide en **modale** (extensible : `#/developer/…`) ; lien Paramètres en local uniquement ; `#/developer/theme-presets` : outil brouillon des thèmes par défaut (éditeur enfant sans route ; pied de modale optionnel levé hors du corps)
 
 ## Boutons (design system)
 
@@ -260,7 +266,7 @@ Contrôle&nbsp;: wrapper `form-image` (`formImageMarkup()` / `bindFormImage()` d
 
 Option `withBackgroundColor: false` : pas de champ fond ; l’aperçu utilise `previewBackground` / `setPreviewBackground()` (thèmes : couleur du thème, live). Option `fit: "logo"` : le zoom règle la **largeur** du logo (1 = 75 % de la largeur de carte, max 250 %), pas un cover. Enregistré sur le thème (`logoZoom` / `logoOffsetX` / `logoOffsetY`) et appliqué au dos et aux mini-cartes (centré dans le cadre ; décalage = fraction du cadre ; rogné s’il dépasse). Ratio thème : `--form-image-aspect: 63 / 44`.
 
-Appliqué : éditeur de carte · éditeur de thème personnalisé. Galerie&nbsp;: `#/developer/images`.
+Appliqué : éditeur de carte · éditeur de thème personnalisé · outil thèmes par défaut (`#/developer/theme-presets`). Galerie&nbsp;: `#/developer/images`.
 
 ## Recherche (design system)
 
@@ -308,7 +314,7 @@ Coquille&nbsp;: `modal-backdrop` + `modal` (`role="dialog"` / `aria-modal`). Bor
 
 Tailles (3)&nbsp;: `modal--sm` (~640) · `modal--md` (~896, **défaut**) · `modal--lg` (~1152). Toujours bornées au **viewport** (`100vw` / `100dvh`). Responsive ≤&nbsp;640px&nbsp;: **plein écran**, overlay masqué.
 
-Appliqué&nbsp;: paramètres / page MD (`md`) · thèmes + éditeur carte + éditeur de thème personnalisé + espace développeur (`lg` ; thèmes : hauteur toujours `var(--modal-max-h)`, le corps défile) · confirmations / paramètres d’impression / chargement d’image depuis une URL (`sm`). Galerie&nbsp;: `#/developer/modals`. Dialogues enfants (supprimer carte / thème / image, reset local, import, impression, URL d’image) : second `modal-backdrop` dans le même host, sans route — helper `confirmDialog()` / `openConfirmDialog()` (`confirm-dialog.js`) ou `openPrintDialog()` (`print-dialog.js`) ; titre un peu plus long et explicite (ex. `Supprimer la carte "Saucer Centurien" (#6939) ?`). Pas de `alert()` / `confirm()` / `prompt()` natifs.
+Appliqué&nbsp;: paramètres / page MD (`md`) · thèmes + éditeur carte + éditeur de thème personnalisé + espace développeur (`lg` ; thèmes et `#/developer/theme-presets` : hauteur toujours `var(--modal-max-h)`, le corps défile) · confirmations / paramètres d’impression / chargement d’image depuis une URL (`sm`). Galerie&nbsp;: `#/developer/modals`. Dialogues enfants (supprimer carte / thème / image, reset local, import, impression, URL d’image) : second `modal-backdrop` dans le même host, sans route — helper `confirmDialog()` / `openConfirmDialog()` (`confirm-dialog.js`) ou `openPrintDialog()` (`print-dialog.js`) ; titre un peu plus long et explicite (ex. `Supprimer la carte "Saucer Centurien" (#6939) ?`). Pas de `alert()` / `confirm()` / `prompt()` natifs.
 
 ## Impression
 

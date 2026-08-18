@@ -84,6 +84,17 @@ export function renderDeveloperIndex(host) {
         },
       ])}
       </section>
+      <section class="styleguide-section">
+        <h2 class="section-title">Outils</h2>
+        ${tileListMarkup([
+        {
+          title: "Thèmes par défaut",
+          desc: "brouillon de themes-presets.json, logos, export",
+          href: "#/developer/theme-presets",
+          icon: "palette",
+        },
+      ])}
+      </section>
       <p class="styleguide-back">
         ${linkMarkup("← Retour à l’app", { href: "#/" })}
       </p>

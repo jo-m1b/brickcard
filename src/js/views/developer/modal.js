@@ -11,6 +11,7 @@ import { renderDeveloperColors } from "./colors.js";
 import { renderDeveloperImages } from "./images.js";
 import { renderDeveloperSearch } from "./search.js";
 import { renderDeveloperModals } from "./modals.js";
+import { renderDeveloperThemePresets } from "./theme-presets.js";
 
 /** @type {Record<string, (host: HTMLElement) => (() => void)|void>} */
 const PAGES = {
@@ -26,6 +27,7 @@ const PAGES = {
   images: renderDeveloperImages,
   search: renderDeveloperSearch,
   modals: renderDeveloperModals,
+  "theme-presets": renderDeveloperThemePresets,
 };
 
 /**
@@ -60,6 +62,39 @@ function liftStyleguideHeader(body, titleEl) {
   } else {
     head.remove();
   }
+}
+
+/**
+ * Pied de page optionnel : déplacé hors du corps pour rester collé au bas de la modale.
+ * @param {HTMLElement} body
+ * @param {HTMLElement} modal
+ */
+function liftModalFooter(body, modal) {
+  modal.querySelectorAll(":scope > .modal-footer").forEach((el) => el.remove());
+  const footer = body.querySelector(".modal-footer");
+  if (footer) modal.appendChild(footer);
+}
+
+/**
+ * Barre de recherche : collée sous le header, hors du corps qui défile (comme `#/themes`).
+ * @param {HTMLElement} body
+ * @param {HTMLElement} modal
+ */
+function liftThemesToolbar(body, modal) {
+  modal.querySelectorAll(":scope > .themes-toolbar").forEach((el) => el.remove());
+  const bar = body.querySelector(".themes-toolbar");
+  if (!bar) return;
+  const header = modal.querySelector(".modal-header");
+  if (header) header.after(bar);
+  else modal.insertBefore(bar, modal.querySelector(".modal-body"));
+}
+
+/** @param {HTMLElement|null} modal */
+function clearLiftedChrome(modal) {
+  if (!modal) return;
+  modal
+    .querySelectorAll(":scope > .modal-footer, :scope > .themes-toolbar")
+    .forEach((el) => el.remove());
 }
 
 /** Liens « App » / « Retour à l’app » : la fermeture de modale suffit. */
@@ -120,6 +155,7 @@ export function renderDeveloperModal(host, opts) {
   const body = host.querySelector("#developer-modal-body");
   const titleEl = host.querySelector("#developer-modal-title");
   const backdrop = host.querySelector("#developer-modal-backdrop");
+  const modal = host.querySelector("#developer-modal-backdrop > .modal");
   const btnClose = host.querySelector("#btn-developer-close");
   const demoRoot = host.querySelector("#developer-demo-root");
 
@@ -128,11 +164,19 @@ export function renderDeveloperModal(host, opts) {
 
   function setPage(nextPage) {
     pageCleanup();
+    clearLiftedChrome(modal);
+    if (modal) {
+      modal.classList.toggle("is-fixed-h", nextPage === "theme-presets");
+    }
     if (demoRoot) demoRoot.innerHTML = "";
     if (!body || !titleEl) return;
     const renderPage = PAGES[nextPage] || PAGES.index;
     pageCleanup = renderPage(body) || (() => {});
     liftStyleguideHeader(body, titleEl);
+    if (modal) {
+      liftThemesToolbar(body, modal);
+      liftModalFooter(body, modal);
+    }
     stripAppBackLinks(body);
   }
 
@@ -160,6 +204,7 @@ export function renderDeveloperModal(host, opts) {
     backdrop?.removeEventListener("click", onBackdropClick);
     btnClose?.removeEventListener("click", close);
     pageCleanup();
+    clearLiftedChrome(modal);
     session = null;
   }
 

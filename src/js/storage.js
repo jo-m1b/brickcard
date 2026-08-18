@@ -3,7 +3,7 @@
  * Les thèmes par défaut viennent du JSON, pas d’IndexedDB.
  */
 
-import { getPresetThemes, getPresetTheme, parseHexColor, clearPresetCache } from "./themes-data.js";
+import { getPresetThemes, getPresetTheme, parseHexColor, clearPresetCache, clampLogoZoom, roundCropCoord } from "./themes-data.js";
 
 const DB_NAME_BASE = "brickcard-generator";
 const DB_GEN_KEY = "brickcard-generator:db-gen";
@@ -379,9 +379,9 @@ function normalizeCard(c) {
     releaseYear,
     imageDataUrl: String(c.imageDataUrl ?? c.setImageDataUrl ?? c.image ?? ""),
     imageBackgroundColor: normalizeImageBackground(c.imageBackgroundColor),
-    imageZoom: Number(c.imageZoom ?? c.zoom) || 1,
-    imageOffsetX: Number(c.imageOffsetX ?? c.offsetX) || 0,
-    imageOffsetY: Number(c.imageOffsetY ?? c.offsetY) || 0,
+    imageZoom: roundCropCoord(c.imageZoom ?? c.zoom) || 1,
+    imageOffsetX: roundCropCoord(c.imageOffsetX ?? c.offsetX),
+    imageOffsetY: roundCropCoord(c.imageOffsetY ?? c.offsetY),
     updatedAt: c.updatedAt || c.createdAt || now,
   };
 }
@@ -393,9 +393,9 @@ function normalizeTheme(t) {
     name: String(t.name ?? t.themeName ?? "").trim() || "THÈME",
     color: parseHexColor(t.color ?? t.accentColor),
     logoDataUrl: String(t.logoDataUrl ?? t.image ?? ""),
-    logoZoom: Math.min(2.5, Math.max(0.25, Number(t.logoZoom) || 1)),
-    logoOffsetX: Number(t.logoOffsetX) || 0,
-    logoOffsetY: Number(t.logoOffsetY) || 0,
+    logoZoom: clampLogoZoom(t.logoZoom),
+    logoOffsetX: roundCropCoord(t.logoOffsetX),
+    logoOffsetY: roundCropCoord(t.logoOffsetY),
     isBuiltin: Boolean(t.isBuiltin ?? t.builtin),
     updatedAt: String(t.updatedAt || t.createdAt || "").trim(),
   };

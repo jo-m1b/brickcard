@@ -684,15 +684,15 @@ export function bindFormImage(root, opts = {}) {
     clearImage(true);
   }
 
-  function onDownloadClick(e) {
+  async function onDownloadClick(e) {
     e.preventDefault();
     e.stopPropagation();
     if (!state.dataUrl) return;
     try {
-      downloadCardPhoto(state.dataUrl, resolveDownloadBasename());
+      await downloadCardPhoto(state.dataUrl, resolveDownloadBasename());
       opts.onDownload?.();
     } catch {
-      /* data URL attendue ; échec silencieux */
+      /* src attendue ; échec silencieux */
     }
   }
 

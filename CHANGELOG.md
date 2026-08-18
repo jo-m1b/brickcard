@@ -7,15 +7,29 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [0.7.3] — 2026-08-18
+
+### Added
+
+- Espace développeur : outil **Thèmes par défaut** (`#/developer/theme-presets`) — brouillon IndexedDB isolé de `themes-presets.json` (recherche, CRUD, logo / cadrage, id/slug), téléchargement du JSON et des logos `theme-logo-{id}.{ext}` ; n’écrit pas la collection
+- Thèmes par défaut : champs optionnels `logoZoom`, `logoOffsetX`, `logoOffsetY` dans `themes-presets.json` (lus au chargement)
+
 ### Changed
 
-- Liste : après enregistrement d’une carte, recherche vidée et tri sur date de modification (récent d’abord)
+- Logos des thèmes par défaut : déplacés de `src/img/` vers `src/data/` (`logoSrc` = `data/theme-logo-…`) ; `src/img/` réservé aux assets UI
+- Thèmes par défaut : logos retravaillés ; Alien Conquest en WebP ; cadrage (Avatar: The Last Airbender, Friends, Space, Star Wars) ; couleurs Avatar et The Angry Birds Movie
+- Espace développeur / thèmes par défaut : hauteur de modale fixe (`var(--modal-max-h)`) ; plus de kicker ni lien retour styleguide
 - Thèmes : après enregistrement d’un thème, recherche vidée et tri sur date de modification (récent d’abord)
 - Thèmes : compteur de cartes masqué sur les tuiles à 0 carte
 - Modales : `modal-body` plus tabulable ; à l’ouverture, focus sur la modale (Tab → Fermer, contenu, actions ; Tab ne sort plus vers l’arrière-plan)
 - Espace développeur : intro retirée ; tuiles regroupées sous « Système de design »
 - Éditeurs carte / thème : aperçu plus sticky en une colonne (suit le scroll)
 - Éditeur de carte : aperçu face et dos côte à côte entre 540px et 840px
+- Mobile : plus de pull-to-refresh ni de swipe précédent/suivant (overscroll contenu dans `.app`)
+
+### Removed
+
+- Thèmes par défaut : 4 Juniors, Games, Homemaker, Make & Create, Xtra
 
 ## [0.7.2] — 2026-08-17
 

@@ -158,9 +158,11 @@
 html,
 body {
   margin: 0;
-  min-height: 100%;
+  height: 100%;
+  height: 100dvh;
   max-width: 100%;
-  overflow-x: clip;
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
 body {
@@ -191,10 +193,12 @@ textarea {
   grid-template-rows: auto minmax(0, 1fr);
   gap: 1.25rem;
   max-width: 100%;
-  overflow-x: clip;
   box-sizing: border-box;
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100%;
+  overflow-x: clip;
+  overflow-y: auto;
+  overscroll-behavior: none;
+  touch-action: pan-y;
 }
 
 .app:has(> .main > .empty-view) {
@@ -2579,7 +2583,7 @@ button.form-select-trigger.sm {
   padding: 1.25rem 1rem 2rem;
   overflow-x: hidden;
   overflow-y: auto;
-  overscroll-behavior: contain;
+  overscroll-behavior: none;
   background: rgba(10, 10, 10, 0.55);
   -webkit-backdrop-filter: blur(1px);
   backdrop-filter: blur(1px);
@@ -2641,9 +2645,29 @@ button.form-select-trigger.sm {
   --modal-width: 72rem; /* ~1152px */
 }
 
-/* Thèmes : hauteur fixe (évite le yoyo selon le nombre de résultats) */
-#themes-modal-backdrop > .modal {
+/* Hauteur fixe (évite le yoyo selon le nombre de résultats) */
+#themes-modal-backdrop > .modal,
+#developer-modal-backdrop > .modal.is-fixed-h {
   height: var(--modal-max-h);
+}
+
+/* Outil presets : état vide / chargement centré sous la recherche (brique hors flux) */
+#developer-modal-backdrop > .modal.is-fixed-h .modal-body:has(.empty-view:not([hidden])) {
+  display: flex;
+  flex-direction: column;
+}
+
+#developer-modal-backdrop > .modal.is-fixed-h .modal-body:has(.empty-view:not([hidden])) > .styleguide {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+#developer-modal-backdrop > .modal.is-fixed-h .empty-view:not([hidden]) {
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .modal-header {
@@ -2687,6 +2711,7 @@ button.form-select-trigger.sm {
   min-height: 0;
   flex: 1 1 auto;
   overflow: auto;
+  overscroll-behavior: none;
 }
 
 /* Chrome rend les overflow:auto tabulables ; le corps n’est pas un contrôle */
@@ -3602,6 +3627,7 @@ textarea {
     z-index: 9999;
     background: rgba(0, 0, 0, 0.7);
     overflow: auto;
+    overscroll-behavior: none;
     padding: 1.5rem;
   }
 
@@ -3644,6 +3670,15 @@ textarea {
     background: #fff !important;
     margin: 0;
     padding: 0;
+    height: auto;
+    overflow: visible;
+    overscroll-behavior: auto;
+  }
+
+  .app {
+    height: auto;
+    overflow: visible;
+    touch-action: auto;
   }
 
   /* Ne garder que les feuilles de cartes — rien d’autre (toast, UI, etc.). */

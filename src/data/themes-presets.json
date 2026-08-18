@@ -1,744 +1,725 @@
 {
   "themes": [
     {
-      "id": "4-juniors",
-      "name": "4 Juniors",
-      "logoSrc": "img/theme-logo-4-juniors.png",
-      "color": "#FFB400"
-    },
-    {
       "id": "adventurers",
       "name": "Adventurers",
-      "logoSrc": "img/theme-logo-adventurers.webp",
-      "color": "#6B7C3A"
+      "logoSrc": "data/theme-logo-adventurers.webp",
+      "color": "#6b7c3a"
     },
     {
       "id": "agents",
       "name": "Agents",
-      "logoSrc": "img/theme-logo-agents.png",
-      "color": "#E87722"
+      "logoSrc": "data/theme-logo-agents.png",
+      "color": "#e87722"
     },
     {
       "id": "alien-conquest",
       "name": "Alien Conquest",
-      "logoSrc": "img/theme-logo-alien-conquest.png",
-      "color": "#5B2C6F"
+      "logoSrc": "data/theme-logo-alien-conquest.webp",
+      "color": "#5b2c6f"
     },
     {
       "id": "alpha-team",
       "name": "Alpha Team",
-      "logoSrc": "img/theme-logo-alpha-team.webp",
-      "color": "#00857C"
+      "logoSrc": "data/theme-logo-alpha-team.webp",
+      "color": "#00857c"
     },
     {
       "id": "animal-crossing",
       "name": "Animal Crossing",
-      "logoSrc": "img/theme-logo-animal-crossing.png",
-      "color": "#88C057"
+      "logoSrc": "data/theme-logo-animal-crossing.png",
+      "color": "#88c057"
     },
     {
       "id": "aqua-raiders",
       "name": "Aqua Raiders",
-      "logoSrc": "img/theme-logo-aqua-raiders.jpg",
-      "color": "#0B5345"
+      "logoSrc": "data/theme-logo-aqua-raiders.jpg",
+      "color": "#0b5345"
     },
     {
       "id": "aquazone",
       "name": "Aquazone",
-      "logoSrc": "img/theme-logo-aquazone.png",
-      "color": "#F2CD37"
+      "logoSrc": "data/theme-logo-aquazone.png",
+      "color": "#f2cd37"
     },
     {
       "id": "architecture",
       "name": "Architecture",
-      "logoSrc": "img/theme-logo-architecture.svg",
-      "color": "#2C3E50"
+      "logoSrc": "data/theme-logo-architecture.svg",
+      "color": "#2c3e50"
     },
     {
       "id": "art",
       "name": "Art",
-      "logoSrc": "img/theme-logo-art.webp",
-      "color": "#4A148C"
+      "logoSrc": "data/theme-logo-art.webp",
+      "color": "#4a148c"
     },
     {
       "id": "atlantis",
       "name": "Atlantis",
-      "logoSrc": "img/theme-logo-atlantis.png",
-      "color": "#00A3A1"
+      "logoSrc": "data/theme-logo-atlantis.png",
+      "color": "#00a3a1"
     },
     {
       "id": "avatar",
       "name": "Avatar",
-      "logoSrc": "img/theme-logo-avatar.svg",
-      "color": "#17A2B8"
+      "logoSrc": "data/theme-logo-avatar.svg",
+      "color": "#006da5"
     },
     {
       "id": "avatar-the-last-airbender",
       "name": "Avatar: The Last Airbender",
-      "logoSrc": "img/theme-logo-avatar-the-last-airbender.svg",
-      "color": "#B03A2E"
+      "logoSrc": "data/theme-logo-avatar-the-last-airbender.svg",
+      "color": "#b03a2e",
+      "logoOffsetX": 0.05,
+      "logoOffsetY": -0.04
     },
     {
       "id": "basic",
       "name": "Basic",
-      "logoSrc": "img/theme-logo-basic.jpg",
-      "color": "#E3000B"
+      "logoSrc": "data/theme-logo-basic.jpg",
+      "color": "#e3000b"
     },
     {
       "id": "batman",
       "name": "Batman",
-      "logoSrc": "img/theme-logo-batman.svg",
+      "logoSrc": "data/theme-logo-batman.svg",
       "color": "#212121"
     },
     {
       "id": "belville",
       "name": "Belville",
-      "logoSrc": "img/theme-logo-belville.jpg",
-      "color": "#C39BD3"
+      "logoSrc": "data/theme-logo-belville.jpg",
+      "color": "#c39bd3"
     },
     {
       "id": "bionicle",
       "name": "BIONICLE",
-      "logoSrc": "img/theme-logo-bionicle.png",
-      "color": "#C9A227"
+      "logoSrc": "data/theme-logo-bionicle.png",
+      "color": "#c9a227"
     },
     {
       "id": "bluey",
       "name": "Bluey",
-      "logoSrc": "img/theme-logo-bluey.svg",
-      "color": "#6EC6F0"
+      "logoSrc": "data/theme-logo-bluey.svg",
+      "color": "#6ec6f0"
     },
     {
       "id": "boats",
       "name": "Boats",
-      "logoSrc": "img/theme-logo-boats.png",
-      "color": "#1A5276"
+      "logoSrc": "data/theme-logo-boats.png",
+      "color": "#1a5276"
     },
     {
       "id": "bricks-and-more",
       "name": "Bricks and More",
-      "logoSrc": "img/theme-logo-bricks-and-more.svg",
-      "color": "#F39C12"
+      "logoSrc": "data/theme-logo-bricks-and-more.svg",
+      "color": "#f39c12"
     },
     {
       "id": "castle",
       "name": "Castle",
-      "logoSrc": "img/theme-logo-castle.png",
-      "color": "#5A6470"
+      "logoSrc": "data/theme-logo-castle.png",
+      "color": "#5a6470"
     },
     {
       "id": "city",
       "name": "City",
-      "logoSrc": "img/theme-logo-city.svg",
-      "color": "#0055BF"
+      "logoSrc": "data/theme-logo-city.svg",
+      "color": "#0055bf"
     },
     {
       "id": "classic",
       "name": "Classic",
-      "logoSrc": "img/theme-logo-classic.svg",
-      "color": "#FF6B00"
+      "logoSrc": "data/theme-logo-classic.svg",
+      "color": "#ff6b00"
     },
     {
       "id": "clikits",
       "name": "Clikits",
-      "logoSrc": "img/theme-logo-clikits.jpg",
-      "color": "#E91E8C"
+      "logoSrc": "data/theme-logo-clikits.jpg",
+      "color": "#e91e8c"
     },
     {
       "id": "despicable-me-4",
       "name": "Despicable Me 4",
-      "logoSrc": "img/theme-logo-despicable-me-4.png",
-      "color": "#FFEB3B"
+      "logoSrc": "data/theme-logo-despicable-me-4.png",
+      "color": "#ffeb3b"
     },
     {
       "id": "dimensions",
       "name": "Dimensions",
-      "logoSrc": "img/theme-logo-dimensions.png",
-      "color": "#9B59B6"
+      "logoSrc": "data/theme-logo-dimensions.png",
+      "color": "#9b59b6"
     },
     {
       "id": "dino",
       "name": "Dino",
-      "logoSrc": "img/theme-logo-dino.jpg",
-      "color": "#52BE80"
+      "logoSrc": "data/theme-logo-dino.jpg",
+      "color": "#52be80"
     },
     {
       "id": "dino-attack",
       "name": "Dino Attack",
-      "logoSrc": "img/theme-logo-dino-attack.png",
-      "color": "#3D5C2E"
+      "logoSrc": "data/theme-logo-dino-attack.png",
+      "color": "#3d5c2e"
     },
     {
       "id": "dinosaurs",
       "name": "Dinosaurs",
-      "logoSrc": "img/theme-logo-dinosaurs.jpg",
-      "color": "#A0522D"
+      "logoSrc": "data/theme-logo-dinosaurs.jpg",
+      "color": "#a0522d"
     },
     {
       "id": "discovery",
       "name": "Discovery",
-      "logoSrc": "img/theme-logo-discovery.jpg",
-      "color": "#2874A6"
+      "logoSrc": "data/theme-logo-discovery.jpg",
+      "color": "#2874a6"
     },
     {
       "id": "disney",
       "name": "Disney",
-      "logoSrc": "img/theme-logo-disney.svg",
-      "color": "#7B2D8E"
+      "logoSrc": "data/theme-logo-disney.svg",
+      "color": "#7b2d8e"
     },
     {
       "id": "dots",
       "name": "DOTS",
-      "logoSrc": "img/theme-logo-dots.webp",
-      "color": "#FF6F61"
+      "logoSrc": "data/theme-logo-dots.webp",
+      "color": "#ff6f61"
     },
     {
       "id": "dreamzzz",
       "name": "Dreamzzz",
-      "logoSrc": "img/theme-logo-dreamzzz.webp",
-      "color": "#6C5CE7"
+      "logoSrc": "data/theme-logo-dreamzzz.webp",
+      "color": "#6c5ce7"
     },
     {
       "id": "duplo",
       "name": "DUPLO",
-      "logoSrc": "img/theme-logo-duplo.svg",
-      "color": "#D32F2F"
+      "logoSrc": "data/theme-logo-duplo.svg",
+      "color": "#d32f2f"
     },
     {
       "id": "education",
       "name": "Education",
-      "logoSrc": "img/theme-logo-education.svg",
-      "color": "#F57C00"
+      "logoSrc": "data/theme-logo-education.svg",
+      "color": "#f57c00"
     },
     {
       "id": "elves",
       "name": "Elves",
-      "logoSrc": "img/theme-logo-elves.png",
-      "color": "#16A085"
+      "logoSrc": "data/theme-logo-elves.png",
+      "color": "#16a085"
     },
     {
       "id": "exo-force",
       "name": "Exo-Force",
-      "logoSrc": "img/theme-logo-exo-force.png",
-      "color": "#FF4500"
+      "logoSrc": "data/theme-logo-exo-force.png",
+      "color": "#ff4500"
     },
     {
       "id": "fabuland",
       "name": "Fabuland",
-      "logoSrc": "img/theme-logo-fabuland.png",
-      "color": "#F5B041"
+      "logoSrc": "data/theme-logo-fabuland.png",
+      "color": "#f5b041"
     },
     {
       "id": "factory",
       "name": "Factory",
-      "logoSrc": "img/theme-logo-factory.jpg",
-      "color": "#34495E"
+      "logoSrc": "data/theme-logo-factory.jpg",
+      "color": "#34495e"
     },
     {
       "id": "forma",
       "name": "FORMA",
-      "logoSrc": "img/theme-logo-forma.png",
-      "color": "#D2691E"
+      "logoSrc": "data/theme-logo-forma.png",
+      "color": "#d2691e"
     },
     {
       "id": "fortnite",
       "name": "Fortnite",
-      "logoSrc": "img/theme-logo-fortnite.svg",
-      "color": "#9B51E0"
+      "logoSrc": "data/theme-logo-fortnite.svg",
+      "color": "#9b51e0"
     },
     {
       "id": "freestyle",
       "name": "FreeStyle",
-      "logoSrc": "img/theme-logo-freestyle.jpg",
-      "color": "#A3CB38"
+      "logoSrc": "data/theme-logo-freestyle.jpg",
+      "color": "#a3cb38"
     },
     {
       "id": "friends",
       "name": "Friends",
-      "logoSrc": "img/theme-logo-friends.svg",
-      "color": "#C870A0"
+      "logoSrc": "data/theme-logo-friends.svg",
+      "color": "#c870a0",
+      "logoZoom": 1.16
     },
     {
       "id": "gabbys-dollhouse",
       "name": "Gabby's Dollhouse",
-      "logoSrc": "img/theme-logo-gabbys-dollhouse.png",
-      "color": "#EC407A"
+      "logoSrc": "data/theme-logo-gabbys-dollhouse.png",
+      "color": "#ec407a"
     },
     {
       "id": "galidor",
       "name": "Galidor",
-      "logoSrc": "img/theme-logo-galidor.jpg",
-      "color": "#E74C3C"
-    },
-    {
-      "id": "games",
-      "name": "Games",
-      "color": "#FF9F1C"
+      "logoSrc": "data/theme-logo-galidor.jpg",
+      "color": "#e74c3c"
     },
     {
       "id": "harry-potter",
       "name": "Harry Potter",
-      "logoSrc": "img/theme-logo-harry-potter.svg",
-      "color": "#720E0F"
+      "logoSrc": "data/theme-logo-harry-potter.svg",
+      "color": "#720e0f"
     },
     {
       "id": "hero-factory",
       "name": "Hero Factory",
-      "logoSrc": "img/theme-logo-hero-factory.svg",
-      "color": "#D35400"
+      "logoSrc": "data/theme-logo-hero-factory.svg",
+      "color": "#d35400"
     },
     {
       "id": "hidden-side",
       "name": "Hidden Side",
-      "logoSrc": "img/theme-logo-hidden-side.png",
-      "color": "#00C853"
-    },
-    {
-      "id": "homemaker",
-      "name": "Homemaker",
-      "color": "#C4783A"
+      "logoSrc": "data/theme-logo-hidden-side.png",
+      "color": "#00c853"
     },
     {
       "id": "horizon",
       "name": "Horizon",
-      "logoSrc": "img/theme-logo-horizon.png",
-      "color": "#148F77"
+      "logoSrc": "data/theme-logo-horizon.png",
+      "color": "#148f77"
     },
     {
       "id": "how-to-train-your-dragon",
       "name": "How to Train Your Dragon",
-      "logoSrc": "img/theme-logo-how-to-train-your-dragon.svg",
-      "color": "#1A252F"
+      "logoSrc": "data/theme-logo-how-to-train-your-dragon.svg",
+      "color": "#1a252f"
     },
     {
       "id": "icons",
       "name": "Icons",
-      "logoSrc": "img/theme-logo-icons.png",
-      "color": "#B7950B"
+      "logoSrc": "data/theme-logo-icons.png",
+      "color": "#b7950b"
     },
     {
       "id": "ideas",
       "name": "Ideas",
-      "logoSrc": "img/theme-logo-ideas.svg",
-      "color": "#F7DC6F"
+      "logoSrc": "data/theme-logo-ideas.svg",
+      "color": "#f7dc6f"
     },
     {
       "id": "indiana-jones",
       "name": "Indiana Jones",
-      "logoSrc": "img/theme-logo-indiana-jones.svg",
-      "color": "#8B4513"
+      "logoSrc": "data/theme-logo-indiana-jones.svg",
+      "color": "#8b4513"
     },
     {
       "id": "island-xtreme-stunts",
       "name": "Island Xtreme Stunts",
-      "logoSrc": "img/theme-logo-island-xtreme-stunts.jpg",
-      "color": "#FF5722"
+      "logoSrc": "data/theme-logo-island-xtreme-stunts.jpg",
+      "color": "#ff5722"
     },
     {
       "id": "jack-stone",
       "name": "Jack Stone",
-      "logoSrc": "img/theme-logo-jack-stone.jpg",
-      "color": "#3498DB"
+      "logoSrc": "data/theme-logo-jack-stone.jpg",
+      "color": "#3498db"
     },
     {
       "id": "jurassic-world",
       "name": "Jurassic World",
-      "logoSrc": "img/theme-logo-jurassic-world.png",
-      "color": "#145A32"
+      "logoSrc": "data/theme-logo-jurassic-world.png",
+      "color": "#145a32"
     },
     {
       "id": "kpop-demon-hunters",
       "name": "KPop Demon Hunters",
-      "logoSrc": "img/theme-logo-kpop-demon-hunters.webp",
-      "color": "#E040FB"
+      "logoSrc": "data/theme-logo-kpop-demon-hunters.webp",
+      "color": "#e040fb"
     },
     {
       "id": "legends-of-chima",
       "name": "Legends of Chima",
-      "logoSrc": "img/theme-logo-legends-of-chima.webp",
+      "logoSrc": "data/theme-logo-legends-of-chima.webp",
       "color": "#0088dd"
     },
     {
       "id": "looney-tunes",
       "name": "Looney Tunes",
-      "logoSrc": "img/theme-logo-looney-tunes.webp",
-      "color": "#E53935"
-    },
-    {
-      "id": "make-and-create",
-      "name": "Make & Create",
-      "color": "#F1C40F"
-    },
-    {
-      "id": "minecraft",
-      "name": "Minecraft",
-      "logoSrc": "img/theme-logo-minecraft.svg",
-      "color": "#62B47A"
+      "logoSrc": "data/theme-logo-looney-tunes.webp",
+      "color": "#e53935"
     },
     {
       "id": "mindstorms",
       "name": "Mindstorms",
-      "logoSrc": "img/theme-logo-mindstorms.svg",
-      "color": "#DC143C"
+      "logoSrc": "data/theme-logo-mindstorms.svg",
+      "color": "#dc143c"
+    },
+    {
+      "id": "minecraft",
+      "name": "Minecraft",
+      "logoSrc": "data/theme-logo-minecraft.svg",
+      "color": "#62b47a"
     },
     {
       "id": "minifigures",
       "name": "Minifigures",
-      "logoSrc": "img/theme-logo-minifigures.svg",
-      "color": "#FFC107"
+      "logoSrc": "data/theme-logo-minifigures.svg",
+      "color": "#ffc107"
     },
     {
       "id": "minions-the-rise-of-gru",
       "name": "Minions: The Rise of Gru",
-      "logoSrc": "img/theme-logo-minions-the-rise-of-gru.svg",
-      "color": "#6A1B9A"
+      "logoSrc": "data/theme-logo-minions-the-rise-of-gru.svg",
+      "color": "#6a1b9a"
     },
     {
       "id": "mixels",
       "name": "Mixels",
-      "logoSrc": "img/theme-logo-mixels.svg",
-      "color": "#CDDC39"
+      "logoSrc": "data/theme-logo-mixels.svg",
+      "color": "#cddc39"
     },
     {
       "id": "model-team",
       "name": "Model Team",
-      "logoSrc": "img/theme-logo-model-team.jpg",
-      "color": "#2E4053"
+      "logoSrc": "data/theme-logo-model-team.jpg",
+      "color": "#2e4053"
     },
     {
       "id": "monkie-kid",
       "name": "Monkie Kid",
-      "logoSrc": "img/theme-logo-monkie-kid.png",
-      "color": "#FF8F00"
+      "logoSrc": "data/theme-logo-monkie-kid.png",
+      "color": "#ff8f00"
     },
     {
       "id": "monster-fighters",
       "name": "Monster Fighters",
-      "logoSrc": "img/theme-logo-monster-fighters.png",
-      "color": "#4A235A"
+      "logoSrc": "data/theme-logo-monster-fighters.png",
+      "color": "#4a235a"
     },
     {
       "id": "nexo-knights",
       "name": "Nexo Knights",
-      "logoSrc": "img/theme-logo-nexo-knights.png",
-      "color": "#00ACC1"
+      "logoSrc": "data/theme-logo-nexo-knights.png",
+      "color": "#00acc1"
     },
     {
       "id": "ninjago",
       "name": "Ninjago",
-      "logoSrc": "img/theme-logo-ninjago.svg",
-      "color": "#C91A09"
+      "logoSrc": "data/theme-logo-ninjago.svg",
+      "color": "#c91a09"
     },
     {
       "id": "one-piece",
       "name": "One Piece",
-      "logoSrc": "img/theme-logo-one-piece.jpg",
-      "color": "#B71C1C"
+      "logoSrc": "data/theme-logo-one-piece.jpg",
+      "color": "#b71c1c"
     },
     {
       "id": "overwatch",
       "name": "Overwatch",
-      "logoSrc": "img/theme-logo-overwatch.png",
-      "color": "#FA9C1E"
+      "logoSrc": "data/theme-logo-overwatch.png",
+      "color": "#fa9c1e"
     },
     {
       "id": "pharaohs-quest",
       "name": "Pharaoh's Quest",
-      "logoSrc": "img/theme-logo-pharaohs-quest.png",
-      "color": "#B8860B"
+      "logoSrc": "data/theme-logo-pharaohs-quest.png",
+      "color": "#b8860b"
     },
     {
       "id": "pirates",
       "name": "Pirates",
-      "logoSrc": "img/theme-logo-pirates.png",
-      "color": "#7B3F00"
+      "logoSrc": "data/theme-logo-pirates.png",
+      "color": "#7b3f00"
     },
     {
       "id": "pokemon",
       "name": "Pokémon",
-      "logoSrc": "img/theme-logo-pokemon.svg",
-      "color": "#EE1515"
+      "logoSrc": "data/theme-logo-pokemon.svg",
+      "color": "#ee1515"
     },
     {
       "id": "power-miners",
       "name": "Power Miners",
-      "logoSrc": "img/theme-logo-power-miners.webp",
-      "color": "#E65100"
+      "logoSrc": "data/theme-logo-power-miners.webp",
+      "color": "#e65100"
     },
     {
       "id": "powerpuff-girls",
       "name": "The Powerpuff Girls",
-      "logoSrc": "img/theme-logo-powerpuff-girls.png",
-      "color": "#FF1493"
+      "logoSrc": "data/theme-logo-powerpuff-girls.png",
+      "color": "#ff1493"
     },
     {
       "id": "race",
       "name": "Race",
-      "logoSrc": "img/theme-logo-race.png",
+      "logoSrc": "data/theme-logo-race.png",
       "color": "#424242"
     },
     {
       "id": "racers",
       "name": "Racers",
-      "logoSrc": "img/theme-logo-racers.svg",
-      "color": "#C62828"
+      "logoSrc": "data/theme-logo-racers.svg",
+      "color": "#c62828"
     },
     {
       "id": "radio-control",
       "name": "Radio Control",
-      "logoSrc": "img/theme-logo-radio-control.png",
-      "color": "#F9A825"
+      "logoSrc": "data/theme-logo-radio-control.png",
+      "color": "#f9a825"
     },
     {
       "id": "rock-raiders",
       "name": "Rock Raiders",
-      "logoSrc": "img/theme-logo-rock-raiders.webp",
-      "color": "#4C4C4C"
+      "logoSrc": "data/theme-logo-rock-raiders.webp",
+      "color": "#4c4c4c"
     },
     {
       "id": "scala",
       "name": "Scala",
-      "logoSrc": "img/theme-logo-scala.png",
-      "color": "#F8BBD0"
+      "logoSrc": "data/theme-logo-scala.png",
+      "color": "#f8bbd0"
     },
     {
       "id": "scooby-doo",
       "name": "Scooby-Doo",
-      "logoSrc": "img/theme-logo-scooby-doo.png",
-      "color": "#43A047"
+      "logoSrc": "data/theme-logo-scooby-doo.png",
+      "color": "#43a047"
     },
     {
       "id": "shrek",
       "name": "Shrek",
-      "logoSrc": "img/theme-logo-shrek.png",
-      "color": "#7CB342"
+      "logoSrc": "data/theme-logo-shrek.png",
+      "color": "#7cb342"
     },
     {
       "id": "sonic-the-hedgehog",
       "name": "Sonic the Hedgehog",
-      "logoSrc": "img/theme-logo-sonic-the-hedgehog.svg",
-      "color": "#00AEEF"
+      "logoSrc": "data/theme-logo-sonic-the-hedgehog.svg",
+      "color": "#00aeef"
     },
     {
       "id": "space",
       "name": "Space",
-      "logoSrc": "img/theme-logo-space.svg",
-      "color": "#0A58CA"
+      "logoSrc": "data/theme-logo-space.svg",
+      "color": "#0a58ca",
+      "logoZoom": 0.65,
+      "logoOffsetX": 0.06,
+      "logoOffsetY": -0.03
     },
     {
       "id": "speed-champions",
       "name": "Speed Champions",
-      "logoSrc": "img/theme-logo-speed-champions.png",
-      "color": "#AE1C28"
+      "logoSrc": "data/theme-logo-speed-champions.png",
+      "color": "#ae1c28"
     },
     {
       "id": "speed-racer",
       "name": "Speed Racer",
-      "logoSrc": "img/theme-logo-speed-racer.webp",
-      "color": "#C0392B"
+      "logoSrc": "data/theme-logo-speed-racer.webp",
+      "color": "#c0392b"
     },
     {
       "id": "spider-man",
       "name": "Spider-Man",
-      "logoSrc": "img/theme-logo-spider-man.png",
-      "color": "#E23636"
+      "logoSrc": "data/theme-logo-spider-man.png",
+      "color": "#e23636"
     },
     {
       "id": "spongebob-squarepants",
       "name": "SpongeBob SquarePants",
-      "logoSrc": "img/theme-logo-spongebob-squarepants.svg",
-      "color": "#00CED1"
+      "logoSrc": "data/theme-logo-spongebob-squarepants.svg",
+      "color": "#00ced1"
     },
     {
       "id": "sports",
       "name": "Sports",
-      "logoSrc": "img/theme-logo-sports.webp",
-      "color": "#27AE60"
+      "logoSrc": "data/theme-logo-sports.webp",
+      "color": "#27ae60"
     },
     {
       "id": "star-trek",
       "name": "Star Trek",
-      "logoSrc": "img/theme-logo-star-trek.svg",
-      "color": "#003F87"
+      "logoSrc": "data/theme-logo-star-trek.svg",
+      "color": "#003f87"
     },
     {
       "id": "star-wars",
       "name": "Star Wars",
-      "logoSrc": "img/theme-logo-star-wars.svg",
-      "color": "#111111"
+      "logoSrc": "data/theme-logo-star-wars.svg",
+      "color": "#111111",
+      "logoZoom": 0.76
     },
     {
       "id": "stranger-things",
       "name": "Stranger Things",
-      "logoSrc": "img/theme-logo-stranger-things.svg",
-      "color": "#641E16"
+      "logoSrc": "data/theme-logo-stranger-things.svg",
+      "color": "#641e16"
     },
     {
       "id": "studios",
       "name": "Studios",
-      "logoSrc": "img/theme-logo-studios.svg",
-      "color": "#37474F"
+      "logoSrc": "data/theme-logo-studios.svg",
+      "color": "#37474f"
     },
     {
       "id": "super-heroes",
       "name": "Super Heroes",
-      "logoSrc": "img/theme-logo-super-heroes.png",
-      "color": "#8E1A1A"
+      "logoSrc": "data/theme-logo-super-heroes.png",
+      "color": "#8e1a1a"
     },
     {
       "id": "super-mario",
       "name": "Super Mario",
-      "logoSrc": "img/theme-logo-super-mario.svg",
-      "color": "#48A9E6"
+      "logoSrc": "data/theme-logo-super-mario.svg",
+      "color": "#48a9e6"
     },
     {
       "id": "technic",
       "name": "TECHNIC",
-      "logoSrc": "img/theme-logo-technic.svg",
-      "color": "#2F4F4F"
+      "logoSrc": "data/theme-logo-technic.svg",
+      "color": "#2f4f4f"
     },
     {
       "id": "teenage-mutant-ninja-turtles",
       "name": "Teenage Mutant Ninja Turtles",
-      "logoSrc": "img/theme-logo-teenage-mutant-ninja-turtles.svg",
-      "color": "#3D8B37"
+      "logoSrc": "data/theme-logo-teenage-mutant-ninja-turtles.svg",
+      "color": "#3d8b37"
     },
     {
       "id": "the-angry-birds-movie",
       "name": "The Angry Birds Movie",
-      "logoSrc": "img/theme-logo-the-angry-birds-movie.svg",
-      "color": "#DD2C00"
+      "logoSrc": "data/theme-logo-the-angry-birds-movie.svg",
+      "color": "#c20a31"
     },
     {
       "id": "the-hobbit",
       "name": "The Hobbit",
-      "logoSrc": "img/theme-logo-the-hobbit.png",
-      "color": "#3E5F2E"
+      "logoSrc": "data/theme-logo-the-hobbit.png",
+      "color": "#3e5f2e"
     },
     {
       "id": "the-legend-of-zelda",
       "name": "The Legend of Zelda",
-      "logoSrc": "img/theme-logo-the-legend-of-zelda.svg",
-      "color": "#1B5E20"
+      "logoSrc": "data/theme-logo-the-legend-of-zelda.svg",
+      "color": "#1b5e20"
     },
     {
       "id": "the-lego-movie",
       "name": "The LEGO Movie",
-      "logoSrc": "img/theme-logo-the-lego-movie.png",
-      "color": "#F4C430"
+      "logoSrc": "data/theme-logo-the-lego-movie.png",
+      "color": "#f4c430"
     },
     {
       "id": "the-lord-of-the-rings",
       "name": "The Lord of the Rings",
-      "logoSrc": "img/theme-logo-the-lord-of-the-rings.webp",
-      "color": "#1B4F3A"
+      "logoSrc": "data/theme-logo-the-lord-of-the-rings.webp",
+      "color": "#1b4f3a"
     },
     {
       "id": "the-muppets",
       "name": "The Muppets",
-      "logoSrc": "img/theme-logo-the-muppets.png",
-      "color": "#43B02A"
+      "logoSrc": "data/theme-logo-the-muppets.png",
+      "color": "#43b02a"
     },
     {
       "id": "the-simpsons",
       "name": "The Simpsons",
-      "logoSrc": "img/theme-logo-the-simpsons.svg",
-      "color": "#FFD34E"
+      "logoSrc": "data/theme-logo-the-simpsons.svg",
+      "color": "#ffd34e"
     },
     {
       "id": "time-cruisers",
       "name": "Time Cruisers",
-      "logoSrc": "img/theme-logo-time-cruisers.png",
-      "color": "#7D3C98"
+      "logoSrc": "data/theme-logo-time-cruisers.png",
+      "color": "#7d3c98"
     },
     {
       "id": "town",
       "name": "Town",
-      "logoSrc": "img/theme-logo-town.svg",
-      "color": "#1A6BB3"
+      "logoSrc": "data/theme-logo-town.svg",
+      "color": "#1a6bb3"
     },
     {
       "id": "trains",
       "name": "Trains",
-      "logoSrc": "img/theme-logo-trains.jpg",
-      "color": "#A93226"
+      "logoSrc": "data/theme-logo-trains.jpg",
+      "color": "#a93226"
     },
     {
       "id": "transformers",
       "name": "Transformers",
-      "logoSrc": "img/theme-logo-transformers.svg",
-      "color": "#9C27B0"
+      "logoSrc": "data/theme-logo-transformers.svg",
+      "color": "#bb122f"
     },
     {
       "id": "trolls-world-tour",
       "name": "Trolls World Tour",
-      "logoSrc": "img/theme-logo-trolls-world-tour.webp",
-      "color": "#FF4081"
+      "logoSrc": "data/theme-logo-trolls-world-tour.webp",
+      "color": "#ff4081"
     },
     {
       "id": "ultra-agents",
       "name": "Ultra Agents",
-      "logoSrc": "img/theme-logo-ultra-agents.png",
-      "color": "#00B8D4"
+      "logoSrc": "data/theme-logo-ultra-agents.png",
+      "color": "#00b8d4"
     },
     {
       "id": "unikitty",
       "name": "Unikitty!",
-      "logoSrc": "img/theme-logo-unikitty.png",
-      "color": "#FF80AB"
+      "logoSrc": "data/theme-logo-unikitty.png",
+      "color": "#ff80ab"
     },
     {
       "id": "vidiyo",
       "name": "Vidiyo",
-      "logoSrc": "img/theme-logo-vidiyo.svg",
-      "color": "#D500F9"
+      "logoSrc": "data/theme-logo-vidiyo.svg",
+      "color": "#d500f9"
     },
     {
       "id": "vikings",
       "name": "Vikings",
-      "logoSrc": "img/theme-logo-vikings.png",
-      "color": "#7B241C"
+      "logoSrc": "data/theme-logo-vikings.png",
+      "color": "#7b241c"
     },
     {
       "id": "wednesday",
       "name": "Wednesday",
-      "logoSrc": "img/theme-logo-wednesday.png",
-      "color": "#311B92"
+      "logoSrc": "data/theme-logo-wednesday.png",
+      "color": "#311b92"
     },
     {
       "id": "western",
       "name": "Western",
-      "logoSrc": "img/theme-logo-western.png",
-      "color": "#CD853F"
+      "logoSrc": "data/theme-logo-western.png",
+      "color": "#cd853f"
     },
     {
       "id": "wicked",
       "name": "Wicked",
-      "logoSrc": "img/theme-logo-wicked.webp",
-      "color": "#0B6E4F"
+      "logoSrc": "data/theme-logo-wicked.webp",
+      "color": "#0b6e4f"
     },
     {
       "id": "world-city",
       "name": "World City",
-      "logoSrc": "img/theme-logo-world-city.png",
-      "color": "#117A65"
+      "logoSrc": "data/theme-logo-world-city.png",
+      "color": "#117a65"
     },
     {
       "id": "world-racers",
       "name": "World Racers",
-      "logoSrc": "img/theme-logo-world-racers.png",
-      "color": "#E67E22"
-    },
-    {
-      "id": "xtra",
-      "name": "Xtra",
-      "color": "#95A5A6"
+      "logoSrc": "data/theme-logo-world-racers.png",
+      "color": "#e67e22"
     },
     {
       "id": "znap",
       "name": "Znap",
-      "logoSrc": "img/theme-logo-znap.png",
-      "color": "#D4E157"
+      "logoSrc": "data/theme-logo-znap.png",
+      "color": "#d4e157"
     }
   ]
 }
