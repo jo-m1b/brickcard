@@ -7,6 +7,25 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Added
+
+- Curseurs (`form-range-row`) : bouton reset (valeur par défaut, `ri-close-circle-fill`, non focusable), emplacement toujours réservé, icône visible si ≠ défaut ; `output` gras dans ce cas ; module `form-range.js` ; galerie `#/developer/sliders`
+- Paramètres et impression : restaurer le défaut des curseurs (colonnes, bordure, coins, images, grille)
+- Paramètres → Apparence des cartes : arrondi des images (0–8 mm, pas 0,5, défaut 1 mm), indépendant de l’arrondi des coins
+
+### Fixed
+
+- Impression dos : fond perdu aligné sur la grille (plus de décalage haut / droite)
+
+### Changed
+
+- Champ image : pas de zoom molette / `+` `−` à 1 % (au lieu de 8 %)
+- Paramètres : « Arrondi des coins » ne s’applique plus aux photos (réglage dédié) ; défaut 2 mm (au lieu de 1,5 mm)
+- Paramètres → Apparence des cartes : couleur par défaut en premier
+- Impression : label « Impression recto-verso des feuilles » (modale et paramètres)
+- Impression dos : fond perdu 1 mm gauche / droite, 2 mm haut / bas (scale avec la grille)
+- Logos des thèmes par défaut : 70 fichiers minifiés (~6,6 Mo) ; SVG Indiana Jones, SpongeBob SquarePants et Teenage Mutant Ninja Turtles nettoyés (métadonnées Inkscape)
+
 ## [0.7.3] — 2026-08-18
 
 ### Added

@@ -264,6 +264,7 @@ export async function wipeAllLocalData() {
     localStorage.removeItem("brickcard-generator:ui-theme");
     localStorage.removeItem("brickcard-generator:card-face-border-mm");
     localStorage.removeItem("brickcard-generator:card-radius-mm");
+    localStorage.removeItem("brickcard-generator:card-image-radius-mm");
     localStorage.removeItem("brickcard-generator:card-default-color");
     localStorage.removeItem("brickcard-generator:migrate-accent-default-v1");
     localStorage.removeItem("brickcard-generator:migrate-empty-theme-color-v1");

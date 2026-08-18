@@ -1699,7 +1699,72 @@ html:not([data-theme]) .btn .icon-system {
   font-variant-numeric: tabular-nums;
   text-align: right;
   color: var(--ink-soft);
-  line-height: 1.3;
+  line-height: 1.35rem;
+  min-height: 1.35rem;
+}
+
+.form-range-row.is-custom output {
+  font-weight: 700;
+}
+
+.form-range-reset {
+  flex: 0 0 1.35rem;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  margin: 0;
+  padding: 0.1rem;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+  line-height: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.form-range-row.is-custom .form-range-reset {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.form-range-row.sm .form-range-reset {
+  flex-basis: 1.15rem;
+  width: 1.15rem;
+  height: 1.15rem;
+  padding: 0.075rem;
+}
+
+.form-range-reset svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  display: block;
+}
+
+.form-range-row.sm .form-range-reset svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.form-range-reset:hover {
+  color: var(--ink);
+}
+
+.form-range-reset:focus {
+  outline: none;
+}
+
+.form-range-reset:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.form-range-row:has(input:disabled) .form-range-reset {
+  pointer-events: none;
 }
 
 .form-range-row.sm input[type="range"] {
@@ -1726,6 +1791,8 @@ html:not([data-theme]) .btn .icon-system {
 .form-range-row.sm output {
   flex-basis: 3rem;
   font-size: 0.8rem;
+  line-height: 1.15rem;
+  min-height: 1.15rem;
 }
 
 .form-range-row:has(input:disabled) {
@@ -2861,11 +2928,6 @@ body.modal-open {
   background: var(--bg);
 }
 
-.settings-color-field {
-  margin-top: 1rem;
-  margin-bottom: 0;
-}
-
 .theme-mode-switch {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
@@ -3100,7 +3162,7 @@ textarea {
   gap: 0.2rem;
   padding: 0.4rem 0.35rem 0.45rem;
   border: none;
-  border-radius: var(--card-radius, 1.5mm);
+  border-radius: var(--card-radius, 2mm);
   overflow: hidden;
   background: var(--theme-accent, var(--card-default-accent, #6e6e6e));
   color: var(--theme-accent-fg, #ffffff);
@@ -3225,7 +3287,7 @@ textarea {
   width: var(--card-w);
   height: var(--card-h);
   background: var(--card-accent, var(--card-default-accent, #6e6e6e));
-  border-radius: var(--card-radius, 1.5mm);
+  border-radius: var(--card-radius, 2mm);
   border: var(--card-face-border-width, 3mm) solid var(--card-accent, var(--card-default-accent, #6e6e6e));
   overflow: hidden;
   display: grid;
@@ -3351,8 +3413,8 @@ textarea {
   inset: 0;
   z-index: 1;
   overflow: hidden;
-  border-radius: var(--card-radius, 1.5mm);
-  clip-path: inset(0 round var(--card-radius, 1.5mm));
+  border-radius: var(--card-image-radius, 1mm);
+  clip-path: inset(0 round var(--card-image-radius, 1mm));
   background: #ffffff;
 }
 
@@ -3453,7 +3515,7 @@ textarea {
   width: var(--card-w);
   height: var(--card-h);
   background: var(--card-accent, var(--card-default-accent, #6e6e6e));
-  border-radius: var(--card-radius, 1.5mm);
+  border-radius: var(--card-radius, 2mm);
   border: none;
   overflow: hidden;
   display: grid;
@@ -3724,35 +3786,26 @@ textarea {
   }
 
   /*
-   * Fond perdu dos (impression) : rectangle couleur carte, sans arrondi,
-   * pour remplir les coins (évite le blanc hors du border-radius).
-   * Bleed 0,5 mm — le gap horizontal feuille est ~3 mm.
+   * Fond perdu dos : rectangle sur le slot (repère feuille, pas le
+   * transform de la carte). 1 mm L/R, 2 mm H/B — scale avec la grille
+   * (gap 3 mm / 5 mm).
    */
   .print-sheet--back {
+    --print-bleed-x: calc(1mm * var(--print-scale));
+    --print-bleed-y: calc(2mm * var(--print-scale));
     overflow: hidden;
   }
 
-  .print-sheet--back .print-slot {
+  .print-sheet--back .print-slot:not(.is-empty) {
+    position: relative;
     overflow: visible;
   }
 
-  .print-sheet--back .card-back {
-    --card-print-bleed: 0.5mm;
-    overflow: visible;
-  }
-
-  .print-sheet--back .card-back::before {
+  .print-sheet--back .print-slot:not(.is-empty)::before {
     content: "";
     position: absolute;
-    inset: calc(-1 * var(--card-print-bleed));
+    inset: calc(-1 * var(--print-bleed-y)) calc(-1 * var(--print-bleed-x));
     background: var(--card-accent, var(--card-default-accent, #6e6e6e));
-    border-radius: 0;
-    z-index: 0;
     pointer-events: none;
-  }
-
-  .print-sheet--back .card-back .card-brand,
-  .print-sheet--back .card-back .card-theme {
-    z-index: 1;
   }
 }

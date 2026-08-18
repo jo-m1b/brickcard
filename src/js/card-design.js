@@ -1,5 +1,5 @@
 /**
- * Design des cartes (bordure face, arrondi, couleur par défaut) — persisté en localStorage.
+ * Design des cartes (bordure face, arrondi coins / images, couleur par défaut) — persisté en localStorage.
  *
  * Couleur d’accent d’une carte :
  * 1. couleur du thème (si définie)
@@ -15,6 +15,7 @@ import {
 
 const BORDER_KEY = "brickcard-generator:card-face-border-mm";
 const RADIUS_KEY = "brickcard-generator:card-radius-mm";
+const IMAGE_RADIUS_KEY = "brickcard-generator:card-image-radius-mm";
 const COLOR_KEY = "brickcard-generator:card-default-color";
 
 /** Largeur de bordure face par défaut (mm). */
@@ -25,11 +26,18 @@ export const FACE_BORDER_MIN_MM = 0;
 export const FACE_BORDER_MAX_MM = 10;
 
 /** Rayon d’arrondi des coins par défaut (mm) — 0 = angles droits. */
-export const DEFAULT_CARD_RADIUS_MM = 1.5;
+export const DEFAULT_CARD_RADIUS_MM = 2;
 
-/** Min / max (mm) pour l’arrondi. */
+/** Min / max (mm) pour l’arrondi des coins de carte. */
 export const CARD_RADIUS_MIN_MM = 0;
 export const CARD_RADIUS_MAX_MM = 8;
+
+/** Rayon d’arrondi des images par défaut (mm) — 0 = angles droits. */
+export const DEFAULT_CARD_IMAGE_RADIUS_MM = 1;
+
+/** Min / max (mm) pour l’arrondi des images. */
+export const CARD_IMAGE_RADIUS_MIN_MM = 0;
+export const CARD_IMAGE_RADIUS_MAX_MM = 8;
 
 /**
  * @param {unknown} value
@@ -138,6 +146,51 @@ export function setCardRadiusMm(mm) {
 }
 
 /**
+ * @param {unknown} value
+ * @returns {number}
+ */
+export function clampCardImageRadiusMm(value) {
+  return clampHalfMm(
+    value,
+    CARD_IMAGE_RADIUS_MIN_MM,
+    CARD_IMAGE_RADIUS_MAX_MM,
+    DEFAULT_CARD_IMAGE_RADIUS_MM
+  );
+}
+
+/** @returns {number} rayon en mm */
+export function getCardImageRadiusMm() {
+  try {
+    const raw = localStorage.getItem(IMAGE_RADIUS_KEY);
+    if (raw !== null && raw !== "") {
+      return clampCardImageRadiusMm(raw);
+    }
+  } catch {
+    /* ignore */
+  }
+  return DEFAULT_CARD_IMAGE_RADIUS_MM;
+}
+
+/** Applique --card-image-radius (sans persister). */
+export function applyCardImageRadiusMm(mm) {
+  const value = clampCardImageRadiusMm(mm);
+  document.documentElement.style.setProperty("--card-image-radius", `${value}mm`);
+  return value;
+}
+
+/** Persiste et applique. @param {number} mm */
+export function setCardImageRadiusMm(mm) {
+  const value = clampCardImageRadiusMm(mm);
+  try {
+    localStorage.setItem(IMAGE_RADIUS_KEY, String(value));
+  } catch {
+    /* ignore */
+  }
+  applyCardImageRadiusMm(value);
+  return value;
+}
+
+/**
  * Couleur configurée (étape 2) — chaîne vide = non configurée.
  * @returns {string} hex #rrggbb ou ""
  */
@@ -212,9 +265,10 @@ export function refreshRenderedCardAccents() {
   });
 }
 
-/** Applique bordure, arrondi et couleur stockés au démarrage. */
+/** Applique bordure, arrondis et couleur stockés au démarrage. */
 export function initCardDesign() {
   applyFaceBorderMm(getFaceBorderMm());
   applyCardRadiusMm(getCardRadiusMm());
+  applyCardImageRadiusMm(getCardImageRadiusMm());
   applyConfiguredCardColor();
 }

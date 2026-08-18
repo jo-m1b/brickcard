@@ -6,7 +6,9 @@
 
 import { ICON_CLOSE, ICON_PRINTER } from "./icons.js";
 import { focusTopModal } from "./modal-focus.js";
+import { bindFormRange, formRangeResetMarkup } from "./form-range.js";
 import {
+  DEFAULT_PRINT_GRID,
   PRINT_GRID_MAX,
   PRINT_GRID_MIN,
   computePrintLayout,
@@ -84,6 +86,7 @@ export function openPrintDialog(host, opts) {
                 aria-describedby="${uid}-print-grid-out"
               />
               <output id="${uid}-print-grid-out" for="${uid}-print-grid">${initialGrid}</output>
+              ${formRangeResetMarkup()}
             </div>
           </div>
           <div class="form-field">
@@ -95,7 +98,7 @@ export function openPrintDialog(host, opts) {
             </div>
           </div>
           <div class="form-field" id="${uid}-duplex-field">
-            <p class="form-label" id="${uid}-recto-verso-label">Recto-verso</p>
+            <p class="form-label" id="${uid}-recto-verso-label">Impression recto-verso des feuilles</p>
             <div class="theme-mode-switch" role="radiogroup" aria-labelledby="${uid}-recto-verso-label" aria-describedby="${uid}-recto-verso-hint">
               <button type="button" class="btn ${settings.sheetRectoVerso === "alternate" ? "primary" : "secondary"}" data-sheet-recto-verso="alternate" aria-pressed="${settings.sheetRectoVerso === "alternate"}">Alterner</button>
               <button type="button" class="btn ${settings.sheetRectoVerso === "grouped" ? "primary" : "secondary"}" data-sheet-recto-verso="grouped" aria-pressed="${settings.sheetRectoVerso === "grouped"}">Regrouper</button>
@@ -119,10 +122,9 @@ export function openPrintDialog(host, opts) {
 
     const countEl = backdrop.querySelector(`#${uid}-count`);
     const descEl = backdrop.querySelector(`#${uid}-desc`);
-    const gridInput = /** @type {HTMLInputElement|null} */ (
-      backdrop.querySelector(`#${uid}-print-grid`)
+    const gridRow = /** @type {HTMLElement|null} */ (
+      backdrop.querySelector(`#${uid}-print-grid`)?.closest(".form-range-row")
     );
-    const gridOut = backdrop.querySelector(`#${uid}-print-grid-out`);
     const sidesBtns = Array.from(backdrop.querySelectorAll("[data-card-sides]"));
     const duplexBtns = Array.from(backdrop.querySelectorAll("[data-sheet-recto-verso]"));
     const duplexField = backdrop.querySelector(`#${uid}-duplex-field`);
@@ -145,10 +147,6 @@ export function openPrintDialog(host, opts) {
         btn.classList.toggle("primary", on);
         btn.classList.toggle("secondary", !on);
       });
-    }
-
-    function gridSize() {
-      return formatPrintGridSize(computePrintLayout(settings.printGrid));
     }
 
     function refresh() {
@@ -185,6 +183,18 @@ export function openPrintDialog(host, opts) {
       refresh();
     }
 
+    /** @type {ReturnType<typeof bindFormRange>|null} */
+    let gridRangeField = null;
+    if (gridRow) {
+      gridRangeField = bindFormRange(gridRow, {
+        defaultValue: DEFAULT_PRINT_GRID,
+        format: (v) => formatPrintGridSize(computePrintLayout(Number(v))),
+        onChange(value) {
+          persist({ printGrid: Number(value) });
+        },
+      });
+    }
+
     const previouslyFocused =
       document.activeElement instanceof HTMLElement ? document.activeElement : null;
 
@@ -198,6 +208,7 @@ export function openPrintDialog(host, opts) {
       if (settled) return;
       settled = true;
       mo.disconnect();
+      gridRangeField?.destroy();
       document.removeEventListener("keydown", onKey, true);
       backdrop.remove();
       if (addedModalOpen) document.body.classList.remove("modal-open");
@@ -217,14 +228,6 @@ export function openPrintDialog(host, opts) {
       finish();
     }
 
-    gridInput?.addEventListener("input", () => {
-      const printGrid = Number(gridInput.value);
-      persist({ printGrid });
-      const size = gridSize();
-      gridInput.setAttribute("aria-valuenow", String(printGrid));
-      gridInput.setAttribute("aria-valuetext", size);
-      if (gridOut) gridOut.textContent = size;
-    });
     sidesBtns.forEach((btn) => {
       btn.addEventListener("click", () => {
         const cardSidesToPrint = btn.getAttribute("data-card-sides");

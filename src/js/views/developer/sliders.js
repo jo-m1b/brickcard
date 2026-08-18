@@ -1,3 +1,4 @@
+import { bindFormRange, formRangeResetMarkup } from "../../form-range.js";
 import { linkMarkup } from "../../link.js";
 
 /**
@@ -16,6 +17,10 @@ export function renderDeveloperSliders(host) {
       <p class="styleguide-intro">
         Contrôle&nbsp;: <code>form-range-row</code> avec
         <code>input[type=range]</code> (+ <code>output</code> optionnel).
+        Reset optionnel (<code>ri-close-circle-fill</code>, non focusable) :
+        emplacement toujours réservé, icône visible seulement si la valeur
+        diffère du défaut ; l’<code>output</code> passe alors en gras.
+        Module&nbsp;: <code>form-range.js</code>.
         Même vocabulaire de champ (<code>form-field</code> / <code>form-label</code> /
         <code>form-hint</code> / <code>form-error</code>).
         Appliqué dans les paramètres.
@@ -44,6 +49,46 @@ export function renderDeveloperSliders(host) {
             <div class="form-range-row">
               <input type="range" id="demo-range-required" name="demo-range-required" min="2" max="10" step="1" value="4" required aria-valuemin="2" aria-valuemax="10" aria-valuenow="4" aria-describedby="demo-range-required-out" />
               <output id="demo-range-required-out" for="demo-range-required">4</output>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="styleguide-section">
+        <h2 class="styleguide-section-title">Reset (valeur par défaut)</h2>
+        <div class="styleguide-fields">
+          <div class="form-field">
+            <label class="form-label" for="demo-range-reset-default">Zoom</label>
+            <p class="form-hint" id="demo-range-reset-default-desc">Icône masquée tant que la valeur est le défaut (100&nbsp;%).</p>
+            <div class="form-range-row">
+              <input type="range" id="demo-range-reset-default" name="demo-range-reset-default" min="25" max="400" step="1" value="100" aria-valuemin="25" aria-valuemax="400" aria-valuenow="100" aria-describedby="demo-range-reset-default-desc demo-range-reset-default-out" />
+              <output id="demo-range-reset-default-out" for="demo-range-reset-default">100&nbsp;%</output>
+              ${formRangeResetMarkup()}
+            </div>
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="demo-range-reset-custom">Bordure (face)</label>
+            <p class="form-hint" id="demo-range-reset-custom-desc">Défaut 3&nbsp;mm ; ici 6&nbsp;mm → output gras et reset visible.</p>
+            <div class="form-range-row">
+              <input type="range" id="demo-range-reset-custom" name="demo-range-reset-custom" min="0" max="8" step="0.5" value="6" aria-valuemin="0" aria-valuemax="8" aria-valuenow="6" aria-describedby="demo-range-reset-custom-desc demo-range-reset-custom-out" />
+              <output id="demo-range-reset-custom-out" for="demo-range-reset-custom">6&nbsp;mm</output>
+              ${formRangeResetMarkup()}
+            </div>
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="demo-range-reset-sm">Coins arrondis</label>
+            <div class="form-range-row sm">
+              <input type="range" id="demo-range-reset-sm" name="demo-range-reset-sm" min="0" max="6" step="0.5" value="3" aria-valuemin="0" aria-valuemax="6" aria-valuenow="3" aria-describedby="demo-range-reset-sm-out" />
+              <output id="demo-range-reset-sm-out" for="demo-range-reset-sm">3&nbsp;mm</output>
+              ${formRangeResetMarkup()}
+            </div>
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="demo-range-reset-bare">Opacité</label>
+            <p class="form-hint" id="demo-range-reset-bare-desc">Sans <code>output</code> : le reset se place après la piste.</p>
+            <div class="form-range-row">
+              <input type="range" id="demo-range-reset-bare" name="demo-range-reset-bare" min="0" max="100" step="1" value="80" aria-describedby="demo-range-reset-bare-desc" />
+              ${formRangeResetMarkup()}
             </div>
           </div>
         </div>
@@ -149,6 +194,33 @@ export function renderDeveloperSliders(host) {
     item.input.addEventListener("input", onInput);
     unbind.push(() => item.input.removeEventListener("input", onInput));
   }
+
+  /**
+   * @param {string} id
+   * @param {{ defaultValue: number|string, format?: (value: string) => string }} opts
+   */
+  function bindReset(id, opts) {
+    const row = host.querySelector(id)?.closest(".form-range-row");
+    if (!(row instanceof HTMLElement)) return;
+    const field = bindFormRange(row, opts);
+    unbind.push(() => field.destroy());
+  }
+
+  bindReset("#demo-range-reset-default", {
+    defaultValue: 100,
+    format: (v) => `${v}\u00a0%`,
+  });
+  bindReset("#demo-range-reset-custom", {
+    defaultValue: 3,
+    format: (v) => `${v}\u00a0mm`,
+  });
+  bindReset("#demo-range-reset-sm", {
+    defaultValue: 1.5,
+    format: (v) => `${String(v).replace(".", ",")}\u00a0mm`,
+  });
+  bindReset("#demo-range-reset-bare", {
+    defaultValue: 50,
+  });
 
   return () => {
     unbind.forEach((fn) => fn());

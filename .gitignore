@@ -13,6 +13,8 @@ node_modules/
 # Environnement local
 .env
 .env.*
+.local/
+.cursor/
 
 # Logs / caches
 *.log

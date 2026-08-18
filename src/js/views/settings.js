@@ -1,15 +1,23 @@
 import { ICON_CLOSE } from "../icons.js";
 import { bindFormColor, formColorMarkup } from "../form-color.js";
+import { bindFormRange, formRangeResetMarkup } from "../form-range.js";
 import { getTheme, setTheme } from "../theme.js";
 import {
+  CARD_IMAGE_RADIUS_MAX_MM,
+  CARD_IMAGE_RADIUS_MIN_MM,
   CARD_RADIUS_MAX_MM,
   CARD_RADIUS_MIN_MM,
+  DEFAULT_CARD_IMAGE_RADIUS_MM,
+  DEFAULT_CARD_RADIUS_MM,
+  DEFAULT_FACE_BORDER_MM,
   FACE_BORDER_MAX_MM,
   FACE_BORDER_MIN_MM,
+  getCardImageRadiusMm,
   getCardRadiusMm,
   getConfiguredCardColor,
   getConfiguredCardColorDisplay,
   getFaceBorderMm,
+  setCardImageRadiusMm,
   setCardRadiusMm,
   setConfiguredCardColor,
   setFaceBorderMm,
@@ -30,6 +38,7 @@ import { tileListMarkup } from "../tile.js";
 import { confirmDialog } from "../confirm-dialog.js";
 import { syncPrintMenu } from "../print-menu.js";
 import {
+  DEFAULT_PRINT_GRID,
   PRINT_GRID_MAX,
   PRINT_GRID_MIN,
   computePrintLayout,
@@ -57,6 +66,7 @@ export function renderSettingsModal(host, opts) {
   const currentTheme = getTheme();
   const faceBorderMm = getFaceBorderMm();
   const cardRadiusMm = getCardRadiusMm();
+  const cardImageRadiusMm = getCardImageRadiusMm();
   const configuredColor = getConfiguredCardColor();
   const configuredColorDisplay = getConfiguredCardColorDisplay();
   const listColsMax = getListColsMax();
@@ -107,12 +117,24 @@ export function renderSettingsModal(host, opts) {
                     aria-describedby="settings-list-cols-out"
                   />
                   <output id="settings-list-cols-out" for="settings-list-cols">${formatListColsLabel(listColsMax)}</output>
+                  ${formRangeResetMarkup()}
                 </div>
               </div>
             </section>
 
             <section class="settings-panel">
               <h2 class="section-title">Apparence des cartes</h2>
+              <div class="form-field">
+                <label class="form-label" for="settings-default-color-hex">Couleur par défaut</label>
+                <p class="form-hint" id="settings-default-color-hint">Couleur appliquée par défaut aux cartes sans thème ou sans couleur personnalisée.</p>
+                ${formColorMarkup({
+                  id: "settings-default-color-hex",
+                  value: configuredColor,
+                  fallback: configuredColorDisplay,
+                  placeholder: DEFAULT_THEME_COLOR,
+                  describedBy: "settings-default-color-hint",
+                })}
+              </div>
               <div class="form-field">
                 <label class="form-label" for="settings-face-border">Taille de la bordure (côté face)</label>
                 <div class="form-range-row">
@@ -129,6 +151,7 @@ export function renderSettingsModal(host, opts) {
                     aria-describedby="settings-face-border-out"
                   />
                   <output id="settings-face-border-out" for="settings-face-border">${faceBorderMm}&nbsp;mm</output>
+                  ${formRangeResetMarkup()}
                 </div>
               </div>
               <div class="form-field">
@@ -147,18 +170,27 @@ export function renderSettingsModal(host, opts) {
                     aria-describedby="settings-card-radius-out"
                   />
                   <output id="settings-card-radius-out" for="settings-card-radius">${cardRadiusMm}&nbsp;mm</output>
+                  ${formRangeResetMarkup()}
                 </div>
               </div>
-              <div class="form-field settings-color-field">
-                <label class="form-label" for="settings-default-color-hex">Couleur par défaut</label>
-                <p class="form-hint" id="settings-default-color-hint">Couleur appliquée par défaut aux cartes sans thème ou sans couleur personnalisée.</p>
-                ${formColorMarkup({
-                  id: "settings-default-color-hex",
-                  value: configuredColor,
-                  fallback: configuredColorDisplay,
-                  placeholder: DEFAULT_THEME_COLOR,
-                  describedBy: "settings-default-color-hint",
-                })}
+              <div class="form-field">
+                <label class="form-label" for="settings-card-image-radius">Arrondi des images</label>
+                <div class="form-range-row">
+                  <input
+                    type="range"
+                    id="settings-card-image-radius"
+                    min="${CARD_IMAGE_RADIUS_MIN_MM}"
+                    max="${CARD_IMAGE_RADIUS_MAX_MM}"
+                    step="0.5"
+                    value="${cardImageRadiusMm}"
+                    aria-valuemin="${CARD_IMAGE_RADIUS_MIN_MM}"
+                    aria-valuemax="${CARD_IMAGE_RADIUS_MAX_MM}"
+                    aria-valuenow="${cardImageRadiusMm}"
+                    aria-describedby="settings-card-image-radius-out"
+                  />
+                  <output id="settings-card-image-radius-out" for="settings-card-image-radius">${cardImageRadiusMm}&nbsp;mm</output>
+                  ${formRangeResetMarkup()}
+                </div>
               </div>
             </section>
 
@@ -181,6 +213,7 @@ export function renderSettingsModal(host, opts) {
                     aria-describedby="settings-print-grid-out"
                   />
                   <output id="settings-print-grid-out" for="settings-print-grid">${printGridSize}</output>
+                  ${formRangeResetMarkup()}
                 </div>
               </div>
               <div class="form-field">
@@ -192,7 +225,7 @@ export function renderSettingsModal(host, opts) {
                 </div>
               </div>
               <div class="form-field" id="settings-recto-verso-field">
-                <p class="form-label" id="settings-recto-verso-label">Recto-verso</p>
+                <p class="form-label" id="settings-recto-verso-label">Impression recto-verso des feuilles</p>
                 <div class="theme-mode-switch" role="radiogroup" aria-labelledby="settings-recto-verso-label" aria-describedby="settings-recto-verso-hint">
                   <button type="button" class="btn ${printSettings.sheetRectoVerso === "alternate" ? "primary" : "secondary"}" data-sheet-recto-verso="alternate" aria-pressed="${printSettings.sheetRectoVerso === "alternate"}">Alterner</button>
                   <button type="button" class="btn ${printSettings.sheetRectoVerso === "grouped" ? "primary" : "secondary"}" data-sheet-recto-verso="grouped" aria-pressed="${printSettings.sheetRectoVerso === "grouped"}">Regrouper</button>
@@ -270,26 +303,52 @@ export function renderSettingsModal(host, opts) {
   const themeBtns = /** @type {NodeListOf<HTMLButtonElement>} */ (
     host.querySelectorAll("[data-theme-mode]")
   );
-  const faceBorderInput = /** @type {HTMLInputElement|null} */ (
-    host.querySelector("#settings-face-border")
-  );
-  const faceBorderOut = host.querySelector("#settings-face-border-out");
-  const cardRadiusInput = /** @type {HTMLInputElement|null} */ (
-    host.querySelector("#settings-card-radius")
-  );
-  const cardRadiusOut = host.querySelector("#settings-card-radius-out");
-  const listColsInput = /** @type {HTMLInputElement|null} */ (
-    host.querySelector("#settings-list-cols")
-  );
-  const listColsOut = host.querySelector("#settings-list-cols-out");
-  const printGridInput = /** @type {HTMLInputElement|null} */ (
-    host.querySelector("#settings-print-grid")
-  );
-  const printGridOut = host.querySelector("#settings-print-grid-out");
   const printSidesBtns = Array.from(host.querySelectorAll("[data-card-sides]"));
   const printDuplexBtns = Array.from(host.querySelectorAll("[data-sheet-recto-verso]"));
   const printDuplexField = host.querySelector("#settings-recto-verso-field");
   const printDuplexHint = host.querySelector("#settings-recto-verso-hint");
+
+  /** @type {ReturnType<typeof bindFormRange>[]} */
+  const rangeFields = [];
+
+  /**
+   * @param {string} id
+   * @param {{ defaultValue: number|string, format?: (value: string) => string, onChange?: (value: string) => void }} opts
+   */
+  function bindSettingsRange(id, opts) {
+    const row = host.querySelector(id)?.closest(".form-range-row");
+    if (!(row instanceof HTMLElement)) return;
+    rangeFields.push(bindFormRange(row, opts));
+  }
+
+  bindSettingsRange("#settings-list-cols", {
+    defaultValue: listColsToSlider(DEFAULT_LIST_COLS_MAX),
+    format: (v) => formatListColsLabel(listColsFromSlider(v)),
+    onChange(value) {
+      setListColsMax(listColsFromSlider(value));
+    },
+  });
+  bindSettingsRange("#settings-face-border", {
+    defaultValue: DEFAULT_FACE_BORDER_MM,
+    format: (v) => `${v}\u00a0mm`,
+    onChange(value) {
+      setFaceBorderMm(value);
+    },
+  });
+  bindSettingsRange("#settings-card-radius", {
+    defaultValue: DEFAULT_CARD_RADIUS_MM,
+    format: (v) => `${v}\u00a0mm`,
+    onChange(value) {
+      setCardRadiusMm(value);
+    },
+  });
+  bindSettingsRange("#settings-card-image-radius", {
+    defaultValue: DEFAULT_CARD_IMAGE_RADIUS_MM,
+    format: (v) => `${v}\u00a0mm`,
+    onChange(value) {
+      setCardImageRadiusMm(value);
+    },
+  });
 
   const defaultColorRoot = /** @type {HTMLElement|null} */ (
     host.querySelector("#settings-default-color-hex")?.closest("[data-form-color]")
@@ -325,41 +384,6 @@ export function renderSettingsModal(host, opts) {
       syncThemeButtons(mode);
     });
   });
-
-  if (listColsInput) {
-    const syncListCols = () => {
-      const value = setListColsMax(listColsFromSlider(listColsInput.value));
-      const slider = listColsToSlider(value);
-      listColsInput.value = String(slider);
-      listColsInput.setAttribute("aria-valuenow", String(slider));
-      listColsInput.setAttribute("aria-valuetext", formatListColsLabel(value));
-      if (listColsOut) listColsOut.textContent = formatListColsLabel(value);
-    };
-    listColsInput.addEventListener("input", syncListCols);
-    listColsInput.addEventListener("change", syncListCols);
-  }
-
-  if (faceBorderInput) {
-    const syncFaceBorder = () => {
-      const value = setFaceBorderMm(faceBorderInput.value);
-      faceBorderInput.value = String(value);
-      faceBorderInput.setAttribute("aria-valuenow", String(value));
-      if (faceBorderOut) faceBorderOut.textContent = `${value}\u00a0mm`;
-    };
-    faceBorderInput.addEventListener("input", syncFaceBorder);
-    faceBorderInput.addEventListener("change", syncFaceBorder);
-  }
-
-  if (cardRadiusInput) {
-    const syncCardRadius = () => {
-      const value = setCardRadiusMm(cardRadiusInput.value);
-      cardRadiusInput.value = String(value);
-      cardRadiusInput.setAttribute("aria-valuenow", String(value));
-      if (cardRadiusOut) cardRadiusOut.textContent = `${value}\u00a0mm`;
-    };
-    cardRadiusInput.addEventListener("input", syncCardRadius);
-    cardRadiusInput.addEventListener("change", syncCardRadius);
-  }
 
   let currentPrintSettings = printSettings;
 
@@ -404,13 +428,12 @@ export function renderSettingsModal(host, opts) {
 
   refreshPrintSettingsUi();
 
-  printGridInput?.addEventListener("input", () => {
-    const printGrid = Number(printGridInput.value);
-    persistPrintSettings({ printGrid });
-    const size = formatPrintGridSize(computePrintLayout(currentPrintSettings.printGrid));
-    printGridInput.setAttribute("aria-valuenow", String(printGrid));
-    printGridInput.setAttribute("aria-valuetext", size);
-    if (printGridOut) printGridOut.textContent = size;
+  bindSettingsRange("#settings-print-grid", {
+    defaultValue: DEFAULT_PRINT_GRID,
+    format: (v) => formatPrintGridSize(computePrintLayout(Number(v))),
+    onChange(value) {
+      persistPrintSettings({ printGrid: Number(value) });
+    },
   });
   printSidesBtns.forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -494,6 +517,7 @@ export function renderSettingsModal(host, opts) {
 
   function cleanup() {
     defaultColorField?.destroy();
+    rangeFields.forEach((field) => field.destroy());
     document.removeEventListener("keydown", onKey);
     backdrop?.removeEventListener("click", onBackdropClick);
     btnClose?.removeEventListener("click", close);

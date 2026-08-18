@@ -26,7 +26,7 @@ import {
 const ZOOM_MIN = 25;
 const ZOOM_MAX = 400;
 const ZOOM_MAX_LOGO = 250;
-const ZOOM_STEP = 8;
+const ZOOM_STEP = 1;
 const KEY_PAN = 0.05;
 const CROP_EPS = 0.0005;
 

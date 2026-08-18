@@ -75,7 +75,12 @@ function buildSheet(pageCards, side, themeMap, layout) {
         face.dataset.imageOffsetY = String(card.imageOffsetY || 0);
         slot.appendChild(face);
       } else {
-        slot.appendChild(renderCardBack(card, { legoTheme }));
+        const back = renderCardBack(card, { legoTheme });
+        slot.style.setProperty(
+          "--card-accent",
+          back.style.getPropertyValue("--card-accent")
+        );
+        slot.appendChild(back);
       }
     }
     sheet.appendChild(slot);

@@ -33,7 +33,7 @@ Tout le code applicatif est dans **`src/`**.
 | `src/js/modal-focus.js` | Focus initial + piège Tab des modales |
 | `src/js/markdown.js` | Parser Markdown léger + `loadMarkdownPage(slug)` |
 | `src/js/theme.js` | Thème **UI** system / light / dark |
-| `src/js/card-design.js` | Design cartes (bordure face, CSS vars) — localStorage |
+| `src/js/card-design.js` | Design cartes (bordure face, arrondi coins / images, CSS vars) — localStorage |
 | `src/js/list-layout.js` | Densité liste (cartes/ligne max) — localStorage |
 | `src/js/themes-data.js` | Charge le JSON des thèmes par défaut, `logoSrc`, accent par défaut |
 | `src/js/storage.js` | IndexedDB cartes + thèmes **personnalisés**, export/import JSON |
@@ -52,6 +52,7 @@ Tout le code applicatif est dans **`src/`**.
 | `src/js/confirm-dialog.js` | Dialogues `modal--sm` (`openConfirmDialog` / `confirmDialog` / `alertDialog`) — pas de `alert()` / `confirm()` / `prompt()` |
 | `src/js/form-color.js` | Champ couleur (`form-color` / pastille / clear) |
 | `src/js/form-image.js` | Champ image (`form-image` / fichier, URL, fond, cadrage) |
+| `src/js/form-range.js` | Curseur (`form-range-row` / output / reset valeur par défaut) |
 | `src/js/form-select.js` | Surcouche select (`form-select` / liste custom) |
 | `src/js/views/list.js` | Grille d’aperçus + recherche (barre topbar) |
 | `src/js/views/editor.js` | Éditeur de carte |
@@ -131,7 +132,8 @@ Accent d’une Brickcard (`resolveCardAccent`) :
 - IndexedDB outil presets : `brickcard-generator-preset-draft` — brouillon `#/developer/theme-presets` uniquement (indépendant du Reset local)
 - Clé thème UI : `brickcard-generator:ui-theme`
 - Clé bordure face : `brickcard-generator:card-face-border-mm` (défaut `3`)
-- Clé arrondi coins : `brickcard-generator:card-radius-mm` (défaut `1.5`, face + dos)
+- Clé arrondi coins : `brickcard-generator:card-radius-mm` (défaut `2`, face + dos)
+- Clé arrondi images : `brickcard-generator:card-image-radius-mm` (défaut `1`, cadre photo)
 - Clé couleur carte par défaut : `brickcard-generator:card-default-color` (vide = gris d’usine `#6e6e6e`)
 - Clé sélection impression : `brickcard-generator:print-qty` (`{ [cardId]: qty }`)
 - Clé réglages impression : `brickcard-generator:print-settings` (`{ printGrid: 1–10, cardSidesToPrint: "faceAndBack"|"faceOnly"|"backOnly", sheetRectoVerso: "alternate"|"grouped" }`, défaut `3` / `faceAndBack` / `alternate`)
@@ -243,7 +245,7 @@ Vocabulaire :
 
 Hover : **aucun**. Repos = trait bas inset 2px ; focus = `outline` 2px + `outline-offset` 1px (`ink`, inchangé en erreur). Couleur erreur : `--form-error` (`#ce0000` clair / `#ff5555` dark). Galerie : `#/developer/fields`.
 
-Exceptions actuelles : alertes form-wide (`#error`, `#theme-error`) sous le bloc de champs ; impression (Recto-verso) : `form-hint` sous les boutons, texte selon le choix.
+Exceptions actuelles : alertes form-wide (`#error`, `#theme-error`) sous le bloc de champs ; impression (Impression recto-verso des feuilles) : `form-hint` sous les boutons, texte selon le choix.
 
 ## Listes déroulantes (design system — styleguide)
 
@@ -251,7 +253,7 @@ Markup&nbsp;: `select.form-control` (même look qu’un champ texte). Surcouche 
 
 ## Curseurs / range (design system)
 
-Même ordre de champ. Contrôle&nbsp;: `form-range-row` (`input[type=range]` + `output` optionnel). Poignée carrée sans bordure ; focus sur la poignée seule ; erreur = message seulement (pas de teinte rouge sur le curseur). Appliqué : paramètres (colonnes, bordure, coins, grille d’impression) · impression (grille). Galerie&nbsp;: `#/developer/sliders`.
+Même ordre de champ. Contrôle&nbsp;: `form-range-row` (`input[type=range]` + `output` optionnel). Reset optionnel (`formRangeResetMarkup()` / `bindFormRange()` dans `form-range.js`)&nbsp;: bouton `ri-close-circle-fill` après l’input / output, non focusable, emplacement toujours réservé, icône visible seulement si la valeur diffère du défaut ; l’`output` passe alors en gras. Poignée carrée sans bordure ; focus sur la poignée seule ; erreur = message seulement (pas de teinte rouge sur le curseur). Appliqué : paramètres (colonnes, bordure, coins, images, grille d’impression) · impression (grille). Galerie&nbsp;: `#/developer/sliders`.
 
 ## Couleurs (design system)
 
