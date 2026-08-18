@@ -91,6 +91,16 @@ function saveSortDir(dir) {
   }
 }
 
+/** Après enregistrement d’une carte : recherche vidée, tri par date de modification (récent d’abord). */
+export function prepareListAfterCardSave() {
+  const searchInput = document.getElementById("global-search");
+  if (searchInput instanceof HTMLInputElement) {
+    searchInput.value = "";
+  }
+  saveSortKey("updatedAt");
+  saveSortDir("desc");
+}
+
 /**
  * @param {import("../storage.js").Card} a
  * @param {import("../storage.js").Card} b

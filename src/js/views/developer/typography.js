@@ -181,7 +181,7 @@ export function renderDeveloperTypography(host) {
               <span class="visually-hidden">Fermer</span>
             </button>
           </div>
-          <div class="modal-body">
+          <div class="modal-body" tabindex="-1">
             <h2 class="section-title">Interface</h2>
             <p class="form-label">Mode d’affichage</p>
           </div>
@@ -204,7 +204,7 @@ export function renderDeveloperTypography(host) {
               <span class="visually-hidden">Fermer</span>
             </button>
           </div>
-          <div class="modal-body">
+          <div class="modal-body" tabindex="-1">
             <article class="md-content">
               <p><strong>Version 0.x.x.</strong> Paragraphe de contenu. Texte avec <strong>gras</strong>, <em>italique</em>,
                 un ${linkMarkup("lien", { href: "#/developer" })} et du <code>code inline</code>.</p>

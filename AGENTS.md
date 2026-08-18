@@ -29,6 +29,7 @@ Tout le code applicatif est dans **`src/`**.
 | `src/img/brickcard-generator-web-app-manifest-192x192.png` / `512x512.png` | Icônes PWA (any + maskable) |
 | `src/fonts/` | Open Sans + Inter (woff2 variable, latin-ext) + licences SIL OFL |
 | `src/js/app.js` | Hash routing (vues + historique), import/export |
+| `src/js/modal-focus.js` | Focus initial + piège Tab des modales |
 | `src/js/markdown.js` | Parser Markdown léger + `loadMarkdownPage(slug)` |
 | `src/js/theme.js` | Thème **UI** system / light / dark |
 | `src/js/card-design.js` | Design cartes (bordure face, CSS vars) — localStorage |
@@ -128,8 +129,8 @@ Accent d’une Brickcard (`resolveCardAccent`) :
 - Clé couleur carte par défaut : `brickcard-generator:card-default-color` (vide = gris d’usine `#6e6e6e`)
 - Clé sélection impression : `brickcard-generator:print-qty` (`{ [cardId]: qty }`)
 - Clé réglages impression : `brickcard-generator:print-settings` (`{ printGrid: 1–10, cardSidesToPrint: "faceAndBack"|"faceOnly"|"backOnly", sheetRectoVerso: "alternate"|"grouped" }`, défaut `3` / `faceAndBack` / `alternate`)
-- Clés tri liste : `brickcard-generator:list-sort`, `brickcard-generator:list-sort-dir`
-- Clés tri thèmes : `brickcard-generator:themes-sort`, `brickcard-generator:themes-sort-dir` (défaut `cardCount` / `desc`)
+- Clés tri liste : `brickcard-generator:list-sort`, `brickcard-generator:list-sort-dir` (défaut `updatedAt` / `desc`) ; après enregistrement d’une carte : recherche vidée et tri remis sur date de modification décroissante
+- Clés tri thèmes : `brickcard-generator:themes-sort`, `brickcard-generator:themes-sort-dir` (défaut `cardCount` / `desc`) ; après enregistrement d’un thème : recherche vidée et tri remis sur date de modification décroissante (si ≥ 2 thèmes personnalisés ; sinon repli sur le défaut)
 - Clé colonnes liste max : `brickcard-generator:list-cols-max` (défaut `4`, plage 2–10, ou `infinite`)
 - Cascade accent carte : couleur du thème → couleur configurée → `#6e6e6e`
 - Export JSON **v3** : `{ version: 3, app: "brickcard-generator", cards, themes }` — `themes` = personnalisés uniquement — fichier `brickcard-export-YYYY-MM-DD.json`
@@ -303,7 +304,7 @@ Pas des headings&nbsp;: marque topbar, `form-label`, noms de cartes (grille thè
 
 ## Modales (design system)
 
-Coquille&nbsp;: `modal-backdrop` + `modal` (`role="dialog"` / `aria-modal`). Bordure&nbsp;: `2px solid var(--ink)` (comme le focus des champs). Alignement vertical (sur le backdrop)&nbsp;: `modal-backdrop--top` · `modal-backdrop--middle` (**défaut**) · `modal-backdrop--bottom`. Header inversé (fond `ink` / texte `panel`)&nbsp;: titre (`h1.view-title`, court) + `btn primary icon-only modal-close` (même variante DS, tokens inversés comme le menu impression&nbsp;: repos fond `--bg` / hover fond `--ink` + bordure `--bg`). Bouton fermer centré verticalement, même inset haut / droite / bas. Corps&nbsp;: `modal-body`. Pied optionnel&nbsp;: `modal-footer` avec `modal-footer-start` (gauche&nbsp;: sauvegarde / validation) et `modal-footer-end` (droite&nbsp;: danger) — boutons centrés verticalement (normal / `sm`). Exception `modal-footer--primary-first` (éditeur de carte, éditeur de thème, paramètres d’impression)&nbsp;: visuel Annuler puis action primaire à droite (éditeurs&nbsp;: Supprimer à gauche) ; ordre clavier (DOM) primaire → Annuler → Supprimer. Séparateur header&nbsp;: `2px solid var(--ink)` (pas de bordure haute sur le footer).
+Coquille&nbsp;: `modal-backdrop` + `modal` (`role="dialog"` / `aria-modal`). Bordure&nbsp;: `2px solid var(--ink)` (comme le focus des champs). Alignement vertical (sur le backdrop)&nbsp;: `modal-backdrop--top` · `modal-backdrop--middle` (**défaut**) · `modal-backdrop--bottom`. Header inversé (fond `ink` / texte `panel`)&nbsp;: titre (`h1.view-title`, court) + `btn primary icon-only modal-close` (même variante DS, tokens inversés comme le menu impression&nbsp;: repos fond `--bg` / hover fond `--ink` + bordure `--bg`). Bouton fermer centré verticalement, même inset haut / droite / bas. Corps&nbsp;: `modal-body` (`tabindex="-1"` — Chrome rend les `overflow: auto` tabulables). À l’ouverture, focus sur `.modal` (`tabindex="-1"`) : Tab va à Fermer, puis le contenu, puis le pied ; Tab boucle dans la modale au premier plan. Pied optionnel&nbsp;: `modal-footer` avec `modal-footer-start` (gauche&nbsp;: sauvegarde / validation) et `modal-footer-end` (droite&nbsp;: danger) — boutons centrés verticalement (normal / `sm`). Exception `modal-footer--primary-first` (éditeur de carte, éditeur de thème, paramètres d’impression)&nbsp;: visuel Annuler puis action primaire à droite (éditeurs&nbsp;: Supprimer à gauche) ; ordre clavier (DOM) primaire → Annuler → Supprimer. Séparateur header&nbsp;: `2px solid var(--ink)` (pas de bordure haute sur le footer).
 
 Tailles (3)&nbsp;: `modal--sm` (~640) · `modal--md` (~896, **défaut**) · `modal--lg` (~1152). Toujours bornées au **viewport** (`100vw` / `100dvh`). Responsive ≤&nbsp;640px&nbsp;: **plein écran**, overlay masqué.
 

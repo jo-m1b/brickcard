@@ -78,7 +78,7 @@ export function renderSettingsModal(host, opts) {
             <span class="visually-hidden">Fermer</span>
           </button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body" tabindex="-1">
           <div class="settings-sections">
             <section class="settings-panel">
               <h2 class="section-title">Interface</h2>

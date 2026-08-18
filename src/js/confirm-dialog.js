@@ -4,6 +4,7 @@
  */
 
 import { ICON_CLOSE } from "./icons.js";
+import { focusTopModal } from "./modal-focus.js";
 
 let dialogSeq = 0;
 
@@ -92,7 +93,7 @@ export function openConfirmDialog(host, opts) {
             <span class="visually-hidden">Fermer</span>
           </button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body" tabindex="-1">
           <p id="${uid}-desc" class="modal-confirm-msg">${escapeHtml(message)}</p>
         </div>
         <div class="modal-footer">
@@ -148,14 +149,7 @@ export function openConfirmDialog(host, opts) {
     document.addEventListener("keydown", onKey, true);
     host.appendChild(backdrop);
     mo.observe(host, { childList: true });
-
-    const cancelBtn =
-      backdrop.querySelector('[data-confirm-action="cancel"]') ||
-      backdrop.querySelector(".modal-footer .btn.secondary") ||
-      backdrop.querySelector(".modal-footer .btn");
-    queueMicrotask(() => {
-      if (cancelBtn instanceof HTMLElement) cancelBtn.focus();
-    });
+    queueMicrotask(() => focusTopModal());
   });
 }
 

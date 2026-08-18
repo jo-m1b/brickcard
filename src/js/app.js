@@ -5,14 +5,15 @@ import { initListLayout } from "./list-layout.js";
 import { isLocalDevHost } from "./themes-data.js";
 import { APP_ID, APP_VERSION } from "./version.js";
 import { renderEditor } from "./views/editor.js";
-import { renderList } from "./views/list.js";
-import { renderThemesModal } from "./views/themes.js";
+import { renderList, prepareListAfterCardSave } from "./views/list.js";
+import { renderThemesModal, prepareThemesAfterThemeSave } from "./views/themes.js";
 import { renderThemeEditor } from "./views/theme-editor.js";
 import { renderPageModal } from "./views/page.js";
 import { renderSettingsModal } from "./views/settings.js";
 import { renderDeveloperModal } from "./views/developer/modal.js";
 import { emptyViewMarkup } from "./empty-view.js";
 import { confirmDialog, openConfirmDialog } from "./confirm-dialog.js";
+import { bindModalFocusTrap, focusTopModal } from "./modal-focus.js";
 import {
   initPrintMenu,
   setPrintMenuVisible,
@@ -260,6 +261,7 @@ async function showOverlay(routeInfo) {
       onDevReset: isLocalDevHost() ? handleDevReset : undefined,
       cardCount,
     });
+    focusTopModal();
     return;
   }
 
@@ -270,6 +272,7 @@ async function showOverlay(routeInfo) {
         onCreate: () => navigate("#/themes/new"),
         onEdit: (id) => navigate(`#/themes/edit/${encodeURIComponent(id)}`),
       });
+      focusTopModal();
       return;
     }
 
@@ -282,6 +285,7 @@ async function showOverlay(routeInfo) {
       },
       onSaved: () => {
         toast("Thème enregistré");
+        prepareThemesAfterThemeSave();
         underlayStale = true;
         if (parseRoute().name === "themes") {
           navigate("#/themes", { replace: true });
@@ -297,7 +301,9 @@ async function showOverlay(routeInfo) {
     });
     if (!cleanupThemes) {
       navigate("#/themes", { replace: true });
+      return;
     }
+    focusTopModal();
     return;
   }
 
@@ -308,14 +314,17 @@ async function showOverlay(routeInfo) {
       onClose: overlayOnClose("page"),
     });
     if (!cleanupPage) dismissOverlay();
+    else focusTopModal();
     return;
   }
 
   if (routeInfo.name === "developer") {
+    const alreadyOpen = Boolean(modalRoot.querySelector("#developer-modal-backdrop"));
     cleanupDeveloper = renderDeveloperModal(modalRoot, {
       page: routeInfo.page,
       onClose: overlayOnClose("developer"),
     });
+    if (!alreadyOpen) focusTopModal();
     return;
   }
 
@@ -325,6 +334,7 @@ async function showOverlay(routeInfo) {
       toast,
       onSaved: () => {
         toast("Carte enregistrée");
+        prepareListAfterCardSave();
         underlayStale = true;
         if (parseRoute().name === "editor") navigate("#/", { replace: true });
       },
@@ -335,6 +345,7 @@ async function showOverlay(routeInfo) {
         if (parseRoute().name === "editor") navigate("#/", { replace: true });
       },
     });
+    focusTopModal();
   }
 }
 
@@ -593,6 +604,7 @@ async function boot() {
     initCardDesign();
     initListLayout();
     initPrintMenu({ toast });
+    bindModalFocusTrap();
     registerServiceWorker();
 
     const initialHash = !location.hash || location.hash === "#" ? "#/" : normalizeHash(location.hash);

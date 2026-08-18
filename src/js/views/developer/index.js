@@ -13,8 +13,9 @@ export function renderDeveloperIndex(host) {
         <p class="styleguide-kicker">Styleguide</p>
         <h1 class="view-title">Espace développeur</h1>
       </header>
-      <p class="styleguide-intro">Système de design, exemples et documentation.</p>
-      ${tileListMarkup([
+      <section class="styleguide-section">
+        <h2 class="section-title">Système de design</h2>
+        ${tileListMarkup([
         {
           title: "Typographie",
           desc: "polices, titres (classe vs h1–h3), Markdown en modale",
@@ -82,6 +83,7 @@ export function renderDeveloperIndex(host) {
           icon: "window",
         },
       ])}
+      </section>
       <p class="styleguide-back">
         ${linkMarkup("← Retour à l’app", { href: "#/" })}
       </p>

@@ -7,6 +7,7 @@ import { applyImageTransform, applyThemeLogoTransform } from "./card-render.js";
 import { downloadCardPhoto } from "./card-export.js";
 import { confirmDialog } from "./confirm-dialog.js";
 import { bindFormColor, formColorMarkup } from "./form-color.js";
+import { focusTopModal } from "./modal-focus.js";
 import {
   ICON_ALIGN_ITEM_HORIZONTAL_CENTER,
   ICON_ALIGN_ITEM_VERTICAL_CENTER,
@@ -234,7 +235,7 @@ function openImageUrlDialog(host, opts) {
             <span class="visually-hidden">Fermer</span>
           </button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body" tabindex="-1">
           <div class="form-field">
             <label class="form-label" for="${inputId}">URL</label>
             <input
@@ -361,10 +362,7 @@ function openImageUrlDialog(host, opts) {
     document.addEventListener("keydown", onKey, true);
     host.appendChild(backdrop);
     mo.observe(host, { childList: true });
-
-    queueMicrotask(() => {
-      input?.focus();
-    });
+    queueMicrotask(() => focusTopModal());
   });
 }
 

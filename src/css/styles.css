@@ -2618,6 +2618,10 @@ button.form-select-trigger.sm {
   min-height: 0;
 }
 
+.modal:focus {
+  outline: none;
+}
+
 @supports not (height: 100dvh) {
   .modal {
     --modal-max-h: calc(100vh - 2.5rem);
@@ -2683,6 +2687,11 @@ button.form-select-trigger.sm {
   min-height: 0;
   flex: 1 1 auto;
   overflow: auto;
+}
+
+/* Chrome rend les overflow:auto tabulables ; le corps n’est pas un contrôle */
+.modal-body:focus {
+  outline: none;
 }
 
 .modal-body:has(> .empty-view:not([hidden])) {
@@ -2985,6 +2994,20 @@ textarea {
   gap: 0.55rem;
   justify-items: center;
   align-content: start;
+}
+
+@media (max-width: 840px) {
+  .preview-wrap {
+    position: static;
+  }
+}
+
+@media (max-width: 840px) and (min-width: 540px) {
+  .preview-wrap--pair {
+    grid-template-columns: repeat(2, max-content);
+    justify-content: center;
+    width: 100%;
+  }
 }
 
 .field-row {

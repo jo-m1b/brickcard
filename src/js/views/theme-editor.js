@@ -77,7 +77,7 @@ export async function renderThemeEditor(host, opts) {
             <span class="visually-hidden">Fermer</span>
           </button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body" tabindex="-1">
           <div class="editor-layout">
             <aside class="preview-wrap">
               <div class="card-preview" id="theme-preview-back-host" aria-label="Aperçu du dos"></div>
@@ -298,8 +298,6 @@ export async function renderThemeEditor(host, opts) {
       }
     };
   }
-
-  queueMicrotask(() => nameInput.focus());
 
   return () => {
     themeColorField?.destroy();

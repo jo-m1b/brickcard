@@ -74,6 +74,13 @@ function saveSortDir(dir) {
   }
 }
 
+/** Après enregistrement d’un thème : recherche vidée, tri par date de modification (récent d’abord). */
+export function prepareThemesAfterThemeSave() {
+  rememberedQuery = "";
+  saveSortKey("updatedAt");
+  saveSortDir("desc");
+}
+
 /**
  * @param {import("../themes-data.js").LegoTheme} a
  * @param {import("../themes-data.js").LegoTheme} b
@@ -187,7 +194,7 @@ export async function renderThemesModal(host, opts) {
             </div>
           </div>
         </div>
-        <div class="modal-body">
+        <div class="modal-body" tabindex="-1">
           <section class="themes-section" id="themes-section-custom" hidden>
             <h2 class="section-title">Thèmes personnalisés</h2>
             <div class="themes-grid" id="themes-grid-custom"></div>
@@ -633,8 +640,8 @@ function themeTileMarkup(theme, count, editable) {
     : "";
   const logo = `<div class="${wrapClass}"${cropAttrs}><img class="${logoClass}" src="${escapeAttr(logoSrc)}" alt="" /></div>`;
   const label = editable
-    ? `Modifier « ${escapeAttr(theme.name)} », ${countLabel}`
-    : `${escapeAttr(theme.name)}, ${countLabel}`;
+    ? `Modifier « ${escapeAttr(theme.name)} »${count > 0 ? `, ${countLabel}` : ""}`
+    : `${escapeAttr(theme.name)}${count > 0 ? `, ${countLabel}` : ""}`;
   const attrs = editable
     ? `role="button" tabindex="0" data-edit="${escapeAttr(theme.id)}"`
     : "";
@@ -646,7 +653,7 @@ function themeTileMarkup(theme, count, editable) {
         <p class="theme-tile-name">${name}</p>
         ${logo}
       </div>
-      <p class="theme-tile-count">${countLabel}</p>
+      ${count > 0 ? `<p class="theme-tile-count">${countLabel}</p>` : ""}
     </article>`;
 }
 

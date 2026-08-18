@@ -111,7 +111,7 @@ export function renderDeveloperModal(host, opts) {
             <span class="visually-hidden">Fermer</span>
           </button>
         </div>
-        <div class="modal-body" id="developer-modal-body"></div>
+        <div class="modal-body" id="developer-modal-body" tabindex="-1"></div>
       </div>
     </div>
     <div id="developer-demo-root"></div>

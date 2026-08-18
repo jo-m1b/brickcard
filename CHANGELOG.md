@@ -7,6 +7,16 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Changed
+
+- Liste : après enregistrement d’une carte, recherche vidée et tri sur date de modification (récent d’abord)
+- Thèmes : après enregistrement d’un thème, recherche vidée et tri sur date de modification (récent d’abord)
+- Thèmes : compteur de cartes masqué sur les tuiles à 0 carte
+- Modales : `modal-body` plus tabulable ; à l’ouverture, focus sur la modale (Tab → Fermer, contenu, actions ; Tab ne sort plus vers l’arrière-plan)
+- Espace développeur : intro retirée ; tuiles regroupées sous « Système de design »
+- Éditeurs carte / thème : aperçu plus sticky en une colonne (suit le scroll)
+- Éditeur de carte : aperçu face et dos côte à côte entre 540px et 840px
+
 ## [0.7.2] — 2026-08-17
 
 ### Added

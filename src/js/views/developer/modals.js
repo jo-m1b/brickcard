@@ -1,5 +1,6 @@
 import { ICON_CLOSE } from "../../icons.js";
 import { linkMarkup } from "../../link.js";
+import { focusTopModal } from "../../modal-focus.js";
 
 /**
  * @typedef {"sm"|"md"|"lg"} ModalSize
@@ -212,7 +213,7 @@ export function renderDeveloperModals(host) {
               <span class="visually-hidden">Fermer</span>
             </button>
           </div>
-          <div class="modal-body">
+          <div class="modal-body" tabindex="-1">
             ${spec.bodyHtml}
           </div>
           ${footer}
@@ -240,7 +241,7 @@ export function renderDeveloperModals(host) {
       el.addEventListener("click", closeDemo);
     });
     document.addEventListener("keydown", onKey, true);
-    /** @type {HTMLElement|null} */ (btnClose)?.focus();
+    queueMicrotask(() => focusTopModal());
 
     demoCleanup = () => {
       backdrop?.removeEventListener("click", onBackdrop);

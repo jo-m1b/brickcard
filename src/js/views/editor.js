@@ -76,9 +76,9 @@ export async function renderEditor(host, opts) {
             <span class="visually-hidden">Fermer</span>
           </button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body" tabindex="-1">
           <div class="editor-layout">
-            <aside class="preview-wrap">
+            <aside class="preview-wrap preview-wrap--pair">
               <div class="card-preview" id="preview-host" aria-label="Aperçu de la face"></div>
               <div class="card-preview" id="preview-back-host" aria-label="Aperçu du dos"></div>
             </aside>
@@ -352,9 +352,6 @@ export async function renderEditor(host, opts) {
       }
     });
   }
-
-  // Focus premier champ
-  queueMicrotask(() => refs.legoSetRef?.focus());
 
   return () => {
     destroyThemeSelect();

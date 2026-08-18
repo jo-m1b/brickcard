@@ -5,6 +5,7 @@
  */
 
 import { ICON_CLOSE, ICON_PRINTER } from "./icons.js";
+import { focusTopModal } from "./modal-focus.js";
 import {
   PRINT_GRID_MAX,
   PRINT_GRID_MIN,
@@ -61,7 +62,7 @@ export function openPrintDialog(host, opts) {
             <span class="visually-hidden">Fermer</span>
           </button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body" tabindex="-1">
           <div class="modal-confirm-msg" id="${uid}-recap">
             <h2 class="section-title" id="${uid}-count"></h2>
             <p class="view-desc" id="${uid}-desc"></p>
@@ -261,9 +262,6 @@ export function openPrintDialog(host, opts) {
     host.appendChild(backdrop);
     mo.observe(host, { childList: true });
     refresh();
-
-    queueMicrotask(() => {
-      if (runBtn instanceof HTMLElement) runBtn.focus();
-    });
+    queueMicrotask(() => focusTopModal());
   });
 }

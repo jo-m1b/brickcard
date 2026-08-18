@@ -33,7 +33,7 @@ export async function renderPageModal(host, opts) {
             <span class="visually-hidden">Fermer</span>
           </button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body" tabindex="-1">
           <article class="md-content" id="page-md-body"></article>
         </div>
       </div>
