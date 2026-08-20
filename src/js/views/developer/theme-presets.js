@@ -16,7 +16,6 @@ import {
   loadPresetDraftThemes,
   resetPresetDraft,
 } from "../../preset-draft.js";
-import { renderPresetDraftEditor } from "./theme-presets-editor.js";
 
 /** @param {string} hay @param {string} needle */
 function includesCI(hay, needle) {
@@ -24,6 +23,14 @@ function includesCI(hay, needle) {
 }
 
 let rememberedQuery = "";
+
+/** @type {null | (() => void)} */
+let refreshMountedPresetList = null;
+
+/** Recharge la liste si elle est affichée (après enregistrement / suppression dans l’éditeur). */
+export function preparePresetDraftAfterSave() {
+  refreshMountedPresetList?.();
+}
 
 function dialogHost() {
   return (
@@ -35,9 +42,10 @@ function dialogHost() {
 /**
  * Outil développeur : brouillon de `themes-presets.json`.
  * @param {HTMLElement} host
+ * @param {{ onCreate: () => void, onEdit: (id: string) => void }} opts
  * @returns {() => void}
  */
-export function renderDeveloperThemePresets(host) {
+export function renderDeveloperThemePresets(host, opts) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
@@ -86,11 +94,11 @@ export function renderDeveloperThemePresets(host) {
         <div class="modal-footer-end">
           <button type="button" class="btn secondary" id="preset-draft-json">
             ${ICON_DOWNLOAD}
-            <span>Télécharger themes-presets.json</span>
+            <span>Sauvegarder themes-presets.json</span>
           </button>
           <button type="button" class="btn secondary" id="preset-draft-logos">
             ${ICON_DOWNLOAD}
-            <span>Télécharger les logos</span>
+            <span>Sauvegarder les logos</span>
           </button>
           <button type="button" class="btn primary" id="preset-draft-new">
             ${ICON_ADD}
@@ -121,8 +129,6 @@ export function renderDeveloperThemePresets(host) {
   /** @type {import("../../preset-draft.js").PresetDraftTheme[]} */
   let themes = [];
   let cancelled = false;
-  /** @type {() => void} */
-  let editorCleanup = () => {};
   let busy = false;
 
   function setStatus(message, isError = false) {
@@ -263,35 +269,6 @@ export function renderDeveloperThemePresets(host) {
     }
   }
 
-  function closeEditor() {
-    editorCleanup();
-    editorCleanup = () => {};
-    const root = document.getElementById("developer-demo-root");
-    if (root) root.innerHTML = "";
-  }
-
-  /**
-   * @param {string|null} [themeId]
-   */
-  async function openEditor(themeId) {
-    const root = document.getElementById("developer-demo-root");
-    if (!root) return;
-    closeEditor();
-    const cleanup = await renderPresetDraftEditor(root, {
-      themeId: themeId || null,
-      onClose: closeEditor,
-      onSaved: () => {
-        closeEditor();
-        reload();
-      },
-      onDeleted: () => {
-        closeEditor();
-        reload();
-      },
-    });
-    editorCleanup = cleanup || (() => {});
-  }
-
   function onSearchInput() {
     rememberedQuery = searchInput.value;
     paint();
@@ -317,7 +294,7 @@ export function renderDeveloperThemePresets(host) {
     const tile = t.closest("[data-edit]");
     if (!tile) return;
     const id = tile.getAttribute("data-edit");
-    if (id) openEditor(id);
+    if (id) opts.onEdit(id);
   }
 
   /** @param {KeyboardEvent} e */
@@ -328,10 +305,10 @@ export function renderDeveloperThemePresets(host) {
     if (!tile) return;
     e.preventDefault();
     const id = tile.getAttribute("data-edit");
-    if (id) openEditor(id);
+    if (id) opts.onEdit(id);
   }
 
-  btnNew.onclick = () => openEditor(null);
+  btnNew.onclick = () => opts.onCreate();
 
   btnJson.onclick = async () => {
     if (busy) return;
@@ -406,10 +383,13 @@ export function renderDeveloperThemePresets(host) {
   window.addEventListener("resize", applyTileLogoCrops);
 
   reload();
+  refreshMountedPresetList = () => {
+    if (!cancelled) reload();
+  };
 
   return () => {
     cancelled = true;
-    closeEditor();
+    if (refreshMountedPresetList) refreshMountedPresetList = null;
     window.removeEventListener("resize", applyTileLogoCrops);
     host.innerHTML = "";
   };

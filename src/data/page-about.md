@@ -9,12 +9,12 @@ Usage typique : imprimer, plastifier, glisser dans une pochette transparente ave
 - Création et édition de plusieurs cartes
 - Thèmes LEGO par défaut (nom, logo, couleur) + thèmes personnalisés
 - Sauvegarde dans le navigateur (IndexedDB)
-- Export / import JSON (cartes + thèmes)
+- Export / import `.brickcard` (cartes + thèmes)
 - Impression A4 : 9 cartes par feuille, face + dos alignés
 
 ## Données locales
 
-Tout reste **dans ton navigateur**. Aucun compte, aucun serveur d’application : tu es responsable de tes exports JSON si tu veux une sauvegarde durable.
+Tout reste **dans ton navigateur**. Aucun compte, aucun serveur d’application : tu es responsable de tes fichiers `.brickcard` si tu veux une sauvegarde durable.
 
 ## Crédits
 

@@ -7,6 +7,17 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Changed
+
+- Sauvegarde de la collection : fichier `.brickcard` (JSON) au lieu de `.json` ; import limité à `*.brickcard`
+- Import : refus des fichiers qui ne sont pas une sauvegarde Brickcard (`app`, `version`, `cards` / `themes`)
+- Paramètres : tuile Sauvegarder désactivée si la collection est vide
+- Espace développeur / thèmes par défaut : boutons « Sauvegarder themes-presets.json » et « Sauvegarder les logos » (au lieu de « Télécharger… »)
+
+### Fixed
+
+- Espace développeur / thèmes par défaut : routes `#/developer/theme-presets/new` et `#/developer/theme-presets/edit/{slug}` (Précédent revient à la liste)
+
 ## [0.7.4] — 2026-08-20
 
 ### Added

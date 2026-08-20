@@ -1,9 +1,11 @@
 /**
- * Persistance IndexedDB (cartes + thèmes personnalisés) + export/import JSON.
+ * Persistance IndexedDB (cartes + thèmes personnalisés) + export/import `.brickcard`.
  * Les thèmes par défaut viennent du JSON, pas d’IndexedDB.
  */
 
 import { getPresetThemes, getPresetTheme, parseHexColor, clearPresetCache, clampLogoZoom, roundCropCoord } from "./themes-data.js";
+import { downloadBlob } from "./card-export.js";
+import { APP_ID } from "./version.js";
 
 const DB_NAME_BASE = "brickcard-generator";
 const DB_GEN_KEY = "brickcard-generator:db-gen";
@@ -11,6 +13,8 @@ const DB_VERSION = 2;
 const STORE_CARDS = "cards";
 const STORE_THEMES = "themes";
 const EXPORT_VERSION = 3;
+const BACKUP_EXT = ".brickcard";
+const BACKUP_INVALID = "Ce fichier n’est pas une sauvegarde Brickcard valide.";
 
 /**
  * @typedef {Object} Card
@@ -630,12 +634,61 @@ export async function deleteTheme(id) {
   await txDone(tx);
 }
 
+/** @param {string} [name] */
+export function isBrickcardBackupFilename(name) {
+  return String(name || "").toLowerCase().endsWith(BACKUP_EXT);
+}
+
+/**
+ * @param {string|object} input
+ * @returns {{ version: number, app: string, cards: unknown[], themes: unknown[] }}
+ */
+export function parseBrickcardBackup(input) {
+  let data;
+  if (typeof input === "string") {
+    try {
+      data = JSON.parse(input);
+    } catch {
+      throw new Error(BACKUP_INVALID);
+    }
+  } else {
+    data = input;
+  }
+  if (!data || typeof data !== "object" || Array.isArray(data)) {
+    throw new Error(BACKUP_INVALID);
+  }
+  const backup = /** @type {Record<string, unknown>} */ (data);
+  if (backup.app !== APP_ID) {
+    throw new Error(BACKUP_INVALID);
+  }
+  if (!Number.isInteger(backup.version) || /** @type {number} */ (backup.version) < 1) {
+    throw new Error(BACKUP_INVALID);
+  }
+  if (/** @type {number} */ (backup.version) > EXPORT_VERSION) {
+    throw new Error(
+      `Cette sauvegarde (v${backup.version}) n’est pas compatible avec cette version de l’app.`
+    );
+  }
+  if (!Array.isArray(backup.cards) || !Array.isArray(backup.themes)) {
+    throw new Error(BACKUP_INVALID);
+  }
+  if (!backup.cards.some(isValidCard)) {
+    throw new Error("Aucune carte valide trouvée dans le fichier.");
+  }
+  return {
+    version: /** @type {number} */ (backup.version),
+    app: /** @type {string} */ (backup.app),
+    cards: backup.cards,
+    themes: backup.themes,
+  };
+}
+
 /** @returns {Promise<{ cards: number, themes: number }>} */
-export async function exportToJson() {
+export async function exportBackup() {
   const [cards, themes] = await Promise.all([loadCards(), loadCustomThemes()]);
   const payload = {
     version: EXPORT_VERSION,
-    app: "brickcard-generator",
+    app: APP_ID,
     exportedAt: new Date().toISOString(),
     cards,
     themes,
@@ -643,15 +696,8 @@ export async function exportToJson() {
   const blob = new Blob([JSON.stringify(payload, null, 2)], {
     type: "application/json",
   });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
   const stamp = new Date().toISOString().slice(0, 10);
-  a.href = url;
-  a.download = `brickcard-export-${stamp}.json`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+  downloadBlob(blob, `brickcard-export-${stamp}${BACKUP_EXT}`);
   return { cards: cards.length, themes: themes.length };
 }
 
@@ -660,19 +706,10 @@ export async function exportToJson() {
  * @param {"merge"|"replace"} mode
  * @returns {Promise<{ imported: number, total: number, themesImported: number }>}
  */
-export async function importFromJson(input, mode = "merge") {
-  const data = typeof input === "string" ? JSON.parse(input) : input;
-  let incoming = [];
-  let incomingThemes = [];
-
-  if (Array.isArray(data)) {
-    incoming = data;
-  } else if (data && Array.isArray(data.cards)) {
-    incoming = data.cards;
-    if (Array.isArray(data.themes)) incomingThemes = data.themes;
-  } else {
-    throw new Error("Fichier JSON invalide : tableau de cartes ou { cards: [...] } attendu.");
-  }
+export async function importBackup(input, mode = "merge") {
+  const data = parseBrickcardBackup(input);
+  const incoming = data.cards;
+  const incomingThemes = data.themes;
 
   const valid = incoming.filter(isValidCard).map((c) => normalizeCard(c));
 

@@ -250,6 +250,7 @@ export function renderSettingsModal(host, opts) {
                   icon: "download",
                   tag: "button",
                   id: "settings-export",
+                  disabled: cardCount === 0,
                 },
                 {
                   title: "Thèmes",

@@ -36,7 +36,7 @@ Tout le code applicatif est dans **`src/`**.
 | `src/js/card-design.js` | Design cartes (bordure face, arrondi coins / images, CSS vars) — localStorage |
 | `src/js/list-layout.js` | Densité liste (cartes/ligne max) — localStorage |
 | `src/js/themes-data.js` | Charge le JSON des thèmes par défaut, `logoSrc`, accent par défaut |
-| `src/js/storage.js` | IndexedDB cartes + thèmes **personnalisés**, export/import JSON |
+| `src/js/storage.js` | IndexedDB cartes + thèmes **personnalisés**, export/import `.brickcard` |
 | `src/js/card-export.js` | Téléchargement (photo Brickcard, blob, URL same-origin) |
 | `src/js/preset-draft.js` | Brouillon isolé des thèmes par défaut (outil `#/developer/theme-presets`) |
 | `src/js/print.js` | Impression A4 (grille variable, faces/dos, miroir) |
@@ -101,7 +101,7 @@ Champs par entrée :
 
 Thèmes par défaut : **lecture seule** dans l’app (ni modification ni suppression). Les thèmes personnalisés ont un id UUID (`createId()`), sont stockés en IndexedDB, et s’éditent via `#/themes/new` / `#/themes/edit/:id`.
 
-Outil développeur `#/developer/theme-presets` : copie locale isolée (IndexedDB `brickcard-generator-preset-draft`) pour éditer id/slug, nom, couleur, logo et cadrage, puis **télécharger** `themes-presets.json` + `theme-logo-{id}.{ext}` à placer soi-même dans `data/`. Ne lit/écrit jamais les stores `cards` / `themes` ni les réglages. Au premier chargement (ou après « Supprimer le brouillon ») : seed depuis le JSON. Reset local de la collection **ne** touche **pas** ce brouillon.
+Outil développeur `#/developer/theme-presets` : copie locale isolée (IndexedDB `brickcard-generator-preset-draft`) pour éditer id/slug, nom, couleur, logo et cadrage (`#/developer/theme-presets/new`, `#/developer/theme-presets/edit/:slug`), puis **sauvegarder** `themes-presets.json` + `theme-logo-{id}.{ext}` à placer soi-même dans `data/`. Ne lit/écrit jamais les stores `cards` / `themes` ni les réglages. Au premier chargement (ou après « Supprimer le brouillon ») : seed depuis le JSON. Reset local de la collection **ne** touche **pas** ce brouillon.
 
 ## Modèle thème LEGO (`LegoTheme`)
 
@@ -143,8 +143,8 @@ Accent d’une Brickcard (`resolveCardAccent`) :
 - Clés tri thèmes : `brickcard-generator:themes-sort`, `brickcard-generator:themes-sort-dir` (défaut `cardCount` / `desc`) ; après enregistrement d’un thème : recherche vidée et tri remis sur date de modification décroissante (si ≥ 2 thèmes personnalisés ; sinon repli sur le défaut)
 - Clé colonnes liste max : `brickcard-generator:list-cols-max` (défaut `4`, plage 2–10, ou `infinite`)
 - Cascade accent carte : couleur du thème → couleur configurée → `#6e6e6e`
-- Export JSON **v3** : `{ version: 3, app: "brickcard-generator", cards, themes }` — `themes` = personnalisés uniquement — fichier `brickcard-export-YYYY-MM-DD.json`
-- Import : ignore les thèmes par défaut (ids de preset / `isBuiltin`) ; ne réécrit pas le JSON
+- Export **v3** (fichier `.brickcard`, JSON) : `{ version: 3, app: "brickcard-generator", cards, themes }` — `themes` = personnalisés uniquement — fichier `brickcard-export-YYYY-MM-DD.brickcard`
+- Import : fichier `.brickcard` uniquement ; vérifie `app` / `version` / `cards` / `themes` (tableaux) ; refuse une `version` supérieure à celle de l’app ; ignore les thèmes par défaut (ids de preset / `isBuiltin`) ; ne réécrit pas `themes-presets.json`
 - APIs async ; serveur HTTP obligatoire en local
 - Au démarrage, `boot()` attend `loadCards()` + `loadThemes()` avant `route()` (écran « Chargement... » dans `#main`, animation CSS tant que `aria-busy`)
 - Au démarrage, purge éventuelle de l’ancienne base `lego-set-cards` (plus utilisée)
@@ -153,14 +153,14 @@ Accent d’une Brickcard (`resolveCardAccent`) :
 
 Hash = source de vérité (Précédent / Suivant). Croix / Échap / backdrop d’un overlay → `#/` (`replace`). Hash inconnu → `#/`. Pas d’alias.
 
-Overlays de route (une à la fois, **swap** sans démonter la liste) : `#/settings`, `#/themes`, `#/themes/new`, `#/themes/edit/:id`, `#/page/:slug`, `#/new-card`, `#/edit-card/:id`, `#/developer/…`. Dialogues enfants (confirmations, paramètres d’impression, URL d’image, éditeur de thème preset) : pas d’URL, second backdrop par-dessus la vue courante.
+Overlays de route (une à la fois, **swap** sans démonter la liste) : `#/settings`, `#/themes`, `#/themes/new`, `#/themes/edit/:id`, `#/page/:slug`, `#/new-card`, `#/edit-card/:id`, `#/developer/…` (`#/developer/theme-presets/new`, `#/developer/theme-presets/edit/:slug`). Dialogues enfants (confirmations, paramètres d’impression, URL d’image) : pas d’URL, second backdrop par-dessus la vue courante.
 
 - `#/` accueil (empty « Bienvenue », liste, ou recherche sans résultat « Oups ! »)
 - `#/new-card` `#/edit-card/:id` éditeur de carte (modale)
 - `#/themes` gestion des thèmes (modale) ; `#/themes/new` `#/themes/edit/:id` éditeur de thème **personnalisé** (modale ; fermeture → `#/themes`)
 - `#/settings` paramètres (modale)
 - `#/page/:slug` page Markdown (`data/page-{{slug}}.md`, ex. `#/page/about`)
-- `#/developer` `#/developer/typography` `#/developer/links` `#/developer/tiles` `#/developer/buttons` `#/developer/fields` `#/developer/selects` `#/developer/sliders` `#/developer/checkboxes` `#/developer/radios` `#/developer/colors` `#/developer/images` `#/developer/search` `#/developer/modals` `#/developer/theme-presets` — espace développeur / styleguide en **modale** (extensible : `#/developer/…`) ; lien Paramètres en local uniquement ; index : **Aide au développement** (`ri-pencil-ruler-2-fill`) puis **Système de design** (`ri-collage-fill`) ; galeries / aide au développement (tuiles) : titre = lien `#/developer` vers la section + `ri-arrow-right-wide-fill` + titre de page ; hover / focus du lien = primary hover (mêmes tokens inversés que Fermer) ; ≤ 640px (plein écran) : si le lien a une icône, texte masqué (icône seule) ; `#/developer/theme-presets` : outil brouillon des thèmes par défaut (éditeur enfant sans route ; pied de modale optionnel levé hors du corps)
+- `#/developer` `#/developer/typography` `#/developer/links` `#/developer/tiles` `#/developer/buttons` `#/developer/fields` `#/developer/selects` `#/developer/sliders` `#/developer/checkboxes` `#/developer/radios` `#/developer/colors` `#/developer/images` `#/developer/search` `#/developer/modals` `#/developer/theme-presets` `#/developer/theme-presets/new` `#/developer/theme-presets/edit/:slug` — espace développeur / styleguide en **modale** (extensible : `#/developer/…`) ; lien Paramètres en local uniquement ; index : **Aide au développement** (`ri-pencil-ruler-2-fill`) puis **Système de design** (`ri-collage-fill`) ; galeries / aide au développement (tuiles) : titre = lien `#/developer` vers la section + `ri-arrow-right-wide-fill` + titre de page ; hover / focus du lien = primary hover (mêmes tokens inversés que Fermer) ; ≤ 640px (plein écran) : si le lien a une icône, texte masqué (icône seule) ; `#/developer/theme-presets` : outil brouillon des thèmes par défaut (`#/developer/theme-presets/new`, `#/developer/theme-presets/edit/:slug` ; fermeture éditeur → liste ; pied de modale optionnel levé hors du corps)
 
 ## Boutons (design system)
 

@@ -1,5 +1,5 @@
 /**
- * Téléchargement de fichiers (photo Brickcard, logos, JSON).
+ * Téléchargement de fichiers (photo Brickcard, logos, sauvegardes).
  */
 
 /**

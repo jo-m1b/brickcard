@@ -14,7 +14,11 @@ import { renderDeveloperColors } from "./colors.js";
 import { renderDeveloperImages } from "./images.js";
 import { renderDeveloperSearch } from "./search.js";
 import { renderDeveloperModals } from "./modals.js";
-import { renderDeveloperThemePresets } from "./theme-presets.js";
+import {
+  preparePresetDraftAfterSave,
+  renderDeveloperThemePresets,
+} from "./theme-presets.js";
+import { renderPresetDraftEditor } from "./theme-presets-editor.js";
 
 /** @type {Record<string, (host: HTMLElement) => (() => void)|void>} */
 const PAGES = {
@@ -32,7 +36,6 @@ const PAGES = {
   images: renderDeveloperImages,
   search: renderDeveloperSearch,
   modals: renderDeveloperModals,
-  "theme-presets": renderDeveloperThemePresets,
 };
 
 /** @typedef {{ name: string, icon?: string }} DeveloperSection */
@@ -63,8 +66,9 @@ const PAGE_SECTIONS = {
 /**
  * @type {null | {
  *   cleanup: () => void,
- *   setPage: (page: string) => void,
+ *   setPage: (page: string, extras?: { presetPage?: string, themeId?: string }) => void,
  *   setOnClose: (fn: () => void) => void,
+ *   setOnNavigate: (fn: (hash: string, opts?: { replace?: boolean }) => void) => void,
  * }}
  */
 let session = null;
@@ -135,17 +139,27 @@ function clearLiftedChrome(modal) {
 /**
  * Espace développeur en modale overlay (même coquille que les pages Markdown).
  * Un second appel avec la coquille déjà en place ne swap que le corps.
+ * Liste `#/developer/theme-presets` : conservée sous l’éditeur (`/new`, `/edit/:slug`).
  * @param {HTMLElement} host Conteneur (#modal-root)
- * @param {{ page?: string, onClose: () => void }} opts
+ * @param {{
+ *   page?: string,
+ *   presetPage?: string,
+ *   themeId?: string,
+ *   onClose: () => void,
+ *   onNavigate: (hash: string, opts?: { replace?: boolean }) => void,
+ * }} opts
  * @returns {() => void}
  */
 export function renderDeveloperModal(host, opts) {
   let onClose = opts.onClose;
+  let onNavigate = opts.onNavigate;
   const page = opts.page || "index";
+  const extras = { presetPage: opts.presetPage, themeId: opts.themeId };
 
   if (session && host.querySelector("#developer-modal-backdrop")) {
     session.setOnClose(onClose);
-    session.setPage(page);
+    session.setOnNavigate(onNavigate);
+    session.setPage(page, extras);
     return session.cleanup;
   }
 
@@ -178,25 +192,111 @@ export function renderDeveloperModal(host, opts) {
 
   /** @type {() => void} */
   let pageCleanup = () => {};
+  /** @type {string} */
+  let renderedPage = "";
+  let editorToken = 0;
+  /** @type {() => void} */
+  let editorCleanup = () => {};
+  let shownPresetKey = "";
 
-  function setPage(nextPage) {
-    pageCleanup();
-    clearLiftedChrome(modal);
-    if (modal) {
-      modal.classList.toggle("is-fixed-h", nextPage === "theme-presets");
-    }
+  const PRESET_LIST_HASH = "#/developer/theme-presets";
+
+  function closePresetEditor() {
+    editorToken += 1;
+    editorCleanup();
+    editorCleanup = () => {};
+    shownPresetKey = "";
     if (demoRoot) demoRoot.innerHTML = "";
-    if (!body || !titleEl) return;
-    const renderPage = PAGES[nextPage] || PAGES.index;
-    pageCleanup = renderPage(body) || (() => {});
-    liftStyleguideHeader(body, titleEl, nextPage);
-    if (modal) {
-      liftThemesToolbar(body, modal);
-      liftModalFooter(body, modal);
+  }
+
+  function goToPresetList() {
+    const hash = String(location.hash || "");
+    if (!hash.includes("/developer/theme-presets")) return;
+    onNavigate(PRESET_LIST_HASH, { replace: true });
+  }
+
+  /**
+   * @param {string} nextPage
+   * @param {{ presetPage?: string, themeId?: string }} extras
+   */
+  function presetEditorKey(nextPage, extras) {
+    if (nextPage !== "theme-presets") return "";
+    if (extras.presetPage === "new") return "new";
+    if (extras.presetPage === "edit") return `edit:${extras.themeId || ""}`;
+    return "";
+  }
+
+  /**
+   * @param {string} nextPage
+   * @param {{ presetPage?: string, themeId?: string }} nextExtras
+   */
+  async function syncPresetEditor(nextPage, nextExtras) {
+    const nextKey = presetEditorKey(nextPage, nextExtras);
+    if (nextKey && nextKey === shownPresetKey) return;
+    closePresetEditor();
+    if (!nextKey || !demoRoot) return;
+
+    const token = editorToken;
+    const cleanup = await renderPresetDraftEditor(demoRoot, {
+      themeId: nextExtras.presetPage === "edit" ? nextExtras.themeId || null : null,
+      onClose: goToPresetList,
+      onSaved: () => {
+        preparePresetDraftAfterSave();
+        goToPresetList();
+      },
+      onDeleted: () => {
+        preparePresetDraftAfterSave();
+        goToPresetList();
+      },
+    });
+    if (token !== editorToken) {
+      if (cleanup) cleanup();
+      return;
     }
-    body.scrollTop = 0;
-    if (backdrop) backdrop.scrollTop = 0;
-    if (modal) modal.scrollTop = 0;
+    if (!cleanup) {
+      goToPresetList();
+      return;
+    }
+    editorCleanup = cleanup;
+    shownPresetKey = nextKey;
+  }
+
+  /**
+   * @param {string} nextPage
+   * @param {{ presetPage?: string, themeId?: string }} [nextExtras]
+   */
+  function setPage(nextPage, nextExtras = {}) {
+    const stayOnPresets = renderedPage === "theme-presets" && nextPage === "theme-presets";
+    if (!stayOnPresets) {
+      if (renderedPage === "theme-presets") closePresetEditor();
+      pageCleanup();
+      clearLiftedChrome(modal);
+      if (modal) {
+        modal.classList.toggle("is-fixed-h", nextPage === "theme-presets");
+      }
+      if (!body || !titleEl) return;
+      if (nextPage === "theme-presets") {
+        pageCleanup =
+          renderDeveloperThemePresets(body, {
+            onCreate: () => onNavigate(`${PRESET_LIST_HASH}/new`),
+            onEdit: (id) =>
+              onNavigate(`${PRESET_LIST_HASH}/edit/${encodeURIComponent(id)}`),
+          }) || (() => {});
+      } else {
+        const renderPage = PAGES[nextPage] || PAGES.index;
+        pageCleanup = renderPage(body) || (() => {});
+      }
+      liftStyleguideHeader(body, titleEl, nextPage);
+      if (modal) {
+        liftThemesToolbar(body, modal);
+        liftModalFooter(body, modal);
+      }
+      body.scrollTop = 0;
+      if (backdrop) backdrop.scrollTop = 0;
+      if (modal) modal.scrollTop = 0;
+      renderedPage = nextPage;
+    }
+    void syncPresetEditor(nextPage, nextExtras);
   }
 
   const close = () => onClose();
@@ -222,6 +322,7 @@ export function renderDeveloperModal(host, opts) {
     document.removeEventListener("keydown", onKey);
     backdrop?.removeEventListener("click", onBackdropClick);
     btnClose?.removeEventListener("click", close);
+    closePresetEditor();
     pageCleanup();
     clearLiftedChrome(modal);
     session = null;
@@ -233,8 +334,11 @@ export function renderDeveloperModal(host, opts) {
     setOnClose(fn) {
       onClose = fn;
     },
+    setOnNavigate(fn) {
+      onNavigate = fn;
+    },
   };
 
-  setPage(page);
+  setPage(page, extras);
   return cleanup;
 }

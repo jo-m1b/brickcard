@@ -22,7 +22,7 @@ const THEME_LOGO_ACCEPT =
   "image/svg+xml,image/png,image/webp,.svg,.png,.webp";
 
 /**
- * Éditeur enfant d’un thème du brouillon presets (pas de route, pas d’IndexedDB collection).
+ * Éditeur d’un thème du brouillon presets (`#/developer/theme-presets/new`, `#/developer/theme-presets/edit/:slug`).
  * @param {HTMLElement} host `#developer-demo-root`
  * @param {{
  *   themeId?: string|null,

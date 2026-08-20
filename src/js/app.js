@@ -1,4 +1,4 @@
-import { loadCards, loadThemes, exportToJson, importFromJson, wipeAllLocalData, deleteAllCards } from "./storage.js";
+import { loadCards, loadThemes, exportBackup, importBackup, isBrickcardBackupFilename, parseBrickcardBackup, wipeAllLocalData, deleteAllCards } from "./storage.js";
 import { initTheme } from "./theme.js";
 import { initCardDesign } from "./card-design.js";
 import { initListLayout } from "./list-layout.js";
@@ -133,10 +133,39 @@ function parsePath(path) {
   }
   if (path === "developer") return { name: "developer", page: "index" };
   if (path.startsWith("developer/")) {
-    const page = path.slice("developer/".length) || "index";
-    return { name: "developer", page };
+    return parseDeveloperPage(path.slice("developer/".length));
   }
   return { name: "unknown" };
+}
+
+/**
+ * @param {string} rest chemin après `developer/`
+ * @returns {{ name: string, page?: string, presetPage?: string, themeId?: string }}
+ */
+function parseDeveloperPage(rest) {
+  const page = rest || "index";
+  if (page === "theme-presets") {
+    return { name: "developer", page: "theme-presets" };
+  }
+  if (page === "theme-presets/new") {
+    return { name: "developer", page: "theme-presets", presetPage: "new" };
+  }
+  if (page.startsWith("theme-presets/edit/")) {
+    const raw = page.slice("theme-presets/edit/".length);
+    if (!raw || raw.includes("/")) return { name: "unknown" };
+    let themeId = raw;
+    try {
+      themeId = decodeURIComponent(raw);
+    } catch {
+      /* slug tel quel */
+    }
+    if (!themeId) return { name: "unknown" };
+    return { name: "developer", page: "theme-presets", presetPage: "edit", themeId };
+  }
+  if (page.startsWith("theme-presets/")) {
+    return { name: "unknown" };
+  }
+  return { name: "developer", page };
 }
 
 function parseRoute() {
@@ -321,7 +350,10 @@ async function showOverlay(routeInfo) {
   if (routeInfo.name === "developer") {
     cleanupDeveloper = renderDeveloperModal(modalRoot, {
       page: routeInfo.page,
+      presetPage: routeInfo.presetPage,
+      themeId: routeInfo.themeId,
       onClose: overlayOnClose("developer"),
+      onNavigate: navigate,
     });
     focusTopModal();
     return;
@@ -458,9 +490,9 @@ async function exportCards() {
       toast("Aucune carte à sauvegarder", "error");
       return;
     }
-    const result = await exportToJson();
+    const result = await exportBackup();
     toast(
-      `Sauvegarde : ${result.cards} carte(s) + ${result.themes} thème(s) (JSON)`
+      `Sauvegarde : ${result.cards} carte(s) + ${result.themes} thème(s)`
     );
   } catch (err) {
     toast(err.message || "Sauvegarde impossible", "error");
@@ -473,7 +505,11 @@ async function handleImportFile() {
   if (!file) return;
 
   try {
-    const text = await file.text();
+    if (!isBrickcardBackupFilename(file.name)) {
+      toast("Fichier .brickcard attendu.", "error");
+      return;
+    }
+    const backup = parseBrickcardBackup(await file.text());
     const existing = (await loadCards()).length;
     let mode = "merge";
 
@@ -506,7 +542,7 @@ async function handleImportFile() {
       }
     }
 
-    const result = await importFromJson(text, mode);
+    const result = await importBackup(backup, mode);
     const themeMsg = result.themesImported
       ? ` · ${result.themesImported} thème(s)`
       : "";
