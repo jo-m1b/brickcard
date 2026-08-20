@@ -319,12 +319,11 @@ async function showOverlay(routeInfo) {
   }
 
   if (routeInfo.name === "developer") {
-    const alreadyOpen = Boolean(modalRoot.querySelector("#developer-modal-backdrop"));
     cleanupDeveloper = renderDeveloperModal(modalRoot, {
       page: routeInfo.page,
       onClose: overlayOnClose("developer"),
     });
-    if (!alreadyOpen) focusTopModal();
+    focusTopModal();
     return;
   }
 
@@ -482,6 +481,7 @@ async function handleImportFile() {
       if (!modalRoot) return;
       const choice = await openConfirmDialog(modalRoot, {
         title: `Importer dans une collection de ${existing} carte${existing > 1 ? "s" : ""} ?`,
+        icon: "upload",
         message:
           "Fusionner met à jour les cartes de même id. Remplacer efface toute la collection actuelle.",
         actions: [
@@ -494,6 +494,7 @@ async function handleImportFile() {
       if (choice === "replace") {
         const sure = await confirmDialog(modalRoot, {
           title: "Remplacer toute la collection ?",
+          icon: "delete-bin-2",
           message: "Cette action est irréversible (sauf si tu as un export).",
           okLabel: "Remplacer",
           danger: true,

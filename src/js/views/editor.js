@@ -1,4 +1,16 @@
-import { ICON_CLOSE } from "../icons.js";
+import {
+  ICON_ADD,
+  ICON_APPS_2,
+  ICON_CALENDAR_TODO,
+  ICON_CLOSE,
+  ICON_DELETE_BIN_2,
+  ICON_HASHTAG,
+  ICON_PALETTE,
+  ICON_PENCIL,
+  ICON_SAVE,
+  ICON_USER_3,
+  modalTitleMarkup,
+} from "../icons.js";
 import { enhanceFormSelect } from "../form-select.js";
 import { bindFormImage, formImageMarkup } from "../form-image.js";
 import {
@@ -69,9 +81,12 @@ export async function renderEditor(host, opts) {
       <div class="modal modal--lg" role="dialog" aria-modal="true" aria-labelledby="editor-title">
         <div class="modal-header">
           <div>
-            <h1 class="view-title" id="editor-title">${escapeHtml(editorDialogTitle(existing))}</h1>
+            <h1 class="view-title" id="editor-title">${modalTitleMarkup(
+              editorDialogTitle(existing),
+              isEdit ? ICON_PENCIL : ICON_ADD
+            )}</h1>
           </div>
-          <button type="button" class="btn primary icon-only modal-close" id="btn-modal-close">
+          <button type="button" class="btn primary icon-only modal-close" tabindex="-1" id="btn-modal-close">
             ${ICON_CLOSE}
             <span class="visually-hidden">Fermer</span>
           </button>
@@ -86,7 +101,10 @@ export async function renderEditor(host, opts) {
             <div>
               <div class="form-field">
                 <label class="form-label" for="lego-set-ref">Numéro de l'ensemble</label>
-                <input class="form-control" type="text" id="lego-set-ref" autocomplete="off" />
+                <div class="form-control-wrap">
+                  <span class="form-control-icon" aria-hidden="true">${ICON_HASHTAG}</span>
+                  <input class="form-control" type="text" id="lego-set-ref" autocomplete="off" />
+                </div>
               </div>
 
               <div class="form-field">
@@ -98,24 +116,36 @@ export async function renderEditor(host, opts) {
               <div class="field-row field-row-3">
                 <div class="form-field">
                   <label class="form-label" for="release-year">Année de sortie</label>
-                  <input class="form-control" type="number" id="release-year" min="1900" max="2100" step="1" inputmode="numeric" />
+                  <div class="form-control-wrap">
+                    <span class="form-control-icon" aria-hidden="true">${ICON_CALENDAR_TODO}</span>
+                    <input class="form-control" type="number" id="release-year" min="1900" max="2100" step="1" inputmode="numeric" />
+                  </div>
                 </div>
                 <div class="form-field">
                   <label class="form-label" for="piece-count">Nombre de pièces</label>
-                  <input class="form-control" type="number" id="piece-count" min="0" step="1" inputmode="numeric" />
+                  <div class="form-control-wrap">
+                    <span class="form-control-icon" aria-hidden="true">${ICON_APPS_2}</span>
+                    <input class="form-control" type="number" id="piece-count" min="0" step="1" inputmode="numeric" />
+                  </div>
                 </div>
                 <div class="form-field">
                   <label class="form-label" for="figurine-count">Nombre de figurines</label>
-                  <input class="form-control" type="number" id="figurine-count" min="0" step="1" inputmode="numeric" />
+                  <div class="form-control-wrap">
+                    <span class="form-control-icon" aria-hidden="true">${ICON_USER_3}</span>
+                    <input class="form-control" type="number" id="figurine-count" min="0" step="1" inputmode="numeric" />
+                  </div>
                 </div>
               </div>
 
               <div class="form-field">
                 <label class="form-label" for="brickcard-theme-id">Thème</label>
-                <select id="brickcard-theme-id" class="form-control">
-                  <option value="">Aucun thème</option>
-                  ${themeOptions}
-                </select>
+                <div class="form-control-wrap">
+                  <span class="form-control-icon" aria-hidden="true">${ICON_PALETTE}</span>
+                  <select id="brickcard-theme-id" class="form-control">
+                    <option value="">Aucun thème</option>
+                    ${themeOptions}
+                  </select>
+                </div>
               </div>
 
               <div class="form-field">
@@ -137,13 +167,13 @@ export async function renderEditor(host, opts) {
         </div>
         <div class="modal-footer modal-footer--primary-first">
           <div class="modal-footer-end">
-            <button type="button" class="btn primary" id="btn-card-save">Enregistrer</button>
+            <button type="button" class="btn primary" id="btn-card-save">${ICON_SAVE}<span>Enregistrer</span></button>
             <button type="button" class="btn secondary sm" id="btn-card-cancel">Annuler</button>
           </div>
           ${
             isEdit
               ? `<div class="modal-footer-start">
-            <button type="button" class="btn danger" id="btn-card-delete">Supprimer</button>
+            <button type="button" class="btn danger" id="btn-card-delete">${ICON_DELETE_BIN_2}<span>Supprimer</span></button>
           </div>`
               : ""
           }
@@ -333,6 +363,7 @@ export async function renderEditor(host, opts) {
     refs.deleteBtn.addEventListener("click", async () => {
       const ok = await confirmDialog(host, {
         title: cardDeleteTitle(),
+        icon: "delete-bin-2",
         message:
           "Attention, la suppression est définitive et ne pourra pas être annulée ! Souhaitez-vous continuer ?",
         okLabel: "Supprimer",

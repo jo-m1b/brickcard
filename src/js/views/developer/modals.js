@@ -1,4 +1,4 @@
-import { ICON_CLOSE } from "../../icons.js";
+import { ICON_CLOSE, ICON_DELETE_BIN_2, ICON_SAVE, ICON_WINDOW, modalTitleMarkup } from "../../icons.js";
 import { linkMarkup } from "../../link.js";
 import { focusTopModal } from "../../modal-focus.js";
 
@@ -21,8 +21,8 @@ export function renderDeveloperModals(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Modales</p>
-        <h1 class="view-title">Modales</h1>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Modale (Modal)</p>
+        <h1 class="view-title">Modale (Modal)</h1>
       </header>
 
       <p class="styleguide-intro">
@@ -59,7 +59,7 @@ export function renderDeveloperModals(host) {
               </tr>
               <tr>
                 <td>Header</td>
-                <td><code>modal-header</code> : <code>h1.view-title</code> + <code>btn primary icon-only modal-close</code> (couleurs inversées)</td>
+                <td><code>modal-header</code> : <code>h1.view-title</code> (icône Remix optionnelle à gauche) + <code>btn primary icon-only modal-close</code> (couleurs inversées, <code>tabindex="-1"</code>)</td>
               </tr>
               <tr>
                 <td>Corps</td>
@@ -149,15 +149,11 @@ export function renderDeveloperModals(host) {
         <h2 class="styleguide-section-title">Comportement</h2>
         <ul class="styleguide-notes">
           <li>Clic backdrop → ferme (desktop uniquement — en plein écran le backdrop n’est plus visible)</li>
-          <li>Échap → ferme</li>
+          <li>Échap → ferme (le bouton Fermer n’est pas tabulable)</li>
           <li>Bouton close → ferme</li>
           <li><code>body.modal-open</code> bloque le scroll de fond</li>
         </ul>
       </div>
-
-      <p class="styleguide-back">
-        ${linkMarkup("← Styleguide", { href: "#/developer" })}
-      </p>
     </section>
   `;
 
@@ -176,6 +172,7 @@ export function renderDeveloperModals(host) {
    *   size?: ModalSize,
    *   align?: ModalAlign,
    *   title: string,
+   *   icon?: string,
    *   bodyHtml: string,
    *   footerHtml?: string,
    * }} spec
@@ -206,9 +203,9 @@ export function renderDeveloperModals(host) {
         >
           <div class="modal-header">
             <div>
-              <h1 class="view-title" id="demo-modal-title">${spec.title}</h1>
+              <h1 class="view-title" id="demo-modal-title">${modalTitleMarkup(spec.title, spec.icon || ICON_WINDOW)}</h1>
             </div>
-            <button type="button" class="btn primary icon-only modal-close" id="demo-modal-close">
+            <button type="button" class="btn primary icon-only modal-close" tabindex="-1" id="demo-modal-close">
               ${ICON_CLOSE}
               <span class="visually-hidden">Fermer</span>
             </button>
@@ -290,6 +287,7 @@ export function renderDeveloperModals(host) {
       openDemo({
         size: "md",
         title: "Paramètres",
+        icon: "tools",
         bodyHtml: `<p>Header&nbsp;: titre court + <code>btn primary icon-only modal-close</code> (couleurs inversées sur le header ink).</p>`,
       });
       return;
@@ -297,12 +295,13 @@ export function renderDeveloperModals(host) {
     if (kind === "header-confirm") {
       openDemo({
         size: "sm",
-        title: "Supprimer la carte &quot;Saucer Centurien&quot; (#6939) ?",
+        title: "Supprimer la carte \"Saucer Centurien\" (#6939) ?",
+        icon: "delete-bin-2",
         bodyHtml: `<p class="modal-confirm-msg">Attention, la suppression est définitive et ne pourra pas être annulée&nbsp;! Souhaitez-vous continuer&nbsp;?</p>`,
         footerHtml: `
           <div class="modal-footer-end">
             <button type="button" class="btn secondary" data-demo-close>Annuler</button>
-            <button type="button" class="btn danger" data-demo-close>Supprimer</button>
+            <button type="button" class="btn danger" data-demo-close>${ICON_DELETE_BIN_2}<span>Supprimer</span></button>
           </div>
         `,
       });
@@ -323,11 +322,11 @@ export function renderDeveloperModals(host) {
         bodyHtml: `<p>Gauche&nbsp;: validation · Droite&nbsp;: danger. Tailles mixte (normal + <code>sm</code>).</p><p>Les boutons restent alignés verticalement au centre du footer, quelle que soit leur taille.</p>`,
         footerHtml: `
           <div class="modal-footer-start">
-            <button type="button" class="btn primary" data-demo-close>Sauvegarder</button>
+            <button type="button" class="btn primary" data-demo-close>${ICON_SAVE}<span>Sauvegarder</span></button>
             <button type="button" class="btn secondary sm" data-demo-close>Annuler</button>
           </div>
           <div class="modal-footer-end">
-            <button type="button" class="btn danger" data-demo-close>Supprimer</button>
+            <button type="button" class="btn danger" data-demo-close>${ICON_DELETE_BIN_2}<span>Supprimer</span></button>
           </div>
         `,
       });
@@ -336,14 +335,15 @@ export function renderDeveloperModals(host) {
     if (kind === "footer-danger") {
       openDemo({
         size: "sm",
-        title: "Supprimer le thème &quot;Star Wars&quot; ?",
+        title: "Supprimer le thème \"Star Wars\" ?",
+        icon: "delete-bin-2",
         bodyHtml: `<p class="modal-confirm-msg">Cette action est irréversible (démo).</p>`,
         footerHtml: `
           <div class="modal-footer-start">
             <button type="button" class="btn secondary sm" data-demo-close>Annuler</button>
           </div>
           <div class="modal-footer-end">
-            <button type="button" class="btn danger" data-demo-close>Supprimer</button>
+            <button type="button" class="btn danger" data-demo-close>${ICON_DELETE_BIN_2}<span>Supprimer</span></button>
           </div>
         `,
       });

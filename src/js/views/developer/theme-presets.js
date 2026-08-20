@@ -373,6 +373,7 @@ export function renderDeveloperThemePresets(host) {
     if (!wrap) return;
     const ok = await confirmDialog(wrap, {
       title: "Réinitialiser le brouillon des thèmes par défaut ?",
+      icon: "close-circle",
       message:
         "Le brouillon local sera effacé et rechargé depuis themes-presets.json. La collection (cartes, thèmes personnalisés, réglages) n’est pas touchée.",
       okLabel: "Réinitialiser",

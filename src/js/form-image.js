@@ -13,7 +13,14 @@ import {
   ICON_ALIGN_ITEM_VERTICAL_CENTER,
   ICON_CLOSE,
   ICON_CLOSE_CIRCLE,
+  ICON_CLOUD,
+  ICON_DELETE_BIN_2,
+  ICON_DOWNLOAD,
+  ICON_FILE_LINE,
+  ICON_LINK,
+  ICON_UPLOAD,
   ICON_ZOOM_IN,
+  modalTitleMarkup,
 } from "./icons.js";
 import {
   fetchImageAsFile,
@@ -161,8 +168,8 @@ export function formImageMarkup(opts) {
       <div class="form-image-empty" ${hasImage ? "hidden" : ""}>
         <p class="form-image-empty-text"><strong>Aucune image !</strong> Charger une nouvelle image :</p>
         <div class="form-image-empty-actions">
-          <button type="button" class="btn primary" data-form-image-file>Depuis mes fichiers</button>
-          <button type="button" class="btn secondary sm" data-form-image-url>Depuis une URL</button>
+          <button type="button" class="btn primary" data-form-image-file>${ICON_FILE_LINE}<span>Depuis mes fichiers</span></button>
+          <button type="button" class="btn secondary sm" data-form-image-url>${ICON_LINK}<span>Depuis une URL</span></button>
         </div>
         <p class="form-error" id="${escapeAttr(errorId)}" role="alert"></p>
       </div>
@@ -192,8 +199,8 @@ export function formImageMarkup(opts) {
             <span class="visually-hidden">Réinitialiser le cadrage</span>
           </button>
           <div class="form-image-crop-bar">
-            <button type="button" class="btn primary sm" data-form-image-download>Télécharger</button>
-            <button type="button" class="btn primary sm" data-form-image-delete>Supprimer</button>
+            <button type="button" class="btn primary sm" data-form-image-download>${ICON_DOWNLOAD}<span>Sauvegarder</span></button>
+            <button type="button" class="btn primary sm" data-form-image-delete>${ICON_DELETE_BIN_2}<span>Supprimer</span></button>
           </div>
         </div>
       </div>
@@ -228,9 +235,9 @@ function openImageUrlDialog(host, opts) {
       <div class="modal modal--sm" role="dialog" aria-modal="true" aria-labelledby="${uid}-title">
         <div class="modal-header">
           <div>
-            <h1 class="view-title" id="${uid}-title">Charger depuis une URL</h1>
+            <h1 class="view-title" id="${uid}-title">${modalTitleMarkup("Charger depuis une URL", ICON_LINK)}</h1>
           </div>
-          <button type="button" class="btn primary icon-only modal-close" data-url-dismiss>
+          <button type="button" class="btn primary icon-only modal-close" tabindex="-1" data-url-dismiss>
             ${ICON_CLOSE}
             <span class="visually-hidden">Fermer</span>
           </button>
@@ -238,23 +245,26 @@ function openImageUrlDialog(host, opts) {
         <div class="modal-body" tabindex="-1">
           <div class="form-field">
             <label class="form-label" for="${inputId}">URL</label>
-            <input
-              class="form-control"
-              type="text"
-              id="${inputId}"
-              inputmode="url"
-              placeholder="https://…/image.png"
-              autocomplete="off"
-              spellcheck="false"
-              aria-describedby="${errorId}"
-            />
+            <div class="form-control-wrap">
+              <span class="form-control-icon" aria-hidden="true">${ICON_CLOUD}</span>
+              <input
+                class="form-control"
+                type="text"
+                id="${inputId}"
+                inputmode="url"
+                placeholder="https://…/image.png"
+                autocomplete="off"
+                spellcheck="false"
+                aria-describedby="${errorId}"
+              />
+            </div>
             <p class="form-error" id="${errorId}" role="alert"></p>
           </div>
         </div>
         <div class="modal-footer">
           <div class="modal-footer-end">
             <button type="button" class="btn secondary sm" data-url-dismiss>Annuler</button>
-            <button type="button" class="btn primary" data-url-load>Charger</button>
+            <button type="button" class="btn primary" data-url-load>${ICON_UPLOAD}<span>Charger</span></button>
           </div>
         </div>
       </div>
@@ -675,6 +685,7 @@ export function bindFormImage(root, opts = {}) {
     e.stopPropagation();
     const ok = await confirmDialog(dialogHost, {
       title: "Supprimer l’image ?",
+      icon: "delete-bin-2",
       message:
         "Attention, la suppression est définitive et ne pourra pas être annulée ! Souhaitez-vous continuer ?",
       okLabel: "Supprimer",

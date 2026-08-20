@@ -10,8 +10,8 @@ export function renderDeveloperSliders(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Curseurs</p>
-        <h1 class="view-title">Curseurs (range)</h1>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Curseur (Range)</p>
+        <h1 class="view-title">Curseur (Range)</h1>
       </header>
 
       <p class="styleguide-intro">
@@ -141,14 +141,6 @@ export function renderDeveloperSliders(host) {
           </div>
         </div>
       </div>
-
-      <p class="styleguide-back">
-        ${linkMarkup("← Index styleguide", { href: "#/developer" })}
-        ·
-        ${linkMarkup("Champs", { href: "#/developer/fields" })}
-        ·
-        ${linkMarkup("App", { href: "#/" })}
-      </p>
     </section>
   `;
 

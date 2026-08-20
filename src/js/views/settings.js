@@ -1,4 +1,4 @@
-import { ICON_CLOSE } from "../icons.js";
+import { ICON_CLOSE, ICON_TOOLS, modalTitleMarkup } from "../icons.js";
 import { bindFormColor, formColorMarkup } from "../form-color.js";
 import { bindFormRange, formRangeResetMarkup } from "../form-range.js";
 import { getTheme, setTheme } from "../theme.js";
@@ -81,9 +81,9 @@ export function renderSettingsModal(host, opts) {
       <div class="modal modal--md" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
         <div class="modal-header">
           <div>
-            <h1 class="view-title" id="settings-modal-title">Paramètres</h1>
+            <h1 class="view-title" id="settings-modal-title">${modalTitleMarkup("Paramètres", ICON_TOOLS)}</h1>
           </div>
-          <button type="button" class="btn primary icon-only modal-close" id="btn-settings-close">
+          <button type="button" class="btn primary icon-only modal-close" tabindex="-1" id="btn-settings-close">
             ${ICON_CLOSE}
             <span class="visually-hidden">Fermer</span>
           </button>
@@ -239,14 +239,14 @@ export function renderSettingsModal(host, opts) {
               ${tileListMarkup([
                 {
                   title: "Importer",
-                  desc: "Ajouter, fusionner ou remplacer un lot de cartes à partir d’une sauvegarde JSON",
+                  desc: "Charger une sauvegarde pour ajouter ou fusionner un lot de cartes, thèmes ou paramètres",
                   icon: "upload",
                   tag: "button",
                   id: "settings-import",
                 },
                 {
                   title: "Sauvegarder",
-                  desc: "Télécharger une sauvegarde des cartes et des thèmes au format JSON",
+                  desc: "Enregistrer une sauvegarde de la collection de cartes, thèmes et paramètres",
                   icon: "download",
                   tag: "button",
                   id: "settings-export",
@@ -259,8 +259,8 @@ export function renderSettingsModal(host, opts) {
                 },
                 {
                   title: "Supprimer toutes les cartes",
-                  desc: "Retirer définitivement les cartes, sans modifier les thèmes ni les réglages",
-                  icon: "delete-bin",
+                  desc: "Retirer définitivement toutes les cartes, sans modifier les thèmes ni les paramètres enregistrés",
+                  icon: "delete-bin-2",
                   tag: "button",
                   id: "settings-clear-cards",
                   danger: true,
@@ -276,13 +276,13 @@ export function renderSettingsModal(host, opts) {
               ${tileListMarkup([
                 {
                   title: "Espace développeur",
-                  desc: "Système de design, exemples et documentation",
+                  desc: "Aide au développement, système de design et documentation",
                   href: "#/developer",
                   icon: "tools",
                 },
                 {
                   title: "Réinitialiser",
-                  desc: "Supprimer toutes les données locales du navigateur (cartes, thèmes et réglages)",
+                  desc: "Supprimer toutes les données locales enregistrées (cartes, thèmes et paramètres)",
                   icon: "close-circle",
                   tag: "button",
                   id: "settings-dev-reset",
@@ -463,6 +463,7 @@ export function renderSettingsModal(host, opts) {
     clearCardsBtn.addEventListener("click", async () => {
       const ok = await confirmDialog(host, {
         title: "Supprimer toutes les cartes ?",
+        icon: "delete-bin-2",
         message:
           "Toutes les cartes seront supprimées définitivement. Les thèmes et les réglages sont conservés.",
         okLabel: "Supprimer",
@@ -483,6 +484,7 @@ export function renderSettingsModal(host, opts) {
     resetBtn.addEventListener("click", async () => {
       const ok = await confirmDialog(host, {
         title: "Réinitialiser toutes les données locales ?",
+        icon: "close-circle",
         message:
           "Toutes les cartes, thèmes et réglages de la collection seront supprimés définitivement.",
         okLabel: "Réinitialiser",

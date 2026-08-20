@@ -3,6 +3,7 @@
 import { contrastText, parseHexColor } from "./themes-data.js";
 import { resolveCardAccent } from "./card-design.js";
 import { resolveImageBackground } from "./storage.js";
+import { ICON_APPS_2, ICON_CALENDAR_TODO, ICON_USER_3 } from "./icons.js";
 
 /** Logo app (chemin relatif depuis `src/`). */
 export const BRAND_LOGO_SRC = "img/brickcard-generator-logo.svg";
@@ -184,9 +185,9 @@ function syncAccentFgClass(root, accentFg) {
 }
 
 /** Icônes méta (header) — valeurs seules, sans libellé. */
-const ICON_YEAR = `<svg class="card-badge-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><path d="M17 3H21C21.5523 3 22 3.44772 22 4V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V4C2 3.44772 2.44772 3 3 3H7V1H9V3H15V1H17V3ZM4 9V19H20V9H4ZM6 11H8V13H6V11ZM11 11H13V13H11V11ZM16 11H18V13H16V11Z"/></svg>`;
-const ICON_PIECES = `<svg class="card-badge-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><path d="M5 5V11H11V5H5ZM5 13V19H11V13H5ZM13 5V11H19V5H13ZM13 13V19H19V13H13ZM7 7H9V9H7V7ZM7 15H9V17H7V15ZM15 7H17V9H15V7ZM15 15H17V17H15V15Z"/></svg>`;
-const ICON_FIGURINES = `<svg class="card-badge-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C13.6569 2 15 3.34315 15 5C15 6.65685 13.6569 8 12 8C10.3431 8 9 6.65685 9 5C9 3.34315 10.3431 2 12 2ZM12 10C16.4183 10 20 12.2386 20 15V20H4V15C4 12.2386 7.58172 10 12 10Z"/></svg>`;
+const ICON_YEAR = ICON_CALENDAR_TODO.replace("<svg ", '<svg class="card-badge-icon" ');
+const ICON_PIECES = ICON_APPS_2.replace("<svg ", '<svg class="card-badge-icon" ');
+const ICON_FIGURINES = ICON_USER_3.replace("<svg ", '<svg class="card-badge-icon" ');
 
 /** Markup commun face de carte */
 export function cardFaceMarkup() {

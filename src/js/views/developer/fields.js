@@ -16,8 +16,8 @@ export function renderDeveloperFields(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Champs</p>
-        <h1 class="view-title">Champs de saisie</h1>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Champ de saisie (Input)</p>
+        <h1 class="view-title">Champ de saisie (Input)</h1>
       </header>
 
       <p class="styleguide-intro">
@@ -157,16 +157,6 @@ export function renderDeveloperFields(host) {
           </div>
         </div>
       </div>
-
-      <p class="styleguide-back">
-        ${linkMarkup("← Index styleguide", { href: "#/developer" })}
-        ·
-        ${linkMarkup("Listes déroulantes", { href: "#/developer/selects" })}
-        ·
-        ${linkMarkup("Images", { href: "#/developer/images" })}
-        ·
-        ${linkMarkup("App", { href: "#/" })}
-      </p>
     </section>
   `;
   return () => {

@@ -1,4 +1,4 @@
-import { ICON_CLOSE } from "../../icons.js";
+import { ICON_ADD, ICON_CLOSE, ICON_DELETE_BIN_2, ICON_PENCIL, ICON_SAVE, modalTitleMarkup } from "../../icons.js";
 import { bindFormColor, formColorMarkup } from "../../form-color.js";
 import { bindFormImage, formImageMarkup } from "../../form-image.js";
 import { compressThemeImage } from "../../storage.js";
@@ -75,13 +75,12 @@ export async function renderPresetDraftEditor(host, opts) {
       <div class="modal modal--lg" role="dialog" aria-modal="true" aria-labelledby="preset-editor-title">
         <div class="modal-header">
           <div>
-            <h1 class="view-title" id="preset-editor-title">${
-              existing
-                ? `Modifier « ${escapeHtml(existing.name)} »`
-                : "Nouveau thème"
-            }</h1>
+            <h1 class="view-title" id="preset-editor-title">${modalTitleMarkup(
+              existing ? `Modifier « ${existing.name} »` : "Nouveau thème",
+              existing ? ICON_PENCIL : ICON_ADD
+            )}</h1>
           </div>
-          <button type="button" class="btn primary icon-only modal-close" id="preset-editor-close">
+          <button type="button" class="btn primary icon-only modal-close" tabindex="-1" id="preset-editor-close">
             ${ICON_CLOSE}
             <span class="visually-hidden">Fermer</span>
           </button>
@@ -135,13 +134,13 @@ export async function renderPresetDraftEditor(host, opts) {
         </div>
         <div class="modal-footer modal-footer--primary-first">
           <div class="modal-footer-end">
-            <button type="button" class="btn primary" id="preset-theme-save">Enregistrer</button>
+            <button type="button" class="btn primary" id="preset-theme-save">${ICON_SAVE}<span>Enregistrer</span></button>
             <button type="button" class="btn secondary sm" id="preset-theme-cancel">Annuler</button>
           </div>
           ${
             existing
               ? `<div class="modal-footer-start">
-            <button type="button" class="btn danger" id="preset-theme-delete">Supprimer</button>
+            <button type="button" class="btn danger" id="preset-theme-delete">${ICON_DELETE_BIN_2}<span>Supprimer</span></button>
           </div>`
               : ""
           }
@@ -369,6 +368,7 @@ export async function renderPresetDraftEditor(host, opts) {
     deleteBtn.onclick = async () => {
       const ok = await confirmDialog(host, {
         title: `Supprimer le thème « ${existing.name} » (${existing.id}) ?`,
+        icon: "delete-bin-2",
         message:
           "Ce thème sera retiré du brouillon local uniquement (pas de la collection). Souhaitez-vous continuer ?",
         okLabel: "Supprimer",
@@ -392,12 +392,4 @@ export async function renderPresetDraftEditor(host, opts) {
     document.removeEventListener("keydown", onKey, true);
     window.removeEventListener("resize", syncPreview);
   };
-}
-
-function escapeHtml(str) {
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
 }

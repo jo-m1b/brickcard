@@ -2,7 +2,7 @@
  * Service worker minimal (install PWA + cache same-origin).
  * Aligner CACHE sur APP_VERSION (version.js) et les ?v= de index.html.
  */
-const CACHE = "brickcard-generator-0.7.3";
+const CACHE = "brickcard-generator-0.7.4";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(["./", "./index.html"])));

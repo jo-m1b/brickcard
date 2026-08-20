@@ -1,7 +1,9 @@
 /**
  * Focus initial + piège Tab dans la modale au premier plan.
  * Chrome rend les overflow:auto tabulables : `.modal-body` a `tabindex="-1"`.
- * À l’ouverture, le focus va sur `.modal` (tabindex -1) : le premier Tab atteint Fermer.
+ * À l’ouverture, le focus va sur `.modal` (tabindex -1) : le premier Tab atteint le contenu
+ * (Fermer n’est pas tabulable : Échap / clic).
+ * Le scroll (backdrop + corps) est remis en haut, sauf si `resetScroll: false` (piège Tab).
  */
 
 const TABBABLE = [
@@ -41,14 +43,38 @@ function isShown(el) {
 /** @param {HTMLElement} modal @returns {HTMLElement[]} */
 function tabbablesIn(modal) {
   return /** @type {HTMLElement[]} */ (
-    [...modal.querySelectorAll(TABBABLE)].filter(isShown)
+    [...modal.querySelectorAll(TABBABLE)].filter(
+      (el) => isShown(el) && !el.classList.contains("modal-close")
+    )
   );
 }
 
-/** Place le focus sur la modale au premier plan (prochain Tab → bouton Fermer). */
-export function focusTopModal() {
+/** @param {HTMLElement} modal */
+function skipCloseButtonTab(modal) {
+  modal.querySelectorAll(".modal-close").forEach((btn) => {
+    if (btn instanceof HTMLElement) btn.tabIndex = -1;
+  });
+}
+
+/** @param {HTMLElement} modal */
+function resetModalScroll(modal) {
+  const backdrop = modal.closest(".modal-backdrop");
+  if (backdrop instanceof HTMLElement) backdrop.scrollTop = 0;
+  modal.scrollTop = 0;
+  modal.querySelectorAll(":scope > .modal-body").forEach((el) => {
+    if (el instanceof HTMLElement) el.scrollTop = 0;
+  });
+}
+
+/**
+ * Place le focus sur la modale au premier plan (prochain Tab → premier contrôle du contenu).
+ * @param {{ resetScroll?: boolean }} [opts] `resetScroll: false` pour le piège Tab
+ */
+export function focusTopModal(opts = {}) {
   const modal = getTopModal();
   if (!modal) return;
+  skipCloseButtonTab(modal);
+  if (opts.resetScroll !== false) resetModalScroll(modal);
   if (modal.getAttribute("tabindex") !== "-1") {
     modal.setAttribute("tabindex", "-1");
   }
@@ -68,7 +94,7 @@ export function bindModalFocusTrap() {
 
     if (!items.length) {
       e.preventDefault();
-      focusTopModal();
+      focusTopModal({ resetScroll: false });
       return;
     }
 

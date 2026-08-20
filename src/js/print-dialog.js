@@ -4,7 +4,7 @@
  * « Lancer l’impression » imprime sans fermer la modale.
  */
 
-import { ICON_CLOSE, ICON_PRINTER } from "./icons.js";
+import { ICON_CLOSE, ICON_PRINTER, modalTitleMarkup } from "./icons.js";
 import { focusTopModal } from "./modal-focus.js";
 import { bindFormRange, formRangeResetMarkup } from "./form-range.js";
 import {
@@ -57,9 +57,9 @@ export function openPrintDialog(host, opts) {
       <div class="modal modal--sm" role="dialog" aria-modal="true" aria-labelledby="${uid}-title" aria-describedby="${uid}-count ${uid}-desc">
         <div class="modal-header">
           <div>
-            <h1 class="view-title" id="${uid}-title">Paramètres d’impression</h1>
+            <h1 class="view-title" id="${uid}-title">${modalTitleMarkup("Paramètres d’impression", ICON_PRINTER)}</h1>
           </div>
-          <button type="button" class="btn primary icon-only modal-close" data-print-dismiss>
+          <button type="button" class="btn primary icon-only modal-close" tabindex="-1" data-print-dismiss>
             ${ICON_CLOSE}
             <span class="visually-hidden">Fermer</span>
           </button>

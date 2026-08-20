@@ -10,8 +10,8 @@ export function renderDeveloperSelects(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Listes déroulantes</p>
-        <h1 class="view-title">Listes déroulantes</h1>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Liste déroulante (Select)</p>
+        <h1 class="view-title">Liste déroulante (Select)</h1>
       </header>
 
       <p class="styleguide-intro">
@@ -171,14 +171,6 @@ export function renderDeveloperSelects(host) {
           </div>
         </div>
       </div>
-
-      <p class="styleguide-back">
-        ${linkMarkup("← Index styleguide", { href: "#/developer" })}
-        ·
-        ${linkMarkup("Champs", { href: "#/developer/fields" })}
-        ·
-        ${linkMarkup("App", { href: "#/" })}
-      </p>
     </section>
   `;
 

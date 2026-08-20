@@ -1,4 +1,4 @@
-import { ICON_CLOSE } from "../icons.js";
+import { ICON_ADD, ICON_CLOSE, ICON_DELETE_BIN_2, ICON_PENCIL, ICON_SAVE, modalTitleMarkup } from "../icons.js";
 import { bindFormColor, formColorMarkup } from "../form-color.js";
 import { bindFormImage, formImageMarkup } from "../form-image.js";
 import { slugifyFilename } from "../card-export.js";
@@ -66,13 +66,12 @@ export async function renderThemeEditor(host, opts) {
       <div class="modal modal--lg" role="dialog" aria-modal="true" aria-labelledby="theme-editor-title">
         <div class="modal-header">
           <div>
-            <h1 class="view-title" id="theme-editor-title">${
-              existing
-                ? `Modifier « ${escapeHtml(existing.name)} »`
-                : "Nouveau thème"
-            }</h1>
+            <h1 class="view-title" id="theme-editor-title">${modalTitleMarkup(
+              existing ? `Modifier « ${existing.name} »` : "Nouveau thème",
+              existing ? ICON_PENCIL : ICON_ADD
+            )}</h1>
           </div>
-          <button type="button" class="btn primary icon-only modal-close" id="theme-modal-close">
+          <button type="button" class="btn primary icon-only modal-close" tabindex="-1" id="theme-modal-close">
             ${ICON_CLOSE}
             <span class="visually-hidden">Fermer</span>
           </button>
@@ -120,13 +119,13 @@ export async function renderThemeEditor(host, opts) {
         </div>
         <div class="modal-footer modal-footer--primary-first">
           <div class="modal-footer-end">
-            <button type="button" class="btn primary" id="theme-save">Enregistrer</button>
+            <button type="button" class="btn primary" id="theme-save">${ICON_SAVE}<span>Enregistrer</span></button>
             <button type="button" class="btn secondary sm" id="theme-cancel">Annuler</button>
           </div>
           ${
             existing
               ? `<div class="modal-footer-start">
-            <button type="button" class="btn danger" id="theme-delete">Supprimer</button>
+            <button type="button" class="btn danger" id="theme-delete">${ICON_DELETE_BIN_2}<span>Supprimer</span></button>
           </div>`
               : ""
           }
@@ -284,6 +283,7 @@ export async function renderThemeEditor(host, opts) {
     deleteBtn.onclick = async () => {
       const ok = await confirmDialog(host, {
         title: `Supprimer le thème "${existing.name}" ?`,
+        icon: "delete-bin-2",
         message:
           "Attention, la suppression est définitive et ne pourra pas être annulée ! Souhaitez-vous continuer ?",
         okLabel: "Supprimer",
@@ -305,12 +305,4 @@ export async function renderThemeEditor(host, opts) {
     window.removeEventListener("keydown", onKey);
     window.removeEventListener("resize", syncPreview);
   };
-}
-
-function escapeHtml(str) {
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
 }

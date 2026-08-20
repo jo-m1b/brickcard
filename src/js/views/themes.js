@@ -2,9 +2,11 @@ import {
   ICON_ADD,
   ICON_CLOSE,
   ICON_FILTER_3,
+  ICON_PALETTE,
   ICON_SEARCH_LINE,
   ICON_SORT_ASC,
   ICON_SORT_DESC,
+  modalTitleMarkup,
 } from "../icons.js";
 import { loadCards, loadThemes } from "../storage.js";
 import { contrastText, partitionThemes } from "../themes-data.js";
@@ -143,9 +145,9 @@ export async function renderThemesModal(host, opts) {
       <div class="modal modal--lg" role="dialog" aria-modal="true" aria-labelledby="themes-modal-title">
         <div class="modal-header">
           <div>
-            <h1 class="view-title" id="themes-modal-title">Thèmes</h1>
+            <h1 class="view-title" id="themes-modal-title">${modalTitleMarkup("Thèmes", ICON_PALETTE)}</h1>
           </div>
-          <button type="button" class="btn primary icon-only modal-close" id="btn-themes-close">
+          <button type="button" class="btn primary icon-only modal-close" tabindex="-1" id="btn-themes-close">
             ${ICON_CLOSE}
             <span class="visually-hidden">Fermer</span>
           </button>

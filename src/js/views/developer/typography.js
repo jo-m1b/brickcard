@@ -1,4 +1,4 @@
-import { ICON_CLOSE } from "../../icons.js";
+import { ICON_ARROW_RIGHT_WIDE, ICON_CLOSE, ICON_TOOLS, modalTitleMarkup } from "../../icons.js";
 import { linkMarkup } from "../../link.js";
 
 /**
@@ -157,7 +157,7 @@ export function renderDeveloperTypography(host) {
               </tr>
               <tr>
                 <td>Page Markdown en modale</td>
-                <td><code># Titre</code> → titre du dialog (retiré du corps)</td>
+                <td><code># Titre</code> → logo app + nom + version + <code>ri-arrow-right-wide-fill</code> + titre (<code>#/page/about</code>)</td>
                 <td><code>##</code> → <code>h2</code> · <code>###</code> → <code>h3</code> dans <code>.md-content</code></td>
               </tr>
             </tbody>
@@ -174,7 +174,7 @@ export function renderDeveloperTypography(host) {
         <div class="styleguide-dialog-demo">
           <div class="modal-header">
             <div>
-              <p class="view-title">Paramètres</p>
+              <p class="view-title">${modalTitleMarkup("Paramètres", ICON_TOOLS)}</p>
             </div>
             <button type="button" class="btn primary icon-only modal-close" tabindex="-1">
               ${ICON_CLOSE}
@@ -192,12 +192,12 @@ export function renderDeveloperTypography(host) {
         <h2 class="styleguide-section-title">Dialog — Markdown (<code>md-content</code>)</h2>
         <p class="form-hint" style="margin-bottom: 0.75rem">
           Fichier&nbsp;: <code># Titre</code>, puis <code>##</code> / <code>###</code>.
-          Pas de <code>h1</code> dans le corps. Intertitres plus petits que le header (1.2rem / 1.05rem).
+          Pas de <code>h1</code> dans le corps. À propos&nbsp;: logo app + nom + version + flèche + titre. Intertitres plus petits que le header (1.2rem / 1.05rem).
         </p>
         <div class="styleguide-dialog-demo">
           <div class="modal-header">
             <div>
-              <p class="view-title">Brickcard Generator</p>
+              <p class="view-title"><span class="modal-title-lead"><span class="modal-title-brand" aria-hidden="true"></span><span>Brickcard Generator v0.x.x</span></span>${ICON_ARROW_RIGHT_WIDE}<span>À propos</span></p>
             </div>
             <button type="button" class="btn primary icon-only modal-close" tabindex="-1">
               ${ICON_CLOSE}
@@ -206,7 +206,7 @@ export function renderDeveloperTypography(host) {
           </div>
           <div class="modal-body" tabindex="-1">
             <article class="md-content">
-              <p><strong>Version 0.x.x.</strong> Paragraphe de contenu. Texte avec <strong>gras</strong>, <em>italique</em>,
+              <p>Paragraphe de contenu. Texte avec <strong>gras</strong>, <em>italique</em>,
                 un ${linkMarkup("lien", { href: "#/developer" })} et du <code>code inline</code>.</p>
               <h2>Fonctionnalités</h2>
               <ul>
@@ -293,10 +293,6 @@ const APP_ID = "brickcard-generator";</code></pre>
           </table>
         </div>
       </div>
-
-      <p class="styleguide-back">
-        ${linkMarkup("← Styleguide", { href: "#/developer" })}
-      </p>
     </section>
   `;
 

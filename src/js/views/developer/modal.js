@@ -1,4 +1,5 @@
-import { ICON_CLOSE } from "../../icons.js";
+import { ICON_ARROW_RIGHT_WIDE, ICON_CLOSE, modalTitleMarkup } from "../../icons.js";
+import { linkMarkup } from "../../link.js";
 import { renderDeveloperIndex } from "./index.js";
 import { renderDeveloperTypography } from "./typography.js";
 import { renderDeveloperLinks } from "./links.js";
@@ -7,6 +8,8 @@ import { renderDeveloperButtons } from "./buttons.js";
 import { renderDeveloperFields } from "./fields.js";
 import { renderDeveloperSelects } from "./selects.js";
 import { renderDeveloperSliders } from "./sliders.js";
+import { renderDeveloperCheckboxes } from "./checkboxes.js";
+import { renderDeveloperRadios } from "./radios.js";
 import { renderDeveloperColors } from "./colors.js";
 import { renderDeveloperImages } from "./images.js";
 import { renderDeveloperSearch } from "./search.js";
@@ -23,11 +26,38 @@ const PAGES = {
   fields: renderDeveloperFields,
   selects: renderDeveloperSelects,
   sliders: renderDeveloperSliders,
+  checkboxes: renderDeveloperCheckboxes,
+  radios: renderDeveloperRadios,
   colors: renderDeveloperColors,
   images: renderDeveloperImages,
   search: renderDeveloperSearch,
   modals: renderDeveloperModals,
   "theme-presets": renderDeveloperThemePresets,
+};
+
+/** @typedef {{ name: string, icon?: string }} DeveloperSection */
+
+/** @type {DeveloperSection} */
+const SECTION_DESIGN = { name: "Système de design", icon: "collage" };
+/** @type {DeveloperSection} */
+const SECTION_TOOLS = { name: "Aide au développement", icon: "pencil-ruler-2" };
+
+/** Section d’index pour les pages ouvertes par une tuile (`#/developer`). */
+const PAGE_SECTIONS = {
+  typography: SECTION_DESIGN,
+  links: SECTION_DESIGN,
+  tiles: SECTION_DESIGN,
+  buttons: SECTION_DESIGN,
+  fields: SECTION_DESIGN,
+  selects: SECTION_DESIGN,
+  sliders: SECTION_DESIGN,
+  checkboxes: SECTION_DESIGN,
+  radios: SECTION_DESIGN,
+  colors: SECTION_DESIGN,
+  images: SECTION_DESIGN,
+  search: SECTION_DESIGN,
+  modals: SECTION_DESIGN,
+  "theme-presets": SECTION_TOOLS,
 };
 
 /**
@@ -41,27 +71,32 @@ let session = null;
 
 /**
  * Titre du dialog = header de la galerie (comme les pages Markdown).
- * Le kicker (fil d’Ariane) reste dans le corps s’il contient un lien.
+ * Pages tuile : section (lien `#/developer`, icône optionnelle) + séparateur + titre de page (pas d’icône de tuile).
  * @param {HTMLElement} body
  * @param {HTMLElement} titleEl
+ * @param {string} page
  */
-function liftStyleguideHeader(body, titleEl) {
+function liftStyleguideHeader(body, titleEl, page) {
   const head = body.querySelector(".styleguide-header");
   if (!head) return;
 
   const h1 = head.querySelector("h1");
-  const kicker = head.querySelector(".styleguide-kicker");
+  const section = PAGE_SECTIONS[page];
 
   if (h1) {
-    titleEl.innerHTML = h1.innerHTML;
+    const pageTitle = h1.textContent || "";
+    if (section) {
+      titleEl.innerHTML = `${linkMarkup(section.name, {
+        href: "#/developer",
+        icon: section.icon || false,
+      })}${ICON_ARROW_RIGHT_WIDE}${modalTitleMarkup(pageTitle)}`;
+    } else {
+      titleEl.innerHTML = modalTitleMarkup(pageTitle, "tools");
+    }
     h1.remove();
   }
 
-  if (kicker && kicker.querySelector("a")) {
-    head.replaceWith(kicker);
-  } else {
-    head.remove();
-  }
+  head.remove();
 }
 
 /**
@@ -97,24 +132,6 @@ function clearLiftedChrome(modal) {
     .forEach((el) => el.remove());
 }
 
-/** Liens « App » / « Retour à l’app » : la fermeture de modale suffit. */
-function stripAppBackLinks(root) {
-  root.querySelectorAll('.styleguide-back a[href="#/"]').forEach((a) => {
-    let node = a.previousSibling;
-    while (node && node.nodeType === Node.TEXT_NODE && !String(node.textContent).trim()) {
-      node = node.previousSibling;
-    }
-    if (node && node.nodeType === Node.TEXT_NODE && String(node.textContent).includes("·")) {
-      node.textContent = String(node.textContent).replace(/\s*·\s*$/, "");
-      if (!String(node.textContent).trim()) node.remove();
-    }
-    a.remove();
-  });
-  root.querySelectorAll(".styleguide-back").forEach((p) => {
-    if (!p.querySelector("a")) p.remove();
-  });
-}
-
 /**
  * Espace développeur en modale overlay (même coquille que les pages Markdown).
  * Un second appel avec la coquille déjà en place ne swap que le corps.
@@ -139,9 +156,9 @@ export function renderDeveloperModal(host, opts) {
       <div class="modal modal--lg" role="dialog" aria-modal="true" aria-labelledby="developer-modal-title">
         <div class="modal-header">
           <div>
-            <h1 class="view-title" id="developer-modal-title">Espace développeur</h1>
+            <h1 class="view-title" id="developer-modal-title">${modalTitleMarkup("Espace développeur", "tools")}</h1>
           </div>
-          <button type="button" class="btn primary icon-only modal-close" id="btn-developer-close">
+          <button type="button" class="btn primary icon-only modal-close" tabindex="-1" id="btn-developer-close">
             ${ICON_CLOSE}
             <span class="visually-hidden">Fermer</span>
           </button>
@@ -172,12 +189,14 @@ export function renderDeveloperModal(host, opts) {
     if (!body || !titleEl) return;
     const renderPage = PAGES[nextPage] || PAGES.index;
     pageCleanup = renderPage(body) || (() => {});
-    liftStyleguideHeader(body, titleEl);
+    liftStyleguideHeader(body, titleEl, nextPage);
     if (modal) {
       liftThemesToolbar(body, modal);
       liftModalFooter(body, modal);
     }
-    stripAppBackLinks(body);
+    body.scrollTop = 0;
+    if (backdrop) backdrop.scrollTop = 0;
+    if (modal) modal.scrollTop = 0;
   }
 
   const close = () => onClose();

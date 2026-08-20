@@ -11,8 +11,8 @@ export function renderDeveloperColors(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Couleurs</p>
-        <h1 class="view-title">Champs couleur</h1>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Sélecteur de couleur (Color)</p>
+        <h1 class="view-title">Sélecteur de couleur (Color)</h1>
       </header>
 
       <p class="styleguide-intro">
@@ -187,16 +187,6 @@ export function renderDeveloperColors(host) {
           </div>
         </div>
       </div>
-
-      <p class="styleguide-back">
-        ${linkMarkup("← Index styleguide", { href: "#/developer" })}
-        ·
-        ${linkMarkup("Champs", { href: "#/developer/fields" })}
-        ·
-        ${linkMarkup("Images", { href: "#/developer/images" })}
-        ·
-        ${linkMarkup("App", { href: "#/" })}
-      </p>
     </section>
   `;
 

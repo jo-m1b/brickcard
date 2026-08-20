@@ -45,14 +45,16 @@ Tout le code applicatif est dans **`src/`**.
 | `src/js/print-settings.js` | Réglages d’impression (grille, côtés, recto-verso) — localStorage |
 | `src/js/print-dialog.js` | Modale paramètres d’impression (sans route) |
 | `src/js/version.js` | Version SemVer (`APP_VERSION`) — source unique |
-| `src/js/icons.js` | Icônes UI ([Remix Icon](https://remixicon.com/)) — paths + helpers |
+| `src/js/icons.js` | Icônes UI ([Remix Icon](https://remixicon.com/)) — paths + helpers (`remixIconByName`, `modalTitleMarkup`) |
 | `src/js/link.js` | Markup liens (`a.link` / externe / icône) |
 | `src/js/tile.js` | Markup tuiles (`ul.tile-list` / `a.tile`) |
 | `src/js/empty-view.js` | Markup états vides / chargement (`section.empty-view`, brique CSS) |
-| `src/js/confirm-dialog.js` | Dialogues `modal--sm` (`openConfirmDialog` / `confirmDialog` / `alertDialog`) — pas de `alert()` / `confirm()` / `prompt()` |
+| `src/js/confirm-dialog.js` | Dialogues `modal--sm` (`openConfirmDialog` / `confirmDialog` / `alertDialog`, `icon` optionnel) — pas de `alert()` / `confirm()` / `prompt()` |
 | `src/js/form-color.js` | Champ couleur (`form-color` / pastille / clear) |
 | `src/js/form-image.js` | Champ image (`form-image` / fichier, URL, fond, cadrage) |
 | `src/js/form-range.js` | Curseur (`form-range-row` / output / reset valeur par défaut) |
+| `src/js/form-checkbox.js` | Case à cocher (`form-check` / hint / groupes / lecture seule) |
+| `src/js/form-radio.js` | Bouton radio (`form-check form-radio` / hint / groupes / lecture seule) |
 | `src/js/form-select.js` | Surcouche select (`form-select` / liste custom) |
 | `src/js/views/list.js` | Grille d’aperçus + recherche (barre topbar) |
 | `src/js/views/editor.js` | Éditeur de carte |
@@ -158,7 +160,7 @@ Overlays de route (une à la fois, **swap** sans démonter la liste) : `#/settin
 - `#/themes` gestion des thèmes (modale) ; `#/themes/new` `#/themes/edit/:id` éditeur de thème **personnalisé** (modale ; fermeture → `#/themes`)
 - `#/settings` paramètres (modale)
 - `#/page/:slug` page Markdown (`data/page-{{slug}}.md`, ex. `#/page/about`)
-- `#/developer` `#/developer/typography` `#/developer/links` `#/developer/tiles` `#/developer/buttons` `#/developer/fields` `#/developer/selects` `#/developer/sliders` `#/developer/colors` `#/developer/images` `#/developer/search` `#/developer/modals` `#/developer/theme-presets` — espace développeur / styleguide en **modale** (extensible : `#/developer/…`) ; lien Paramètres en local uniquement ; `#/developer/theme-presets` : outil brouillon des thèmes par défaut (éditeur enfant sans route ; pied de modale optionnel levé hors du corps)
+- `#/developer` `#/developer/typography` `#/developer/links` `#/developer/tiles` `#/developer/buttons` `#/developer/fields` `#/developer/selects` `#/developer/sliders` `#/developer/checkboxes` `#/developer/radios` `#/developer/colors` `#/developer/images` `#/developer/search` `#/developer/modals` `#/developer/theme-presets` — espace développeur / styleguide en **modale** (extensible : `#/developer/…`) ; lien Paramètres en local uniquement ; index : **Aide au développement** (`ri-pencil-ruler-2-fill`) puis **Système de design** (`ri-collage-fill`) ; galeries / aide au développement (tuiles) : titre = lien `#/developer` vers la section + `ri-arrow-right-wide-fill` + titre de page ; hover / focus du lien = primary hover (mêmes tokens inversés que Fermer) ; ≤ 640px (plein écran) : si le lien a une icône, texte masqué (icône seule) ; `#/developer/theme-presets` : outil brouillon des thèmes par défaut (éditeur enfant sans route ; pied de modale optionnel levé hors du corps)
 
 ## Boutons (design system)
 
@@ -177,7 +179,7 @@ Icône seule : label dans `span.visually-hidden`, SVG en `aria-hidden="true"`.
 Badge : compteur en overlay (coin haut-droit) ; le bouton reste dans son type (y compris `icon-only`). Nom accessible sur le bouton, pas sur le badge.
 Hover et `:focus-visible` partagent le même style (pas d’outline dédié sur les boutons).
 Ghost : texte = secondary ; hover/focus = primary au repos (fond accent / texte contraste).
-Ne pas créer de classes one-shot — réutiliser ce vocabulaire. Galerie : `#/developer/buttons`.
+Ne pas créer de classes one-shot — réutiliser ce vocabulaire. Appliqué : **Enregistrer** = `ri-save-fill` ; **Supprimer** = `ri-delete-bin-2-fill` (y compris titres de confirmation de suppression). Galerie : `#/developer/buttons`.
 
 ## Liens (design system)
 
@@ -243,17 +245,25 @@ Vocabulaire :
 | Erreur | `form-error` + `is-invalid` / `aria-invalid` sur le contrôle |
 | Taille | (défaut) · `sm` |
 
-Hover : **aucun**. Repos = trait bas inset 2px ; focus = `outline` 2px + `outline-offset` 1px (`ink`, inchangé en erreur). Couleur erreur : `--form-error` (`#ce0000` clair / `#ff5555` dark). Galerie : `#/developer/fields`.
+Hover : **aucun**. Repos = trait bas inset 2px ; focus = `outline` 2px + `outline-offset` 1px (`ink`, inchangé en erreur). Couleur erreur : `--form-error` (`#ce0000` clair / `#ff5555` dark). Galerie : `#/developer/fields`. Appliqué : éditeur de carte (référence `ri-hashtag`, année / pièces / figurines = badges de carte, thème `ri-palette-fill`).
 
-Exceptions actuelles : alertes form-wide (`#error`, `#theme-error`) sous le bloc de champs ; impression (Impression recto-verso des feuilles) : `form-hint` sous les boutons, texte selon le choix.
+Exceptions actuelles : alertes form-wide (`#error`, `#theme-error`) sous le bloc de champs ; impression (Impression recto-verso des feuilles) : `form-hint` sous les boutons, texte selon le choix ; **cases à cocher** et **boutons radio** : contrôle à gauche du libellé / hint (`form-check`, voir ci-dessous).
 
 ## Listes déroulantes (design system — styleguide)
 
-Markup&nbsp;: `select.form-control` (même look qu’un champ texte). Surcouche unobtrusive&nbsp;: `enhanceFormSelects()` / `enhanceFormSelect()` dans `form-select.js` — déclencheur stylé + liste custom (optgroup, clavier, états). Option placeholder (`value=""`) exclue de la liste ; reset `ri-close-circle-fill` (non focusable) pour y revenir. Icônes d’option&nbsp;: `data-icon-left` / `data-icon-right` (clés Remix de `icons.js`, ex. `printer`, `arrow-right`). Le `<select>` natif reste synchronisé. Appliqué : éditeur (thème, groupes **Thèmes personnalisés** / **Thèmes par défaut** si personnalisés). Galerie&nbsp;: `#/developer/selects`.
+Markup&nbsp;: `select.form-control` (même look qu’un champ texte). Surcouche unobtrusive&nbsp;: `enhanceFormSelects()` / `enhanceFormSelect()` dans `form-select.js` — déclencheur stylé + liste custom (optgroup, clavier, états). Option placeholder (`value=""`) exclue de la liste ; reset `ri-close-circle-fill` (non focusable) pour y revenir. Icônes d’option&nbsp;: `data-icon-left` / `data-icon-right` (clés Remix de `icons.js`, ex. `printer`, `arrow-right`). Icône de champ (comme un input)&nbsp;: `form-control-wrap` + `form-control-icon` autour du `<select>`. Le `<select>` natif reste synchronisé. Appliqué : éditeur (thème + `ri-palette-fill`, groupes **Thèmes personnalisés** / **Thèmes par défaut** si personnalisés). Galerie&nbsp;: `#/developer/selects`.
 
 ## Curseurs / range (design system)
 
 Même ordre de champ. Contrôle&nbsp;: `form-range-row` (`input[type=range]` + `output` optionnel). Reset optionnel (`formRangeResetMarkup()` / `bindFormRange()` dans `form-range.js`)&nbsp;: bouton `ri-close-circle-fill` après l’input / output, non focusable, emplacement toujours réservé, icône visible seulement si la valeur diffère du défaut ; l’`output` passe alors en gras. Poignée carrée sans bordure ; focus sur la poignée seule ; erreur = message seulement (pas de teinte rouge sur le curseur). Appliqué : paramètres (colonnes, bordure, coins, images, grille d’impression) · impression (grille). Galerie&nbsp;: `#/developer/sliders`.
+
+## Cases à cocher (design system)
+
+Exception d’ordre&nbsp;: la case est **à gauche** du libellé et du hint (hint sous le libellé), centrée verticalement sur le bloc texte. Contrôle&nbsp;: `label.form-check` (`input.form-check-input` masqué + `form-check-ui` + `form-check-text` avec `form-label` / `form-hint` optionnel). Erreur = message `form-error` seulement (pas de teinte rouge sur la case). Taille&nbsp;: `sm` (case plus petite). États&nbsp;: disabled (grisé, non soumis) · lecture seule (`aria-readonly="true"` — l’attribut HTML `readonly` est ignoré par les checkboxes ; `bindFormCheckboxes()` bloque le bascule, valeur toujours soumise). Pas d’état visuel obligatoire ni invalide. Groupes&nbsp;: `fieldset.form-check-group` + `legend.form-label` optionnelle + `form-check-list` (colonne) ou `form-check-list--row` (rangée, wrap) ; erreur de groupe sous la liste. Module&nbsp;: `formCheckboxMarkup()` / `bindFormCheckboxes()` dans `form-checkbox.js`. Carré sans arrondi ; coche Remix `ri-check-fill` ; pas de hover ; focus sur la case. Galerie&nbsp;: `#/developer/checkboxes`.
+
+## Boutons radio (design system)
+
+Même principe d’affichage que les cases à cocher. Contrôle&nbsp;: `label.form-check.form-radio` (`input.form-check-input` `type="radio"` masqué + `form-check-ui` + `form-check-text`). Même hint, erreur (`form-error` seulement), taille `sm`, disabled, lecture seule (`aria-readonly="true"` — l’attribut HTML `readonly` est ignoré par les radios ; `bindFormRadios()` bloque le choix, y compris si une autre option du même `name` est cliquée alors que l’option cochée est figée ; valeur toujours soumise). Groupes&nbsp;: même `name` pour une option unique ; `fieldset.form-check-group` + `form-check-list` / `form-check-list--row`. Module&nbsp;: `formRadioMarkup()` / `bindFormRadios()` dans `form-radio.js`. Remix `ri-radio-button-line` (masque CSS) aux deux états ; au repos, le disque interne est retiré (même viewBox) ; pas de hover ; focus sur le rond. Galerie&nbsp;: `#/developer/radios`.
 
 ## Couleurs (design system)
 
@@ -263,8 +273,8 @@ Même ordre de champ. Contrôle&nbsp;: `input.form-control` texte dans un wrappe
 
 Contrôle&nbsp;: wrapper `form-image` (`formImageMarkup()` / `bindFormImage()` dans `form-image.js`). `processFile(file) => Promise<dataUrl>` obligatoire (`compressImage` pour les cartes, `compressThemeImage` pour les logos). Deux vues&nbsp;:
 
-- **Vide** — texte « Aucune image ! Charger une nouvelle image : » + **Depuis mes fichiers** (`btn primary`, `<input type="file">` caché) et **Depuis une URL** (`btn secondary sm`). URL → modale enfant `modal--sm` sans route (titre « Charger depuis une URL », champ URL, `form-error` sous l’input) ; pied à droite **Annuler** `secondary sm` + **Charger** `primary` ; fermeture seulement si le chargement réussit (Échap / backdrop / X = dismiss). Pipeline : `fetchImageAsFile` puis `processFile` (l’URL n’est pas conservée).
-- **Image** — champ **Fond de l’image** (`form-color`, sans hint) puis aperçu `.form-image-crop` (`tabindex="0"`). Overlays : 3 badges centrés (`btn primary sm`, apparence seulement : zoom `%`, alignements `%` signés ; `ri-zoom-in-fill` / `ri-align-item-horizontal-center-fill` / `ri-align-item-vertical-center-fill`) ; reset `btn ghost sm icon-only` (`ri-close-circle-fill`) en haut à droite si cadrage ≠ 100 % / 0 / 0 ; **Supprimer** (gauche) et **Télécharger** (droite) `btn primary sm` (supprimer : `confirmDialog`). Tabulation aperçu : reset (s’il est visible) → Télécharger → Supprimer. Cadrage au focus (glisser / molette / flèches / `+` `−`). Ratio : `--form-image-aspect` (défaut `1 / 1`). Fond de l’aperçu = couleur du champ, live.
+- **Vide** — texte « Aucune image ! Charger une nouvelle image : » + **Depuis mes fichiers** (`btn primary`, `ri-file-line`, `<input type="file">` caché) et **Depuis une URL** (`btn secondary sm`, `ri-link`). URL → modale enfant `modal--sm` sans route (titre « Charger depuis une URL » + `ri-link`, champ URL avec `ri-cloud-fill`, `form-error` sous l’input) ; pied à droite **Annuler** `secondary sm` + **Charger** `primary` (`ri-upload-fill`, comme Importer) ; fermeture seulement si le chargement réussit (Échap / backdrop / X = dismiss). Pipeline : `fetchImageAsFile` puis `processFile` (l’URL n’est pas conservée).
+- **Image** — champ **Fond de l’image** (`form-color`, sans hint) puis aperçu `.form-image-crop` (`tabindex="0"`). Overlays : 3 badges centrés (`btn primary sm`, apparence seulement : zoom `%`, alignements `%` signés ; `ri-zoom-in-fill` / `ri-align-item-horizontal-center-fill` / `ri-align-item-vertical-center-fill`) ; reset `btn ghost sm icon-only` (`ri-close-circle-fill`) en haut à droite si cadrage ≠ 100 % / 0 / 0 ; **Supprimer** (gauche, `ri-delete-bin-2-fill`) et **Sauvegarder** (droite, `ri-download-fill`, comme Sauvegarder la collection) `btn primary sm` (supprimer : `confirmDialog`). Tabulation aperçu : reset (s’il est visible) → Sauvegarder → Supprimer. Cadrage au focus (glisser / molette / flèches / `+` `−`). Ratio : `--form-image-aspect` (défaut `1 / 1`). Fond de l’aperçu = couleur du champ, live.
 
 Option `withBackgroundColor: false` : pas de champ fond ; l’aperçu utilise `previewBackground` / `setPreviewBackground()` (thèmes : couleur du thème, live). Option `fit: "logo"` : le zoom règle la **largeur** du logo (1 = 75 % de la largeur de carte, max 250 %), pas un cover. Enregistré sur le thème (`logoZoom` / `logoOffsetX` / `logoOffsetY`) et appliqué au dos et aux mini-cartes (centré dans le cadre ; décalage = fraction du cadre ; rogné s’il dépasse). Ratio thème : `--form-image-aspect: 63 / 44`.
 
@@ -303,8 +313,8 @@ Classe = apparence. Tag = plan du document. **Un rang 1 par vue** (page ou dialo
 | Liste | `h1.visually-hidden` « Cartes » | — |
 | État vide (accueil, chargement) | `h1.view-title` | brique CSS ; texte / tuiles optionnels |
 | État vide (recherche liste / thèmes) | `p.view-title` | `h1` déjà sur la vue / dialog |
-| Dialog | `h1.view-title` (`aria-labelledby`) — titre **court** ; confirmations : un peu plus long, avec le sujet | `h2.section-title` |
-| Page Markdown en modale | `# Titre` → titre du dialog (retiré du corps) | `##` → `h2`, `###` → `h3` dans `.md-content` |
+| Dialog | `h1.view-title` (`aria-labelledby`) — titre **court** + **une** icône Remix max à gauche si le déclencheur en a une (`modalTitleMarkup`) ; édition carte / thème : `ri-pencil-fill` ; confirmations : un peu plus long, avec le sujet ; galeries / aide au développement : section (lien `#/developer`, icône optionnelle) + `ri-arrow-right-wide-fill` + titre (pas d’icône de tuile) ; `#/page/about` : logo app (même look qu’une icône Remix) + `Brickcard Generator v{{APP_VERSION}}` + `ri-arrow-right-wide-fill` + `À propos` | `h2.section-title` |
+| Page Markdown en modale | `# Titre` → titre du dialog (retiré du corps) ; about : `# À propos`, version dans le titre, pas dans le corps | `##` → `h2`, `###` → `h3` dans `.md-content` |
 
 Pas des headings&nbsp;: marque topbar, `form-label`, noms de cartes (grille thèmes, Brickcard). Galerie&nbsp;: `#/developer/typography`.
 
@@ -312,7 +322,7 @@ Pas des headings&nbsp;: marque topbar, `form-label`, noms de cartes (grille thè
 
 ## Modales (design system)
 
-Coquille&nbsp;: `modal-backdrop` + `modal` (`role="dialog"` / `aria-modal`). Bordure&nbsp;: `2px solid var(--ink)` (comme le focus des champs). Alignement vertical (sur le backdrop)&nbsp;: `modal-backdrop--top` · `modal-backdrop--middle` (**défaut**) · `modal-backdrop--bottom`. Header inversé (fond `ink` / texte `panel`)&nbsp;: titre (`h1.view-title`, court) + `btn primary icon-only modal-close` (même variante DS, tokens inversés comme le menu impression&nbsp;: repos fond `--bg` / hover fond `--ink` + bordure `--bg`). Bouton fermer centré verticalement, même inset haut / droite / bas. Corps&nbsp;: `modal-body` (`tabindex="-1"` — Chrome rend les `overflow: auto` tabulables). À l’ouverture, focus sur `.modal` (`tabindex="-1"`) : Tab va à Fermer, puis le contenu, puis le pied ; Tab boucle dans la modale au premier plan. Pied optionnel&nbsp;: `modal-footer` avec `modal-footer-start` (gauche&nbsp;: sauvegarde / validation) et `modal-footer-end` (droite&nbsp;: danger) — boutons centrés verticalement (normal / `sm`). Exception `modal-footer--primary-first` (éditeur de carte, éditeur de thème, paramètres d’impression)&nbsp;: visuel Annuler puis action primaire à droite (éditeurs&nbsp;: Supprimer à gauche) ; ordre clavier (DOM) primaire → Annuler → Supprimer. Séparateur header&nbsp;: `2px solid var(--ink)` (pas de bordure haute sur le footer).
+Coquille&nbsp;: `modal-backdrop` + `modal` (`role="dialog"` / `aria-modal`). Bordure&nbsp;: `2px solid var(--ink)` (comme le focus des champs). Alignement vertical (sur le backdrop)&nbsp;: `modal-backdrop--top` · `modal-backdrop--middle` (**défaut**) · `modal-backdrop--bottom`. Header inversé (fond `ink` / texte `panel`)&nbsp;: titre (`h1.view-title`, court) + **une** icône Remix max à gauche (décorative, reprise du bouton / de la tuile qui ouvre ; exception édition carte / thème : `ri-pencil-fill` ; galeries développeur : icône de section sur le lien, pas d’icône de tuile ; `#/page/about` : logo app en `currentColor`) + `btn primary icon-only modal-close` (même variante DS, tokens inversés comme le menu impression&nbsp;: repos fond `--bg` / hover fond `--ink` + bordure `--bg`). Bouton fermer centré verticalement, même inset haut / droite / bas ; `tabindex="-1"` (pas tabulable — fermeture : Échap / clic). Corps&nbsp;: `modal-body` (`tabindex="-1"` — Chrome rend les `overflow: auto` tabulables). À l’ouverture, focus sur `.modal` (`tabindex="-1"`) : Tab va au contenu, puis le pied ; Tab boucle dans la modale au premier plan. Scroll du backdrop et du `modal-body` remis en haut (y compris swap d’une galerie développeur). Pied optionnel&nbsp;: `modal-footer` avec `modal-footer-start` (gauche&nbsp;: sauvegarde / validation) et `modal-footer-end` (droite&nbsp;: danger) — boutons centrés verticalement (normal / `sm`). Exception `modal-footer--primary-first` (éditeur de carte, éditeur de thème, paramètres d’impression)&nbsp;: visuel Annuler puis action primaire à droite (éditeurs&nbsp;: Supprimer à gauche) ; ordre clavier (DOM) primaire → Annuler → Supprimer. Séparateur header&nbsp;: `2px solid var(--ink)` (pas de bordure haute sur le footer).
 
 Tailles (3)&nbsp;: `modal--sm` (~640) · `modal--md` (~896, **défaut**) · `modal--lg` (~1152). Toujours bornées au **viewport** (`100vw` / `100dvh`). Responsive ≤&nbsp;640px&nbsp;: **plein écran**, overlay masqué.
 

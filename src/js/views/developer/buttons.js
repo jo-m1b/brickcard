@@ -56,8 +56,8 @@ export function renderDeveloperButtons(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Boutons</p>
-        <h1 class="view-title">Boutons</h1>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Bouton (Button)</p>
+        <h1 class="view-title">Bouton (Button)</h1>
       </header>
 
       <p class="styleguide-intro">
@@ -179,12 +179,6 @@ export function renderDeveloperButtons(host) {
           ${demoBtn("danger", "Fermer", { icon: ICON_CLOSE, iconOnly: true, disabled: true })}
         </div>
       </div>
-
-      <p class="styleguide-back">
-        ${linkMarkup("← Index styleguide", { href: "#/developer" })}
-        ·
-        ${linkMarkup("App", { href: "#/" })}
-      </p>
     </section>
   `;
   return () => {

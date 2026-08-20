@@ -7,18 +7,32 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [0.7.4] — 2026-08-20
+
 ### Added
 
 - Curseurs (`form-range-row`) : bouton reset (valeur par défaut, `ri-close-circle-fill`, non focusable), emplacement toujours réservé, icône visible si ≠ défaut ; `output` gras dans ce cas ; module `form-range.js` ; galerie `#/developer/sliders`
+- Cases à cocher (`form-check`) : libellé, hint, sm, états (disabled, lecture seule, erreur), groupes (colonne / rangée, légende) ; module `form-checkbox.js` ; galerie `#/developer/checkboxes`
+- Boutons radio (`form-check form-radio`) : même affichage que les cases à cocher, glyphe `ri-radio-button-line` (repos sans le disque interne), sélection exclusive ; module `form-radio.js` ; galerie `#/developer/radios`
 - Paramètres et impression : restaurer le défaut des curseurs (colonnes, bordure, coins, images, grille)
 - Paramètres → Apparence des cartes : arrondi des images (0–8 mm, pas 0,5, défaut 1 mm), indépendant de l’arrondi des coins
 
 ### Fixed
 
+- Modales : scroll remis en haut à l’affichage (backdrop + corps), y compris en swapant une galerie de l’espace développeur
 - Impression dos : fond perdu aligné sur la grille (plus de décalage haut / droite)
 
 ### Changed
 
+- Boutons **Enregistrer** : `ri-save-fill` ; **Supprimer** : `ri-delete-bin-2-fill` (y compris titres de confirmation) ; chargement d’image : **Depuis mes fichiers** `ri-file-line`, **Depuis une URL** `ri-link` ; modale URL : champ avec `ri-cloud-fill`, **Charger** `ri-upload-fill` ; image chargée : **Sauvegarder** `ri-download-fill` (comme Sauvegarder la collection)
+- Éditeur de carte : icônes de champ (référence `#`, année / pièces / figurines des badges, thème palette)
+- Page À propos : logo app + `Brickcard Generator v…` + `ri-arrow-right-wide-fill` + `À propos` ; plus de version dans le corps
+- Paramètres : descriptions des tuiles collection / développeurs (Importer, Sauvegarder, Supprimer les cartes, Espace développeur, Réinitialiser)
+- Espace développeur : libellés des tuiles (titre + description) et titres de galeries (singulier + nom anglais)
+- Modales : une icône Remix max à gauche du titre (déclencheur : tuile / bouton ; édition carte / thème : `ri-pencil-fill` ; galeries développeur : icône de section seulement)
+- Espace développeur : titre des galeries / aide au développement = nom de section (lien `#/developer`, icône `ri-collage-fill` / `ri-pencil-ruler-2-fill`) + `ri-arrow-right-wide-fill` + titre de page ; hover / focus du lien = bouton primary (tokens du Fermer)
+- Espace développeur : plus de liens retour en pied de galerie ; index : **Aide au développement** en premier, icônes sur les titres de section
+- Modales plein écran (≤ 640px) : lien de section dans le titre réduit à l’icône si présente (texte masqué)
 - Champ image : pas de zoom molette / `+` `−` à 1 % (au lieu de 8 %)
 - Paramètres : « Arrondi des coins » ne s’applique plus aux photos (réglage dédié) ; défaut 2 mm (au lieu de 1,5 mm)
 - Paramètres → Apparence des cartes : couleur par défaut en premier

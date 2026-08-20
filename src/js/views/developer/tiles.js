@@ -11,8 +11,8 @@ export function renderDeveloperTiles(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Tuiles</p>
-        <h1 class="view-title">Tuiles</h1>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Tuile (Tile)</p>
+        <h1 class="view-title">Tuile (Tile)</h1>
       </header>
 
       <p class="styleguide-intro">
@@ -136,14 +136,6 @@ export function renderDeveloperTiles(host) {
         ])}
         <p class="styleguide-hint">Classe <code>danger</code> : <code>--danger-line</code> ; hover / focus fond <code>--danger-bg</code>, cadre et trait bas rouges.</p>
       </div>
-
-      <p class="styleguide-back">
-        ${linkMarkup("← Index styleguide", { href: "#/developer" })}
-        ·
-        ${linkMarkup("Liens", { href: "#/developer/links" })}
-        ·
-        ${linkMarkup("App", { href: "#/" })}
-      </p>
     </section>
   `;
   return () => {

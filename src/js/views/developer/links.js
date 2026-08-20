@@ -10,8 +10,8 @@ export function renderDeveloperLinks(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Liens</p>
-        <h1 class="view-title">Liens</h1>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Lien (Link)</p>
+        <h1 class="view-title">Lien (Link)</h1>
       </header>
 
       <p class="styleguide-intro">
@@ -101,16 +101,6 @@ export function renderDeveloperLinks(host) {
           icône <code>ri-external-link-fill</code> à droite.
         </p>
       </div>
-
-      <p class="styleguide-back">
-        ${linkMarkup("← Index styleguide", { href: "#/developer" })}
-        ·
-        ${linkMarkup("Typographie", { href: "#/developer/typography" })}
-        ·
-        ${linkMarkup("Boutons", { href: "#/developer/buttons" })}
-        ·
-        ${linkMarkup("App", { href: "#/" })}
-      </p>
     </section>
   `;
   return () => {

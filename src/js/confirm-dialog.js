@@ -3,7 +3,7 @@
  * Enfant du host (`#modal-root`) : second backdrop, sans route.
  */
 
-import { ICON_CLOSE } from "./icons.js";
+import { ICON_CLOSE, ICON_DELETE_BIN_2, ICON_SAVE, modalTitleMarkup, remixIconByName } from "./icons.js";
 import { focusTopModal } from "./modal-focus.js";
 
 let dialogSeq = 0;
@@ -30,6 +30,7 @@ function escapeAttr(s) {
  * @typedef {{
  *   id: string,
  *   label: string,
+ *   icon?: string,
  *   variant?: "primary" | "secondary" | "danger" | "ghost",
  *   size?: "sm",
  *   slot?: "start" | "end",
@@ -43,6 +44,7 @@ function escapeAttr(s) {
  * @param {{
  *   title: string,
  *   message: string,
+ *   icon?: string,
  *   actions?: ConfirmAction[],
  * }} opts
  * @returns {Promise<string|null>} `id` de l’action, ou `null` si dismiss
@@ -72,7 +74,13 @@ export function openConfirmDialog(host, opts) {
     function btnHtml(a) {
       const variant = a.variant || "secondary";
       const size = a.size === "sm" ? " sm" : "";
-      return `<button type="button" class="btn ${variant}${size}" data-confirm-action="${escapeAttr(a.id)}">${escapeHtml(a.label)}</button>`;
+      let icon = "";
+      if (a.icon) icon = a.icon.includes("<svg") ? a.icon : remixIconByName(a.icon);
+      else if (a.label === "Supprimer") icon = ICON_DELETE_BIN_2;
+      else if (a.label === "Enregistrer") icon = ICON_SAVE;
+      const label = escapeHtml(a.label);
+      const inner = icon ? `${icon}<span>${label}</span>` : label;
+      return `<button type="button" class="btn ${variant}${size}" data-confirm-action="${escapeAttr(a.id)}">${inner}</button>`;
     }
 
     const startHtml = startBtns.length
@@ -86,9 +94,9 @@ export function openConfirmDialog(host, opts) {
       <div class="modal modal--sm" role="dialog" aria-modal="true" aria-labelledby="${uid}-title" aria-describedby="${uid}-desc">
         <div class="modal-header">
           <div>
-            <h1 class="view-title" id="${uid}-title">${escapeHtml(title)}</h1>
+            <h1 class="view-title" id="${uid}-title">${modalTitleMarkup(title, opts.icon)}</h1>
           </div>
-          <button type="button" class="btn primary icon-only modal-close" data-confirm-dismiss>
+          <button type="button" class="btn primary icon-only modal-close" tabindex="-1" data-confirm-dismiss>
             ${ICON_CLOSE}
             <span class="visually-hidden">Fermer</span>
           </button>
@@ -160,6 +168,7 @@ export function openConfirmDialog(host, opts) {
  * @param {{
  *   title: string,
  *   message: string,
+ *   icon?: string,
  *   okLabel?: string,
  *   cancelLabel?: string,
  *   danger?: boolean,
@@ -170,6 +179,7 @@ export async function confirmDialog(host, opts) {
   const result = await openConfirmDialog(host, {
     title: opts.title,
     message: opts.message,
+    icon: opts.icon,
     actions: [
       { id: "cancel", label: opts.cancelLabel || "Annuler", variant: "secondary", slot: "end" },
       {
@@ -190,6 +200,7 @@ export async function confirmDialog(host, opts) {
  * @param {{
  *   title: string,
  *   message: string,
+ *   icon?: string,
  *   okLabel?: string,
  * }} opts
  * @returns {Promise<void>}
@@ -198,6 +209,7 @@ export async function alertDialog(host, opts) {
   await openConfirmDialog(host, {
     title: opts.title,
     message: opts.message,
+    icon: opts.icon,
     actions: [{ id: "ok", label: opts.okLabel || "OK", variant: "primary", slot: "end" }],
   });
 }

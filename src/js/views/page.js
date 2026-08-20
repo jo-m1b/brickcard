@@ -1,5 +1,19 @@
-import { ICON_CLOSE } from "../icons.js";
+import { ICON_ARROW_RIGHT_WIDE, ICON_CLOSE } from "../icons.js";
 import { loadMarkdownPage } from "../markdown.js";
+import { APP_VERSION } from "../version.js";
+
+/** Logo app en titre de modale : même taille / `currentColor` qu’une icône Remix. */
+const MODAL_TITLE_BRAND = `<span class="modal-title-brand" aria-hidden="true"></span>`;
+
+/**
+ * @param {{ slug: string, title: string }} page Titre déjà en HTML (échappé)
+ * @returns {string}
+ */
+function pageModalTitleMarkup(page) {
+  const title = page.title || "";
+  if (page.slug !== "about") return title;
+  return `<span class="modal-title-lead">${MODAL_TITLE_BRAND}<span>Brickcard Generator v${APP_VERSION}</span></span>${ICON_ARROW_RIGHT_WIDE}<span>${title}</span>`;
+}
 
 /**
  * Affiche une page Markdown (`data/page-{{slug}}.md`) en modale overlay.
@@ -26,9 +40,9 @@ export async function renderPageModal(host, opts) {
       <div class="modal modal--md" role="dialog" aria-modal="true" aria-labelledby="page-modal-title">
         <div class="modal-header">
           <div>
-            <h1 class="view-title" id="page-modal-title">${page.title}</h1>
+            <h1 class="view-title" id="page-modal-title">${pageModalTitleMarkup(page)}</h1>
           </div>
-          <button type="button" class="btn primary icon-only modal-close" id="btn-page-close">
+          <button type="button" class="btn primary icon-only modal-close" tabindex="-1" id="btn-page-close">
             ${ICON_CLOSE}
             <span class="visually-hidden">Fermer</span>
           </button>
