@@ -7,14 +7,15 @@ import { getPresetThemes, getPresetTheme, parseHexColor, clearPresetCache, clamp
 import { downloadBlob } from "./card-export.js";
 import { APP_ID } from "./version.js";
 
-const DB_NAME_BASE = "brickcard-generator";
-const DB_GEN_KEY = "brickcard-generator:db-gen";
+const DB_NAME_BASE = APP_ID;
+const DB_GEN_KEY = `${APP_ID}:db-gen`;
 const DB_VERSION = 2;
 const STORE_CARDS = "cards";
 const STORE_THEMES = "themes";
 const EXPORT_VERSION = 3;
 const BACKUP_EXT = ".brickcard";
 const BACKUP_INVALID = "Ce fichier n’est pas une sauvegarde Brickcard valide.";
+const LEGACY_APP_IDS = new Set(["brickcard-generator"]);
 
 /**
  * @typedef {Object} Card
@@ -64,14 +65,27 @@ function getDbName() {
 }
 
 /**
- * Après un reset buggé, l’URL a souvent `?_=` et la base historique est coincée.
+ * Query de rechargement après reset : `?{timestamp}` (legacy `?_=`).
+ * Sert à contourner le cache HTTP / SW de `index.html`.
+ * @param {string} [search]
+ */
+export function isResetReloadQuery(search = typeof location !== "undefined" ? location.search : "") {
+  if (!search || search === "?") return false;
+  const params = new URLSearchParams(search);
+  if (params.has("_")) return true;
+  const keys = [...params.keys()];
+  return keys.length === 1 && /^\d+$/.test(keys[0]) && params.get(keys[0]) === "";
+}
+
+/**
+ * Après un reset buggé, l’URL a souvent `?{timestamp}` / `?_=` et la base historique est coincée.
  * On bascule alors sur une nouvelle génération (données déjà vidées de toute façon).
  */
 function repairWedgedDbIfNeeded() {
   try {
     if (localStorage.getItem(DB_GEN_KEY)) return;
     if (typeof location === "undefined") return;
-    if (!new URLSearchParams(location.search).has("_")) return;
+    if (!isResetReloadQuery(location.search)) return;
     localStorage.setItem(DB_GEN_KEY, String(Date.now()));
     deleteDatabaseBestEffort(DB_NAME_BASE);
     deleteDatabaseBestEffort("lego-set-cards");
@@ -191,19 +205,31 @@ function txDone(tx) {
   });
 }
 
-/** Supprime l'ancienne base / clés (projet renommé Brickcard Generator). */
+/** Supprime les anciennes bases / clés (lego-set-cards, brickcard-generator). */
 let legacyStoragePurged = false;
 function purgeLegacyBrowserStorage() {
   if (legacyStoragePurged) return;
   legacyStoragePurged = true;
   try {
-    localStorage.removeItem("lego-set-cards:v1");
-    localStorage.removeItem("lego-set-cards:theme");
+    const oldGen = localStorage.getItem("brickcard-generator:db-gen");
+    if (oldGen) {
+      indexedDB.deleteDatabase(`brickcard-generator-${oldGen}`);
+    }
+    const stale = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (key.startsWith("brickcard-generator:") || key.startsWith("lego-set-cards:"))) {
+        stale.push(key);
+      }
+    }
+    for (const key of stale) localStorage.removeItem(key);
   } catch {
     /* ignore */
   }
   try {
     indexedDB.deleteDatabase("lego-set-cards");
+    indexedDB.deleteDatabase("brickcard-generator");
+    indexedDB.deleteDatabase("brickcard-generator-preset-draft");
   } catch {
     /* ignore */
   }
@@ -263,23 +289,24 @@ export async function wipeAllLocalData() {
   deleteDatabaseBestEffort(oldDbName);
   deleteDatabaseBestEffort(DB_NAME_BASE);
   deleteDatabaseBestEffort("lego-set-cards");
+  deleteDatabaseBestEffort("brickcard-generator");
 
   try {
-    localStorage.removeItem("brickcard-generator:ui-theme");
-    localStorage.removeItem("brickcard-generator:card-face-border-mm");
-    localStorage.removeItem("brickcard-generator:card-radius-mm");
-    localStorage.removeItem("brickcard-generator:card-image-radius-mm");
-    localStorage.removeItem("brickcard-generator:card-default-color");
-    localStorage.removeItem("brickcard-generator:migrate-accent-default-v1");
-    localStorage.removeItem("brickcard-generator:migrate-empty-theme-color-v1");
-    localStorage.removeItem("brickcard-generator:list-sort");
-    localStorage.removeItem("brickcard-generator:list-sort-dir");
-    localStorage.removeItem("brickcard-generator:themes-sort");
-    localStorage.removeItem("brickcard-generator:themes-sort-dir");
-    localStorage.removeItem("brickcard-generator:list-cols-max");
-    localStorage.removeItem("brickcard-generator:print-qty");
-    localStorage.removeItem("brickcard-generator:print-settings");
-    localStorage.removeItem("brickcard-generator:developer-enabled");
+    localStorage.removeItem("brickcard:ui-theme");
+    localStorage.removeItem("brickcard:card-face-border-mm");
+    localStorage.removeItem("brickcard:card-radius-mm");
+    localStorage.removeItem("brickcard:card-image-radius-mm");
+    localStorage.removeItem("brickcard:card-default-color");
+    localStorage.removeItem("brickcard:migrate-accent-default-v1");
+    localStorage.removeItem("brickcard:migrate-empty-theme-color-v1");
+    localStorage.removeItem("brickcard:list-sort");
+    localStorage.removeItem("brickcard:list-sort-dir");
+    localStorage.removeItem("brickcard:themes-sort");
+    localStorage.removeItem("brickcard:themes-sort-dir");
+    localStorage.removeItem("brickcard:list-cols-max");
+    localStorage.removeItem("brickcard:print-qty");
+    localStorage.removeItem("brickcard:print-settings");
+    localStorage.removeItem("brickcard:developer-enabled");
     localStorage.removeItem("lego-set-cards:v1");
     localStorage.removeItem("lego-set-cards:theme");
     /* Ne pas retirer DB_GEN_KEY : c’est la clé de la nouvelle base vide. */
@@ -659,7 +686,7 @@ export function parseBrickcardBackup(input) {
     throw new Error(BACKUP_INVALID);
   }
   const backup = /** @type {Record<string, unknown>} */ (data);
-  if (backup.app !== APP_ID) {
+  if (backup.app !== APP_ID && !LEGACY_APP_IDS.has(backup.app)) {
     throw new Error(BACKUP_INVALID);
   }
   if (!Number.isInteger(backup.version) || /** @type {number} */ (backup.version) < 1) {

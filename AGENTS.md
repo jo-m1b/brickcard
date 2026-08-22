@@ -1,14 +1,14 @@
-# AGENTS.md — Brickcard Generator
+# AGENTS.md — Brickcard
 
 Guide pour les agents IA (Cursor, Copilot, etc.) qui travaillent sur ce dépôt.
 
 ## Qu’est-ce que c’est ?
 
-**Brickcard Generator** — SPA **statique** (pas de framework, pas de bundler) pour générer des *Brickcards* : cartes « poker » (63×88 mm) décrivant des sets LEGO. Objectif utilisateur : cartons plastifiés dans des pochettes avec les sets sans boîte.
+**Brickcard** — SPA **statique** (pas de framework, pas de bundler) pour générer des *Brickcards* : cartes « poker » (63×88 mm) décrivant des sets LEGO. Objectif utilisateur : cartons plastifiés dans des pochettes avec les sets sans boîte.
 
 Stack : HTML + CSS + JS modules ES (`type="module"`). UI en **français**.
 
-Nom produit : **Brickcard Generator** (marque courte UI : **Brickcard**).
+Nom produit / marque UI : **Brickcard**.
 
 ## Où est le code ?
 
@@ -22,12 +22,12 @@ Tout le code applicatif est dans **`src/`**.
 | `src/data/themes-presets.json` | Liste des thèmes LEGO par défaut (éditable sans toucher au JS) |
 | `src/data/theme-logo-*` | Logos des thèmes par défaut (PNG / SVG / WebP / JPEG) |
 | `src/data/page-{{slug}}.md` | Pages Markdown en modale (`#page/:slug`, ex. `page-about.md`) ; `# Titre` → titre du dialog |
-| `src/img/brickcard-generator-logo.svg` | Logo app noir (brick outline — crédit Joko Sutrisno / Vecteezy) |
-| `src/img/brickcard-generator-logo-white.svg` | Même logo, fill blanc (cartes / thèmes à fond coloré) |
-| `src/img/brickcard-generator-favicon.svg` | Favicon SVG (clair `#141414` / sombre blanc via `prefers-color-scheme`) |
-| `src/img/brickcard-generator-favicon.ico` / `brickcard-generator-favicon-96x96.png` | Favicon raster (onglet) |
-| `src/img/brickcard-generator-apple-touch-icon.png` | Icône iOS 180×180 |
-| `src/img/brickcard-generator-web-app-manifest-192x192.png` / `512x512.png` | Icônes PWA (any + maskable) |
+| `src/img/brickcard-logo.svg` | Logo app noir (brick outline — crédit Joko Sutrisno / Vecteezy) |
+| `src/img/brickcard-logo-white.svg` | Même logo, fill blanc (cartes / thèmes à fond coloré) |
+| `src/img/brickcard-favicon.svg` | Favicon SVG (clair `#141414` / sombre blanc via `prefers-color-scheme`) |
+| `src/img/brickcard-favicon.ico` / `brickcard-favicon-96x96.png` | Favicon raster (onglet) |
+| `src/img/brickcard-apple-touch-icon.png` | Icône iOS 180×180 |
+| `src/img/brickcard-web-app-manifest-192x192.png` / `512x512.png` | Icônes PWA (any + maskable) |
 | `src/fonts/` | Open Sans + Inter (woff2 variable, latin-ext) + licences SIL OFL |
 | `src/js/app.js` | Hash routing (vues + historique), import/export |
 | `src/js/modal-focus.js` | Focus initial + piège Tab des modales |
@@ -44,7 +44,7 @@ Tout le code applicatif est dans **`src/`**.
 | `src/js/print-qty.js` | Quantités d’impression — localStorage |
 | `src/js/print-settings.js` | Réglages d’impression (grille, côtés, recto-verso) — localStorage |
 | `src/js/print-dialog.js` | Modale paramètres d’impression (`#print`) |
-| `src/js/version.js` | Version SemVer (`APP_VERSION`) — source unique |
+| `src/js/version.js` | Version SemVer (`APP_VERSION`), `APP_ID`, `APP_NAME` — source unique |
 | `src/js/icons.js` | Icônes UI ([Remix Icon](https://remixicon.com/)) — paths + helpers (`remixIconByName`, `modalTitleMarkup`) |
 | `src/js/link.js` | Markup liens (`a.link` / externe / icône) |
 | `src/js/tile.js` | Markup tuiles (`ul.tile-list` / `a.tile`) |
@@ -102,7 +102,7 @@ Champs par entrée :
 
 Thèmes par défaut : **lecture seule** dans l’app (ni modification ni suppression). Les thèmes personnalisés ont un id UUID (`createId()`), sont stockés en IndexedDB, et s’éditent via `#themes/new` / `#themes/edit/:id`.
 
-Outil développeur `#developer/theme-presets` : copie locale isolée (IndexedDB `brickcard-generator-preset-draft`) pour éditer id/slug, nom, couleur, logo et cadrage (`#developer/theme-presets/new`, `#developer/theme-presets/edit/:slug`), puis **sauvegarder** `themes-presets.json` + `theme-logo-{id}.{ext}` à placer soi-même dans `data/`. Ne lit/écrit jamais les stores `cards` / `themes` ni les réglages. Au premier chargement (ou après « Supprimer le brouillon ») : seed depuis le JSON. Reset local de la collection **ne** touche **pas** ce brouillon.
+Outil développeur `#developer/theme-presets` : copie locale isolée (IndexedDB `brickcard-preset-draft`) pour éditer id/slug, nom, couleur, logo et cadrage (`#developer/theme-presets/new`, `#developer/theme-presets/edit/:slug`), puis **sauvegarder** `themes-presets.json` + `theme-logo-{id}.{ext}` à placer soi-même dans `data/`. Ne lit/écrit jamais les stores `cards` / `themes` ni les réglages. Au premier chargement (ou après « Supprimer le brouillon ») : seed depuis le JSON. Reset local de la collection **ne** touche **pas** ce brouillon.
 
 ## Modèle thème LEGO (`LegoTheme`)
 
@@ -131,25 +131,25 @@ Accent d’une Brickcard (`resolveCardAccent`) :
 
 ## Persistance
 
-- IndexedDB : `brickcard-generator` **v2** — stores `cards` + `themes` (**personnalisés seulement** ; les thèmes par défaut se lisent dans `themes-presets.json`) (après Reset local : nom `brickcard-generator-<db-gen>`, clé `brickcard-generator:db-gen`)
-- IndexedDB outil presets : `brickcard-generator-preset-draft` — brouillon `#developer/theme-presets` uniquement (indépendant du Reset local)
-- Clé thème UI : `brickcard-generator:ui-theme`
-- Clé bordure face : `brickcard-generator:card-face-border-mm` (défaut `3`)
-- Clé arrondi coins : `brickcard-generator:card-radius-mm` (défaut `2`, face + dos)
-- Clé arrondi images : `brickcard-generator:card-image-radius-mm` (défaut `1`, cadre photo)
-- Clé couleur carte par défaut : `brickcard-generator:card-default-color` (vide = gris d’usine `#6e6e6e`)
-- Clé sélection impression : `brickcard-generator:print-qty` (`{ [cardId]: qty }`)
-- Clé réglages impression : `brickcard-generator:print-settings` (`{ printGrid: 1–10, cardSidesToPrint: "faceAndBack"|"faceOnly"|"backOnly", sheetRectoVerso: "alternate"|"grouped" }`, défaut `3` / `faceAndBack` / `alternate`)
-- Clé espace développeur : `brickcard-generator:developer-enabled` (`"1"` si activé hors local ; toujours considéré actif sur localhost / `127.0.0.1` / `[::1]`) ; Reset local la retire
-- Clés tri liste : `brickcard-generator:list-sort`, `brickcard-generator:list-sort-dir` (défaut `updatedAt` / `desc`) ; après enregistrement d’une carte : recherche vidée et tri remis sur date de modification décroissante
-- Clés tri thèmes : `brickcard-generator:themes-sort`, `brickcard-generator:themes-sort-dir` (défaut `cardCount` / `desc`) ; après enregistrement d’un thème : recherche vidée et tri remis sur date de modification décroissante (si ≥ 2 thèmes personnalisés ; sinon repli sur le défaut)
-- Clé colonnes liste max : `brickcard-generator:list-cols-max` (défaut `4`, plage 2–10, ou `infinite`)
+- IndexedDB : `brickcard` **v2** — stores `cards` + `themes` (**personnalisés seulement** ; les thèmes par défaut se lisent dans `themes-presets.json`) (après Reset local : nom `brickcard-<db-gen>`, clé `brickcard:db-gen`) ; le reload post-reset passe par `?{timestamp}` (cache HTTP / SW), puis la query est retirée au boot (`?_=` encore reconnu)
+- IndexedDB outil presets : `brickcard-preset-draft` — brouillon `#developer/theme-presets` uniquement (indépendant du Reset local)
+- Clé thème UI : `brickcard:ui-theme`
+- Clé bordure face : `brickcard:card-face-border-mm` (défaut `3`)
+- Clé arrondi coins : `brickcard:card-radius-mm` (défaut `2`, face + dos)
+- Clé arrondi images : `brickcard:card-image-radius-mm` (défaut `1`, cadre photo)
+- Clé couleur carte par défaut : `brickcard:card-default-color` (vide = gris d’usine `#6e6e6e`)
+- Clé sélection impression : `brickcard:print-qty` (`{ [cardId]: qty }`)
+- Clé réglages impression : `brickcard:print-settings` (`{ printGrid: 1–10, cardSidesToPrint: "faceAndBack"|"faceOnly"|"backOnly", sheetRectoVerso: "alternate"|"grouped" }`, défaut `3` / `faceAndBack` / `alternate`)
+- Clé espace développeur : `brickcard:developer-enabled` (`"1"` si activé hors local ; toujours considéré actif sur localhost / `127.0.0.1` / `[::1]`) ; Reset local la retire
+- Clés tri liste : `brickcard:list-sort`, `brickcard:list-sort-dir` (défaut `updatedAt` / `desc`) ; après enregistrement d’une carte : recherche vidée et tri remis sur date de modification décroissante
+- Clés tri thèmes : `brickcard:themes-sort`, `brickcard:themes-sort-dir` (défaut `cardCount` / `desc`) ; après enregistrement d’un thème : recherche vidée et tri remis sur date de modification décroissante (si ≥ 2 thèmes personnalisés ; sinon repli sur le défaut)
+- Clé colonnes liste max : `brickcard:list-cols-max` (défaut `4`, plage 2–10, ou `infinite`)
 - Cascade accent carte : couleur du thème → couleur configurée → `#6e6e6e`
-- Export **v3** (fichier `.brickcard`, JSON) : `{ version: 3, app: "brickcard-generator", cards, themes }` — `themes` = personnalisés uniquement — fichier `brickcard-export-YYYY-MM-DD.brickcard`
-- Import : fichier `.brickcard` uniquement ; vérifie `app` / `version` / `cards` / `themes` (tableaux) ; refuse une `version` supérieure à celle de l’app ; ignore les thèmes par défaut (ids de preset / `isBuiltin`) ; ne réécrit pas `themes-presets.json`
+- Export **v3** (fichier `.brickcard`, JSON) : `{ version: 3, app: "brickcard", cards, themes }` — `themes` = personnalisés uniquement — fichier `brickcard-export-YYYY-MM-DD.brickcard`
+- Import : fichier `.brickcard` uniquement ; vérifie `app` / `version` / `cards` / `themes` (tableaux) ; `app` = `brickcard` (l’ancien `brickcard-generator` est encore accepté) ; refuse une `version` supérieure à celle de l’app ; ignore les thèmes par défaut (ids de preset / `isBuiltin`) ; ne réécrit pas `themes-presets.json`
 - APIs async ; serveur HTTP obligatoire en local
 - Au démarrage, `boot()` attend `loadCards()` + `loadThemes()` avant `route()` (écran « Chargement... » dans `#main`, animation CSS tant que `aria-busy`)
-- Au démarrage, purge éventuelle de l’ancienne base `lego-set-cards` (plus utilisée)
+- Au démarrage, purge éventuelle des anciennes bases `lego-set-cards` et `brickcard-generator` (plus utilisées)
 
 ## Vues
 
@@ -157,7 +157,7 @@ Hash = source de vérité (Précédent / Suivant). Accueil = URL sans hash (jeto
 
 Overlays de route (une à la fois, **swap** sans démonter la liste) : `#settings`, `#print`, `#themes`, `#themes/new`, `#themes/edit/:id`, `#page/:slug`, `#new-card`, `#edit-card/:id`, `#developer/…` (`#developer/theme-presets/new`, `#developer/theme-presets/edit/:slug`). Dialogues enfants (confirmations, URL d’image) : pas d’URL, second backdrop par-dessus la vue courante.
 
-- (sans hash) accueil (empty « Bienvenue », liste, ou recherche sans résultat « Oups ! ») ; `#` et `#/` nettoyés
+- (sans hash) accueil (empty « Bienvenue ;) », liste, ou recherche sans résultat « Oups ! ») ; `#` et `#/` nettoyés
 - `#new-card` `#edit-card/:id` éditeur de carte (modale)
 - `#themes` gestion des thèmes (modale) ; `#themes/new` `#themes/edit/:id` éditeur de thème **personnalisé** (modale ; fermeture → `#themes`)
 - `#settings` paramètres (modale)
@@ -316,16 +316,16 @@ Classe = apparence. Tag = plan du document. **Un rang 1 par vue** (page ou dialo
 | Liste | `h1.visually-hidden` « Cartes » | — |
 | État vide (accueil, chargement) | `h1.view-title` | brique CSS ; texte / tuiles optionnels |
 | État vide (recherche liste / thèmes) | `p.view-title` | `h1` déjà sur la vue / dialog |
-| Dialog | `h1.view-title` (`aria-labelledby`) — titre **court** + **une** icône Remix max à gauche si le déclencheur en a une (`modalTitleMarkup`) ; édition carte / thème : `ri-pencil-fill` ; confirmations : un peu plus long, avec le sujet ; galeries / aide au développement : section (lien `#developer`, icône optionnelle) + `ri-arrow-right-wide-fill` + titre (pas d’icône de tuile) ; `#page/about` : logo app (même look qu’une icône Remix) + `Brickcard Generator v{{APP_VERSION}}` + `ri-arrow-right-wide-fill` + `À propos` | `h2.section-title` |
+| Dialog | `h1.view-title` (`aria-labelledby`) — titre **court** + **une** icône Remix max à gauche si le déclencheur en a une (`modalTitleMarkup`) ; édition carte / thème : `ri-pencil-fill` ; confirmations : un peu plus long, avec le sujet ; galeries / aide au développement : section (lien `#developer`, icône optionnelle) + `ri-arrow-right-wide-fill` + titre (pas d’icône de tuile) ; `#page/about` : logo app (même look qu’une icône Remix) + `Brickcard v{{APP_VERSION}}` + `ri-arrow-right-wide-fill` + `À propos` | `h2.section-title` |
 | Page Markdown en modale | `# Titre` → titre du dialog (retiré du corps) ; about : `# À propos`, version dans le titre, pas dans le corps | `##` → `h2`, `###` → `h3` dans `.md-content` |
 
 Pas des headings&nbsp;: marque topbar, `form-label`, noms de cartes (grille thèmes, Brickcard). Galerie&nbsp;: `#developer/typography`.
 
-États vides (`section.empty-view` / `.empty-view-body`, helper `emptyViewMarkup` dans `empty-view.js`)&nbsp;: titre + texte + tuiles centrés dans `#main` ou le `modal-body` ; brique CSS collée au-dessus (hors flux). Accueil sans carte&nbsp;: «&nbsp;Bienvenue&nbsp;» + tuiles Nouvelle carte / Importer une sauvegarde. Recherche sans résultat (cartes ou thèmes)&nbsp;: «&nbsp;Oups&nbsp;!&nbsp;». Premier affichage&nbsp;: «&nbsp;Chargement...&nbsp;» jusqu’à cartes + thèmes prêts.
+États vides (`section.empty-view` / `.empty-view-body`, helper `emptyViewMarkup` dans `empty-view.js`)&nbsp;: titre + texte + tuiles centrés dans `#main` ou le `modal-body` ; brique CSS collée au-dessus (hors flux). Accueil sans carte&nbsp;: «&nbsp;Bienvenue ;)&nbsp;» + tuiles Nouvelle carte / Importer une sauvegarde ; sur grand écran le bloc remonte d’une hauteur de header (header visuellement vide). Recherche sans résultat (cartes ou thèmes)&nbsp;: «&nbsp;Oups&nbsp;!&nbsp;». Premier affichage&nbsp;: «&nbsp;Chargement...&nbsp;» jusqu’à cartes + thèmes prêts.
 
 ## Modales (design system)
 
-Coquille&nbsp;: `modal-backdrop` + `modal` (`role="dialog"` / `aria-modal`). Bordure&nbsp;: `2px solid var(--ink)` (comme le focus des champs). Alignement vertical (sur le backdrop)&nbsp;: `modal-backdrop--top` · `modal-backdrop--middle` (**défaut**) · `modal-backdrop--bottom`. Header inversé (fond `ink` / texte `panel`)&nbsp;: titre (`h1.view-title`, court) + **une** icône Remix max à gauche (décorative, reprise du bouton / de la tuile qui ouvre ; exception édition carte / thème : `ri-pencil-fill` ; galeries développeur : icône de section sur le lien, pas d’icône de tuile ; `#page/about` : logo app en `currentColor`) + `btn primary icon-only modal-close` (même variante DS, tokens inversés comme le menu impression&nbsp;: repos fond `--bg` / hover fond `--ink` + bordure `--bg`). Bouton fermer centré verticalement, même inset haut / droite / bas ; `tabindex="-1"` (pas tabulable — fermeture : Échap / clic). Corps&nbsp;: `modal-body` (`tabindex="-1"` — Chrome rend les `overflow: auto` tabulables). À l’ouverture, focus sur `.modal` (`tabindex="-1"`) : Tab va au contenu, puis le pied ; Tab boucle dans la modale au premier plan. Scroll du backdrop et du `modal-body` remis en haut (y compris swap d’une galerie développeur). Pied optionnel&nbsp;: `modal-footer` avec `modal-footer-start` (gauche&nbsp;: sauvegarde / validation) et `modal-footer-end` (droite&nbsp;: danger) — boutons centrés verticalement (normal / `sm`). Exception `modal-footer--primary-first` (éditeur de carte, éditeur de thème, paramètres d’impression)&nbsp;: visuel Annuler puis action primaire à droite (éditeurs&nbsp;: Supprimer à gauche) ; ordre clavier (DOM) primaire → Annuler → Supprimer. Séparateur header&nbsp;: `2px solid var(--ink)` (pas de bordure haute sur le footer).
+Coquille&nbsp;: `modal-backdrop` + `modal` (`role="dialog"` / `aria-modal`). Bordure&nbsp;: `2px solid var(--ink)` (comme le focus des champs). Alignement vertical (sur le backdrop)&nbsp;: `modal-backdrop--top` · `modal-backdrop--middle` (**défaut**) · `modal-backdrop--bottom`. Header inversé (fond `ink` / texte `panel`)&nbsp;: titre (`h1.view-title`, court) + **une** icône Remix max à gauche (décorative, reprise du bouton / de la tuile qui ouvre ; exception édition carte / thème : `ri-pencil-fill` ; galeries développeur : icône de section sur le lien, pas d’icône de tuile ; `#page/about` : logo app en `currentColor`) + `btn primary icon-only modal-close` (même variante DS, tokens inversés comme le menu impression&nbsp;: repos fond `--bg` / hover fond `--ink` + bordure `--bg`). Bouton fermer centré verticalement, même inset haut / droite / bas ; `tabindex="-1"` (pas tabulable — fermeture : Échap / clic). Corps&nbsp;: `modal-body` (`tabindex="-1"` — Chrome rend les `overflow: auto` tabulables). À l’ouverture, focus sur `.modal` (`tabindex="-1"`) : Tab va au contenu, puis le pied ; Tab boucle dans la modale au premier plan. Scroll du backdrop et du `modal-body` remis en haut (y compris swap d’une galerie développeur). Pied optionnel&nbsp;: `modal-footer` avec `modal-footer-start` (gauche&nbsp;: sauvegarde / validation) et `modal-footer-end` (droite&nbsp;: danger) — boutons centrés verticalement (normal / `sm`). **Annuler**&nbsp;: `sm` s’il y a d’autres boutons d’action dans le pied, taille normale s’il est seul (`openConfirmDialog` l’applique tout seul). Exception `modal-footer--primary-first` (éditeur de carte, éditeur de thème, paramètres d’impression)&nbsp;: visuel Annuler puis action primaire à droite (éditeurs&nbsp;: Supprimer à gauche) ; ordre clavier (DOM) primaire → Annuler → Supprimer. Séparateur header&nbsp;: `2px solid var(--ink)` (pas de bordure haute sur le footer).
 
 Tailles (3)&nbsp;: `modal--sm` (~640) · `modal--md` (~896, **défaut**) · `modal--lg` (~1152). Toujours bornées au **viewport** (`100vw` / `100dvh`). Responsive ≤&nbsp;640px&nbsp;: **plein écran**, overlay masqué.
 
@@ -337,7 +337,7 @@ A4 portrait ; **grille** 1×1 à 10×10 (défaut **3×3** poker 63×88 mm). Autr
 
 ## Conventions
 
-- Garder le nom produit **Brickcard Generator** / marque **Brickcard** dans l’UI et la doc.
+- Garder le nom produit **Brickcard** dans l’UI et la doc.
 - Garder les noms de champs **verbeux** sur les modèles Card / LegoTheme.
 - UI française, design minimaliste (pas d’arrondis/ombres UI).
 - **Typo** : Open Sans pour l’UI (`--font-ui`) ; Inter pour le texte des cartes (`--font-card`) — fichiers dans `src/fonts/`, pas de CDN. Titres : classe = look, tag = plan (voir **Titres**).

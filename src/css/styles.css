@@ -187,6 +187,8 @@ textarea {
 }
 
 .app {
+  /* Logo 55px + padding vertical du topbar (0.85rem × 2) */
+  --topbar-h: calc(55px + 1.7rem);
   margin: 0 auto;
   padding: 0 1.25rem 3rem;
   display: grid;
@@ -1183,6 +1185,15 @@ html:not([data-theme]) .btn .icon-system {
   flex: 1 1 auto;
   min-height: 0;
   overflow: hidden;
+}
+
+/* Accueil / chargement : le header est vide visuellement, le centrage dans #main
+   paraît trop bas. place-content centre dans la zone de contenu : un padding-bottom
+   de 2× topbar remonte le bloc d’une hauteur de header. */
+@media (min-height: 40rem) {
+  .main > .empty-view {
+    padding-bottom: calc(var(--topbar-h) * 2);
+  }
 }
 
 .main > .panel:has(> .empty-view:not([hidden])) {
@@ -2997,8 +3008,8 @@ button.form-select-trigger.sm {
   flex-shrink: 0;
   background-color: currentColor;
   /* Le brick remplit le viewBox (contrairement aux glyphes Remix) : inset optique */
-  -webkit-mask: url("../img/brickcard-generator-logo.svg") center / 80% 80% no-repeat;
-  mask: url("../img/brickcard-generator-logo.svg") center / 80% 80% no-repeat;
+  -webkit-mask: url("../img/brickcard-logo.svg") center / 80% 80% no-repeat;
+  mask: url("../img/brickcard-logo.svg") center / 80% 80% no-repeat;
 }
 
 .modal-header > div {

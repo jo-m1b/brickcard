@@ -19,8 +19,8 @@ function includesCI(hay, needle) {
   return hay.toLowerCase().includes(needle.toLowerCase());
 }
 
-const SORT_KEY = "brickcard-generator:themes-sort";
-const SORT_DIR_KEY = "brickcard-generator:themes-sort-dir";
+const SORT_KEY = "brickcard:themes-sort";
+const SORT_DIR_KEY = "brickcard:themes-sort-dir";
 
 /** @typedef {"cardCount"|"name"|"updatedAt"} ThemesSortKey */
 /** @typedef {"asc"|"desc"} ThemesSortDir */

@@ -13,6 +13,8 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Changed
 
+- Accueil vide : « Bienvenue ;) », « votre collection » ; bloc remonte d’une hauteur de header (grand écran)
+- Pied de modale : « Annuler » en `sm` s’il y a d’autres actions ; taille normale s’il est seul
 - Sauvegarde de la collection : fichier `.brickcard` (JSON) au lieu de `.json` ; import limité à `*.brickcard`
 - Import : refus des fichiers qui ne sont pas une sauvegarde Brickcard (`app`, `version`, `cards` / `themes`)
 - Paramètres : tuile Sauvegarder désactivée si la collection est vide
@@ -20,6 +22,8 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 - Accueil (liste ou vue vide) : URL sans hash (jeton interne `#`)
 - Routes : overlays en `#settings`, `#new-card`, `#developer/…` (plus de `/` juste après `#`) ; anciennes URLs `#/…` nettoyées
 - Paramètres d’impression : route `#print` (comme les autres overlays) ; rien à imprimer → message à la place des options
+- Reset local : rechargement en `?{timestamp}` (plus de `?_=`) ; la query est retirée une fois l’app relancée
+- Nom produit : **Brickcard** (plus « Brickcard Generator ») ; identifiants techniques `brickcard` (IndexedDB, localStorage, `APP_ID`, cache SW, images app) ; import : l’ancien `app` `brickcard-generator` est encore accepté
 
 ### Fixed
 

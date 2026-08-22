@@ -1,9 +1,9 @@
-import { loadCards, loadThemes, exportBackup, importBackup, isBrickcardBackupFilename, parseBrickcardBackup, wipeAllLocalData, deleteAllCards } from "./storage.js";
+import { loadCards, loadThemes, exportBackup, importBackup, isBrickcardBackupFilename, parseBrickcardBackup, wipeAllLocalData, deleteAllCards, isResetReloadQuery } from "./storage.js";
 import { initTheme } from "./theme.js";
 import { initCardDesign } from "./card-design.js";
 import { initListLayout } from "./list-layout.js";
 import { enableDeveloper, isDeveloperEnabled } from "./developer-access.js";
-import { APP_ID, APP_VERSION } from "./version.js";
+import { APP_ID, APP_NAME, APP_VERSION } from "./version.js";
 import { renderEditor } from "./views/editor.js";
 import { renderList, prepareListAfterCardSave } from "./views/list.js";
 import { renderThemesModal, prepareThemesAfterThemeSave } from "./views/themes.js";
@@ -368,13 +368,17 @@ async function showOverlay(routeInfo) {
 
   if (routeInfo.name === "developer") {
     if (!isDeveloperEnabled()) {
-      const ok = await confirmDialog(modalRoot, {
+      const choice = await openConfirmDialog(modalRoot, {
         title: "Activer l’espace développeur ?",
         icon: "tools",
         message:
-          "L’espace développeur donne accès au styleguide, aux outils internes et à la réinitialisation des données locales.",
-        okLabel: "Activer",
+          "L’espace développeur donne accès à l’aide au développement, le système de design, la documentation et certaines options comme la réinitialisation des données locales enregistrées.",
+        actions: [
+          { id: "cancel", label: "Annuler", variant: "secondary", size: "sm", slot: "end" },
+          { id: "ok", label: "Activer", variant: "primary", slot: "end" },
+        ],
       });
+      const ok = choice === "ok";
       if (parseRoute().name !== "developer") return;
       if (!ok) {
         dismissOverlay();
@@ -423,18 +427,18 @@ function disposeList() {
 
 function renderEmpty() {
   main.innerHTML = emptyViewMarkup({
-    title: "Bienvenue",
-    text: "Aucune carte pour l'instant dans la collection !",
+    title: "Bienvenue ;)",
+    text: "Aucune carte pour l'instant dans votre collection !",
     tiles: [
       {
         title: "Nouvelle carte",
-        desc: "Créer une première carte pour l'ajouter à la collection",
+        desc: "Créer une carte pour commencer votre collection",
         href: "#new-card",
         icon: "add",
       },
       {
         title: "Importer une sauvegarde",
-        desc: "Ajouter un lot de cartes à la collection à partir d'une sauvegarde",
+        desc: "Ajouter un lot de cartes à votre collection depuis une sauvegarde",
         icon: "upload",
         tag: "button",
         id: "empty-import",
@@ -619,9 +623,7 @@ async function handleDevReset() {
       cleanupSettings = null;
     }
     await wipeAllLocalData();
-    const url = new URL(location.href);
-    url.searchParams.set("_", String(Date.now()));
-    location.replace(`${url.pathname}${url.search}`);
+    location.replace(`${location.pathname}?${Date.now()}`);
   } catch (err) {
     toast(err.message || "Reset impossible", "error");
   }
@@ -680,7 +682,7 @@ async function boot() {
     if (appVersionEl) {
       appVersionEl.textContent = `v${APP_VERSION}`;
     }
-    document.title = `Brickcard Generator v${APP_VERSION}`;
+    document.title = `${APP_NAME} v${APP_VERSION}`;
     initTheme();
     initCardDesign();
     initListLayout();
@@ -691,6 +693,11 @@ async function boot() {
     history.replaceState({ app: APP_ID, depth: 0 }, "", hashUrl(location.hash));
 
     await Promise.all([loadCards(), loadThemes()]);
+    if (isResetReloadQuery(location.search)) {
+      const h = normalizeHash(location.hash);
+      const clean = h === "#" ? location.pathname : `${location.pathname}${h}`;
+      history.replaceState({ app: APP_ID, depth: 0 }, "", clean);
+    }
     main.removeAttribute("aria-busy");
     await route();
   } catch (err) {

@@ -4,7 +4,7 @@
  * Plage : 2–10, plus un cran « illimité » (pas de plafond).
  */
 
-const COLS_KEY = "brickcard-generator:list-cols-max";
+const COLS_KEY = "brickcard:list-cols-max";
 const GAP_X = "1.25rem";
 const UNLIMITED_TOKEN = "infinite";
 

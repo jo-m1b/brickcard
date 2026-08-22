@@ -3,22 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Brickcard Generator</title>
+  <title>Brickcard</title>
   <meta name="theme-color" content="#141414" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Brickcard" />
   <link rel="manifest" href="manifest.webmanifest" />
-  <link rel="icon" href="img/brickcard-generator-favicon.svg" type="image/svg+xml" sizes="any" />
-  <link rel="icon" href="img/brickcard-generator-favicon-96x96.png" type="image/png" sizes="96x96" />
-  <link rel="icon" href="img/brickcard-generator-favicon.ico" sizes="48x48" />
-  <link rel="apple-touch-icon" href="img/brickcard-generator-apple-touch-icon.png" sizes="180x180" />
+  <link rel="icon" href="img/brickcard-favicon.svg" type="image/svg+xml" sizes="any" />
+  <link rel="icon" href="img/brickcard-favicon-96x96.png" type="image/png" sizes="96x96" />
+  <link rel="icon" href="img/brickcard-favicon.ico" sizes="48x48" />
+  <link rel="apple-touch-icon" href="img/brickcard-apple-touch-icon.png" sizes="180x180" />
   <link rel="stylesheet" href="css/styles.css?v=0.7.4" />
   <script>
     /* Après styles.css (script bloquant) : pas de flush layout avant CSS, pas de flash thème */
     (function () {
       try {
-        var t = localStorage.getItem("brickcard-generator:ui-theme");
+        var t = localStorage.getItem("brickcard:ui-theme");
         if (t === "light" || t === "dark") {
           document.documentElement.setAttribute("data-theme", t);
         }
@@ -30,9 +30,9 @@
   <div id="app" class="app">
     <header class="topbar no-print">
       <a href="#page/about" class="topbar-brand" id="brand-link">
-        <img class="brand-logo" src="img/brickcard-generator-logo.svg" width="40" height="55" alt="" />
+        <img class="brand-logo" src="img/brickcard-logo.svg" width="40" height="55" alt="" />
         <span class="brand-text">
-          <span class="brand-name">Brickcard Generator</span>
+          <span class="brand-name">Brickcard</span>
           <span class="brand-version" id="app-version"></span>
         </span>
       </a>

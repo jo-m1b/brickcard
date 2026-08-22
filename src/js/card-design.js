@@ -13,10 +13,10 @@ import {
   parseHexColor,
 } from "./themes-data.js";
 
-const BORDER_KEY = "brickcard-generator:card-face-border-mm";
-const RADIUS_KEY = "brickcard-generator:card-radius-mm";
-const IMAGE_RADIUS_KEY = "brickcard-generator:card-image-radius-mm";
-const COLOR_KEY = "brickcard-generator:card-default-color";
+const BORDER_KEY = "brickcard:card-face-border-mm";
+const RADIUS_KEY = "brickcard:card-radius-mm";
+const IMAGE_RADIUS_KEY = "brickcard:card-image-radius-mm";
+const COLOR_KEY = "brickcard:card-default-color";
 
 /** Largeur de bordure face par défaut (mm). */
 export const DEFAULT_FACE_BORDER_MM = 3;

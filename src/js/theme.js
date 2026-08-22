@@ -1,6 +1,6 @@
 /** Thème UI : system (défaut) | light | dark */
 
-const THEME_KEY = "brickcard-generator:ui-theme";
+const THEME_KEY = "brickcard:ui-theme";
 const MODES = ["system", "light", "dark"];
 
 /** @returns {"system"|"light"|"dark"} */

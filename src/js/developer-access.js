@@ -5,7 +5,7 @@
 
 import { isLocalDevHost } from "./themes-data.js";
 
-const DEVELOPER_ENABLED_KEY = "brickcard-generator:developer-enabled";
+const DEVELOPER_ENABLED_KEY = "brickcard:developer-enabled";
 
 /**
  * @returns {boolean}

@@ -138,7 +138,7 @@ export function renderDeveloperImages(host) {
   }
 
   if (filledCtl || themeCtl) {
-    fetch("img/brickcard-generator-logo.svg")
+    fetch("img/brickcard-logo.svg")
       .then((res) => {
         if (!res.ok) throw new Error("Démo : logo introuvable.");
         return res.blob();

@@ -1,6 +1,6 @@
 # Contribuer
 
-Merci de ton intérêt pour Brickcard Generator.
+Merci de ton intérêt pour Brickcard.
 
 ## Ajouter ou modifier des thèmes par défaut
 

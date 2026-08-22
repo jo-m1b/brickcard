@@ -28,8 +28,8 @@ const ICON_PRINT = ICON_PRINTER;
 const ICON_MINUS = ICON_SUBTRACT;
 const ICON_PLUS = ICON_ADD;
 
-const SORT_KEY = "brickcard-generator:list-sort";
-const SORT_DIR_KEY = "brickcard-generator:list-sort-dir";
+const SORT_KEY = "brickcard:list-sort";
+const SORT_DIR_KEY = "brickcard:list-sort-dir";
 
 /** @typedef {"updatedAt"|"legoSetRef"|"title"|"releaseYear"|"pieceCount"|"figurineCount"} ListSortKey */
 /** @typedef {"asc"|"desc"} ListSortDir */

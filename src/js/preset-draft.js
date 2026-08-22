@@ -1,6 +1,6 @@
 /**
  * Brouillon isolé des thèmes par défaut (outil développeur).
- * IndexedDB `brickcard-generator-preset-draft` — jamais les stores cartes / thèmes
+ * IndexedDB `brickcard-preset-draft` — jamais les stores cartes / thèmes
  * de la collection, ni les clés localStorage d’UI.
  */
 
@@ -18,7 +18,7 @@ import {
   roundCropCoord,
 } from "./themes-data.js";
 
-const DB_NAME = "brickcard-generator-preset-draft";
+const DB_NAME = "brickcard-preset-draft";
 const DB_VERSION = 1;
 const STORE_THEMES = "themes";
 const STORE_META = "meta";

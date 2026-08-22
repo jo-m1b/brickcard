@@ -151,7 +151,7 @@ export function renderDeveloperSelects(host) {
             <label class="form-label" for="demo-select-long">Libellé long</label>
             <select class="form-control" id="demo-select-long" name="demo-select-long">
               <option value="">— Choisir —</option>
-              <option value="1">Brickcard Generator — sauvegarde .brickcard</option>
+              <option value="1">Brickcard — sauvegarde .brickcard</option>
               <option value="2">Impression A4 3×3 face + dos miroir</option>
             </select>
           </div>

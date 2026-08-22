@@ -6,8 +6,8 @@ import { resolveImageBackground } from "./storage.js";
 import { ICON_APPS_2, ICON_CALENDAR_TODO, ICON_USER_3 } from "./icons.js";
 
 /** Logo app (chemin relatif depuis `src/`). */
-export const BRAND_LOGO_SRC = "img/brickcard-generator-logo.svg";
-export const BRAND_LOGO_SRC_WHITE = "img/brickcard-generator-logo-white.svg";
+export const BRAND_LOGO_SRC = "img/brickcard-logo.svg";
+export const BRAND_LOGO_SRC_WHITE = "img/brickcard-logo-white.svg";
 
 /** @param {boolean} lightFg texte / logo blancs sur fond coloré */
 export function brandLogoSrc(lightFg) {

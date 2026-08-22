@@ -1,5 +1,5 @@
 const QTY_MAX = 99;
-const PRINT_QTY_KEY = "brickcard-generator:print-qty";
+const PRINT_QTY_KEY = "brickcard:print-qty";
 
 export { QTY_MAX, PRINT_QTY_KEY };
 

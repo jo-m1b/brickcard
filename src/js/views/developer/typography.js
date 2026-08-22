@@ -51,11 +51,11 @@ export function renderDeveloperTypography(host) {
         <div class="styleguide-type-specimens" aria-label="Spécimens de police">
           <p class="styleguide-type-specimen styleguide-type-specimen--ui">
             <span class="styleguide-type-specimen-label">Open Sans — UI</span>
-            Brickcard Generator — Aa Bb Cc 0123456789
+            Brickcard — Aa Bb Cc 0123456789
           </p>
           <p class="styleguide-type-specimen styleguide-type-specimen--card">
             <span class="styleguide-type-specimen-label">Inter — cartes</span>
-            Brickcard Generator — Aa Bb Cc 0123456789
+            Brickcard — Aa Bb Cc 0123456789
           </p>
         </div>
       </div>
@@ -197,7 +197,7 @@ export function renderDeveloperTypography(host) {
         <div class="styleguide-dialog-demo">
           <div class="modal-header">
             <div>
-              <p class="view-title"><span class="modal-title-lead"><span class="modal-title-brand" aria-hidden="true"></span><span>Brickcard Generator v0.x.x</span></span>${ICON_ARROW_RIGHT_WIDE}<span>À propos</span></p>
+              <p class="view-title"><span class="modal-title-lead"><span class="modal-title-brand" aria-hidden="true"></span><span>Brickcard v0.x.x</span></span>${ICON_ARROW_RIGHT_WIDE}<span>À propos</span></p>
             </div>
             <button type="button" class="btn primary icon-only modal-close" tabindex="-1">
               ${ICON_CLOSE}
@@ -223,7 +223,7 @@ export function renderDeveloperTypography(host) {
                 Citation (blockquote) — bordure gauche ink, texte ink-soft.
               </blockquote>
               <pre><code>// Bloc de code (Open Sans)
-const APP_ID = "brickcard-generator";</code></pre>
+const APP_ID = "brickcard";</code></pre>
               <hr />
               <p>Après un séparateur <code>hr</code>.</p>
             </article>
@@ -235,7 +235,7 @@ const APP_ID = "brickcard-generator";</code></pre>
         <h2 class="styleguide-section-title">Marque (topbar)</h2>
         <div class="styleguide-type-demo">
           <div class="brand-text">
-            <span class="brand-name">Brickcard Generator</span>
+            <span class="brand-name">Brickcard</span>
             <span class="brand-version">0.x.x</span>
           </div>
           <p class="styleguide-hint">

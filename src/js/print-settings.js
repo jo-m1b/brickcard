@@ -3,7 +3,7 @@
  * N’impacte que le document imprimé et le libellé de feuilles du menu.
  */
 
-const SETTINGS_KEY = "brickcard-generator:print-settings";
+const SETTINGS_KEY = "brickcard:print-settings";
 
 export const PRINT_GRID_MIN = 1;
 export const PRINT_GRID_MAX = 10;

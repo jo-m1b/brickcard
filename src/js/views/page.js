@@ -1,6 +1,6 @@
 import { ICON_ARROW_RIGHT_WIDE, ICON_CLOSE } from "../icons.js";
 import { loadMarkdownPage } from "../markdown.js";
-import { APP_VERSION } from "../version.js";
+import { APP_NAME, APP_VERSION } from "../version.js";
 
 /** Logo app en titre de modale : même taille / `currentColor` qu’une icône Remix. */
 const MODAL_TITLE_BRAND = `<span class="modal-title-brand" aria-hidden="true"></span>`;
@@ -12,7 +12,7 @@ const MODAL_TITLE_BRAND = `<span class="modal-title-brand" aria-hidden="true"></
 function pageModalTitleMarkup(page) {
   const title = page.title || "";
   if (page.slug !== "about") return title;
-  return `<span class="modal-title-lead">${MODAL_TITLE_BRAND}<span>Brickcard Generator v${APP_VERSION}</span></span>${ICON_ARROW_RIGHT_WIDE}<span>${title}</span>`;
+  return `<span class="modal-title-lead">${MODAL_TITLE_BRAND}<span>${APP_NAME} v${APP_VERSION}</span></span>${ICON_ARROW_RIGHT_WIDE}<span>${title}</span>`;
 }
 
 /**

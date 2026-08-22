@@ -39,6 +39,8 @@ function escapeAttr(s) {
 
 /**
  * Ouvre une modale de confirmation. Fermeture (X, Échap, backdrop) → `null`.
+ * « Annuler » (`id: "cancel"` ou libellé) est en `sm` s’il y a d’autres actions ;
+ * taille normale s’il est le seul bouton.
  *
  * @param {HTMLElement} host Conteneur (`#modal-root`)
  * @param {{
@@ -69,11 +71,18 @@ export function openConfirmDialog(host, opts) {
 
     const startBtns = actions.filter((a) => (a.slot || "end") === "start");
     const endBtns = actions.filter((a) => (a.slot || "end") !== "start");
+    const manyActions = actions.length > 1;
+
+    /** @param {ConfirmAction} a */
+    function isCancelAction(a) {
+      return a.id === "cancel" || a.label === "Annuler";
+    }
 
     /** @param {ConfirmAction} a */
     function btnHtml(a) {
       const variant = a.variant || "secondary";
-      const size = a.size === "sm" ? " sm" : "";
+      const size =
+        a.size === "sm" || (manyActions && isCancelAction(a)) ? " sm" : "";
       let icon = "";
       if (a.icon) icon = a.icon.includes("<svg") ? a.icon : remixIconByName(a.icon);
       else if (a.label === "Supprimer") icon = ICON_DELETE_BIN_2;

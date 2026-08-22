@@ -138,6 +138,7 @@ export function renderDeveloperModals(host) {
         <p class="form-hint" style="margin-bottom: 0.65rem">
           <code>modal-footer-start</code> (gauche&nbsp;: sauvegarde / validation) ·
           <code>modal-footer-end</code> (droite&nbsp;: danger). Boutons centrés verticalement (normal + <code>sm</code>).
+          <strong>Annuler</strong>&nbsp;: <code>sm</code> s’il y a d’autres actions dans le pied ; taille normale s’il est seul.
         </p>
         <div class="styleguide-row">
           <button type="button" class="btn secondary" data-demo-modal="footer">Zones gauche / droite</button>
@@ -300,7 +301,7 @@ export function renderDeveloperModals(host) {
         bodyHtml: `<p class="modal-confirm-msg">Attention, la suppression est définitive et ne pourra pas être annulée&nbsp;! Souhaitez-vous continuer&nbsp;?</p>`,
         footerHtml: `
           <div class="modal-footer-end">
-            <button type="button" class="btn secondary" data-demo-close>Annuler</button>
+            <button type="button" class="btn secondary sm" data-demo-close>Annuler</button>
             <button type="button" class="btn danger" data-demo-close>${ICON_DELETE_BIN_2}<span>Supprimer</span></button>
           </div>
         `,

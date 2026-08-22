@@ -1,6 +1,6 @@
 # Deploy GitHub Pages depuis le dossier src/
 
-name: Deploy Brickcard Generator to GitHub Pages
+name: Deploy Brickcard to GitHub Pages
 
 on:
   push:
