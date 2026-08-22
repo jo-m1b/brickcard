@@ -3,7 +3,7 @@ import { initTheme } from "./theme.js";
 import { initCardDesign } from "./card-design.js";
 import { initListLayout } from "./list-layout.js";
 import { enableDeveloper, isDeveloperEnabled } from "./developer-access.js";
-import { APP_ID, APP_NAME, APP_VERSION } from "./version.js";
+import { APP_ID, APP_NAME, APP_VERSION } from "./version.js?v=0.7.4";
 import { renderEditor } from "./views/editor.js";
 import { renderList, prepareListAfterCardSave } from "./views/list.js";
 import { renderThemesModal, prepareThemesAfterThemeSave } from "./views/themes.js";
@@ -702,7 +702,9 @@ async function boot() {
     await route();
   } catch (err) {
     console.error(err);
-    if (main) {
+    if (typeof window.showBootError === "function") {
+      window.showBootError(err);
+    } else if (main) {
       main.removeAttribute("aria-busy");
       main.innerHTML = `<section class="panel"><p class="error">Erreur au démarrage : ${err.message}</p></section>`;
     }
@@ -718,7 +720,7 @@ function registerServiceWorker() {
     host === "127.0.0.1" ||
     host === "[::1]";
   if (!secure) return;
-  navigator.serviceWorker.register("sw.js").catch((err) => console.error(err));
+  navigator.serviceWorker.register(`sw.js?v=${APP_VERSION}`).catch((err) => console.error(err));
 }
 
 boot();

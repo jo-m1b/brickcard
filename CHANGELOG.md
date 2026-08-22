@@ -23,11 +23,14 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 - Routes : overlays en `#settings`, `#new-card`, `#developer/…` (plus de `/` juste après `#`) ; anciennes URLs `#/…` nettoyées
 - Paramètres d’impression : route `#print` (comme les autres overlays) ; rien à imprimer → message à la place des options
 - Reset local : rechargement en `?{timestamp}` (plus de `?_=`) ; la query est retirée une fois l’app relancée
-- Nom produit : **Brickcard** (plus « Brickcard Generator ») ; identifiants techniques `brickcard` (IndexedDB, localStorage, `APP_ID`, cache SW, images app) ; import : l’ancien `app` `brickcard-generator` est encore accepté
+- Nom produit et identifiants techniques : **Brickcard** (`APP_ID`, IndexedDB, localStorage, cache SW, images app)
+- Captures README : `docs/screenshots/brickcard-liste.png` et `brickcard-editor.png` (sans version dans le nom)
 
 ### Fixed
 
 - Espace développeur / thèmes par défaut : routes `#developer/theme-presets/new` et `#developer/theme-presets/edit/{slug}` (Précédent revient à la liste)
+- Chargement : si un module ou `boot()` échoue, le message technique s’affiche en rouge sous « Chargement... » (plus d’écran bloqué sans explication)
+- Service worker : revalidation réseau (`cache: "reload"`) pour ne pas resservir un JS périmé (ex. export manquant)
 
 ## [0.7.4] — 2026-08-20
 
@@ -48,7 +51,7 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 - Boutons **Enregistrer** : `ri-save-fill` ; **Supprimer** : `ri-delete-bin-2-fill` (y compris titres de confirmation) ; chargement d’image : **Depuis mes fichiers** `ri-file-line`, **Depuis une URL** `ri-link` ; modale URL : champ avec `ri-cloud-fill`, **Charger** `ri-upload-fill` ; image chargée : **Sauvegarder** `ri-download-fill` (comme Sauvegarder la collection)
 - Éditeur de carte : icônes de champ (référence `#`, année / pièces / figurines des badges, thème palette)
-- Page À propos : logo app + `Brickcard Generator v…` + `ri-arrow-right-wide-fill` + `À propos` ; plus de version dans le corps
+- Page À propos : logo app + `Brickcard v…` + `ri-arrow-right-wide-fill` + `À propos` ; plus de version dans le corps
 - Paramètres : descriptions des tuiles collection / développeurs (Importer, Sauvegarder, Supprimer les cartes, Espace développeur, Réinitialiser)
 - Espace développeur : libellés des tuiles (titre + description) et titres de galeries (singulier + nom anglais)
 - Modales : une icône Remix max à gauche du titre (déclencheur : tuile / bouton ; édition carte / thème : `ri-pencil-fill` ; galeries développeur : icône de section seulement)
@@ -120,7 +123,7 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 - Impression : modale paramètres, tabulation Lancer l’impression → Annuler (visuel inchangé)
 - Thèmes : titre de modale « Thèmes » ; bouton Nouveau thème à droite
 - Paramètres : tuile Thèmes (« Gérer et personnaliser les thèmes disponibles »)
-- Images app : préfixe `brickcard-generator-` (logo, favicon, apple-touch, manifeste PWA)
+- Images app : préfixe `brickcard-` (logo, favicon, apple-touch, manifeste PWA)
 - Logos thèmes : préfixe `theme-logo-` (ex. `theme-logo-unikitty.png`)
 
 ## [0.7.1] — 2026-08-16
@@ -305,7 +308,7 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Changed
 
-- Favicon renommé `favicon-brickcard-generator.svg` (comme le logo)
+- Favicon renommé `favicon-brickcard.svg` (comme le logo)
 
 ## [0.5.36] — 2026-08-13
 
@@ -847,7 +850,7 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 - Impression dos : fond perdu 0,5 mm rectangulaire (couleur de la carte, coins sans blanc)
 - Liste : case à cocher remplacée par un sélecteur de quantité d’impression
-- UI : libellés « Brickcard(s) » → « carte(s) » (logo / marque Brickcard Generator inchangés)
+- UI : libellés « Brickcard(s) » → « carte(s) » (logo / marque Brickcard inchangés)
 - UI : accent rouge remplacé par noir / proche noir (clair) ou clair (sombre)
 
 ## [0.2.0] — 2026-08-09
@@ -895,7 +898,7 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Added
 
-- Première version publique de Brickcard Generator
+- Première version publique de Brickcard
 - Cartes face / dos format poker, impression A4 3×3
 - Thèmes LEGO prédéfinis + thèmes personnalisés
 - Persistance IndexedDB, export / import JSON

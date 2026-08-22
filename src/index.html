@@ -168,6 +168,7 @@
         <div class="empty-view-body">
           <div class="brick" aria-hidden="true"></div>
           <h1 class="view-title">Chargement<span class="visually-hidden">...</span><span class="loading-dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span></h1>
+          <p class="empty-view-error" id="boot-error" role="alert" hidden></p>
         </div>
       </section>
     </main>
@@ -179,6 +180,31 @@
 
   <div id="print-root" class="print-root" aria-hidden="true"></div>
 
-  <script type="module" src="js/app.js?v=0.7.4"></script>
+  <script>
+    /* Hors module : un import cassé n’atteint jamais boot() */
+    (function () {
+      function showBootError(err) {
+        var main = document.getElementById("main");
+        var el = document.getElementById("boot-error");
+        if (!main || !el || !main.hasAttribute("aria-busy")) return;
+        var msg = err && err.message ? err.message : String(err || "Erreur inconnue");
+        el.hidden = false;
+        el.textContent = msg;
+        main.removeAttribute("aria-busy");
+      }
+      window.showBootError = showBootError;
+      window.addEventListener("error", function (e) {
+        showBootError(e.error || e.message || e);
+      });
+      window.addEventListener("unhandledrejection", function (e) {
+        showBootError(e.reason);
+      });
+    })();
+  </script>
+  <script type="module">
+    import("./js/app.js?v=0.7.4").catch(function (err) {
+      if (typeof showBootError === "function") showBootError(err);
+    });
+  </script>
 </body>
 </html>

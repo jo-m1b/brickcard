@@ -5,7 +5,7 @@
 
 import { getPresetThemes, getPresetTheme, parseHexColor, clearPresetCache, clampLogoZoom, roundCropCoord } from "./themes-data.js";
 import { downloadBlob } from "./card-export.js";
-import { APP_ID } from "./version.js";
+import { APP_ID } from "./version.js?v=0.7.4";
 
 const DB_NAME_BASE = APP_ID;
 const DB_GEN_KEY = `${APP_ID}:db-gen`;
@@ -15,7 +15,6 @@ const STORE_THEMES = "themes";
 const EXPORT_VERSION = 3;
 const BACKUP_EXT = ".brickcard";
 const BACKUP_INVALID = "Ce fichier n’est pas une sauvegarde Brickcard valide.";
-const LEGACY_APP_IDS = new Set(["brickcard-generator"]);
 
 /**
  * @typedef {Object} Card
@@ -205,31 +204,19 @@ function txDone(tx) {
   });
 }
 
-/** Supprime les anciennes bases / clés (lego-set-cards, brickcard-generator). */
+/** Supprime l’ancienne base / clés `lego-set-cards`. */
 let legacyStoragePurged = false;
 function purgeLegacyBrowserStorage() {
   if (legacyStoragePurged) return;
   legacyStoragePurged = true;
   try {
-    const oldGen = localStorage.getItem("brickcard-generator:db-gen");
-    if (oldGen) {
-      indexedDB.deleteDatabase(`brickcard-generator-${oldGen}`);
-    }
-    const stale = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && (key.startsWith("brickcard-generator:") || key.startsWith("lego-set-cards:"))) {
-        stale.push(key);
-      }
-    }
-    for (const key of stale) localStorage.removeItem(key);
+    localStorage.removeItem("lego-set-cards:v1");
+    localStorage.removeItem("lego-set-cards:theme");
   } catch {
     /* ignore */
   }
   try {
     indexedDB.deleteDatabase("lego-set-cards");
-    indexedDB.deleteDatabase("brickcard-generator");
-    indexedDB.deleteDatabase("brickcard-generator-preset-draft");
   } catch {
     /* ignore */
   }
@@ -289,7 +276,6 @@ export async function wipeAllLocalData() {
   deleteDatabaseBestEffort(oldDbName);
   deleteDatabaseBestEffort(DB_NAME_BASE);
   deleteDatabaseBestEffort("lego-set-cards");
-  deleteDatabaseBestEffort("brickcard-generator");
 
   try {
     localStorage.removeItem("brickcard:ui-theme");
@@ -686,7 +672,7 @@ export function parseBrickcardBackup(input) {
     throw new Error(BACKUP_INVALID);
   }
   const backup = /** @type {Record<string, unknown>} */ (data);
-  if (backup.app !== APP_ID && !LEGACY_APP_IDS.has(backup.app)) {
+  if (backup.app !== APP_ID) {
     throw new Error(BACKUP_INVALID);
   }
   if (!Number.isInteger(backup.version) || /** @type {number} */ (backup.version) < 1) {

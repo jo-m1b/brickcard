@@ -4,7 +4,9 @@ Mini application web (HTML / CSS / JS) pour créer des **Brickcards** — cartes
 
 Version courante : voir `src/js/version.js` (SemVer) et [`CHANGELOG.md`](CHANGELOG.md).
 
-![Liste des cartes](docs/screenshots/brickcard-v0.4.0-liste.png)
+![Liste des cartes](docs/screenshots/brickcard-liste.png)
+
+![Éditeur de carte](docs/screenshots/brickcard-editor.png)
 
 Usage typique : imprimer, plastifier et glisser dans une pochette transparente avec un set dont la boîte a disparu — pour retrouver facilement le set et ses références (plans).
 
@@ -38,7 +40,7 @@ Puis ouvrir : [http://127.0.0.1:8765/](http://127.0.0.1:8765/)
 ├── LICENSE
 ├── .gitignore
 ├── .github/workflows/
-├── docs/screenshots/              # captures README (versionnées)
+├── docs/screenshots/              # captures README
 └── src/
     ├── index.html
     ├── data/

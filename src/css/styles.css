@@ -1260,7 +1260,7 @@ html:not([data-theme]) .btn .icon-system {
   animation-delay: 0.35s;
 }
 
-.loading-dots > span {
+#main[aria-busy="true"] .loading-dots > span {
   display: inline-block;
   animation: loading-dot 1.2s ease-in-out infinite;
   opacity: 0.2;
@@ -1320,6 +1320,14 @@ html:not([data-theme]) .btn .icon-system {
   max-width: 28rem;
   color: var(--ink-soft);
   white-space: pre-line;
+}
+
+.empty-view p.empty-view-error {
+  max-width: 36rem;
+  color: var(--form-error);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
 }
 
 .empty-view .tile-list {

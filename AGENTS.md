@@ -18,7 +18,7 @@ Tout le code applicatif est dans **`src/`**.
 |---------|------|
 | `src/index.html` | Coquille : topbar sticky, `#main`, `#modal-root`, `#print-root` |
 | `src/manifest.webmanifest` | Manifest PWA (nom, icônes, `standalone`) |
-| `src/sw.js` | Service worker (cache same-origin ; `CACHE` = `APP_VERSION`) |
+| `src/sw.js` | Service worker (cache same-origin ; `CACHE` = `APP_VERSION` ; fetch en ligne avec `cache: "reload"`) |
 | `src/data/themes-presets.json` | Liste des thèmes LEGO par défaut (éditable sans toucher au JS) |
 | `src/data/theme-logo-*` | Logos des thèmes par défaut (PNG / SVG / WebP / JPEG) |
 | `src/data/page-{{slug}}.md` | Pages Markdown en modale (`#page/:slug`, ex. `page-about.md`) ; `# Titre` → titre du dialog |
@@ -146,10 +146,10 @@ Accent d’une Brickcard (`resolveCardAccent`) :
 - Clé colonnes liste max : `brickcard:list-cols-max` (défaut `4`, plage 2–10, ou `infinite`)
 - Cascade accent carte : couleur du thème → couleur configurée → `#6e6e6e`
 - Export **v3** (fichier `.brickcard`, JSON) : `{ version: 3, app: "brickcard", cards, themes }` — `themes` = personnalisés uniquement — fichier `brickcard-export-YYYY-MM-DD.brickcard`
-- Import : fichier `.brickcard` uniquement ; vérifie `app` / `version` / `cards` / `themes` (tableaux) ; `app` = `brickcard` (l’ancien `brickcard-generator` est encore accepté) ; refuse une `version` supérieure à celle de l’app ; ignore les thèmes par défaut (ids de preset / `isBuiltin`) ; ne réécrit pas `themes-presets.json`
+- Import : fichier `.brickcard` uniquement ; vérifie `app` / `version` / `cards` / `themes` (tableaux) ; `app` = `brickcard` ; refuse une `version` supérieure à celle de l’app ; ignore les thèmes par défaut (ids de preset / `isBuiltin`) ; ne réécrit pas `themes-presets.json`
 - APIs async ; serveur HTTP obligatoire en local
-- Au démarrage, `boot()` attend `loadCards()` + `loadThemes()` avant `route()` (écran « Chargement... » dans `#main`, animation CSS tant que `aria-busy`)
-- Au démarrage, purge éventuelle des anciennes bases `lego-set-cards` et `brickcard-generator` (plus utilisées)
+- Au démarrage, `boot()` attend `loadCards()` + `loadThemes()` avant `route()` (écran « Chargement... » dans `#main`, animation CSS tant que `aria-busy`) ; échec de module / boot : message technique en rouge (`#boot-error`, `--form-error`) sous le titre, animation arrêtée (script inline hors module — un import cassé n’atteint pas `boot()`)
+- Au démarrage, purge éventuelle de l’ancienne base `lego-set-cards` (plus utilisée)
 
 ## Vues
 
@@ -344,4 +344,4 @@ A4 portrait ; **grille** 1×1 à 10×10 (défaut **3×3** poker 63×88 mm). Autr
 - **Icônes** : toujours partir de [Remix Icon](https://remixicon.com/) (style *fill* de préférence) avant d’inventer un SVG. Réutiliser / étendre `src/js/icons.js` ; en HTML, commenter le nom `ri-*`.
 - Pas de `alert()` / `confirm()` / `prompt()` natifs : `confirmDialog()` / `openConfirmDialog()` / `alertDialog()` (`confirm-dialog.js`).
 - Pas de dépendances npm sauf demande explicite.
-- **Version** : n’incrémenter `APP_VERSION` (ni le `?v=` de cache, ni `CACHE` dans `sw.js`, ni une entrée datée dans `CHANGELOG.md`) **que sur demande explicite**. Entre deux versions, noter les changements sous `## [Unreleased]`.
+- **Version** : n’incrémenter `APP_VERSION` (ni le `?v=` de cache dans `index.html` / imports `version.js`, ni `CACHE` dans `sw.js`, ni une entrée datée dans `CHANGELOG.md`) **que sur demande explicite**. Entre deux versions, noter les changements sous `## [Unreleased]`.
