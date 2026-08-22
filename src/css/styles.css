@@ -3035,6 +3035,11 @@ button.form-select-trigger.sm {
   overflow: visible;
 }
 
+/* Accueil : brique hors flux au-dessus du titre (le #main est haut). En modale, réserver sa place. */
+.modal-body .empty-view:not([hidden]) {
+  padding-top: calc(0.75rem + 9px + 40px);
+}
+
 .modal-confirm-msg {
   margin: 0;
   text-align: center;

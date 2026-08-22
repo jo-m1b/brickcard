@@ -10,7 +10,7 @@ export function renderDeveloperTypography(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Typographie</p>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#developer" })} / Typographie</p>
         <h1 class="view-title">Typographie</h1>
       </header>
 
@@ -157,7 +157,7 @@ export function renderDeveloperTypography(host) {
               </tr>
               <tr>
                 <td>Page Markdown en modale</td>
-                <td><code># Titre</code> → logo app + nom + version + <code>ri-arrow-right-wide-fill</code> + titre (<code>#/page/about</code>)</td>
+                <td><code># Titre</code> → logo app + nom + version + <code>ri-arrow-right-wide-fill</code> + titre (<code>#page/about</code>)</td>
                 <td><code>##</code> → <code>h2</code> · <code>###</code> → <code>h3</code> dans <code>.md-content</code></td>
               </tr>
             </tbody>
@@ -207,7 +207,7 @@ export function renderDeveloperTypography(host) {
           <div class="modal-body" tabindex="-1">
             <article class="md-content">
               <p>Paragraphe de contenu. Texte avec <strong>gras</strong>, <em>italique</em>,
-                un ${linkMarkup("lien", { href: "#/developer" })} et du <code>code inline</code>.</p>
+                un ${linkMarkup("lien", { href: "#developer" })} et du <code>code inline</code>.</p>
               <h2>Fonctionnalités</h2>
               <ul>
                 <li>Liste à puces — premier élément</li>
@@ -265,7 +265,7 @@ const APP_ID = "brickcard-generator";</code></pre>
           <p style="margin: 0 0 0.75rem">
             Paragraphe UI en <strong>Open Sans</strong> (héritée du <code>body</code>).
             Emphase <em>italique</em>, <strong>gras</strong>,
-            ${linkMarkup("lien", { href: "#/developer" })} et <code>code inline</code> (même police, graisse 600).
+            ${linkMarkup("lien", { href: "#developer" })} et <code>code inline</code> (même police, graisse 600).
           </p>
         </div>
       </div>

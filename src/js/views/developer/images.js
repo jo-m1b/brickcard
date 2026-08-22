@@ -31,7 +31,7 @@ export function renderDeveloperImages(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Sélecteur d’image (Image)</p>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#developer" })} / Sélecteur d’image (Image)</p>
         <h1 class="view-title">Sélecteur d’image (Image)</h1>
       </header>
 

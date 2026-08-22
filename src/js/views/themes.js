@@ -102,7 +102,7 @@ function compareThemesAsc(a, b, key, usage) {
 let rememberedQuery = "";
 
 /**
- * Modale de gestion des thèmes LEGO (`#/themes`).
+ * Modale de gestion des thèmes LEGO (`#themes`).
  * @param {HTMLElement} host Conteneur modale (#modal-root)
  * @param {{
  *   onClose: () => void,

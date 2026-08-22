@@ -33,7 +33,7 @@ import {
   listColsToSlider,
   setListColsMax,
 } from "../list-layout.js";
-import { DEFAULT_THEME_COLOR, isLocalDevHost } from "../themes-data.js";
+import { DEFAULT_THEME_COLOR } from "../themes-data.js";
 import { tileListMarkup } from "../tile.js";
 import { confirmDialog } from "../confirm-dialog.js";
 import { syncPrintMenu } from "../print-menu.js";
@@ -62,7 +62,7 @@ import {
  */
 export function renderSettingsModal(host, opts) {
   const { onClose, onImport, onExport, onClearCards, onDevReset, cardCount = 0 } = opts;
-  const showDevReset = Boolean(onDevReset) && isLocalDevHost();
+  const showDevReset = Boolean(onDevReset);
   const currentTheme = getTheme();
   const faceBorderMm = getFaceBorderMm();
   const cardRadiusMm = getCardRadiusMm();
@@ -255,7 +255,7 @@ export function renderSettingsModal(host, opts) {
                 {
                   title: "Thèmes",
                   desc: "Gérer et personnaliser les thèmes disponibles",
-                  href: "#/themes",
+                  href: "#themes",
                   icon: "palette",
                 },
                 {
@@ -278,7 +278,7 @@ export function renderSettingsModal(host, opts) {
                 {
                   title: "Espace développeur",
                   desc: "Aide au développement, système de design et documentation",
-                  href: "#/developer",
+                  href: "#developer",
                   icon: "tools",
                 },
                 {

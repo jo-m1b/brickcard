@@ -10,7 +10,7 @@ export function renderDeveloperCheckboxes(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Case à cocher (Checkbox)</p>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#developer" })} / Case à cocher (Checkbox)</p>
         <h1 class="view-title">Case à cocher (Checkbox)</h1>
       </header>
 

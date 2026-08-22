@@ -18,7 +18,7 @@ const THEME_LOGO_ACCEPT =
   "image/svg+xml,image/png,image/webp,.svg,.png,.webp";
 
 /**
- * Modale d’édition d’un thème personnalisé (`#/themes/new`, `#/themes/edit/:id`).
+ * Modale d’édition d’un thème personnalisé (`#themes/new`, `#themes/edit/:id`).
  * @param {HTMLElement} host
  * @param {{
  *   themeId?: string|null,

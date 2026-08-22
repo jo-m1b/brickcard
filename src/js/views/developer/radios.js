@@ -10,7 +10,7 @@ export function renderDeveloperRadios(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Bouton radio (Radio)</p>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#developer" })} / Bouton radio (Radio)</p>
         <h1 class="view-title">Bouton radio (Radio)</h1>
       </header>
 

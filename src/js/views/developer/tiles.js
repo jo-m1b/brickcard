@@ -11,7 +11,7 @@ export function renderDeveloperTiles(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Tuile (Tile)</p>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#developer" })} / Tuile (Tile)</p>
         <h1 class="view-title">Tuile (Tile)</h1>
       </header>
 
@@ -54,14 +54,14 @@ export function renderDeveloperTiles(host) {
           {
             title: "Typographie",
             desc: "polices, titres, Markdown en modale",
-            href: "#/developer/typography",
+            href: "#developer/typography",
           },
         ])}
       </div>
 
       <div class="styleguide-section">
         <h2 class="styleguide-section-title">Titre seul</h2>
-        ${tileListMarkup([{ title: "Liens", href: "#/developer/links" }])}
+        ${tileListMarkup([{ title: "Liens", href: "#developer/links" }])}
       </div>
 
       <div class="styleguide-section">
@@ -70,13 +70,13 @@ export function renderDeveloperTiles(host) {
           {
             title: "Recherche",
             desc: "search-bar — champ, compteur, tri",
-            href: "#/developer/search",
+            href: "#developer/search",
             icon: ICON_SEARCH_LINE,
           },
           {
             title: "Typographie",
             desc: "Open Sans / Inter",
-            href: "#/developer/typography",
+            href: "#developer/typography",
             icon: ICON_TEXT,
           },
         ])}
@@ -89,13 +89,13 @@ export function renderDeveloperTiles(host) {
           {
             title: "Bientôt",
             desc: "tuile non cliquable",
-            href: "#/developer",
+            href: "#developer",
             disabled: true,
           },
           {
             title: "Tuiles",
             desc: "avec icône, désactivée",
-            href: "#/developer/tiles",
+            href: "#developer/tiles",
             icon: ICON_LAYOUT_GRID,
             disabled: true,
           },

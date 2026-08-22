@@ -56,7 +56,7 @@ export function renderDeveloperButtons(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Bouton (Button)</p>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#developer" })} / Bouton (Button)</p>
         <h1 class="view-title">Bouton (Button)</h1>
       </header>
 

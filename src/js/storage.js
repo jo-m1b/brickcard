@@ -279,6 +279,7 @@ export async function wipeAllLocalData() {
     localStorage.removeItem("brickcard-generator:list-cols-max");
     localStorage.removeItem("brickcard-generator:print-qty");
     localStorage.removeItem("brickcard-generator:print-settings");
+    localStorage.removeItem("brickcard-generator:developer-enabled");
     localStorage.removeItem("lego-set-cards:v1");
     localStorage.removeItem("lego-set-cards:theme");
     /* Ne pas retirer DB_GEN_KEY : c’est la clé de la nouvelle base vide. */

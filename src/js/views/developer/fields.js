@@ -8,7 +8,7 @@ import { linkMarkup } from "../../link.js";
 
 /**
  * Galerie des champs de saisie (design system — test uniquement).
- * Select : voir `#/developer/selects`.
+ * Select : voir `#developer/selects`.
  * @param {HTMLElement} host
  * @returns {() => void}
  */
@@ -16,7 +16,7 @@ export function renderDeveloperFields(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Champ de saisie (Input)</p>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#developer" })} / Champ de saisie (Input)</p>
         <h1 class="view-title">Champ de saisie (Input)</h1>
       </header>
 
@@ -26,8 +26,8 @@ export function renderDeveloperFields(host) {
         (text, number, textarea).
         Icône optionnelle&nbsp;: wrapper <code>form-control-wrap</code> +
         <code>form-control-icon</code> (Remix, décoratif).
-        Listes déroulantes&nbsp;: ${linkMarkup("page dédiée", { href: "#/developer/selects" })}.
-        Images&nbsp;: ${linkMarkup("page dédiée", { href: "#/developer/images" })}.
+        Listes déroulantes&nbsp;: ${linkMarkup("page dédiée", { href: "#developer/selects" })}.
+        Images&nbsp;: ${linkMarkup("page dédiée", { href: "#developer/images" })}.
         Compact&nbsp;: <code>sm</code>.
         Repos&nbsp;: fond + trait bas (inset). Focus&nbsp;: cadre avec 1&nbsp;px d’air (pas de hover).
       </p>

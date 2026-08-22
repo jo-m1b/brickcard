@@ -10,7 +10,7 @@ export function renderDeveloperLinks(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Lien (Link)</p>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#developer" })} / Lien (Link)</p>
         <h1 class="view-title">Lien (Link)</h1>
       </header>
 
@@ -46,28 +46,28 @@ export function renderDeveloperLinks(host) {
       <div class="styleguide-section">
         <h2 class="styleguide-section-title">Texte seul</h2>
         <div class="styleguide-row">
-          ${linkMarkup("Lien interne", { href: "#/developer" })}
+          ${linkMarkup("Lien interne", { href: "#developer" })}
         </div>
         <p class="styleguide-hint">
           Dans un paragraphe&nbsp;: consulter la
-          ${linkMarkup("galerie typographie", { href: "#/developer/typography" })}
-          ou revenir à l’${linkMarkup("index", { href: "#/developer" })}.
+          ${linkMarkup("galerie typographie", { href: "#developer/typography" })}
+          ou revenir à l’${linkMarkup("index", { href: "#developer" })}.
         </p>
       </div>
 
       <div class="styleguide-section">
         <h2 class="styleguide-section-title">Tailles</h2>
         <div class="styleguide-row">
-          ${linkMarkup("Moyen (défaut)", { href: "#/developer" })}
-          ${linkMarkup("Petit", { href: "#/developer", sm: true })}
+          ${linkMarkup("Moyen (défaut)", { href: "#developer" })}
+          ${linkMarkup("Petit", { href: "#developer", sm: true })}
         </div>
       </div>
 
       <div class="styleguide-section">
         <h2 class="styleguide-section-title">Disabled</h2>
         <div class="styleguide-row">
-          ${linkMarkup("Lien désactivé", { href: "#/developer", disabled: true })}
-          ${linkMarkup("Petit désactivé", { href: "#/developer", sm: true, disabled: true })}
+          ${linkMarkup("Lien désactivé", { href: "#developer", disabled: true })}
+          ${linkMarkup("Petit désactivé", { href: "#developer", sm: true, disabled: true })}
           ${linkMarkup("Externe désactivé", { href: "https://remixicon.com/", disabled: true })}
         </div>
         <p class="styleguide-hint">Plus d’underline ; couleur <code>--muted</code> ; non focusable.</p>
@@ -76,16 +76,16 @@ export function renderDeveloperLinks(host) {
       <div class="styleguide-section">
         <h2 class="styleguide-section-title">Icône à gauche</h2>
         <div class="styleguide-row">
-          ${linkMarkup("Rechercher", { href: "#/developer/search", icon: ICON_SEARCH_LINE })}
-          ${linkMarkup("Petit", { href: "#/developer/search", icon: ICON_SEARCH_LINE, sm: true })}
+          ${linkMarkup("Rechercher", { href: "#developer/search", icon: ICON_SEARCH_LINE })}
+          ${linkMarkup("Petit", { href: "#developer/search", icon: ICON_SEARCH_LINE, sm: true })}
         </div>
       </div>
 
       <div class="styleguide-section">
         <h2 class="styleguide-section-title">Icône à droite</h2>
         <div class="styleguide-row">
-          ${linkMarkup("Continuer", { href: "#/developer/buttons", icon: ICON_ARROW_RIGHT, iconRight: true })}
-          ${linkMarkup("Petit", { href: "#/developer/buttons", icon: ICON_ARROW_RIGHT, iconRight: true, sm: true })}
+          ${linkMarkup("Continuer", { href: "#developer/buttons", icon: ICON_ARROW_RIGHT, iconRight: true })}
+          ${linkMarkup("Petit", { href: "#developer/buttons", icon: ICON_ARROW_RIGHT, iconRight: true, sm: true })}
         </div>
         <p class="styleguide-hint">Classe <code>icon-right</code> (SVG en premier dans le DOM, disposition inversée).</p>
       </div>

@@ -45,7 +45,7 @@ const SECTION_DESIGN = { name: "Système de design", icon: "collage" };
 /** @type {DeveloperSection} */
 const SECTION_TOOLS = { name: "Aide au développement", icon: "pencil-ruler-2" };
 
-/** Section d’index pour les pages ouvertes par une tuile (`#/developer`). */
+/** Section d’index pour les pages ouvertes par une tuile (`#developer`). */
 const PAGE_SECTIONS = {
   typography: SECTION_DESIGN,
   links: SECTION_DESIGN,
@@ -75,7 +75,7 @@ let session = null;
 
 /**
  * Titre du dialog = header de la galerie (comme les pages Markdown).
- * Pages tuile : section (lien `#/developer`, icône optionnelle) + séparateur + titre de page (pas d’icône de tuile).
+ * Pages tuile : section (lien `#developer`, icône optionnelle) + séparateur + titre de page (pas d’icône de tuile).
  * @param {HTMLElement} body
  * @param {HTMLElement} titleEl
  * @param {string} page
@@ -91,7 +91,7 @@ function liftStyleguideHeader(body, titleEl, page) {
     const pageTitle = h1.textContent || "";
     if (section) {
       titleEl.innerHTML = `${linkMarkup(section.name, {
-        href: "#/developer",
+        href: "#developer",
         icon: section.icon || false,
       })}${ICON_ARROW_RIGHT_WIDE}${modalTitleMarkup(pageTitle)}`;
     } else {
@@ -115,7 +115,7 @@ function liftModalFooter(body, modal) {
 }
 
 /**
- * Barre de recherche : collée sous le header, hors du corps qui défile (comme `#/themes`).
+ * Barre de recherche : collée sous le header, hors du corps qui défile (comme `#themes`).
  * @param {HTMLElement} body
  * @param {HTMLElement} modal
  */
@@ -139,7 +139,7 @@ function clearLiftedChrome(modal) {
 /**
  * Espace développeur en modale overlay (même coquille que les pages Markdown).
  * Un second appel avec la coquille déjà en place ne swap que le corps.
- * Liste `#/developer/theme-presets` : conservée sous l’éditeur (`/new`, `/edit/:slug`).
+ * Liste `#developer/theme-presets` : conservée sous l’éditeur (`/new`, `/edit/:slug`).
  * @param {HTMLElement} host Conteneur (#modal-root)
  * @param {{
  *   page?: string,
@@ -199,7 +199,7 @@ export function renderDeveloperModal(host, opts) {
   let editorCleanup = () => {};
   let shownPresetKey = "";
 
-  const PRESET_LIST_HASH = "#/developer/theme-presets";
+  const PRESET_LIST_HASH = "#developer/theme-presets";
 
   function closePresetEditor() {
     editorToken += 1;
@@ -211,7 +211,7 @@ export function renderDeveloperModal(host, opts) {
 
   function goToPresetList() {
     const hash = String(location.hash || "");
-    if (!hash.includes("/developer/theme-presets")) return;
+    if (!hash.includes("developer/theme-presets")) return;
     onNavigate(PRESET_LIST_HASH, { replace: true });
   }
 

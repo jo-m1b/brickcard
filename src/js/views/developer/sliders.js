@@ -10,7 +10,7 @@ export function renderDeveloperSliders(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Curseur (Range)</p>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#developer" })} / Curseur (Range)</p>
         <h1 class="view-title">Curseur (Range)</h1>
       </header>
 

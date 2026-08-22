@@ -11,7 +11,7 @@ export function renderDeveloperColors(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Sélecteur de couleur (Color)</p>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#developer" })} / Sélecteur de couleur (Color)</p>
         <h1 class="view-title">Sélecteur de couleur (Color)</h1>
       </header>
 

@@ -1,6 +1,4 @@
 import { loadCards } from "./storage.js";
-import { printCards } from "./print.js";
-import { openPrintDialog } from "./print-dialog.js";
 import { formatPrintMenuDesc } from "./print-settings.js";
 import {
   getPrintQty,
@@ -18,7 +16,7 @@ import {
 /** @type {PrintMenuHooks} */
 let hooks = {};
 
-/** @type {{ toast: (msg: string, type?: string) => void } | null} */
+/** @type {{ toast: (msg: string, type?: string) => void, onOpenPrint?: () => void } | null} */
 let opts = null;
 
 /**
@@ -119,7 +117,7 @@ export function syncPrintMenu(state = {}) {
   if (desc) {
     if (!count) {
       desc.textContent =
-        "Sélectionnez les cartes à imprimer parmi celles de la collection";
+        "Sélectionnez au moins une carte à imprimer parmi celles de votre collection.";
     } else {
       desc.textContent = formatPrintMenuDesc(count);
     }
@@ -175,7 +173,7 @@ function notifyChange() {
 }
 
 /**
- * @param {{ toast: (msg: string, type?: string) => void }} options
+ * @param {{ toast: (msg: string, type?: string) => void, onOpenPrint?: () => void }} options
  */
 export function initPrintMenu(options) {
   opts = options;
@@ -231,41 +229,9 @@ export function initPrintMenu(options) {
     notifyChange();
   });
 
-  btnRun?.addEventListener("click", async () => {
-    let cards;
-    try {
-      cards = await loadCards();
-    } catch (err) {
-      opts?.toast(err.message || "Impossible de charger les cartes", "error");
-      return;
-    }
-    /** @type {import("./storage.js").Card[]} */
-    const toPrint = [];
-    for (const card of cards) {
-      const qty = getPrintQty(card.id);
-      for (let i = 0; i < qty; i++) toPrint.push(card);
-    }
-    if (!toPrint.length) return;
+  btnRun?.addEventListener("click", () => {
     setOpen(false);
-    const host = document.getElementById("modal-root");
-    if (!host) return;
-    try {
-      await openPrintDialog(host, {
-        cardCount: toPrint.length,
-        onSettingsChange: () => syncPrintMenu(),
-        onPrint: async () => {
-          try {
-            await printCards(toPrint);
-          } catch (err) {
-            opts?.toast(err.message || "Erreur d'impression", "error");
-          }
-        },
-      });
-    } catch (err) {
-      opts?.toast(err.message || "Impossible d’ouvrir les paramètres d’impression", "error");
-    } finally {
-      syncPrintMenu();
-    }
+    opts?.onOpenPrint?.();
   });
 
   syncPrintMenu();

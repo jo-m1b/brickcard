@@ -10,7 +10,7 @@ export function renderDeveloperSelects(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Liste déroulante (Select)</p>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#developer" })} / Liste déroulante (Select)</p>
         <h1 class="view-title">Liste déroulante (Select)</h1>
       </header>
 

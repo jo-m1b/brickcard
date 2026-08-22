@@ -22,7 +22,7 @@ export function renderDeveloperSearch(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Barre de recherche (Search)</p>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#developer" })} / Barre de recherche (Search)</p>
         <h1 class="view-title">Barre de recherche (Search)</h1>
       </header>
 

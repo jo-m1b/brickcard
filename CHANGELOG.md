@@ -7,16 +7,23 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Added
+
+- Espace développeur hors local : inactif par défaut ; `#developer` (et sous-routes) propose une confirmation (Annuler / Activer) ; l’activation est persistée jusqu’à Réinitialiser, et affiche la section Paramètres « Options pour les développeurs »
+
 ### Changed
 
 - Sauvegarde de la collection : fichier `.brickcard` (JSON) au lieu de `.json` ; import limité à `*.brickcard`
 - Import : refus des fichiers qui ne sont pas une sauvegarde Brickcard (`app`, `version`, `cards` / `themes`)
 - Paramètres : tuile Sauvegarder désactivée si la collection est vide
 - Espace développeur / thèmes par défaut : boutons « Sauvegarder themes-presets.json » et « Sauvegarder les logos » (au lieu de « Télécharger… »)
+- Accueil (liste ou vue vide) : URL sans hash (jeton interne `#`)
+- Routes : overlays en `#settings`, `#new-card`, `#developer/…` (plus de `/` juste après `#`) ; anciennes URLs `#/…` nettoyées
+- Paramètres d’impression : route `#print` (comme les autres overlays) ; rien à imprimer → message à la place des options
 
 ### Fixed
 
-- Espace développeur / thèmes par défaut : routes `#/developer/theme-presets/new` et `#/developer/theme-presets/edit/{slug}` (Précédent revient à la liste)
+- Espace développeur / thèmes par défaut : routes `#developer/theme-presets/new` et `#developer/theme-presets/edit/{slug}` (Précédent revient à la liste)
 
 ## [0.7.4] — 2026-08-20
 

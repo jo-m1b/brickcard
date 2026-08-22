@@ -21,7 +21,7 @@ export function renderDeveloperModals(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#/developer" })} / Modale (Modal)</p>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#developer" })} / Modale (Modal)</p>
         <h1 class="view-title">Modale (Modal)</h1>
       </header>
 

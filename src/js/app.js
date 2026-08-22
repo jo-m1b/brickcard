@@ -2,7 +2,7 @@ import { loadCards, loadThemes, exportBackup, importBackup, isBrickcardBackupFil
 import { initTheme } from "./theme.js";
 import { initCardDesign } from "./card-design.js";
 import { initListLayout } from "./list-layout.js";
-import { isLocalDevHost } from "./themes-data.js";
+import { enableDeveloper, isDeveloperEnabled } from "./developer-access.js";
 import { APP_ID, APP_VERSION } from "./version.js";
 import { renderEditor } from "./views/editor.js";
 import { renderList, prepareListAfterCardSave } from "./views/list.js";
@@ -10,6 +10,7 @@ import { renderThemesModal, prepareThemesAfterThemeSave } from "./views/themes.j
 import { renderThemeEditor } from "./views/theme-editor.js";
 import { renderPageModal } from "./views/page.js";
 import { renderSettingsModal } from "./views/settings.js";
+import { renderPrintDialog } from "./print-dialog.js";
 import { renderDeveloperModal } from "./views/developer/modal.js";
 import { emptyViewMarkup } from "./empty-view.js";
 import { confirmDialog, openConfirmDialog } from "./confirm-dialog.js";
@@ -45,6 +46,9 @@ let cleanupThemes = null;
 let cleanupDeveloper = null;
 
 /** @type {null | (() => void)} */
+let cleanupPrint = null;
+
+/** @type {null | (() => void)} */
 let cleanupList = null;
 
 /** Dernière route effectivement affichée. */
@@ -73,18 +77,20 @@ function toast(message, type = "info") {
  */
 function normalizeHash(hash) {
   let h = String(hash || "");
-  if (!h || h === "#" || h === "#/") return "#/";
+  if (!h || h === "#" || h === "#/") return "#";
   if (!h.startsWith("#")) h = `#${h}`;
-  if (!h.startsWith("#/")) h = `#/${h.slice(1)}`;
-  if (h.length > 2 && h.endsWith("/")) h = h.slice(0, -1);
+  if (h.startsWith("#/")) h = `#${h.slice(2)}`;
+  if (h.length > 1 && h.endsWith("/")) h = h.slice(0, -1);
   const q = h.indexOf("?");
   if (q !== -1) h = h.slice(0, q);
   return h;
 }
 
-/** @param {string} hash */
+/** Accueil : URL sans fragment (jeton `#`). Overlays : `#settings` ; `#/settings` nettoyé. */
 function hashUrl(hash) {
-  return `${location.pathname}${location.search}${normalizeHash(hash)}`;
+  const h = normalizeHash(hash);
+  if (h === "#") return `${location.pathname}${location.search}`;
+  return `${location.pathname}${location.search}${h}`;
 }
 
 function routeDepth() {
@@ -126,6 +132,7 @@ function parsePath(path) {
     return { name: "themes", page: "edit", themeId };
   }
   if (path === "settings") return { name: "settings" };
+  if (path === "print") return { name: "print" };
   if (path.startsWith("page/")) {
     const slug = path.slice("page/".length);
     if (!slug || slug.includes("/")) return { name: "unknown" };
@@ -169,7 +176,8 @@ function parseDeveloperPage(rest) {
 }
 
 function parseRoute() {
-  return parsePath(normalizeHash(location.hash).slice(2));
+  const h = normalizeHash(location.hash);
+  return parsePath(h === "#" ? "" : h.slice(1));
 }
 
 /**
@@ -182,7 +190,7 @@ function navigate(hash, opts = {}) {
   const replace = Boolean(opts.replace);
 
   if (replace) {
-    setHistoryState(target === "#/" ? 0 : routeDepth(), target, true);
+    setHistoryState(target === "#" ? 0 : routeDepth(), target, true);
     route();
     return;
   }
@@ -196,8 +204,8 @@ function navigate(hash, opts = {}) {
 
 /** Croix / Échap / backdrop : ferme l’overlay vers l’accueil (replace). Le Précédent navigateur garde l’historique. */
 function dismissOverlay() {
-  if (normalizeHash(location.hash) === "#/") return;
-  navigate("#/", { replace: true });
+  if (normalizeHash(location.hash) === "#") return;
+  navigate("#", { replace: true });
 }
 
 function setNewButtonVisible(visible) {
@@ -221,6 +229,7 @@ function isOverlayRoute(info) {
       (info.name === "editor" ||
         info.name === "themes" ||
         info.name === "settings" ||
+        info.name === "print" ||
         info.name === "page" ||
         info.name === "developer")
   );
@@ -238,12 +247,13 @@ function overlayOnClose(name) {
  * @param {{ clearDom?: boolean, dropModalOpen?: boolean }} [opts]
  */
 function teardownOverlays(opts = {}) {
-  const fns = [cleanupEditor, cleanupPage, cleanupSettings, cleanupThemes, cleanupDeveloper];
+  const fns = [cleanupEditor, cleanupPage, cleanupSettings, cleanupThemes, cleanupDeveloper, cleanupPrint];
   cleanupEditor = null;
   cleanupPage = null;
   cleanupSettings = null;
   cleanupThemes = null;
   cleanupDeveloper = null;
+  cleanupPrint = null;
   for (const fn of fns) {
     if (fn) fn();
   }
@@ -287,8 +297,17 @@ async function showOverlay(routeInfo) {
       onImport: () => importFile?.click(),
       onExport: exportCards,
       onClearCards: handleClearCards,
-      onDevReset: isLocalDevHost() ? handleDevReset : undefined,
+      onDevReset: isDeveloperEnabled() ? handleDevReset : undefined,
       cardCount,
+    });
+    focusTopModal();
+    return;
+  }
+
+  if (routeInfo.name === "print") {
+    cleanupPrint = renderPrintDialog(modalRoot, {
+      onClose: overlayOnClose("print"),
+      toast,
     });
     focusTopModal();
     return;
@@ -298,8 +317,8 @@ async function showOverlay(routeInfo) {
     if (routeInfo.page === "list") {
       cleanupThemes = await renderThemesModal(modalRoot, {
         onClose: overlayOnClose("themes"),
-        onCreate: () => navigate("#/themes/new"),
-        onEdit: (id) => navigate(`#/themes/edit/${encodeURIComponent(id)}`),
+        onCreate: () => navigate("#themes/new"),
+        onEdit: (id) => navigate(`#themes/edit/${encodeURIComponent(id)}`),
       });
       focusTopModal();
       return;
@@ -309,7 +328,7 @@ async function showOverlay(routeInfo) {
       themeId: routeInfo.page === "edit" ? routeInfo.themeId : null,
       onClose: () => {
         if (parseRoute().name === "themes") {
-          navigate("#/themes", { replace: true });
+          navigate("#themes", { replace: true });
         }
       },
       onSaved: () => {
@@ -317,19 +336,19 @@ async function showOverlay(routeInfo) {
         prepareThemesAfterThemeSave();
         underlayStale = true;
         if (parseRoute().name === "themes") {
-          navigate("#/themes", { replace: true });
+          navigate("#themes", { replace: true });
         }
       },
       onDeleted: () => {
         toast("Thème supprimé");
         underlayStale = true;
         if (parseRoute().name === "themes") {
-          navigate("#/themes", { replace: true });
+          navigate("#themes", { replace: true });
         }
       },
     });
     if (!cleanupThemes) {
-      navigate("#/themes", { replace: true });
+      navigate("#themes", { replace: true });
       return;
     }
     focusTopModal();
@@ -348,6 +367,21 @@ async function showOverlay(routeInfo) {
   }
 
   if (routeInfo.name === "developer") {
+    if (!isDeveloperEnabled()) {
+      const ok = await confirmDialog(modalRoot, {
+        title: "Activer l’espace développeur ?",
+        icon: "tools",
+        message:
+          "L’espace développeur donne accès au styleguide, aux outils internes et à la réinitialisation des données locales.",
+        okLabel: "Activer",
+      });
+      if (parseRoute().name !== "developer") return;
+      if (!ok) {
+        dismissOverlay();
+        return;
+      }
+      enableDeveloper();
+    }
     cleanupDeveloper = renderDeveloperModal(modalRoot, {
       page: routeInfo.page,
       presetPage: routeInfo.presetPage,
@@ -367,13 +401,13 @@ async function showOverlay(routeInfo) {
         toast("Carte enregistrée");
         prepareListAfterCardSave();
         underlayStale = true;
-        if (parseRoute().name === "editor") navigate("#/", { replace: true });
+        if (parseRoute().name === "editor") navigate("#", { replace: true });
       },
       onCancel: overlayOnClose("editor"),
       onDeleted: () => {
         toast("Carte supprimée");
         underlayStale = true;
-        if (parseRoute().name === "editor") navigate("#/", { replace: true });
+        if (parseRoute().name === "editor") navigate("#", { replace: true });
       },
     });
     focusTopModal();
@@ -395,7 +429,7 @@ function renderEmpty() {
       {
         title: "Nouvelle carte",
         desc: "Créer une première carte pour l'ajouter à la collection",
-        href: "#/new-card",
+        href: "#new-card",
         icon: "add",
       },
       {
@@ -411,8 +445,8 @@ function renderEmpty() {
 }
 
 const listOpts = {
-  onEdit: (id) => navigate(`#/edit-card/${id}`),
-  onCreate: () => navigate("#/new-card"),
+  onEdit: (id) => navigate(`#edit-card/${id}`),
+  onCreate: () => navigate("#new-card"),
   toast,
 };
 
@@ -436,8 +470,19 @@ async function route() {
 
   let routeInfo = parseRoute();
   if (routeInfo.name === "unknown") {
-    history.replaceState({ app: APP_ID, depth: 0 }, "", hashUrl("#/"));
+    history.replaceState({ app: APP_ID, depth: 0 }, "", hashUrl("#"));
     routeInfo = { name: "home" };
+  } else {
+    const raw = (location.hash || "").split("?")[0];
+    const canonical = normalizeHash(raw);
+    const written = canonical === "#" ? "" : canonical;
+    if (raw !== written) {
+      history.replaceState(
+        { app: APP_ID, depth: canonical === "#" ? 0 : routeDepth() },
+        "",
+        hashUrl(canonical)
+      );
+    }
   }
 
   const prev = shownRoute;
@@ -548,7 +593,7 @@ async function handleImportFile() {
       : "";
     toast(`${result.imported} carte(s) importée(s) · total ${result.total}${themeMsg}`);
     underlayStale = true;
-    navigate("#/", { replace: true });
+    navigate("#", { replace: true });
   } catch (err) {
     toast(err.message || "Import impossible", "error");
   }
@@ -560,7 +605,7 @@ async function handleClearCards() {
     clearPrintQty();
     toast("Toutes les cartes ont été supprimées");
     underlayStale = true;
-    navigate("#/", { replace: true });
+    navigate("#", { replace: true });
   } catch (err) {
     toast(err.message || "Impossible de supprimer les cartes", "error");
   }
@@ -576,15 +621,14 @@ async function handleDevReset() {
     await wipeAllLocalData();
     const url = new URL(location.href);
     url.searchParams.set("_", String(Date.now()));
-    url.hash = "#/";
-    location.replace(url.toString());
+    location.replace(`${url.pathname}${url.search}`);
   } catch (err) {
     toast(err.message || "Reset impossible", "error");
   }
 }
 
-btnNew.addEventListener("click", () => navigate("#/new-card"));
-if (btnSettings) btnSettings.addEventListener("click", () => navigate("#/settings"));
+btnNew.addEventListener("click", () => navigate("#new-card"));
+if (btnSettings) btnSettings.addEventListener("click", () => navigate("#settings"));
 
 if (importFile) {
   importFile.addEventListener("change", () => {
@@ -606,7 +650,7 @@ document.addEventListener("click", (e) => {
     return;
   }
   const href = a.getAttribute("href");
-  if (!href || !href.startsWith("#/")) return;
+  if (!href || href[0] !== "#") return;
   e.preventDefault();
   navigate(href);
 });
@@ -640,12 +684,11 @@ async function boot() {
     initTheme();
     initCardDesign();
     initListLayout();
-    initPrintMenu({ toast });
+    initPrintMenu({ toast, onOpenPrint: () => navigate("#print") });
     bindModalFocusTrap();
     registerServiceWorker();
 
-    const initialHash = !location.hash || location.hash === "#" ? "#/" : normalizeHash(location.hash);
-    history.replaceState({ app: APP_ID, depth: 0 }, "", hashUrl(initialHash));
+    history.replaceState({ app: APP_ID, depth: 0 }, "", hashUrl(location.hash));
 
     await Promise.all([loadCards(), loadThemes()]);
     main.removeAttribute("aria-busy");
