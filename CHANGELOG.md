@@ -7,6 +7,8 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [0.7.5] — 2026-08-22
+
 ### Added
 
 - Espace développeur : section **Modèles** (`ri-pages-fill`) et galerie **Page de chargement** (`#developer/loading`, `ri-loader-4-fill`) — aperçus « Chargement en cours » (animé) et « Erreur de chargement » (message rouge, figé)
@@ -26,6 +28,7 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 - Routes : overlays en `#settings`, `#new-card`, `#developer/…` (plus de `/` juste après `#`) ; anciennes URLs `#/…` nettoyées
 - Paramètres d’impression : route `#print` (comme les autres overlays) ; rien à imprimer → message à la place des options
 - Reset local : rechargement en `?{timestamp}` (plus de `?_=`) ; la query est retirée une fois l’app relancée
+- Header : bouton « Nouvelle carte » en icône seule seulement sous 540px (libellé visible plus longtemps, nom d’app plus court)
 - Nom produit et identifiants techniques : **Brickcard** (`APP_ID`, IndexedDB, localStorage, cache SW, images app)
 - Captures README : `docs/screenshots/brickcard-liste.png` et `brickcard-editor.png` (sans version dans le nom, mises à jour pour l’UI actuelle)
 - Logos de thèmes SVG : nettoyage SVGO (comme SVGOMG : preset + `viewBox` conservé) — ~1,3 Mo → ~0,95 Mo ; `indiana-jones` inchangé (SVGO l’alourdissait)

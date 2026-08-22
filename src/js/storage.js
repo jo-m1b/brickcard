@@ -5,7 +5,7 @@
 
 import { getPresetThemes, getPresetTheme, parseHexColor, clearPresetCache, clampLogoZoom, roundCropCoord } from "./themes-data.js";
 import { downloadBlob } from "./card-export.js";
-import { APP_ID } from "./version.js?v=0.7.4";
+import { APP_ID } from "./version.js?v=0.7.5";
 
 const DB_NAME_BASE = APP_ID;
 const DB_GEN_KEY = `${APP_ID}:db-gen`;

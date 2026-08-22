@@ -390,8 +390,10 @@ textarea {
   .topbar:not(:has(#topbar-search:not([hidden]))) .topbar-search {
     display: none !important;
   }
+}
 
-  /* Nouvelle carte : icône seule, comme les autres actions du header */
+/* Nouvelle carte : icône seule sous 540px (nom d’app plus court, le libellé tient plus longtemps) */
+@media (max-width: 539px) {
   #btn-new-card {
     width: 2.4rem;
     height: 2.4rem;

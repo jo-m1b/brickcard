@@ -1,6 +1,6 @@
 import { ICON_ARROW_RIGHT_WIDE, ICON_CLOSE } from "../icons.js";
 import { loadMarkdownPage } from "../markdown.js";
-import { APP_NAME, APP_VERSION } from "../version.js?v=0.7.4";
+import { APP_NAME, APP_VERSION } from "../version.js?v=0.7.5";
 
 /** Logo app en titre de modale : même taille / `currentColor` qu’une icône Remix. */
 const MODAL_TITLE_BRAND = `<span class="modal-title-brand" aria-hidden="true"></span>`;

@@ -3,7 +3,7 @@ import { initTheme } from "./theme.js";
 import { initCardDesign } from "./card-design.js";
 import { initListLayout } from "./list-layout.js";
 import { enableDeveloper, isDeveloperEnabled } from "./developer-access.js";
-import { APP_ID, APP_NAME, APP_VERSION } from "./version.js?v=0.7.4";
+import { APP_ID, APP_NAME, APP_VERSION } from "./version.js?v=0.7.5";
 import { renderEditor } from "./views/editor.js";
 import { renderList, prepareListAfterCardSave } from "./views/list.js";
 import { renderThemesModal, prepareThemesAfterThemeSave } from "./views/themes.js";
