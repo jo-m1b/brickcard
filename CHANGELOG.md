@@ -9,10 +9,13 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Added
 
+- Espace développeur : section **Modèles** (`ri-pages-fill`) et galerie **Page de chargement** (`#developer/loading`, `ri-loader-4-fill`) — aperçus « Chargement en cours » (animé) et « Erreur de chargement » (message rouge, figé)
 - Espace développeur hors local : inactif par défaut ; `#developer` (et sous-routes) propose une confirmation (Annuler / Activer) ; l’activation est persistée jusqu’à Réinitialiser, et affiche la section Paramètres « Options pour les développeurs »
 
 ### Changed
 
+- Chargement (erreur) : icône `ri-error-warning-line` au centre de la brique ; header inchangé (marque seule, comme en cours)
+- Chargement : titre centré hors des points ; points en séquence `.` / `..` / `...` / vide ; clignotement des plots seulement (plus le corps de la brique)
 - Accueil vide : « Bienvenue ;) », « votre collection » ; bloc remonte d’une hauteur de header (grand écran)
 - Pied de modale : « Annuler » en `sm` s’il y a d’autres actions ; taille normale s’il est seul
 - Sauvegarde de la collection : fichier `.brickcard` (JSON) au lieu de `.json` ; import limité à `*.brickcard`

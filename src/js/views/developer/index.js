@@ -1,4 +1,4 @@
-import { ICON_COLLAGE, ICON_PENCIL_RULER_2 } from "../../icons.js";
+import { ICON_COLLAGE, ICON_PAGES, ICON_PENCIL_RULER_2 } from "../../icons.js";
 import { tileListMarkup } from "../../tile.js";
 
 /**
@@ -21,6 +21,17 @@ export function renderDeveloperIndex(host) {
           desc: "Paramétrer et exporter themes-presets.json",
           href: "#developer/theme-presets",
           icon: "palette",
+        },
+      ])}
+      </section>
+      <section class="styleguide-section">
+        <h2 class="section-title">${ICON_PAGES} Modèles</h2>
+        ${tileListMarkup([
+        {
+          title: "Page de chargement",
+          desc: "Modèle de la page de chargement utilisée pendant le démarrage de l’application",
+          href: "#developer/loading",
+          icon: "loader-4",
         },
       ])}
       </section>

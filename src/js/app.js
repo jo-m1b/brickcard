@@ -12,7 +12,7 @@ import { renderPageModal } from "./views/page.js";
 import { renderSettingsModal } from "./views/settings.js";
 import { renderPrintDialog } from "./print-dialog.js";
 import { renderDeveloperModal } from "./views/developer/modal.js";
-import { emptyViewMarkup } from "./empty-view.js";
+import { emptyViewMarkup, loadingViewMarkup } from "./empty-view.js";
 import { confirmDialog, openConfirmDialog } from "./confirm-dialog.js";
 import { bindModalFocusTrap, focusTopModal } from "./modal-focus.js";
 import {
@@ -705,8 +705,9 @@ async function boot() {
     if (typeof window.showBootError === "function") {
       window.showBootError(err);
     } else if (main) {
+      const msg = err && err.message ? err.message : String(err || "Erreur inconnue");
       main.removeAttribute("aria-busy");
-      main.innerHTML = `<section class="panel"><p class="error">Erreur au démarrage : ${err.message}</p></section>`;
+      main.innerHTML = loadingViewMarkup({ error: msg, busy: false });
     }
   }
 }

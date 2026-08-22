@@ -14,6 +14,7 @@ import { renderDeveloperColors } from "./colors.js";
 import { renderDeveloperImages } from "./images.js";
 import { renderDeveloperSearch } from "./search.js";
 import { renderDeveloperModals } from "./modals.js";
+import { renderDeveloperLoading } from "./loading.js";
 import {
   preparePresetDraftAfterSave,
   renderDeveloperThemePresets,
@@ -36,6 +37,7 @@ const PAGES = {
   images: renderDeveloperImages,
   search: renderDeveloperSearch,
   modals: renderDeveloperModals,
+  loading: renderDeveloperLoading,
 };
 
 /** @typedef {{ name: string, icon?: string }} DeveloperSection */
@@ -44,6 +46,8 @@ const PAGES = {
 const SECTION_DESIGN = { name: "Système de design", icon: "collage" };
 /** @type {DeveloperSection} */
 const SECTION_TOOLS = { name: "Aide au développement", icon: "pencil-ruler-2" };
+/** @type {DeveloperSection} */
+const SECTION_MODELS = { name: "Modèles", icon: "pages" };
 
 /** Section d’index pour les pages ouvertes par une tuile (`#developer`). */
 const PAGE_SECTIONS = {
@@ -60,6 +64,7 @@ const PAGE_SECTIONS = {
   images: SECTION_DESIGN,
   search: SECTION_DESIGN,
   modals: SECTION_DESIGN,
+  loading: SECTION_MODELS,
   "theme-presets": SECTION_TOOLS,
 };
 

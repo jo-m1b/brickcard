@@ -1,8 +1,10 @@
 /**
  * État vide / chargement : brique CSS + titre + texte optionnel + tuiles optionnelles.
+ * Page de démarrage : `loadingViewMarkup()` (copie inline dans `index.html` pour le boot).
  */
 
 import { tileListMarkup } from "./tile.js";
+import { ICON_ERROR_WARNING_LINE } from "./icons.js";
 
 /**
  * @param {string} s
@@ -45,4 +47,29 @@ export function emptyViewMarkup(opts) {
   const text = opts.text ? `<p>${escapeHtml(opts.text)}</p>` : "";
   const tiles = opts.tiles?.length ? tileListMarkup(opts.tiles) : "";
   return `<section class="empty-view no-print"${idAttr}${hidden}><div class="empty-view-body"><div class="brick" aria-hidden="true"></div><${tag} class="view-title">${escapeHtml(opts.title)}</${tag}>${text}${tiles}</div></section>`;
+}
+
+/**
+ * Markup de la page de chargement (brique animée + « Chargement... »).
+ * Le boot réel reste inline dans `index.html` (modules pas encore chargés) ; garder les deux alignés.
+ *
+ * @param {{
+ *   titleTag?: "h1" | "h2" | "p",
+ *   error?: string,
+ *   errorId?: string,
+ *   busy?: boolean,
+ * }} [opts]
+ * @returns {string}
+ */
+export function loadingViewMarkup(opts = {}) {
+  const tag = opts.titleTag === "h2" || opts.titleTag === "p" ? opts.titleTag : "h1";
+  const busy = opts.busy === false ? "" : ' aria-busy="true"';
+  let error = "";
+  if (opts.error) {
+    error = `<p class="empty-view-error" role="alert">${escapeHtml(opts.error)}</p>`;
+  } else {
+    const idAttr = opts.errorId ? ` id="${escapeAttr(opts.errorId)}"` : "";
+    error = `<p class="empty-view-error"${idAttr} role="alert" hidden></p>`;
+  }
+  return `<section class="empty-view no-print"${busy}><div class="empty-view-body"><div class="brick" aria-hidden="true"><span class="brick-error-icon">${ICON_ERROR_WARNING_LINE}</span></div><${tag} class="view-title">Chargement<span class="visually-hidden">...</span><span class="loading-dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span></${tag}>${error}</div></section>`;
 }
