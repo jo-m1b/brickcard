@@ -13,6 +13,7 @@ import { contrastText, partitionThemes } from "../themes-data.js";
 import { resolveCardAccent } from "../card-design.js";
 import { applyThemeLogoTransform, brandLogoSrc } from "../card-render.js";
 import { emptyViewMarkup } from "../empty-view.js";
+import { setAppDocumentTitle } from "../document-title.js";
 
 /** @param {string} hay @param {string} needle */
 function includesCI(hay, needle) {
@@ -224,6 +225,8 @@ export async function renderThemesModal(host, opts) {
       </div>
     </div>
   `;
+
+  setAppDocumentTitle("Thèmes");
 
   const q = (sel) => host.querySelector(sel);
   const backdrop = q("#themes-modal-backdrop");

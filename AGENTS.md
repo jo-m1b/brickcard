@@ -16,7 +16,7 @@ Tout le code applicatif est dans **`src/`**.
 
 | Fichier | Rôle |
 |---------|------|
-| `src/index.html` | Coquille : topbar sticky, `#main`, `#modal-root`, `#print-root` |
+| `src/index.html` | Coquille : `<title>` = `APP_DOCUMENT_TITLE`, topbar sticky, `#main`, `#modal-root`, `#print-root` |
 | `src/manifest.webmanifest` | Manifest PWA (nom, icônes, `standalone`) |
 | `src/sw.js` | Service worker (cache same-origin ; `CACHE` = `APP_VERSION` ; fetch en ligne avec `cache: "reload"`) |
 | `src/data/themes-presets.json` | Liste des thèmes LEGO par défaut (éditable sans toucher au JS) |
@@ -44,11 +44,12 @@ Tout le code applicatif est dans **`src/`**.
 | `src/js/print-qty.js` | Quantités d’impression — localStorage |
 | `src/js/print-settings.js` | Réglages d’impression (grille, côtés, recto-verso) — localStorage |
 | `src/js/print-dialog.js` | Modale paramètres d’impression (`#print`) |
-| `src/js/version.js` | Version SemVer (`APP_VERSION`), `APP_ID`, `APP_NAME` — source unique |
+| `src/js/version.js` | Version SemVer (`APP_VERSION`), `APP_ID`, `APP_NAME`, `APP_DOCUMENT_TITLE` — source unique |
+| `src/js/document-title.js` | Titre d’onglet (`document.title`) : défaut, overlays, verrou pendant l’impression PDF |
 | `src/js/icons.js` | Icônes UI ([Remix Icon](https://remixicon.com/)) — paths + helpers (`remixIconByName`, `modalTitleMarkup`) |
 | `src/js/link.js` | Markup liens (`a.link` / externe / icône) |
 | `src/js/tile.js` | Markup tuiles (`ul.tile-list` / `a.tile`) |
-| `src/js/empty-view.js` | Markup états vides / chargement (`section.empty-view`, brique CSS, `loadingViewMarkup`) |
+| `src/js/empty-view.js` | Markup états vides / chargement (`section.empty-view`, brique CSS, `welcomeViewMarkup`, `loadingViewMarkup`) |
 | `src/js/confirm-dialog.js` | Dialogues `modal--sm` (`openConfirmDialog` / `confirmDialog` / `alertDialog`, `icon` optionnel) — pas de `alert()` / `confirm()` / `prompt()` |
 | `src/js/developer-access.js` | Accès espace développeur (toujours en local ; hors local, flag `localStorage` après confirmation `#developer`) |
 | `src/js/form-color.js` | Champ couleur (`form-color` / pastille / clear) |
@@ -163,7 +164,7 @@ Overlays de route (une à la fois, **swap** sans démonter la liste) : `#setting
 - `#settings` paramètres (modale)
 - `#print` paramètres d’impression (modale) ; rien à imprimer → message à la place des options
 - `#page/:slug` page Markdown (`data/page-{{slug}}.md`, ex. `#page/about`)
-- `#developer` `#developer/typography` `#developer/links` `#developer/tiles` `#developer/buttons` `#developer/fields` `#developer/selects` `#developer/sliders` `#developer/checkboxes` `#developer/radios` `#developer/colors` `#developer/images` `#developer/search` `#developer/modals` `#developer/loading` `#developer/theme-presets` `#developer/theme-presets/new` `#developer/theme-presets/edit/:slug` — espace développeur / styleguide en **modale** (extensible : `#developer/…`) ; en local : toujours actif ; hors local : inactif par défaut (section Paramètres « Options pour les développeurs » masquée) ; `#developer` / `#developer/…` sans flag → confirmation `modal--sm` (Annuler / Activer) à la place de l’espace ; Activer persiste le flag et ouvre la page demandée ; ensuite le lien Paramètres et `#developer` se comportent comme en local ; index : **Aide au développement** (`ri-pencil-ruler-2-fill`) puis **Modèles** (`ri-pages-fill`) puis **Système de design** (`ri-collage-fill`) ; galeries / aide au développement / modèles (tuiles) : titre = lien `#developer` vers la section + `ri-arrow-right-wide-fill` + titre de page ; hover / focus du lien = primary hover (mêmes tokens inversés que Fermer) ; ≤ 640px (plein écran) : si le lien a une icône, texte masqué (icône seule) ; `#developer/loading` : modèle de la page de chargement (brique animée) ; `#developer/theme-presets` : outil brouillon des thèmes par défaut (`#developer/theme-presets/new`, `#developer/theme-presets/edit/:slug` ; fermeture éditeur → liste ; pied de modale optionnel levé hors du corps)
+- `#developer` `#developer/typography` `#developer/links` `#developer/tiles` `#developer/buttons` `#developer/fields` `#developer/selects` `#developer/sliders` `#developer/checkboxes` `#developer/radios` `#developer/colors` `#developer/images` `#developer/search` `#developer/modals` `#developer/loading` `#developer/welcome` `#developer/theme-presets` `#developer/theme-presets/new` `#developer/theme-presets/edit/:slug` — espace développeur / styleguide en **modale** (extensible : `#developer/…`) ; en local : toujours actif ; hors local : inactif par défaut (section Paramètres « Options pour les développeurs » masquée) ; `#developer` / `#developer/…` sans flag → confirmation `modal--sm` (Annuler / Activer) à la place de l’espace ; Activer persiste le flag et ouvre la page demandée ; ensuite le lien Paramètres et `#developer` se comportent comme en local ; index : **Aide au développement** (`ri-pencil-ruler-2-fill`) puis **Modèles** (`ri-pages-fill`) puis **Système de design** (`ri-collage-fill`) ; galeries / aide au développement / modèles (tuiles) : titre = lien `#developer` vers la section + `ri-arrow-right-wide-fill` + titre de page ; hover / focus du lien = primary hover (mêmes tokens inversés que Fermer) ; ≤ 640px (plein écran) : si le lien a une icône, texte masqué (icône seule) ; `#developer/loading` : modèle de la page de chargement (brique animée) ; `#developer/welcome` : modèle de la page d’accueil vide (brique + tuiles) ; `#developer/theme-presets` : outil brouillon des thèmes par défaut (`#developer/theme-presets/new`, `#developer/theme-presets/edit/:slug` ; fermeture éditeur → liste ; pied de modale optionnel levé hors du corps)
 
 ## Boutons (design system)
 
@@ -321,7 +322,9 @@ Classe = apparence. Tag = plan du document. **Un rang 1 par vue** (page ou dialo
 
 Pas des headings&nbsp;: marque topbar, `form-label`, noms de cartes (grille thèmes, Brickcard). Galerie&nbsp;: `#developer/typography`.
 
-États vides (`section.empty-view` / `.empty-view-body`, helper `emptyViewMarkup` dans `empty-view.js`)&nbsp;: titre + texte + tuiles centrés dans `#main` ou le `modal-body` ; brique CSS collée au-dessus (hors flux). Accueil sans carte&nbsp;: «&nbsp;Bienvenue ;)&nbsp;» + tuiles Nouvelle carte / Importer une sauvegarde ; sur grand écran le bloc remonte d’une hauteur de header (header visuellement vide). Recherche sans résultat (cartes ou thèmes)&nbsp;: «&nbsp;Oups&nbsp;!&nbsp;». Premier affichage&nbsp;: «&nbsp;Chargement...&nbsp;» jusqu’à cartes + thèmes prêts ; échec de boot → message rouge (`#boot-error`), animation arrêtée, `ri-error-warning-line` au centre de la brique (`loadingViewMarkup` ; galerie `#developer/loading` : en cours + erreur).
+Titre de document (`<title>` / `document.title`, `document-title.js`)&nbsp;: défaut **Brickcard - Imprimez de bien jolies cartes pour vos briques LEGO®** (`APP_DOCUMENT_TITLE` dans `version.js` et `src/index.html`, **pas** de version). Accueil = ce titre. Overlay / page&nbsp;: `{titre de la modale} | {titre de la section si elle existe (espace développeur)} | {titre par défaut}`. Dialogues enfants (confirmation, URL d’image, démo styleguide, éditeur presets) se superposent le temps de l’affichage. Pendant `window.print()`, le titre devient le nom de fichier PDF (voir **Impression**) ; le schéma overlay n’est pas appliqué.
+
+États vides (`section.empty-view` / `.empty-view-body`, helper `emptyViewMarkup` dans `empty-view.js`)&nbsp;: titre + texte + tuiles centrés dans `#main` ou le `modal-body` ; brique CSS collée au-dessus (hors flux). Accueil sans carte&nbsp;: «&nbsp;Bienvenue ;)&nbsp;» + tuiles Nouvelle carte / Importer une sauvegarde (`welcomeViewMarkup` ; galerie `#developer/welcome`) ; sur grand écran le bloc remonte d’une hauteur de header (header visuellement vide). Recherche sans résultat (cartes ou thèmes)&nbsp;: «&nbsp;Oups&nbsp;!&nbsp;». Premier affichage&nbsp;: «&nbsp;Chargement...&nbsp;» jusqu’à cartes + thèmes prêts ; échec de boot → message rouge (`#boot-error`), animation arrêtée, `ri-error-warning-line` au centre de la brique (`loadingViewMarkup` ; galerie `#developer/loading` : en cours + erreur).
 
 ## Modales (design system)
 
@@ -333,7 +336,7 @@ Appliqué&nbsp;: paramètres / page MD (`md`) · thèmes + éditeur carte + édi
 
 ## Impression
 
-A4 portrait ; **grille** 1×1 à 10×10 (défaut **3×3** poker 63×88 mm). Autres tailles : échelle pour remplir la largeur (agrandir à 1–2, réduire à 4–10) ; cartes entières seulement. Côtés des cartes : face+dos (défaut) / face / dos. Recto-verso des feuilles A4 : alterner (défaut) ou regrouper (tous les rectos, puis tous les versos). Miroir horizontal au dos (flip bord long). Les mêmes réglages sont dans Paramètres (`#settings`, section Impression) et dans `#print` (menu « Lancer l’impression », reste ouverte pendant l’impression). Rien à imprimer : message à la place des options. Pendant `window.print()`, `document.title` = nom proposé du PDF (`brickcard-YYYY-MM-DD-grille-NxN-…`, sans `.pdf`). Dos : label **Brickcard**.
+A4 portrait ; **grille** 1×1 à 10×10 (défaut **3×3** poker 63×88 mm). Autres tailles : échelle pour remplir la largeur (agrandir à 1–2, réduire à 4–10) ; cartes entières seulement. Côtés des cartes : face+dos (défaut) / face / dos. Recto-verso des feuilles A4 : alterner (défaut) ou regrouper (tous les rectos, puis tous les versos). Miroir horizontal au dos (flip bord long). Les mêmes réglages sont dans Paramètres (`#settings`, section Impression) et dans `#print` (menu « Lancer l’impression », reste ouverte pendant l’impression). Rien à imprimer : message à la place des options. Pendant `window.print()`, `document.title` = nom proposé du PDF (`brickcard-YYYY-MM-DD-grille-NxN-…`, sans `.pdf`) via `beginPrintDocumentTitle` / `endPrintDocumentTitle` (`document-title.js`) — le titre overlay est restauré après, pas écrasé par le schéma de navigation. Dos : label **Brickcard**.
 
 ## Conventions
 

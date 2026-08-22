@@ -1,5 +1,6 @@
 import { ICON_ARROW_RIGHT_WIDE, ICON_CLOSE, modalTitleMarkup } from "../../icons.js";
 import { linkMarkup } from "../../link.js";
+import { setAppDocumentTitle } from "../../document-title.js";
 import { renderDeveloperIndex } from "./index.js";
 import { renderDeveloperTypography } from "./typography.js";
 import { renderDeveloperLinks } from "./links.js";
@@ -15,6 +16,7 @@ import { renderDeveloperImages } from "./images.js";
 import { renderDeveloperSearch } from "./search.js";
 import { renderDeveloperModals } from "./modals.js";
 import { renderDeveloperLoading } from "./loading.js";
+import { renderDeveloperWelcome } from "./welcome.js";
 import {
   preparePresetDraftAfterSave,
   renderDeveloperThemePresets,
@@ -38,6 +40,7 @@ const PAGES = {
   search: renderDeveloperSearch,
   modals: renderDeveloperModals,
   loading: renderDeveloperLoading,
+  welcome: renderDeveloperWelcome,
 };
 
 /** @typedef {{ name: string, icon?: string }} DeveloperSection */
@@ -65,6 +68,7 @@ const PAGE_SECTIONS = {
   search: SECTION_DESIGN,
   modals: SECTION_DESIGN,
   loading: SECTION_MODELS,
+  welcome: SECTION_MODELS,
   "theme-presets": SECTION_TOOLS,
 };
 
@@ -99,8 +103,10 @@ function liftStyleguideHeader(body, titleEl, page) {
         href: "#developer",
         icon: section.icon || false,
       })}${ICON_ARROW_RIGHT_WIDE}${modalTitleMarkup(pageTitle)}`;
+      setAppDocumentTitle(pageTitle, section.name);
     } else {
       titleEl.innerHTML = modalTitleMarkup(pageTitle, "tools");
+      setAppDocumentTitle(pageTitle);
     }
     h1.remove();
   }

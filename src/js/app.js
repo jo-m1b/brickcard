@@ -3,7 +3,8 @@ import { initTheme } from "./theme.js";
 import { initCardDesign } from "./card-design.js";
 import { initListLayout } from "./list-layout.js";
 import { enableDeveloper, isDeveloperEnabled } from "./developer-access.js";
-import { APP_ID, APP_NAME, APP_VERSION } from "./version.js?v=0.7.5";
+import { APP_ID, APP_VERSION } from "./version.js?v=0.7.5";
+import { setAppDocumentTitle } from "./document-title.js";
 import { renderEditor } from "./views/editor.js";
 import { renderList, prepareListAfterCardSave } from "./views/list.js";
 import { renderThemesModal, prepareThemesAfterThemeSave } from "./views/themes.js";
@@ -12,7 +13,7 @@ import { renderPageModal } from "./views/page.js";
 import { renderSettingsModal } from "./views/settings.js";
 import { renderPrintDialog } from "./print-dialog.js";
 import { renderDeveloperModal } from "./views/developer/modal.js";
-import { emptyViewMarkup, loadingViewMarkup } from "./empty-view.js";
+import { loadingViewMarkup, welcomeViewMarkup } from "./empty-view.js";
 import { confirmDialog, openConfirmDialog } from "./confirm-dialog.js";
 import { bindModalFocusTrap, focusTopModal } from "./modal-focus.js";
 import {
@@ -368,6 +369,7 @@ async function showOverlay(routeInfo) {
 
   if (routeInfo.name === "developer") {
     if (!isDeveloperEnabled()) {
+      setAppDocumentTitle();
       const choice = await openConfirmDialog(modalRoot, {
         title: "Activer l’espace développeur ?",
         icon: "tools",
@@ -426,25 +428,7 @@ function disposeList() {
 }
 
 function renderEmpty() {
-  main.innerHTML = emptyViewMarkup({
-    title: "Bienvenue ;)",
-    text: "Aucune carte pour l'instant dans votre collection !",
-    tiles: [
-      {
-        title: "Nouvelle carte",
-        desc: "Créer une carte pour commencer votre collection",
-        href: "#new-card",
-        icon: "add",
-      },
-      {
-        title: "Importer une sauvegarde",
-        desc: "Ajouter un lot de cartes à votre collection depuis une sauvegarde",
-        icon: "upload",
-        tag: "button",
-        id: "empty-import",
-      },
-    ],
-  });
+  main.innerHTML = welcomeViewMarkup();
   main.querySelector("#empty-import")?.addEventListener("click", () => importFile?.click());
 }
 
@@ -496,6 +480,7 @@ async function route() {
   if (!nextIsOverlay) {
     teardownOverlays({ clearDom: true, dropModalOpen: true });
     shownRoute = routeInfo;
+    setAppDocumentTitle();
     await ensureUnderlay();
     return;
   }
@@ -682,7 +667,7 @@ async function boot() {
     if (appVersionEl) {
       appVersionEl.textContent = `v${APP_VERSION}`;
     }
-    document.title = `${APP_NAME} v${APP_VERSION}`;
+    setAppDocumentTitle();
     initTheme();
     initCardDesign();
     initListLayout();

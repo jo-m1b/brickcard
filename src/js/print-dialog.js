@@ -6,6 +6,7 @@
  */
 
 import { ICON_CLOSE, ICON_PRINTER, modalTitleMarkup } from "./icons.js";
+import { setAppDocumentTitle } from "./document-title.js";
 import { emptyViewMarkup } from "./empty-view.js";
 import { bindFormRange, formRangeResetMarkup } from "./form-range.js";
 import { loadCards } from "./storage.js";
@@ -124,6 +125,8 @@ export function renderPrintDialog(host, opts) {
       </div>
     </div>
   `;
+
+  setAppDocumentTitle("Paramètres d’impression");
 
   const backdrop = host.querySelector("#print-dialog-backdrop");
   const btnClose = host.querySelector("#btn-print-dialog-close");

@@ -1,6 +1,7 @@
 /**
  * État vide / chargement : brique CSS + titre + texte optionnel + tuiles optionnelles.
- * Page de démarrage : `loadingViewMarkup()` (copie inline dans `index.html` pour le boot).
+ * Accueil vide : `welcomeViewMarkup()`. Page de démarrage : `loadingViewMarkup()`
+ * (copie inline dans `index.html` pour le boot).
  */
 
 import { tileListMarkup } from "./tile.js";
@@ -47,6 +48,39 @@ export function emptyViewMarkup(opts) {
   const text = opts.text ? `<p>${escapeHtml(opts.text)}</p>` : "";
   const tiles = opts.tiles?.length ? tileListMarkup(opts.tiles) : "";
   return `<section class="empty-view no-print"${idAttr}${hidden}><div class="empty-view-body"><div class="brick" aria-hidden="true"></div><${tag} class="view-title">${escapeHtml(opts.title)}</${tag}>${text}${tiles}</div></section>`;
+}
+
+/**
+ * Markup de la page d’accueil vide (collection sans cartes).
+ *
+ * @param {{
+ *   titleTag?: "h1" | "h2" | "p",
+ *   importId?: string | false,
+ * }} [opts]
+ * @returns {string}
+ */
+export function welcomeViewMarkup(opts = {}) {
+  const importId = opts.importId === false ? "" : opts.importId || "empty-import";
+  return emptyViewMarkup({
+    titleTag: opts.titleTag,
+    title: "Bienvenue ;)",
+    text: "Aucune carte pour l'instant dans votre collection !",
+    tiles: [
+      {
+        title: "Nouvelle carte",
+        desc: "Créer une carte pour commencer votre collection",
+        href: "#new-card",
+        icon: "add",
+      },
+      {
+        title: "Importer une sauvegarde",
+        desc: "Ajouter un lot de cartes à votre collection depuis une sauvegarde",
+        icon: "upload",
+        tag: "button",
+        ...(importId ? { id: importId } : {}),
+      },
+    ],
+  });
 }
 
 /**

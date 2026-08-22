@@ -25,6 +25,7 @@ import { mountCardPreview, refreshCardPreview, mountCardBackPreview, refreshCard
 import { slugifyFilename } from "../card-export.js";
 import { confirmDialog } from "../confirm-dialog.js";
 import { partitionThemes } from "../themes-data.js";
+import { setAppDocumentTitle } from "../document-title.js";
 
 /**
  * @param {HTMLElement} host Conteneur modale (#modal-root)
@@ -181,6 +182,8 @@ export async function renderEditor(host, opts) {
       </div>
     </div>
   `;
+
+  setAppDocumentTitle(editorDialogTitle(existing));
 
   const refs = {
     backdrop: host.querySelector("#card-editor-backdrop"),

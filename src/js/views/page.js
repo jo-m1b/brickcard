@@ -1,6 +1,7 @@
 import { ICON_ARROW_RIGHT_WIDE, ICON_CLOSE } from "../icons.js";
 import { loadMarkdownPage } from "../markdown.js";
 import { APP_NAME, APP_VERSION } from "../version.js?v=0.7.5";
+import { setAppDocumentTitle } from "../document-title.js";
 
 /** Logo app en titre de modale : même taille / `currentColor` qu’une icône Remix. */
 const MODAL_TITLE_BRAND = `<span class="modal-title-brand" aria-hidden="true"></span>`;
@@ -13,6 +14,17 @@ function pageModalTitleMarkup(page) {
   const title = page.title || "";
   if (page.slug !== "about") return title;
   return `<span class="modal-title-lead">${MODAL_TITLE_BRAND}<span>${APP_NAME} v${APP_VERSION}</span></span>${ICON_ARROW_RIGHT_WIDE}<span>${title}</span>`;
+}
+
+/**
+ * Texte brut du titre Markdown (déjà échappé en HTML) pour `document.title`.
+ * @param {{ title: string }} page
+ * @returns {string}
+ */
+function pageTitleText(page) {
+  const t = document.createElement("template");
+  t.innerHTML = page.title || "";
+  return (t.content.textContent || "").trim();
 }
 
 /**
@@ -53,6 +65,8 @@ export async function renderPageModal(host, opts) {
       </div>
     </div>
   `;
+
+  setAppDocumentTitle(pageTitleText(page));
 
   const body = host.querySelector("#page-md-body");
   if (body) body.innerHTML = page.html;

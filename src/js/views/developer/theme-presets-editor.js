@@ -7,6 +7,7 @@ import { DEFAULT_THEME_COLOR } from "../../themes-data.js";
 import { resolveCardAccent } from "../../card-design.js";
 import { confirmDialog } from "../../confirm-dialog.js";
 import { focusTopModal } from "../../modal-focus.js";
+import { popModalDocumentTitle, pushModalDocumentTitle } from "../../document-title.js";
 import {
   deletePresetDraftTheme,
   draftToLegoTheme,
@@ -20,6 +21,9 @@ import {
 
 const THEME_LOGO_ACCEPT =
   "image/svg+xml,image/png,image/webp,.svg,.png,.webp";
+
+/** Section d’index `#developer` pour l’outil thèmes par défaut. */
+const PRESETS_SECTION = "Aide au développement";
 
 /**
  * Éditeur d’un thème du brouillon presets (`#developer/theme-presets/new`, `#developer/theme-presets/edit/:slug`).
@@ -65,6 +69,7 @@ export async function renderPresetDraftEditor(host, opts) {
 
   const displayLogo = existing ? presetDraftLogoUrl(existing) : "";
   const colorDisplay = draft.color || resolveCardAccent(null);
+  const dialogTitle = existing ? `Modifier « ${existing.name} »` : "Nouveau thème";
 
   function themeCropBackground() {
     return resolveCardAccent({ color: draft.color });
@@ -76,7 +81,7 @@ export async function renderPresetDraftEditor(host, opts) {
         <div class="modal-header">
           <div>
             <h1 class="view-title" id="preset-editor-title">${modalTitleMarkup(
-              existing ? `Modifier « ${existing.name} »` : "Nouveau thème",
+              dialogTitle,
               existing ? ICON_PENCIL : ICON_ADD
             )}</h1>
           </div>
@@ -148,6 +153,8 @@ export async function renderPresetDraftEditor(host, opts) {
       </div>
     </div>
   `;
+
+  pushModalDocumentTitle(dialogTitle, PRESETS_SECTION);
 
   const q = (sel) => host.querySelector(sel);
   const backdrop = q("#preset-editor-backdrop");
@@ -391,5 +398,6 @@ export async function renderPresetDraftEditor(host, opts) {
     logoField?.destroy();
     document.removeEventListener("keydown", onKey, true);
     window.removeEventListener("resize", syncPreview);
+    popModalDocumentTitle();
   };
 }

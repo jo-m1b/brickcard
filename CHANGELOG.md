@@ -7,6 +7,14 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Added
+
+- Espace développeur : galerie **Page de bienvenue** (`#developer/welcome`, `ri-home-smile-fill`) — modèle de l’accueil lorsque la collection est vide
+
+### Changed
+
+- Titre de document : slogan par défaut (sans version) ; overlays `{modale} | {section si besoin} | {défaut}` ; nom de fichier PDF inchangé pendant l’impression
+
 ## [0.7.5] — 2026-08-22
 
 ### Added

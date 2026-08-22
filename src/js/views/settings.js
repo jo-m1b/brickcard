@@ -36,6 +36,7 @@ import {
 import { DEFAULT_THEME_COLOR } from "../themes-data.js";
 import { tileListMarkup } from "../tile.js";
 import { confirmDialog } from "../confirm-dialog.js";
+import { setAppDocumentTitle } from "../document-title.js";
 import { syncPrintMenu } from "../print-menu.js";
 import {
   DEFAULT_PRINT_GRID,
@@ -298,6 +299,8 @@ export function renderSettingsModal(host, opts) {
       </div>
     </div>
   `;
+
+  setAppDocumentTitle("Paramètres");
 
   const backdrop = host.querySelector("#settings-modal-backdrop");
   const btnClose = host.querySelector("#btn-settings-close");

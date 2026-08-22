@@ -5,6 +5,7 @@
 
 import { ICON_CLOSE, ICON_DELETE_BIN_2, ICON_SAVE, modalTitleMarkup, remixIconByName } from "./icons.js";
 import { focusTopModal } from "./modal-focus.js";
+import { popModalDocumentTitle, pushModalDocumentTitle } from "./document-title.js";
 
 let dialogSeq = 0;
 
@@ -135,6 +136,7 @@ export function openConfirmDialog(host, opts) {
       mo.disconnect();
       document.removeEventListener("keydown", onKey, true);
       backdrop.remove();
+      popModalDocumentTitle();
       previouslyFocused?.focus?.();
       resolve(value);
     }
@@ -165,6 +167,7 @@ export function openConfirmDialog(host, opts) {
 
     document.addEventListener("keydown", onKey, true);
     host.appendChild(backdrop);
+    pushModalDocumentTitle(title);
     mo.observe(host, { childList: true });
     queueMicrotask(() => focusTopModal());
   });

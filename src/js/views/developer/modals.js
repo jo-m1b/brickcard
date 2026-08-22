@@ -1,6 +1,7 @@
 import { ICON_CLOSE, ICON_DELETE_BIN_2, ICON_SAVE, ICON_WINDOW, modalTitleMarkup } from "../../icons.js";
 import { linkMarkup } from "../../link.js";
 import { focusTopModal } from "../../modal-focus.js";
+import { popModalDocumentTitle, pushModalDocumentTitle } from "../../document-title.js";
 
 /**
  * @typedef {"sm"|"md"|"lg"} ModalSize
@@ -240,12 +241,14 @@ export function renderDeveloperModals(host) {
     });
     document.addEventListener("keydown", onKey, true);
     queueMicrotask(() => focusTopModal());
+    pushModalDocumentTitle(spec.title, "Système de design");
 
     demoCleanup = () => {
       backdrop?.removeEventListener("click", onBackdrop);
       btnClose?.removeEventListener("click", closeDemo);
       document.removeEventListener("keydown", onKey, true);
       demoRoot.innerHTML = "";
+      popModalDocumentTitle();
     };
   }
 

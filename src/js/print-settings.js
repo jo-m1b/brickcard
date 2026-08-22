@@ -210,6 +210,8 @@ export function formatPrintCountLabel(cardCount) {
 /**
  * Nom de fichier proposé au dialogue « Enregistrer au format PDF »
  * (`document.title` pendant `window.print()`, sans `.pdf`).
+ * Verrouillé via `beginPrintDocumentTitle` / `endPrintDocumentTitle` pour ne pas
+ * écraser le nom de fichier avec le titre de navigation.
  * @param {number} cardCount
  * @param {PrintSettings} [settings]
  * @returns {string}

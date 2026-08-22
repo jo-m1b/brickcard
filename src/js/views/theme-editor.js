@@ -13,6 +13,7 @@ import { mountCardBackPreview, refreshCardBackPreview } from "../card-render.js"
 import { DEFAULT_THEME_COLOR } from "../themes-data.js";
 import { resolveCardAccent } from "../card-design.js";
 import { confirmDialog } from "../confirm-dialog.js";
+import { setAppDocumentTitle } from "../document-title.js";
 
 const THEME_LOGO_ACCEPT =
   "image/svg+xml,image/png,image/webp,.svg,.png,.webp";
@@ -56,6 +57,7 @@ export async function renderThemeEditor(host, opts) {
   };
 
   const colorDisplay = draft.color || resolveCardAccent(existing);
+  const dialogTitle = existing ? `Modifier « ${existing.name} »` : "Nouveau thème";
 
   function themeCropBackground() {
     return resolveCardAccent({ color: draft.color });
@@ -67,7 +69,7 @@ export async function renderThemeEditor(host, opts) {
         <div class="modal-header">
           <div>
             <h1 class="view-title" id="theme-editor-title">${modalTitleMarkup(
-              existing ? `Modifier « ${existing.name} »` : "Nouveau thème",
+              dialogTitle,
               existing ? ICON_PENCIL : ICON_ADD
             )}</h1>
           </div>
@@ -133,6 +135,8 @@ export async function renderThemeEditor(host, opts) {
       </div>
     </div>
   `;
+
+  setAppDocumentTitle(dialogTitle);
 
   const q = (sel) => host.querySelector(sel);
   const backdrop = q("#theme-editor-backdrop");

@@ -11,6 +11,7 @@ import {
   formatPrintPdfBasename,
   getPrintSettings,
 } from "./print-settings.js";
+import { beginPrintDocumentTitle, endPrintDocumentTitle } from "./document-title.js";
 
 export const PRINT_COLS = 3;
 export const PRINT_ROWS = 3;
@@ -205,12 +206,11 @@ export async function printCards(cards, opts = {}) {
   };
   window.addEventListener("beforeprint", onBeforePrint);
 
-  const previousTitle = document.title;
   let cleaned = false;
   const cleanup = () => {
     if (cleaned) return;
     cleaned = true;
-    document.title = previousTitle;
+    endPrintDocumentTitle();
     printRoot.classList.remove("is-preparing");
     printRoot.innerHTML = "";
     window.removeEventListener("beforeprint", onBeforePrint);
@@ -220,7 +220,7 @@ export async function printCards(cards, opts = {}) {
 
   window.addEventListener("afterprint", cleanup);
   await new Promise((r) => setTimeout(r, 80));
-  document.title = formatPrintPdfBasename(cards.length, settings);
+  beginPrintDocumentTitle(formatPrintPdfBasename(cards.length, settings));
   window.print();
   setTimeout(cleanup, 2500);
 }

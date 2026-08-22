@@ -33,6 +33,12 @@ export function renderDeveloperIndex(host) {
           href: "#developer/loading",
           icon: "loader-4",
         },
+        {
+          title: "Page de bienvenue",
+          desc: "Modèle de la page d’accueil lorsque la collection est vide",
+          href: "#developer/welcome",
+          icon: "home-smile",
+        },
       ])}
       </section>
       <section class="styleguide-section">

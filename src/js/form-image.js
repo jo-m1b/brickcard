@@ -6,6 +6,7 @@
 import { applyImageTransform, applyThemeLogoTransform } from "./card-render.js";
 import { downloadCardPhoto } from "./card-export.js";
 import { confirmDialog } from "./confirm-dialog.js";
+import { popModalDocumentTitle, pushModalDocumentTitle } from "./document-title.js";
 import { bindFormColor, formColorMarkup } from "./form-color.js";
 import { focusTopModal } from "./modal-focus.js";
 import {
@@ -291,6 +292,7 @@ function openImageUrlDialog(host, opts) {
       mo.disconnect();
       document.removeEventListener("keydown", onKey, true);
       backdrop.remove();
+      popModalDocumentTitle();
       if (addedModalOpen) document.body.classList.remove("modal-open");
       previouslyFocused?.focus?.();
       resolve(value);
@@ -371,6 +373,7 @@ function openImageUrlDialog(host, opts) {
 
     document.addEventListener("keydown", onKey, true);
     host.appendChild(backdrop);
+    pushModalDocumentTitle("Charger depuis une URL");
     mo.observe(host, { childList: true });
     queueMicrotask(() => focusTopModal());
   });
