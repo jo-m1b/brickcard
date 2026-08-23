@@ -8,6 +8,7 @@ import { downloadCardPhoto } from "./card-export.js";
 import { confirmDialog } from "./confirm-dialog.js";
 import { popModalDocumentTitle, pushModalDocumentTitle } from "./document-title.js";
 import { bindFormColor, formColorMarkup } from "./form-color.js";
+import { loadingViewMarkup } from "./empty-view.js";
 import { focusTopModal } from "./modal-focus.js";
 import {
   ICON_ALIGN_ITEM_HORIZONTAL_CENTER,
@@ -261,6 +262,9 @@ function openImageUrlDialog(host, opts) {
             </div>
             <p class="form-error" id="${errorId}" role="alert"></p>
           </div>
+          <div class="url-dialog-loading" id="${uid}-loading" hidden>
+            ${loadingViewMarkup({ titleTag: "p" })}
+          </div>
         </div>
         <div class="modal-footer">
           <div class="modal-footer-end">
@@ -276,6 +280,7 @@ function openImageUrlDialog(host, opts) {
     const input = /** @type {HTMLInputElement|null} */ (backdrop.querySelector(`#${inputId}`));
     const errorEl = backdrop.querySelector(`#${errorId}`);
     const loadBtn = /** @type {HTMLButtonElement|null} */ (backdrop.querySelector("[data-url-load]"));
+    const loadingEl = backdrop.querySelector(`#${uid}-loading`);
     const dismissBtns = backdrop.querySelectorAll("[data-url-dismiss]");
 
     let settled = false;
@@ -312,6 +317,7 @@ function openImageUrlDialog(host, opts) {
       if (loadBtn) loadBtn.disabled = on;
       if (input) input.disabled = on;
       backdrop.setAttribute("aria-busy", on ? "true" : "false");
+      if (loadingEl instanceof HTMLElement) loadingEl.hidden = !on;
     }
 
     async function loadFromUrl() {

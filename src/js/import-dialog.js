@@ -3,11 +3,13 @@
  * Étape 1 : charger un `.brickcard` (fichier ou URL) sans toucher à la collection.
  * Étape 2 : choisir quoi fusionner. L’écriture n’a lieu qu’au clic Importer.
  * Fermeture (X, Échap, backdrop, Annuler, ou après un import réussi) → accueil.
+ * Accueil vide : `openDemoBackupDialog` charge `data/backup-demo-jo.brickcard` et fusionne sans étape de choix.
  */
 
 import {
   ICON_CLOSE,
   ICON_CLOUD,
+  ICON_EMOTION,
   ICON_FILE_LINE,
   ICON_LINK,
   ICON_UPLOAD,
@@ -18,11 +20,13 @@ import { formCheckboxMarkup } from "./form-checkbox.js";
 import { focusTopModal } from "./modal-focus.js";
 import { getPresetThemes } from "./themes-data.js";
 import { importBackup } from "./storage.js";
+import { loadingViewMarkup } from "./empty-view.js";
 import { linkMarkup } from "./link.js";
 import {
   BACKUP_INVALID,
   BACKUP_URL_INVALID,
   CARD_APPEARANCE_SETTING_COUNT,
+  DEMO_BACKUP_SRC,
   UNTHEMED_BACKUP_THEME_ID,
   backupPayloadBytes,
   buildImportPayload,
@@ -102,6 +106,9 @@ function openBackupUrlDialog(host) {
             </div>
             <p class="form-error" id="${errorId}" role="alert"></p>
           </div>
+          <div class="url-dialog-loading" id="${uid}-loading" hidden>
+            ${loadingViewMarkup({ titleTag: "p" })}
+          </div>
         </div>
         <div class="modal-footer">
           <div class="modal-footer-end">
@@ -117,6 +124,7 @@ function openBackupUrlDialog(host) {
     const input = /** @type {HTMLInputElement|null} */ (backdrop.querySelector(`#${inputId}`));
     const errorEl = backdrop.querySelector(`#${errorId}`);
     const loadBtn = /** @type {HTMLButtonElement|null} */ (backdrop.querySelector("[data-url-load]"));
+    const loadingEl = backdrop.querySelector(`#${uid}-loading`);
     const dismissBtns = backdrop.querySelectorAll("[data-url-dismiss]");
 
     let settled = false;
@@ -153,6 +161,7 @@ function openBackupUrlDialog(host) {
       if (loadBtn) loadBtn.disabled = on;
       if (input) input.disabled = on;
       backdrop.setAttribute("aria-busy", on ? "true" : "false");
+      if (loadingEl instanceof HTMLElement) loadingEl.hidden = !on;
     }
 
     async function loadFromUrl() {
@@ -216,6 +225,159 @@ function openBackupUrlDialog(host) {
     pushModalDocumentTitle("Charger depuis une URL");
     mo.observe(host, { childList: true });
     queueMicrotask(() => focusTopModal());
+  });
+}
+
+const DEMO_BACKUP_TITLE = "Sauvegarde de démonstration";
+
+/**
+ * Charge `data/backup-demo-jo.brickcard` et fusionne toute la sauvegarde (sans étape de choix).
+ * Modale enfant `modal--sm`, sans route : brique + « Chargement... » jusqu’à la fin.
+ * @param {HTMLElement} host `#modal-root`
+ * @param {{
+ *   toast?: (msg: string, type?: string) => void,
+ *   onImported?: () => void | Promise<void>,
+ * }} [opts]
+ * @returns {Promise<boolean>} `true` si l’import a réussi
+ */
+export function openDemoBackupDialog(host, opts = {}) {
+  const { toast, onImported } = opts;
+  if (!host) {
+    toast?.("Modale indisponible", "error");
+    return Promise.resolve(false);
+  }
+  if (host.querySelector("#demo-backup-dialog-backdrop")) {
+    return Promise.resolve(false);
+  }
+
+  return new Promise((resolve) => {
+    const backdrop = document.createElement("div");
+    backdrop.className = "modal-backdrop";
+    backdrop.id = "demo-backup-dialog-backdrop";
+    backdrop.setAttribute("role", "presentation");
+
+    const addedModalOpen = !document.body.classList.contains("modal-open");
+    if (addedModalOpen) document.body.classList.add("modal-open");
+
+    backdrop.innerHTML = `
+      <div class="modal modal--sm" role="dialog" aria-modal="true" aria-labelledby="demo-backup-dialog-title" aria-busy="true" tabindex="-1">
+        <div class="modal-header">
+          <div>
+            <h1 class="view-title" id="demo-backup-dialog-title">${modalTitleMarkup(DEMO_BACKUP_TITLE, ICON_EMOTION)}</h1>
+          </div>
+          <button type="button" class="btn primary icon-only modal-close" tabindex="-1" data-demo-dismiss>
+            ${ICON_CLOSE}
+            <span class="visually-hidden">Fermer</span>
+          </button>
+        </div>
+        <div class="modal-body" tabindex="-1">
+          ${loadingViewMarkup({ titleTag: "p", errorId: "demo-backup-error" })}
+        </div>
+      </div>
+    `;
+
+    const ac = new AbortController();
+    let settled = false;
+    let importing = false;
+    const previouslyFocused =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
+    const mo = new MutationObserver(() => {
+      if (!backdrop.isConnected) finish(false);
+    });
+
+    /** @param {boolean} ok */
+    function finish(ok) {
+      if (settled) return;
+      settled = true;
+      ac.abort();
+      mo.disconnect();
+      document.removeEventListener("keydown", onKey, true);
+      backdrop.remove();
+      popModalDocumentTitle();
+      if (addedModalOpen) document.body.classList.remove("modal-open");
+      previouslyFocused?.focus?.();
+      resolve(ok);
+    }
+
+    function requestClose() {
+      if (importing) return;
+      finish(false);
+    }
+
+    /** @param {string} message */
+    function showError(message) {
+      importing = false;
+      const closeBtn = backdrop.querySelector("[data-demo-dismiss]");
+      if (closeBtn instanceof HTMLButtonElement) closeBtn.disabled = false;
+      const modal = backdrop.querySelector(".modal");
+      const view = backdrop.querySelector(".empty-view");
+      const errorEl = backdrop.querySelector("#demo-backup-error");
+      modal?.setAttribute("aria-busy", "false");
+      view?.removeAttribute("aria-busy");
+      if (errorEl instanceof HTMLElement) {
+        errorEl.hidden = false;
+        errorEl.textContent = message;
+      }
+    }
+
+    async function run() {
+      try {
+        const href = new URL(DEMO_BACKUP_SRC, document.baseURI).href;
+        const text = await fetchBackupAsText(href, { signal: ac.signal });
+        if (settled) return;
+        const backup = parseBrickcardBackup(text);
+        importing = true;
+        const closeBtn = backdrop.querySelector("[data-demo-dismiss]");
+        if (closeBtn instanceof HTMLButtonElement) closeBtn.disabled = true;
+        const result = await importBackup(backup, { mode: "merge" });
+        if (settled) return;
+        const bits = [];
+        if (result.imported) bits.push(`${result.imported} carte(s)`);
+        if (result.themesImported) bits.push(`${result.themesImported} thème(s)`);
+        if (result.settingsApplied) bits.push("apparence des cartes");
+        const suffix = result.imported ? ` · total ${result.total}` : "";
+        toast?.(
+          bits.length ? `Import : ${bits.join(" · ")}${suffix}` : "Import terminé"
+        );
+        await onImported?.();
+        finish(true);
+      } catch (err) {
+        if (settled) return;
+        if (err && typeof err === "object" && "name" in err && err.name === "AbortError") {
+          return;
+        }
+        const message = err instanceof Error && err.message ? err.message : "Import impossible";
+        showError(message);
+        toast?.(message, "error");
+      }
+    }
+
+    /** @param {KeyboardEvent} e */
+    function onKey(e) {
+      if (e.key !== "Escape") return;
+      if (!backdrop.isConnected) {
+        finish(false);
+        return;
+      }
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      requestClose();
+    }
+
+    backdrop.addEventListener("click", (e) => {
+      if (e.target === backdrop) requestClose();
+    });
+    backdrop.querySelector("[data-demo-dismiss]")?.addEventListener("click", () => {
+      requestClose();
+    });
+
+    document.addEventListener("keydown", onKey, true);
+    host.appendChild(backdrop);
+    pushModalDocumentTitle(DEMO_BACKUP_TITLE);
+    mo.observe(host, { childList: true });
+    queueMicrotask(() => focusTopModal());
+    run();
   });
 }
 

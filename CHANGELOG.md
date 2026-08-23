@@ -7,10 +7,12 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [0.8.0] — 2026-08-23
+
 ### Added
 
 - Import de sauvegarde : modale `#import` (fichier ou URL, validation en mémoire, choix de fusion, recap live) ; l’écriture n’a lieu qu’au clic **Importer**
-- Sauvegarde de démo : `data/backup-demo-jo.brickcard` (URL : `https://brickcard.org/data/backup-demo-jo.brickcard`)
+- Sauvegarde de démo : `data/backup-demo-jo.brickcard` ; tuile d’accueil **Charger la démonstration** (`ri-emotion-fill`) qui l’importe automatiquement (modale **Sauvegarde de démonstration**, sans étape de choix)
 - Thèmes (par défaut et perso) : couleur secondaire optionnelle (`secondaryColor`) pour les textes, icônes de badge et logo Brickcard ; vide = noir ou blanc automatique
 - Sauvegarde de la collection : modale `#backup` (type complète / personnalisée, recap live, poids estimé)
 - Sauvegarde : raccourci Ctrl/Cmd+S pour ouvrir `#backup` (hors éditeur carte / thème / presets et hors `#import`)
@@ -20,6 +22,8 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 - Import : plus de dialogue Fusionner / Remplacer ; toujours une fusion, configurée dans `#import` (Paramètres et accueil vide ouvrent la modale)
 - Import : messages d’erreur de sauvegarde invalide / version incompatible reformulés (« La sauvegarde chargée… »)
+- Import URL : brique animée + « Chargement... » sous le champ pendant le téléchargement / parse
+- Images / logos : même indicateur de chargement dans « Charger depuis une URL »
 - Éditeur de thème : placeholder de la couleur secondaire = noir ou blanc auto (suit la couleur principale)
 - Éditeur de thème : libellés « Couleur » / hints principale et secondaire
 - Contraste auto des cartes (`contrastText`) : texte / logo noirs seulement sur un fond vraiment pâle (plus de noir sur les jaunes, oranges et limes saturés)

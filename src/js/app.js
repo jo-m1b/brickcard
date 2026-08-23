@@ -3,7 +3,7 @@ import { initTheme } from "./theme.js";
 import { initCardDesign } from "./card-design.js";
 import { initListLayout } from "./list-layout.js";
 import { enableDeveloper, isDeveloperEnabled } from "./developer-access.js";
-import { APP_ID, APP_VERSION } from "./version.js?v=0.7.5";
+import { APP_ID, APP_VERSION } from "./version.js?v=0.8.0";
 import { setAppDocumentTitle } from "./document-title.js";
 import { renderEditor } from "./views/editor.js";
 import { renderList, prepareListAfterCardSave } from "./views/list.js";
@@ -13,7 +13,7 @@ import { renderPageModal } from "./views/page.js";
 import { renderSettingsModal } from "./views/settings.js";
 import { renderPrintDialog } from "./print-dialog.js";
 import { isCollectionSaveShortcut, renderBackupDialog } from "./backup-dialog.js";
-import { renderImportDialog } from "./import-dialog.js";
+import { openDemoBackupDialog, renderImportDialog } from "./import-dialog.js";
 import { renderDeveloperModal } from "./views/developer/modal.js";
 import { loadingViewMarkup, welcomeViewMarkup } from "./empty-view.js";
 import { openConfirmDialog } from "./confirm-dialog.js";
@@ -263,7 +263,10 @@ function isDraftEditorRoute(info) {
 
 /** Second backdrop (confirm, URL d’image…) au-dessus de l’overlay. */
 function hasChildDialog() {
-  return Boolean(modalRoot && modalRoot.querySelectorAll(":scope > .modal-backdrop").length > 1);
+  if (!modalRoot) return false;
+  const n = modalRoot.querySelectorAll(":scope > .modal-backdrop").length;
+  if (n > 1) return true;
+  return n === 1 && !isOverlayRoute(parseRoute());
 }
 
 /**
@@ -474,6 +477,19 @@ function disposeList() {
 
 function renderEmpty() {
   main.innerHTML = welcomeViewMarkup();
+  main.querySelector("#empty-import-demo")?.addEventListener("click", () => {
+    if (!modalRoot) {
+      toast("Modale indisponible", "error");
+      return;
+    }
+    openDemoBackupDialog(modalRoot, {
+      toast,
+      onImported: async () => {
+        underlayStale = true;
+        await ensureUnderlay();
+      },
+    });
+  });
 }
 
 const listOpts = {

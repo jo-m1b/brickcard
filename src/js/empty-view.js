@@ -56,11 +56,13 @@ export function emptyViewMarkup(opts) {
  * @param {{
  *   titleTag?: "h1" | "h2" | "p",
  *   importId?: string | false,
+ *   demoId?: string | false,
  * }} [opts]
  * @returns {string}
  */
 export function welcomeViewMarkup(opts = {}) {
   const importId = opts.importId === false ? "" : opts.importId || "empty-import";
+  const demoId = opts.demoId === false ? "" : opts.demoId || "empty-import-demo";
   const importTile = {
     title: "Importer une sauvegarde",
     desc: "Ajouter un lot de cartes à votre collection depuis une sauvegarde",
@@ -68,6 +70,13 @@ export function welcomeViewMarkup(opts = {}) {
     ...(importId
       ? { href: "#import", id: importId }
       : { tag: /** @type {"button"} */ ("button") }),
+  };
+  const demoTile = {
+    title: "Charger la démonstration",
+    desc: "Importer une sauvegarde de démonstration des cartes de Jo",
+    icon: "emotion",
+    tag: /** @type {"button"} */ ("button"),
+    ...(demoId ? { id: demoId } : {}),
   };
   return emptyViewMarkup({
     titleTag: opts.titleTag,
@@ -81,6 +90,7 @@ export function welcomeViewMarkup(opts = {}) {
         icon: "add",
       },
       importTile,
+      demoTile,
     ],
   });
 }

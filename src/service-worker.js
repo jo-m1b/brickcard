@@ -4,7 +4,7 @@
  * et GitHub Pages ne peut pas envoyer Service-Worker-Allowed pour l’élargir.
  * Aligner CACHE sur APP_VERSION (version.js) et les ?v= de index.html.
  */
-const CACHE = "brickcard-0.7.5";
+const CACHE = "brickcard-0.8.0";
 
 function shouldHandleFetch(request) {
   if (request.method !== "GET") return false;

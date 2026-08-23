@@ -5,13 +5,16 @@
 
 import { downloadBlob } from "./card-export.js";
 import { getCardAppearanceSettings } from "./card-design.js";
-import { APP_ID, APP_VERSION } from "./version.js?v=0.7.5";
+import { APP_ID, APP_VERSION } from "./version.js?v=0.8.0";
 
 export const BACKUP_EXT = ".brickcard";
 export const BACKUP_INVALID = "La sauvegarde chargée est invalide !";
 export const BACKUP_URL_INVALID = "L’URL de la sauvegarde est invalide.";
 export const BACKUP_LOAD_ERROR = "Erreur de chargement de la sauvegarde !";
 export const BACKUP_LOAD_ERROR_CORS = `${BACKUP_LOAD_ERROR} Réseau ou CORS - le site source refuse le chargement.`;
+
+/** Sauvegarde de démo livrée avec l’app (`src/data/`), chemin relatif à `src/`. */
+export const DEMO_BACKUP_SRC = "data/backup-demo-jo.brickcard";
 
 /** Id sentinelle : cartes sans thème connu (case « Sans thème »). */
 export const UNTHEMED_BACKUP_THEME_ID = "";
@@ -382,18 +385,19 @@ export function isImportPayloadEmpty(payload) {
 }
 
 /**
- * Télécharge une sauvegarde depuis une URL http(s) et renvoie le texte.
+ * Télécharge une sauvegarde depuis une URL http(s) (absolue ou relative) et renvoie le texte.
  * L’URL n’est pas conservée.
  * @param {string} urlString
+ * @param {{ signal?: AbortSignal }} [opts]
  * @returns {Promise<string>}
  */
-export async function fetchBackupAsText(urlString) {
+export async function fetchBackupAsText(urlString, opts = {}) {
   const raw = String(urlString || "").trim();
   if (!raw) throw new Error(BACKUP_URL_INVALID);
 
   let url;
   try {
-    url = new URL(raw);
+    url = new URL(raw, document.baseURI);
   } catch {
     throw new Error(BACKUP_URL_INVALID);
   }
@@ -407,8 +411,12 @@ export async function fetchBackupAsText(urlString) {
       mode: "cors",
       credentials: "omit",
       cache: "no-cache",
+      signal: opts.signal,
     });
-  } catch {
+  } catch (err) {
+    if (err && typeof err === "object" && "name" in err && err.name === "AbortError") {
+      throw err;
+    }
     throw new Error(BACKUP_LOAD_ERROR_CORS);
   }
 

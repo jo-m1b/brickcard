@@ -3319,6 +3319,19 @@ body.modal-open {
   text-align: center;
 }
 
+.url-dialog-loading {
+  margin-top: 0.75rem;
+}
+
+.url-dialog-loading[hidden] {
+  display: none !important;
+}
+
+.url-dialog-loading .empty-view {
+  padding: 0;
+  place-content: start center;
+}
+
 .theme-mode-switch {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(0, 1fr));

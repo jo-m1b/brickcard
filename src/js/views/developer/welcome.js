@@ -15,7 +15,7 @@ export function renderDeveloperWelcome(host) {
       </header>
 
       <div class="styleguide-section">
-        ${welcomeViewMarkup({ titleTag: "p", importId: false })}
+        ${welcomeViewMarkup({ titleTag: "p", importId: false, demoId: false })}
       </div>
     </section>
   `;
