@@ -706,7 +706,9 @@ function registerServiceWorker() {
     host === "127.0.0.1" ||
     host === "[::1]";
   if (!secure) return;
-  navigator.serviceWorker.register(`sw.js?v=${APP_VERSION}`).catch((err) => console.error(err));
+  navigator.serviceWorker
+    .register(`service-worker.js?v=${APP_VERSION}`, { updateViaCache: "none" })
+    .catch((err) => console.error(err));
 }
 
 boot();

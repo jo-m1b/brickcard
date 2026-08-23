@@ -10,6 +10,10 @@ Stack : HTML + CSS + JS modules ES (`type="module"`). UI en **français**.
 
 Nom produit / marque UI : **Brickcard**.
 
+## Publication
+
+Site officiel : **https://brickcard.org** (domaine personnalisé). Déploiement **GitHub Pages** depuis `src/` (workflow `.github/workflows/pages.yml`, push sur `main`). Pas de sous-chemin : le site est à la racine du domaine (le service worker doit donc rester à la racine de `src/`).
+
 ## Où est le code ?
 
 Tout le code applicatif est dans **`src/`**.
@@ -18,7 +22,7 @@ Tout le code applicatif est dans **`src/`**.
 |---------|------|
 | `src/index.html` | Coquille : `<title>` = `APP_DOCUMENT_TITLE`, topbar sticky, `#main`, `#modal-root`, `#print-root` |
 | `src/manifest.webmanifest` | Manifest PWA (nom, icônes, `standalone`) |
-| `src/sw.js` | Service worker (cache same-origin ; `CACHE` = `APP_VERSION` ; fetch en ligne avec `cache: "reload"`) |
+| `src/service-worker.js` | Service worker à la racine du site (scope `/` ; GitHub Pages n’autorise pas un SW dans `js/`) ; `CACHE` = `APP_VERSION` ; fetch en ligne avec `cache: "reload"` ; précache install non bloquant ; pas d’interception de son propre script |
 | `src/data/themes-presets.json` | Liste des thèmes LEGO par défaut (éditable sans toucher au JS) |
 | `src/data/theme-logo-*` | Logos des thèmes par défaut (PNG / SVG / WebP / JPEG) |
 | `src/data/page-{{slug}}.md` | Pages Markdown en modale (`#page/:slug`, ex. `page-about.md`) ; `# Titre` → titre du dialog |
@@ -347,4 +351,4 @@ A4 portrait ; **grille** 1×1 à 10×10 (défaut **3×3** poker 63×88 mm). Autr
 - **Icônes** : toujours partir de [Remix Icon](https://remixicon.com/) (style *fill* de préférence) avant d’inventer un SVG. Réutiliser / étendre `src/js/icons.js` ; en HTML, commenter le nom `ri-*`.
 - Pas de `alert()` / `confirm()` / `prompt()` natifs : `confirmDialog()` / `openConfirmDialog()` / `alertDialog()` (`confirm-dialog.js`).
 - Pas de dépendances npm sauf demande explicite.
-- **Version** : n’incrémenter `APP_VERSION` (ni le `?v=` de cache dans `index.html` / imports `version.js`, ni `CACHE` dans `sw.js`, ni une entrée datée dans `CHANGELOG.md`) **que sur demande explicite**. Entre deux versions, noter les changements sous `## [Unreleased]`.
+- **Version** : n’incrémenter `APP_VERSION` (ni le `?v=` de cache dans `index.html` / imports `version.js`, ni `CACHE` dans `service-worker.js`, ni une entrée datée dans `CHANGELOG.md`) **que sur demande explicite**. Entre deux versions, noter les changements sous `## [Unreleased]`.

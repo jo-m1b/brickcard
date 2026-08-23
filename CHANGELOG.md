@@ -14,6 +14,11 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 ### Changed
 
 - Titre de document : slogan par défaut (sans version) ; overlays `{modale} | {section si besoin} | {défaut}` ; nom de fichier PDF inchangé pendant l’impression
+- Service worker : `service-worker.js` à la racine du site (scope `/` ; GitHub Pages ne permet pas de le placer dans `js/`)
+
+### Fixed
+
+- Service worker : l’install ne casse plus si le précache GitHub Pages échoue (`cache.addAll`) ; le script n’est plus intercepté ni remplacé par `index.html`
 
 ## [0.7.5] — 2026-08-22
 
