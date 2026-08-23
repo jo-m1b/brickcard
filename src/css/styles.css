@@ -3265,21 +3265,58 @@ body.modal-open {
   background: var(--bg);
 }
 
-#backup-dialog-backdrop .settings-panel {
+.collection-xfer-dialog .settings-panel {
   padding-bottom: 0;
 }
 
-#backup-dialog-backdrop .form-check-group {
+.collection-xfer-dialog .form-check-group {
   margin-bottom: 0;
 }
 
-#backup-dialog-backdrop .modal-footer-start {
+.collection-xfer-dialog .modal-footer-start {
   min-width: 0;
   flex: 1;
 }
 
-#backup-dialog-backdrop .modal-footer-start .view-desc {
+.collection-xfer-dialog .modal-footer-start .view-desc {
   margin: 0;
+}
+
+.collection-xfer-dialog .import-source-panel {
+  display: grid;
+  gap: 0.65rem;
+  justify-items: center;
+  text-align: center;
+}
+
+.collection-xfer-dialog .import-source-name {
+  margin: 0;
+  max-width: 100%;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.collection-xfer-dialog .import-source-name .link {
+  font-weight: 700;
+}
+
+.collection-xfer-dialog .import-load-lead {
+  margin: 0 0 0.85rem;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+
+.collection-xfer-dialog .import-load-actions {
+  justify-content: center;
+}
+
+.collection-xfer-dialog .import-load-actions + .form-error {
+  text-align: center;
 }
 
 .theme-mode-switch {
@@ -3616,7 +3653,9 @@ textarea {
   max-height: 2.5rem;
   flex-shrink: 0;
   aspect-ratio: 1;
-  object-fit: contain;
+  background-color: currentColor;
+  -webkit-mask: url("../img/brickcard-logo.svg") center / contain no-repeat;
+  mask: url("../img/brickcard-logo.svg") center / contain no-repeat;
   opacity: 0.9;
 }
 
@@ -3795,9 +3834,12 @@ textarea {
 .card-brand-logo {
   display: block;
   height: var(--card-brand-logo-h, 16mm);
-  width: auto;
+  width: var(--card-brand-logo-h, 16mm);
   max-width: 28mm;
-  object-fit: contain;
+  flex-shrink: 0;
+  background-color: currentColor;
+  -webkit-mask: url("../img/brickcard-logo.svg") center / contain no-repeat;
+  mask: url("../img/brickcard-logo.svg") center / contain no-repeat;
   opacity: 0.9;
 }
 

@@ -53,7 +53,6 @@ import {
  * @param {HTMLElement} host Conteneur modale (#modal-root)
  * @param {{
  *   onClose: () => void,
- *   onImport: () => void,
  *   onClearCards?: () => void | Promise<void>,
  *   onDevReset?: () => void | Promise<void>,
  *   cardCount?: number,
@@ -61,7 +60,7 @@ import {
  * @returns {() => void} cleanup
  */
 export function renderSettingsModal(host, opts) {
-  const { onClose, onImport, onClearCards, onDevReset, cardCount = 0 } = opts;
+  const { onClose, onClearCards, onDevReset, cardCount = 0 } = opts;
   const showDevReset = Boolean(onDevReset);
   const currentTheme = getTheme();
   const faceBorderMm = getFaceBorderMm();
@@ -241,8 +240,7 @@ export function renderSettingsModal(host, opts) {
                   title: "Importer",
                   desc: "Charger une sauvegarde pour ajouter ou fusionner un lot de cartes, thèmes ou paramètres",
                   icon: "upload",
-                  tag: "button",
-                  id: "settings-import",
+                  href: "#import",
                 },
                 {
                   title: "Sauvegarder",
@@ -449,10 +447,6 @@ export function renderSettingsModal(host, opts) {
       if (!sheetRectoVerso) return;
       persistPrintSettings({ sheetRectoVerso });
     });
-  });
-
-  host.querySelector("#settings-import")?.addEventListener("click", () => {
-    onImport();
   });
 
   const clearCardsBtn = host.querySelector("#settings-clear-cards");

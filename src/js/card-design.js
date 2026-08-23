@@ -5,6 +5,10 @@
  * 1. couleur du thème (si définie)
  * 2. couleur configurée ici (si définie)
  * 3. gris d’usine `DEFAULT_THEME_COLOR`
+ *
+ * Couleur des textes / icônes / logo Brickcard (`--card-accent-fg`) :
+ * 1. `theme.secondaryColor` si hex valide
+ * 2. sinon contraste auto (`contrastText`) sur l’accent
  */
 
 import {
@@ -251,6 +255,18 @@ export function resolveCardAccent(legoTheme) {
 }
 
 /**
+ * Couleur des textes / icônes / logo Brickcard sur l’accent.
+ * @param {{ secondaryColor?: string }|null|undefined} legoTheme
+ * @param {string} [accent] hex déjà résolu (évite un second passage)
+ * @returns {string} hex #rrggbb
+ */
+export function resolveCardAccentFg(legoTheme, accent) {
+  const fromTheme = parseHexColor(legoTheme?.secondaryColor);
+  if (fromTheme) return fromTheme;
+  return contrastText(accent ?? resolveCardAccent(legoTheme));
+}
+
+/**
  * Met à jour les cartes déjà montées qui n’ont pas de couleur de thème
  * (data-card-theme-color vide).
  */
@@ -260,8 +276,12 @@ export function refreshRenderedCardAccents() {
     const themeColor = el.dataset.cardThemeColor ?? "";
     if (parseHexColor(themeColor)) return;
     const accent = resolveCardAccent(null);
+    const fg = resolveCardAccentFg(
+      { secondaryColor: el.dataset.cardThemeSecondaryColor },
+      accent
+    );
     el.style.setProperty("--card-accent", accent);
-    el.style.setProperty("--card-accent-fg", contrastText(accent));
+    el.style.setProperty("--card-accent-fg", fg);
   });
 }
 

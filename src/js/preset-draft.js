@@ -34,6 +34,7 @@ export const PRESET_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
  * @property {string} id
  * @property {string} name
  * @property {string} color
+ * @property {string} secondaryColor
  * @property {string} logoSrc Chemin d’origine si le fichier n’a pas été remplacé
  * @property {string} logoDataUrl Data URL si logo ajouté / remplacé ; sinon ""
  * @property {number} logoZoom
@@ -76,6 +77,7 @@ export function draftToLegoTheme(theme) {
     id: theme.id,
     name: theme.name,
     color: theme.color,
+    secondaryColor: theme.secondaryColor,
     logoDataUrl: presetDraftLogoUrl(theme),
     logoZoom: clampLogoZoom(theme.logoZoom),
     logoOffsetX: roundCropCoord(theme.logoOffsetX),
@@ -171,6 +173,7 @@ function normalizeDraft(t) {
     id: typeof t.id === "string" ? t.id.trim() : "",
     name: String(t.name ?? t.themeName ?? "").trim(),
     color: parseHexColor(t.color ?? t.accentColor),
+    secondaryColor: parseHexColor(t.secondaryColor),
     logoSrc: migratePresetLogoSrc(t.logoSrc),
     logoDataUrl: String(t.logoDataUrl || "").trim(),
     logoZoom: clampLogoZoom(t.logoZoom),
@@ -187,6 +190,7 @@ function metaToDraft(entry) {
     id: entry.id,
     name: entry.name ?? entry.themeName,
     color: entry.color ?? entry.accentColor,
+    secondaryColor: entry.secondaryColor,
     logoSrc,
     logoDataUrl: "",
     logoZoom: entry.logoZoom,
@@ -328,6 +332,7 @@ function toPresetMeta(theme) {
   const ext = presetDraftLogoExt(theme);
   if (ext) out.logoSrc = `${PRESET_LOGO_DIR}/theme-logo-${theme.id}.${ext}`;
   if (theme.color) out.color = theme.color;
+  if (theme.secondaryColor) out.secondaryColor = theme.secondaryColor;
   const zoom = clampLogoZoom(theme.logoZoom);
   if (zoom !== 0 && zoom !== 1) out.logoZoom = zoom;
   const ox = roundCropCoord(theme.logoOffsetX);

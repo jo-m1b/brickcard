@@ -1,17 +1,33 @@
 /** Rendu d'une carte (face / dos) + transform image */
 
-import { contrastText, parseHexColor } from "./themes-data.js";
-import { resolveCardAccent } from "./card-design.js";
+import { parseHexColor } from "./themes-data.js";
+import { resolveCardAccent, resolveCardAccentFg } from "./card-design.js";
 import { resolveImageBackground } from "./storage.js";
 import { ICON_APPS_2, ICON_CALENDAR_TODO, ICON_USER_3 } from "./icons.js";
 
-/** Logo app (chemin relatif depuis `src/`). */
-export const BRAND_LOGO_SRC = "img/brickcard-logo.svg";
-export const BRAND_LOGO_SRC_WHITE = "img/brickcard-logo-white.svg";
+/**
+ * Marque Brickcard (masque CSS, couleur = `currentColor` / `--card-accent-fg`).
+ * @param {string} [className]
+ */
+export function brandLogoMarkup(className = "card-brand-logo") {
+  return `<span class="${className}" aria-hidden="true"></span>`;
+}
 
-/** @param {boolean} lightFg texte / logo blancs sur fond coloré */
-export function brandLogoSrc(lightFg) {
-  return lightFg ? BRAND_LOGO_SRC_WHITE : BRAND_LOGO_SRC;
+/**
+ * Remplace un logo de thème en échec par la marque Brickcard (tuiles).
+ * @param {HTMLImageElement} img
+ */
+export function fallbackThemeTileToBrandLogo(img) {
+  if (!(img instanceof HTMLImageElement)) return;
+  if (img.classList.contains("is-brand")) {
+    img.remove();
+    return;
+  }
+  img.closest(".theme-tile-logo-wrap")?.classList.remove("theme-tile-logo-wrap--crop");
+  const mark = document.createElement("span");
+  mark.className = "theme-tile-logo is-brand";
+  mark.setAttribute("aria-hidden", "true");
+  img.replaceWith(mark);
 }
 
 /** Nom court affiché sous le logo sur les cartes. */
@@ -103,7 +119,7 @@ export function applyThemeLogoTransform(imgEl, boxEl, theme) {
 function cardBrandMarkup() {
   return `
     <div class="card-brand" aria-hidden="true">
-      <img class="card-brand-logo" src="${BRAND_LOGO_SRC}" alt="" />
+      ${brandLogoMarkup()}
       <p class="card-brand-name">${BRAND_NAME}</p>
     </div>
   `;
@@ -171,19 +187,6 @@ function applyThemeLogo(root, legoTheme) {
   }
 }
 
-/**
- * @param {HTMLElement} root
- * @param {string} accentFg
- */
-function syncAccentFgClass(root, accentFg) {
-  const lightFg = accentFg === "#ffffff";
-  root.classList.toggle("is-light-fg", lightFg);
-  const src = brandLogoSrc(lightFg);
-  root.querySelectorAll(".card-brand-logo").forEach((img) => {
-    if (img.getAttribute("src") !== src) img.setAttribute("src", src);
-  });
-}
-
 /** Icônes méta (header) — valeurs seules, sans libellé. */
 const ICON_YEAR = ICON_CALENDAR_TODO.replace("<svg ", '<svg class="card-badge-icon" ');
 const ICON_PIECES = ICON_APPS_2.replace("<svg ", '<svg class="card-badge-icon" ');
@@ -242,11 +245,11 @@ function setCardTitle(el, title) {
  */
 export function fillCardFace(root, card, legoTheme) {
   const accent = resolveCardAccent(legoTheme);
-  const fg = contrastText(accent);
+  const fg = resolveCardAccentFg(legoTheme, accent);
   root.dataset.cardThemeColor = parseHexColor(legoTheme?.color);
+  root.dataset.cardThemeSecondaryColor = parseHexColor(legoTheme?.secondaryColor);
   root.style.setProperty("--card-accent", accent);
   root.style.setProperty("--card-accent-fg", fg);
-  syncAccentFgClass(root, fg);
 
   setCardTitle(root.querySelector(".card-title"), card.title || "");
 
@@ -383,11 +386,11 @@ export function refreshCardPreview(cardEl, card, opts = {}) {
  */
 export function fillCardBack(root, _card, legoTheme) {
   const accent = resolveCardAccent(legoTheme);
-  const fg = contrastText(accent);
+  const fg = resolveCardAccentFg(legoTheme, accent);
   root.dataset.cardThemeColor = parseHexColor(legoTheme?.color);
+  root.dataset.cardThemeSecondaryColor = parseHexColor(legoTheme?.secondaryColor);
   root.style.setProperty("--card-accent", accent);
   root.style.setProperty("--card-accent-fg", fg);
-  syncAccentFgClass(root, fg);
   applyThemeLogo(root, legoTheme);
 }
 

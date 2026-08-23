@@ -61,6 +61,14 @@ export function emptyViewMarkup(opts) {
  */
 export function welcomeViewMarkup(opts = {}) {
   const importId = opts.importId === false ? "" : opts.importId || "empty-import";
+  const importTile = {
+    title: "Importer une sauvegarde",
+    desc: "Ajouter un lot de cartes à votre collection depuis une sauvegarde",
+    icon: "upload",
+    ...(importId
+      ? { href: "#import", id: importId }
+      : { tag: /** @type {"button"} */ ("button") }),
+  };
   return emptyViewMarkup({
     titleTag: opts.titleTag,
     title: "Bienvenue ;)",
@@ -72,13 +80,7 @@ export function welcomeViewMarkup(opts = {}) {
         href: "#new-card",
         icon: "add",
       },
-      {
-        title: "Importer une sauvegarde",
-        desc: "Ajouter un lot de cartes à votre collection depuis une sauvegarde",
-        icon: "upload",
-        tag: "button",
-        ...(importId ? { id: importId } : {}),
-      },
+      importTile,
     ],
   });
 }

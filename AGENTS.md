@@ -25,15 +25,16 @@ Tout le code applicatif est dans **`src/`**.
 | `src/service-worker.js` | Service worker à la racine du site (scope `/` ; GitHub Pages n’autorise pas un SW dans `js/`) ; `CACHE` = `APP_VERSION` ; fetch en ligne avec `cache: "reload"` ; précache install non bloquant ; pas d’interception de son propre script |
 | `src/data/themes-presets.json` | Liste des thèmes LEGO par défaut (éditable sans toucher au JS) |
 | `src/data/theme-logo-*` | Logos des thèmes par défaut (PNG / SVG / WebP / JPEG) |
+| `src/data/backup-demo-jo.brickcard` | Sauvegarde de démo (import URL : `https://brickcard.org/data/backup-demo-jo.brickcard`) |
 | `src/data/page-{{slug}}.md` | Pages Markdown en modale (`#page/:slug`, ex. `page-about.md`) ; `# Titre` → titre du dialog |
-| `src/img/brickcard-logo.svg` | Logo app noir (brick outline — crédit Joko Sutrisno / Vecteezy) |
-| `src/img/brickcard-logo-white.svg` | Même logo, fill blanc (cartes / thèmes à fond coloré) |
+| `src/img/brickcard-logo.svg` | Logo app noir (brick outline — crédit Joko Sutrisno / Vecteezy) ; cartes : masque CSS (`currentColor` / `--card-accent-fg`) |
+| `src/img/brickcard-logo-white.svg` | Même logo, fill blanc (chrome UI si besoin ; plus utilisé sur les cartes) |
 | `src/img/brickcard-favicon.svg` | Favicon SVG (clair `#141414` / sombre blanc via `prefers-color-scheme`) |
 | `src/img/brickcard-favicon.ico` / `brickcard-favicon-96x96.png` | Favicon raster (onglet) |
 | `src/img/brickcard-apple-touch-icon.png` | Icône iOS 180×180 |
 | `src/img/brickcard-web-app-manifest-192x192.png` / `512x512.png` | Icônes PWA (any + maskable) |
 | `src/fonts/` | Open Sans + Inter (woff2 variable, latin-ext) + licences SIL OFL |
-| `src/js/app.js` | Hash routing (vues + historique), import/export |
+| `src/js/app.js` | Hash routing (vues + historique) |
 | `src/js/modal-focus.js` | Focus initial + piège Tab des modales |
 | `src/js/markdown.js` | Parser Markdown léger + `loadMarkdownPage(slug)` |
 | `src/js/theme.js` | Thème **UI** system / light / dark |
@@ -43,6 +44,7 @@ Tout le code applicatif est dans **`src/`**.
 | `src/js/storage.js` | IndexedDB cartes + thèmes **personnalisés**, import `.brickcard` |
 | `src/js/backup.js` | Format / parse / migrations / export `.brickcard` (`version` = `APP_VERSION`) |
 | `src/js/backup-dialog.js` | Modale de sauvegarde (`#backup`) |
+| `src/js/import-dialog.js` | Modale d’import (`#import`) |
 | `src/js/card-export.js` | Téléchargement (photo Brickcard, blob, URL same-origin) |
 | `src/js/preset-draft.js` | Brouillon isolé des thèmes par défaut (outil `#developer/theme-presets`) |
 | `src/js/print.js` | Impression A4 (grille variable, faces/dos, miroir) |
@@ -104,12 +106,13 @@ Migration auto depuis les anciens noms (`setTitle` → `title`, `setImageDataUrl
 Champs par entrée :
 - `id` (obligatoire), `name` (obligatoire)
 - `color` (hex, optionnel) — si omis → pas de couleur propre ; la carte utilise la couleur configurée puis le gris `#6e6e6e`
+- `secondaryColor` (hex, optionnel) — textes, icônes de badge et logo Brickcard ; si omis → noir `#141414` ou blanc `#ffffff` selon la luminance de l’accent
 - `logoSrc` (optionnel) — chemin depuis `src/` (ex. `data/theme-logo-….png`) ; sans logo / échec de chargement → affichage du **nom** du thème (pas de SVG généré)
 - `logoZoom` / `logoOffsetX` / `logoOffsetY` (optionnels) — cadrage du logo (1 / 0 / 0 si omis) ; mêmes unités que les thèmes personnalisés ; export outil : arrondi 2 décimales, `0.00` → omis (`logoZoom` de `1` aussi)
 
 Thèmes par défaut : **lecture seule** dans l’app (ni modification ni suppression). Les thèmes personnalisés ont un id UUID (`createId()`), sont stockés en IndexedDB, et s’éditent via `#themes/new` / `#themes/edit/:id`.
 
-Outil développeur `#developer/theme-presets` : copie locale isolée (IndexedDB `brickcard-preset-draft`) pour éditer id/slug, nom, couleur, logo et cadrage (`#developer/theme-presets/new`, `#developer/theme-presets/edit/:slug`), puis **sauvegarder** `themes-presets.json` + `theme-logo-{id}.{ext}` à placer soi-même dans `data/`. Ne lit/écrit jamais les stores `cards` / `themes` ni les réglages. Au premier chargement (ou après « Supprimer le brouillon ») : seed depuis le JSON. Reset local de la collection **ne** touche **pas** ce brouillon.
+Outil développeur `#developer/theme-presets` : copie locale isolée (IndexedDB `brickcard-preset-draft`) pour éditer id/slug, nom, couleurs (accent + secondaire), logo et cadrage (`#developer/theme-presets/new`, `#developer/theme-presets/edit/:slug`), puis **sauvegarder** `themes-presets.json` + `theme-logo-{id}.{ext}` à placer soi-même dans `data/`. Ne lit/écrit jamais les stores `cards` / `themes` ni les réglages. Au premier chargement (ou après « Supprimer le brouillon ») : seed depuis le JSON. Reset local de la collection **ne** touche **pas** ce brouillon.
 
 ## Modèle thème LEGO (`LegoTheme`)
 
@@ -118,6 +121,7 @@ Outil développeur `#developer/theme-presets` : copie locale isolée (IndexedDB 
   id: string,               // par défaut = slug JSON ; personnalisé = UUID (`createId()`)
   name: string,             // ex. "CITY"
   color: string,            // hex ; vide = pas de couleur propre (cascade carte)
+  secondaryColor: string,   // hex ; vide = contraste auto (noir / blanc) sur l’accent
   logoDataUrl: string,      // SVG ou PNG transparent (data URL ou chemin), optionnel
   logoZoom: number,         // largeur du logo, 1 = 75 % de la carte (max 2.5 = 250 %) ; arrondi 2 décimales ; le cadre (moitié basse, inset 3 mm) recadre si dépassement
   logoOffsetX: number,      // décalage logo (fraction largeur de la moitié basse) ; arrondi 2 décimales (`0.00` → 0)
@@ -136,6 +140,11 @@ Accent d’une Brickcard (`resolveCardAccent`) :
 2. sinon couleur configurée (`card-design.js`)
 3. sinon gris d’usine `DEFAULT_THEME_COLOR` (`#6e6e6e`)
 
+Textes / icônes / logo Brickcard (`resolveCardAccentFg`, `--card-accent-fg`) :
+1. `theme.secondaryColor` si hex valide
+2. sinon contraste auto (`contrastText`) : `#141414` seulement sur un fond vraiment pâle (gris clair / pastel) ; `#ffffff` sur les teintes saturées (même lumineuses) et les fonds sombres
+Le logo Brickcard (dos, et face sans photo) est un masque CSS sur `brickcard-logo.svg` (`currentColor`).
+
 ## Persistance
 
 - IndexedDB : `brickcard` **v2** — stores `cards` + `themes` (**personnalisés seulement** ; les thèmes par défaut se lisent dans `themes-presets.json`) (après Reset local : nom `brickcard-<db-gen>`, clé `brickcard:db-gen`) ; le reload post-reset passe par `?{timestamp}` (cache HTTP / SW), puis la query est retirée au boot (`?_=` encore reconnu)
@@ -152,8 +161,9 @@ Accent d’une Brickcard (`resolveCardAccent`) :
 - Clés tri thèmes : `brickcard:themes-sort`, `brickcard:themes-sort-dir` (défaut `cardCount` / `desc`) ; après enregistrement d’un thème : recherche vidée et tri remis sur date de modification décroissante (si ≥ 2 thèmes personnalisés ; sinon repli sur le défaut)
 - Clé colonnes liste max : `brickcard:list-cols-max` (défaut `4`, plage 2–10, ou `infinite`)
 - Cascade accent carte : couleur du thème → couleur configurée → `#6e6e6e`
+- Cascade textes / logo Brickcard : `secondaryColor` du thème → contraste auto sur l’accent
 - Export (fichier `.brickcard`, JSON) : `{ version: APP_VERSION, app: "brickcard", cards, themes, settings? }` — `version` = SemVer de l’app (ex. `"0.7.5"`) même sans changement de structure ; `themes` = personnalisés uniquement (sans `isBuiltin`) ; `settings.cardAppearance` (4 clés : bordure, arrondis coins / images, couleur par défaut) omis si non inclus — route `#backup` (`modal--md` ; complète : toutes les cartes, tous les thèmes perso même vides, apparence ; personnalisée : images & logos, apparence, thèmes avec cartes (alpha) ; sans thème sélectionné ou sans carte : pas d’export ; sans images / logos, photo, fond, cadrage et logo sont omis du fichier). Recap dans le pied. Noms : `brickcard-backup-YYYY-MM-DD-{full|custom}-{n}-card(s)[-{n}-theme(s)][-{n}-image(s)][-{n}-logo(s)].brickcard` (segments thèmes / images / logos omis s’ils sont à 0)
-- Import : fichier `.brickcard` uniquement ; vérifie `app` / `version` / `cards` / `themes` (tableaux, éventuellement vides) ; `app` = `brickcard` ; refuse une `version` SemVer supérieure à `APP_VERSION` ; migrations de structure (`backup.js`, dont les anciens `version` entiers 1–3) avant normalisation ; ignore les thèmes par défaut (ids de preset / `isBuiltin`) ; applique `settings.cardAppearance` s’il est présent (fusion et remplacement) ; fichier sans cartes accepté s’il reste des thèmes et/ou des settings ; ne réécrit pas `themes-presets.json`
+- Import : route `#import` (`modal--md`) ; fichier `.brickcard` (ou URL http(s), extension optionnelle si le JSON est valide) chargé **en mémoire** puis choix de fusion (images & logos, apparence, cartes par thème — sections visibles seulement si le fichier en contient) ; écriture IndexedDB uniquement au clic **Importer** (fusion, valeurs remplacées ; images / logos locaux conservés si la case est décochée) ; pas de vider / remplacer la collection ; vérifie `app` / `version` / `cards` / `themes` (tableaux, éventuellement vides) ; `app` = `brickcard` ; refuse une `version` SemVer supérieure à `APP_VERSION` ; migrations de structure (`backup.js`, dont les anciens `version` entiers 1–3) avant normalisation ; ignore les thèmes par défaut (ids de preset / `isBuiltin`) ; applique `settings.cardAppearance` s’il est présent et sélectionné ; fichier sans cartes accepté s’il reste des thèmes et/ou des settings ; ne réécrit pas `themes-presets.json`
 - APIs async ; serveur HTTP obligatoire en local
 - Au démarrage, `boot()` attend `loadCards()` + `loadThemes()` avant `route()` (écran « Chargement... » dans `#main`, animation CSS tant que `aria-busy`) ; échec de module / boot : message technique en rouge (`#boot-error`, `--form-error`) sous le titre, animation arrêtée, `ri-error-warning-line` au centre de la brique (script inline hors module — un import cassé n’atteint pas `boot()`)
 - Au démarrage, purge éventuelle de l’ancienne base `lego-set-cards` (plus utilisée)
@@ -162,14 +172,15 @@ Accent d’une Brickcard (`resolveCardAccent`) :
 
 Hash = source de vérité (Précédent / Suivant). Accueil = URL sans hash (jeton interne `#`). Overlays = `#settings`, `#new-card`, … Croix / Échap / backdrop d’un overlay → accueil (`replace`). Hash inconnu → accueil. Anciennes URLs `#/…` acceptées et nettoyées.
 
-Overlays de route (une à la fois, **swap** sans démonter la liste) : `#settings`, `#print`, `#backup`, `#themes`, `#themes/new`, `#themes/edit/:id`, `#page/:slug`, `#new-card`, `#edit-card/:id`, `#developer/…` (`#developer/theme-presets/new`, `#developer/theme-presets/edit/:slug`). Dialogues enfants (confirmations, URL d’image) : pas d’URL, second backdrop par-dessus la vue courante.
+Overlays de route (une à la fois, **swap** sans démonter la liste) : `#settings`, `#print`, `#backup`, `#import`, `#themes`, `#themes/new`, `#themes/edit/:id`, `#page/:slug`, `#new-card`, `#edit-card/:id`, `#developer/…` (`#developer/theme-presets/new`, `#developer/theme-presets/edit/:slug`). Dialogues enfants (confirmations, URL d’image / de sauvegarde) : pas d’URL, second backdrop par-dessus la vue courante.
 
 - (sans hash) accueil (empty « Bienvenue ;) », liste, ou recherche sans résultat « Oups ! ») ; `#` et `#/` nettoyés
 - `#new-card` `#edit-card/:id` éditeur de carte (modale)
 - `#themes` gestion des thèmes (modale) ; `#themes/new` `#themes/edit/:id` éditeur de thème **personnalisé** (modale ; fermeture → `#themes`)
 - `#settings` paramètres (modale)
 - `#print` paramètres d’impression (modale) ; rien à imprimer → message à la place des options
-- `#backup` sauvegarde de la collection (modale `md`) ; complète ou personnalisée ; recap dans le pied (cartes, thèmes, paramètres, poids ; vide : **Aucune carte à sauvegarder !**) ; fermeture → accueil ; raccourci **Ctrl/Cmd+S** (hors éditeur carte / thème / presets et hors dialogue enfant) ; export réussi → ferme la modale
+- `#backup` sauvegarde de la collection (modale `md`) ; complète ou personnalisée ; recap dans le pied (cartes, thèmes, paramètres, poids ; vide : **Aucune carte à sauvegarder !**) ; fermeture → accueil ; raccourci **Ctrl/Cmd+S** (hors éditeur carte / thème / presets, hors `#import` et hors dialogue enfant) ; export réussi → ferme la modale
+- `#import` import de sauvegarde (modale `md`, titre **Importer une sauvegarde**) ; étape 1 : fichier ou URL (boutons centrés, validation en mémoire, erreurs sous les actions / dans la modale URL ; pas de recap) ; étape 2 : nom du fichier ou URL (`a.link` `_blank`) centré, **Charger une autre sauvegarde** (`sm`) ; choisir images & logos, apparence, cartes (par thème, y compris thèmes perso vides) ; recap dans le pied (vide : **Rien à importer !**) ; fusion uniquement au clic **Importer** (modale `aria-busy` jusqu’à la fin) ; fermeture → accueil ; import réussi → ferme la modale
 - `#page/:slug` page Markdown (`data/page-{{slug}}.md`, ex. `#page/about`)
 - `#developer` `#developer/typography` `#developer/links` `#developer/tiles` `#developer/buttons` `#developer/fields` `#developer/selects` `#developer/sliders` `#developer/checkboxes` `#developer/radios` `#developer/colors` `#developer/images` `#developer/search` `#developer/modals` `#developer/loading` `#developer/welcome` `#developer/theme-presets` `#developer/theme-presets/new` `#developer/theme-presets/edit/:slug` — espace développeur / styleguide en **modale** (extensible : `#developer/…`) ; en local : toujours actif ; hors local : inactif par défaut (section Paramètres « Options pour les développeurs » masquée) ; `#developer` / `#developer/…` sans flag → confirmation `modal--sm` (Annuler / Activer) à la place de l’espace ; Activer persiste le flag et ouvre la page demandée ; ensuite le lien Paramètres et `#developer` se comportent comme en local ; index : **Aide au développement** (`ri-pencil-ruler-2-fill`) puis **Modèles** (`ri-pages-fill`) puis **Système de design** (`ri-collage-fill`) ; galeries / aide au développement / modèles (tuiles) : titre = lien `#developer` vers la section + `ri-arrow-right-wide-fill` + titre de page ; hover / focus du lien = primary hover (mêmes tokens inversés que Fermer) ; ≤ 640px (plein écran) : si le lien a une icône, texte masqué (icône seule) ; `#developer/loading` : modèle de la page de chargement (brique animée) ; `#developer/welcome` : modèle de la page d’accueil vide (brique + tuiles) ; `#developer/theme-presets` : outil brouillon des thèmes par défaut (`#developer/theme-presets/new`, `#developer/theme-presets/edit/:slug` ; fermeture éditeur → liste ; pied de modale optionnel levé hors du corps)
 
@@ -278,7 +289,7 @@ Même principe d’affichage que les cases à cocher. Contrôle&nbsp;: `label.fo
 
 ## Couleurs (design system)
 
-Même ordre de champ. Contrôle&nbsp;: `input.form-control` texte dans un wrapper `form-color`, avec pastille à gauche (`input[type=color]`) et bouton effacer (`ri-close-circle-fill`) en overlay à l’intérieur du champ. Clear visible seulement s’il y a une valeur (peut être omis / disabled) ; non focusable (`tabindex="-1"`). Pastille&nbsp;: uniquement si hex valide ; sinon couleur par défaut du champ (`fallback` / `fallbackColor`), sinon damier transparent. Module&nbsp;: `form-color.js`. Appliqué : paramètres · thèmes · champ image (fond). Galerie&nbsp;: `#developer/colors`.
+Même ordre de champ. Contrôle&nbsp;: `input.form-control` texte dans un wrapper `form-color`, avec pastille à gauche (`input[type=color]`) et bouton effacer (`ri-close-circle-fill`) en overlay à l’intérieur du champ. Clear visible seulement s’il y a une valeur (peut être omis / disabled) ; non focusable (`tabindex="-1"`). Pastille&nbsp;: uniquement si hex valide ; sinon couleur par défaut du champ (`fallback` / `fallbackColor`), sinon damier transparent. Placeholder = fallback (mis à jour par `setValue`). Module&nbsp;: `form-color.js`. Appliqué : paramètres · thèmes · champ image (fond). Galerie&nbsp;: `#developer/colors`.
 
 ## Images (design system)
 
@@ -329,17 +340,17 @@ Classe = apparence. Tag = plan du document. **Un rang 1 par vue** (page ou dialo
 
 Pas des headings&nbsp;: marque topbar, `form-label`, noms de cartes (grille thèmes, Brickcard). Galerie&nbsp;: `#developer/typography`.
 
-Titre de document (`<title>` / `document.title`, `document-title.js`)&nbsp;: défaut **Brickcard - Imprimez de bien jolies cartes pour vos briques LEGO®** (`APP_DOCUMENT_TITLE` dans `version.js` et `src/index.html`, **pas** de version). Accueil = ce titre. Overlay / page&nbsp;: `{titre de la modale} | {titre de la section si elle existe (espace développeur)} | {titre par défaut}`. Dialogues enfants (confirmation, URL d’image, démo styleguide, éditeur presets) se superposent le temps de l’affichage. Pendant `window.print()`, le titre devient le nom de fichier PDF (voir **Impression**) ; le schéma overlay n’est pas appliqué.
+Titre de document (`<title>` / `document.title`, `document-title.js`)&nbsp;: défaut **Brickcard - Imprimez de bien jolies cartes pour vos briques LEGO®** (`APP_DOCUMENT_TITLE` dans `version.js` et `src/index.html`, **pas** de version). Accueil = ce titre. Overlay / page&nbsp;: `{titre de la modale} | {titre de la section si elle existe (espace développeur)} | {titre par défaut}`. Dialogues enfants (confirmation, URL d’image / de sauvegarde, démo styleguide, éditeur presets) se superposent le temps de l’affichage. Pendant `window.print()`, le titre devient le nom de fichier PDF (voir **Impression**) ; le schéma overlay n’est pas appliqué.
 
 États vides (`section.empty-view` / `.empty-view-body`, helper `emptyViewMarkup` dans `empty-view.js`)&nbsp;: titre + texte + tuiles centrés dans `#main` ou le `modal-body` ; brique CSS collée au-dessus (hors flux). Accueil sans carte&nbsp;: «&nbsp;Bienvenue ;)&nbsp;» + tuiles Nouvelle carte / Importer une sauvegarde (`welcomeViewMarkup` ; galerie `#developer/welcome`) ; sur grand écran le bloc remonte d’une hauteur de header (header visuellement vide). Recherche sans résultat (cartes ou thèmes)&nbsp;: «&nbsp;Oups&nbsp;!&nbsp;». Premier affichage&nbsp;: «&nbsp;Chargement...&nbsp;» jusqu’à cartes + thèmes prêts ; échec de boot → message rouge (`#boot-error`), animation arrêtée, `ri-error-warning-line` au centre de la brique (`loadingViewMarkup` ; galerie `#developer/loading` : en cours + erreur).
 
 ## Modales (design system)
 
-Coquille&nbsp;: `modal-backdrop` + `modal` (`role="dialog"` / `aria-modal`). Bordure&nbsp;: `2px solid var(--ink)` (comme le focus des champs). Alignement vertical (sur le backdrop)&nbsp;: `modal-backdrop--top` · `modal-backdrop--middle` (**défaut**) · `modal-backdrop--bottom`. Header inversé (fond `ink` / texte `panel`)&nbsp;: titre (`h1.view-title`, court) + **une** icône Remix max à gauche (décorative, reprise du bouton / de la tuile qui ouvre ; exception édition carte / thème : `ri-pencil-fill` ; galeries développeur : icône de section sur le lien, pas d’icône de tuile ; `#page/about` : logo app en `currentColor`) + `btn primary icon-only modal-close` (même variante DS, tokens inversés comme le menu impression&nbsp;: repos fond `--bg` / hover fond `--ink` + bordure `--bg`). Bouton fermer centré verticalement, même inset haut / droite / bas ; `tabindex="-1"` (pas tabulable — fermeture : Échap / clic). Corps&nbsp;: `modal-body` (`tabindex="-1"` — Chrome rend les `overflow: auto` tabulables). À l’ouverture, focus sur `.modal` (`tabindex="-1"`) : Tab va au contenu, puis le pied ; Tab boucle dans la modale au premier plan. Scroll du backdrop et du `modal-body` remis en haut (y compris swap d’une galerie développeur). Pied optionnel&nbsp;: `modal-footer` avec `modal-footer-start` (gauche&nbsp;: sauvegarde / validation) et `modal-footer-end` (droite&nbsp;: danger) — boutons centrés verticalement (normal / `sm`). **Annuler**&nbsp;: `sm` s’il y a d’autres boutons d’action dans le pied, taille normale s’il est seul (`openConfirmDialog` l’applique tout seul). Exception `modal-footer--primary-first` (éditeur de carte, éditeur de thème, paramètres d’impression, sauvegarde `#backup`)&nbsp;: visuel Annuler puis action primaire à droite (éditeurs&nbsp;: Supprimer à gauche) ; ordre clavier (DOM) primaire → Annuler → Supprimer. Séparateur header&nbsp;: `2px solid var(--ink)` (pas de bordure haute sur le footer).
+Coquille&nbsp;: `modal-backdrop` + `modal` (`role="dialog"` / `aria-modal`). Bordure&nbsp;: `2px solid var(--ink)` (comme le focus des champs). Alignement vertical (sur le backdrop)&nbsp;: `modal-backdrop--top` · `modal-backdrop--middle` (**défaut**) · `modal-backdrop--bottom`. Header inversé (fond `ink` / texte `panel`)&nbsp;: titre (`h1.view-title`, court) + **une** icône Remix max à gauche (décorative, reprise du bouton / de la tuile qui ouvre ; exception édition carte / thème : `ri-pencil-fill` ; galeries développeur : icône de section sur le lien, pas d’icône de tuile ; `#page/about` : logo app en `currentColor`) + `btn primary icon-only modal-close` (même variante DS, tokens inversés comme le menu impression&nbsp;: repos fond `--bg` / hover fond `--ink` + bordure `--bg`). Bouton fermer centré verticalement, même inset haut / droite / bas ; `tabindex="-1"` (pas tabulable — fermeture : Échap / clic). Corps&nbsp;: `modal-body` (`tabindex="-1"` — Chrome rend les `overflow: auto` tabulables). À l’ouverture, focus sur `.modal` (`tabindex="-1"`) : Tab va au contenu, puis le pied ; Tab boucle dans la modale au premier plan. Scroll du backdrop et du `modal-body` remis en haut (y compris swap d’une galerie développeur). Pied optionnel&nbsp;: `modal-footer` avec `modal-footer-start` (gauche&nbsp;: sauvegarde / validation) et `modal-footer-end` (droite&nbsp;: danger) — boutons centrés verticalement (normal / `sm`). **Annuler**&nbsp;: `sm` s’il y a d’autres boutons d’action dans le pied, taille normale s’il est seul (`openConfirmDialog` l’applique tout seul). Exception `modal-footer--primary-first` (éditeur de carte, éditeur de thème, paramètres d’impression, sauvegarde `#backup`, import `#import`)&nbsp;: visuel Annuler puis action primaire à droite (éditeurs&nbsp;: Supprimer à gauche) ; ordre clavier (DOM) primaire → Annuler → Supprimer. Séparateur header&nbsp;: `2px solid var(--ink)` (pas de bordure haute sur le footer).
 
 Tailles (3)&nbsp;: `modal--sm` (~640) · `modal--md` (~896, **défaut**) · `modal--lg` (~1152). Toujours bornées au **viewport** (`100vw` / `100dvh`). Responsive ≤&nbsp;640px&nbsp;: **plein écran**, overlay masqué.
 
-Appliqué&nbsp;: paramètres / page MD / sauvegarde (`#backup`) (`md`) · thèmes + éditeur carte + éditeur de thème personnalisé + espace développeur (`lg` ; thèmes et `#developer/theme-presets` : hauteur toujours `var(--modal-max-h)`, le corps défile) · confirmations / paramètres d’impression (`#print`) / chargement d’image depuis une URL (`sm`). Galerie&nbsp;: `#developer/modals`. Dialogues enfants (supprimer carte / thème / image, reset local, import, URL d’image) : second `modal-backdrop` dans le même host, sans route — helper `confirmDialog()` / `openConfirmDialog()` (`confirm-dialog.js`) ; titre un peu plus long et explicite (ex. `Supprimer la carte "Saucer Centurien" (#6939) ?`). Pas de `alert()` / `confirm()` / `prompt()` natifs.
+Appliqué&nbsp;: paramètres / page MD / sauvegarde (`#backup`) / import (`#import`) (`md`) · thèmes + éditeur carte + éditeur de thème personnalisé + espace développeur (`lg` ; thèmes et `#developer/theme-presets` : hauteur toujours `var(--modal-max-h)`, le corps défile) · confirmations / paramètres d’impression (`#print`) / chargement d’image ou de sauvegarde depuis une URL (`sm`). Galerie&nbsp;: `#developer/modals`. Dialogues enfants (supprimer carte / thème / image, reset local, URL d’image / de sauvegarde) : second `modal-backdrop` dans le même host, sans route — helper `confirmDialog()` / `openConfirmDialog()` (`confirm-dialog.js`) ; titre un peu plus long et explicite (ex. `Supprimer la carte "Saucer Centurien" (#6939) ?`). Pas de `alert()` / `confirm()` / `prompt()` natifs.
 
 ## Impression
 

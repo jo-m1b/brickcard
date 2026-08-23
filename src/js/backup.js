@@ -8,7 +8,10 @@ import { getCardAppearanceSettings } from "./card-design.js";
 import { APP_ID, APP_VERSION } from "./version.js?v=0.7.5";
 
 export const BACKUP_EXT = ".brickcard";
-export const BACKUP_INVALID = "Ce fichier n’est pas une sauvegarde Brickcard valide.";
+export const BACKUP_INVALID = "La sauvegarde chargée est invalide !";
+export const BACKUP_URL_INVALID = "L’URL de la sauvegarde est invalide.";
+export const BACKUP_LOAD_ERROR = "Erreur de chargement de la sauvegarde !";
+export const BACKUP_LOAD_ERROR_CORS = `${BACKUP_LOAD_ERROR} Réseau ou CORS - le site source refuse le chargement.`;
 
 /** Id sentinelle : cartes sans thème connu (case « Sans thème »). */
 export const UNTHEMED_BACKUP_THEME_ID = "";
@@ -137,6 +140,11 @@ function stripCardImage(card) {
     imageZoom: _imageZoom,
     imageOffsetX: _imageOffsetX,
     imageOffsetY: _imageOffsetY,
+    setImageDataUrl: _setImageDataUrl,
+    image: _image,
+    zoom: _zoom,
+    offsetX: _offsetX,
+    offsetY: _offsetY,
     ...rest
   } = card;
   return rest;
@@ -149,9 +157,17 @@ function stripThemeLogo(theme) {
     logoZoom: _logoZoom,
     logoOffsetX: _logoOffsetX,
     logoOffsetY: _logoOffsetY,
+    image: _image,
     ...rest
   } = theme;
   return rest;
+}
+
+/** @param {unknown} card */
+function cardThemeId(card) {
+  if (!card || typeof card !== "object") return "";
+  const c = /** @type {Record<string, unknown>} */ (card);
+  return String(c.brickcardThemeId ?? c.legoThemeId ?? c.themeId ?? "").trim();
 }
 
 /** Les sauvegardes n’ont que des thèmes perso : `isBuiltin` / `builtin` inutiles. */
@@ -170,7 +186,7 @@ export function groupCardsForBackup(cards, themes) {
   /** @type {Map<string, Card[]>} */
   const groups = new Map();
   for (const card of cards || []) {
-    const id = String(card.brickcardThemeId || "");
+    const id = cardThemeId(card);
     const key = id && known.has(id) ? id : UNTHEMED_BACKUP_THEME_ID;
     const list = groups.get(key) || [];
     list.push(card);
@@ -194,9 +210,12 @@ export function listBackupThemeChoices(cards, themes) {
     if (id === UNTHEMED_BACKUP_THEME_ID) continue;
     const theme = themeById.get(id);
     if (!theme) continue;
+    const themeName =
+      String(theme.name || /** @type {{ themeName?: unknown }} */ (theme).themeName || "").trim() ||
+      "THÈME";
     choices.push({
       id,
-      name: theme.name,
+      name: themeName,
       cardCount: groupCards.length,
       isCustom: !theme.isBuiltin,
     });
@@ -285,6 +304,121 @@ export function isBackupPayloadEmpty(payload) {
   return !payload || !payload.cards.length;
 }
 
+/**
+ * Thèmes du fichier à importer : ceux qui ont des cartes, plus les thèmes perso vides.
+ * @param {Card[]} cards
+ * @param {LegoTheme[]} themes
+ * @param {LegoTheme[]} customThemes
+ * @returns {{ id: string, name: string, cardCount: number, isCustom: boolean }[]}
+ */
+export function listImportThemeChoices(cards, themes, customThemes) {
+  const choices = listBackupThemeChoices(cards, themes);
+  const chosen = new Set(choices.map((c) => c.id));
+  /** @type {{ id: string, name: string, cardCount: number, isCustom: boolean }[]} */
+  const empty = [];
+  for (const theme of customThemes || []) {
+    if (!theme || !theme.id || chosen.has(theme.id)) continue;
+    empty.push({
+      id: theme.id,
+      name: String(theme.name || "").trim() || "THÈME",
+      cardCount: 0,
+      isCustom: true,
+    });
+  }
+  empty.sort((a, b) => a.name.localeCompare(b.name, "fr"));
+  return [...choices, ...empty];
+}
+
+/**
+ * @param {BackupData} backup
+ * @param {{
+ *   themes: LegoTheme[],
+ *   selectedThemeIds?: string[],
+ *   includeSettings?: boolean,
+ *   includeImages?: boolean,
+ *   includeThemeLogos?: boolean,
+ * }} opts
+ * @returns {BackupData}
+ */
+export function buildImportPayload(backup, opts) {
+  const includeImages = opts.includeImages !== false;
+  const includeThemeLogos = opts.includeThemeLogos !== false;
+  const includeSettings = Boolean(opts.includeSettings);
+  const cardsIn = /** @type {Card[]} */ (backup.cards || []);
+  const customThemes = /** @type {LegoTheme[]} */ (backup.themes || []);
+  const themes = opts.themes || [];
+  const choices = listImportThemeChoices(cardsIn, themes, customThemes);
+  const selectedThemeIds = opts.selectedThemeIds || choices.map((c) => c.id);
+  const selected = new Set(selectedThemeIds);
+  const cards = selectCardsByThemes(cardsIn, themes, selected);
+  let exportedThemes = customThemes.filter((t) => t && selected.has(t.id));
+  const exportedCards = includeImages ? cards : cards.map(stripCardImage);
+  if (!includeThemeLogos) {
+    exportedThemes = exportedThemes.map(stripThemeLogo);
+  }
+  exportedThemes = exportedThemes.map(stripThemeBuiltinFlag);
+
+  /** @type {BackupData} */
+  const payload = {
+    version: backup.version,
+    app: backup.app,
+    exportedAt: backup.exportedAt,
+    cards: exportedCards,
+    themes: exportedThemes,
+  };
+  if (includeSettings && backup.settings?.cardAppearance) {
+    payload.settings = { cardAppearance: backup.settings.cardAppearance };
+  }
+  return payload;
+}
+
+/** Import impossible sans carte, thème ni paramètre sélectionné. */
+export function isImportPayloadEmpty(payload) {
+  if (!payload) return true;
+  const hasCards = Array.isArray(payload.cards) && payload.cards.length > 0;
+  const hasThemes = Array.isArray(payload.themes) && payload.themes.length > 0;
+  const hasSettings = Boolean(payload.settings?.cardAppearance);
+  return !hasCards && !hasThemes && !hasSettings;
+}
+
+/**
+ * Télécharge une sauvegarde depuis une URL http(s) et renvoie le texte.
+ * L’URL n’est pas conservée.
+ * @param {string} urlString
+ * @returns {Promise<string>}
+ */
+export async function fetchBackupAsText(urlString) {
+  const raw = String(urlString || "").trim();
+  if (!raw) throw new Error(BACKUP_URL_INVALID);
+
+  let url;
+  try {
+    url = new URL(raw);
+  } catch {
+    throw new Error(BACKUP_URL_INVALID);
+  }
+  if (url.protocol !== "http:" && url.protocol !== "https:") {
+    throw new Error(BACKUP_URL_INVALID);
+  }
+
+  let res;
+  try {
+    res = await fetch(url.href, {
+      mode: "cors",
+      credentials: "omit",
+      cache: "no-cache",
+    });
+  } catch {
+    throw new Error(BACKUP_LOAD_ERROR_CORS);
+  }
+
+  if (!res.ok) {
+    throw new Error(`${BACKUP_LOAD_ERROR} HTTP ${res.status}.`);
+  }
+
+  return res.text();
+}
+
 /** @param {unknown} payload */
 export function backupPayloadBytes(payload) {
   return new Blob([JSON.stringify(payload, null, 2)]).size;
@@ -357,16 +491,20 @@ export function formatBackupFooterRecap(recap) {
 
 /** @param {unknown[]} cards */
 export function countBackupCardImages(cards) {
-  return (cards || []).filter((c) =>
-    Boolean(c && typeof c === "object" && String(/** @type {{ imageDataUrl?: unknown }} */ (c).imageDataUrl || "").trim())
-  ).length;
+  return (cards || []).filter((c) => {
+    if (!c || typeof c !== "object") return false;
+    const card = /** @type {Record<string, unknown>} */ (c);
+    return Boolean(String(card.imageDataUrl ?? card.setImageDataUrl ?? card.image ?? "").trim());
+  }).length;
 }
 
 /** @param {unknown[]} themes */
 export function countBackupThemeLogos(themes) {
-  return (themes || []).filter((t) =>
-    Boolean(t && typeof t === "object" && String(/** @type {{ logoDataUrl?: unknown }} */ (t).logoDataUrl || "").trim())
-  ).length;
+  return (themes || []).filter((t) => {
+    if (!t || typeof t !== "object") return false;
+    const theme = /** @type {Record<string, unknown>} */ (t);
+    return Boolean(String(theme.logoDataUrl ?? theme.image ?? "").trim());
+  }).length;
 }
 
 /**
@@ -452,7 +590,7 @@ export function migrateBackup(raw) {
   if (!ver) throw new Error(BACKUP_INVALID);
   if (semverGt(ver, APP_VERSION)) {
     throw new Error(
-      `Cette sauvegarde (v${ver}) n’est pas compatible avec cette version de l’app.`
+      `La version (v${ver}) de la sauvegarde chargée est incompatible !`
     );
   }
 
@@ -509,7 +647,7 @@ export function parseBrickcardBackup(input) {
   const hasTheme = migrated.themes.some(isValidThemeLike);
   const hasSettings = Boolean(migrated.settings?.cardAppearance);
   if (!hasCard && !hasTheme && !hasSettings) {
-    throw new Error("Aucune donnée valide trouvée dans le fichier.");
+    throw new Error(BACKUP_INVALID);
   }
   return migrated;
 }

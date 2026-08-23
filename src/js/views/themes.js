@@ -9,9 +9,13 @@ import {
   modalTitleMarkup,
 } from "../icons.js";
 import { loadCards, loadThemes } from "../storage.js";
-import { contrastText, partitionThemes } from "../themes-data.js";
-import { resolveCardAccent } from "../card-design.js";
-import { applyThemeLogoTransform, brandLogoSrc } from "../card-render.js";
+import { partitionThemes } from "../themes-data.js";
+import { resolveCardAccent, resolveCardAccentFg } from "../card-design.js";
+import {
+  applyThemeLogoTransform,
+  brandLogoMarkup,
+  fallbackThemeTileToBrandLogo,
+} from "../card-render.js";
 import { emptyViewMarkup } from "../empty-view.js";
 import { setAppDocumentTitle } from "../document-title.js";
 
@@ -436,16 +440,7 @@ export async function renderThemesModal(host, opts) {
     syncSortMenu();
 
     host.querySelectorAll("img.theme-tile-logo").forEach((img) => {
-      img.onerror = () => {
-        if (img.classList.contains("is-brand")) {
-          img.remove();
-          return;
-        }
-        img.classList.add("is-brand");
-        img.closest(".theme-tile-logo-wrap")?.classList.remove("theme-tile-logo-wrap--crop");
-        const lightFg = img.closest(".theme-tile")?.classList.contains("is-light-fg");
-        img.src = brandLogoSrc(Boolean(lightFg));
-      };
+      img.onerror = () => fallbackThemeTileToBrandLogo(img);
       if (img.classList.contains("is-brand")) return;
       const wrap = img.closest(".theme-tile-logo-wrap--crop");
       const apply = () => {
@@ -628,32 +623,30 @@ export async function renderThemesModal(host, opts) {
  */
 function themeTileMarkup(theme, count, editable) {
   const accent = resolveCardAccent(theme);
-  const fg = contrastText(accent);
+  const fg = resolveCardAccentFg(theme, accent);
   const countLabel =
     count <= 1 ? `${count} carte` : `${count} cartes`;
   const name = escapeHtml(theme.name);
   const hasThemeLogo = Boolean(theme.logoDataUrl);
-  const logoSrc = hasThemeLogo
-    ? theme.logoDataUrl
-    : brandLogoSrc(fg === "#ffffff");
-  const logoClass = hasThemeLogo ? "theme-tile-logo" : "theme-tile-logo is-brand";
   const wrapClass = hasThemeLogo
     ? "theme-tile-logo-wrap theme-tile-logo-wrap--crop"
     : "theme-tile-logo-wrap";
   const cropAttrs = hasThemeLogo
     ? ` data-logo-zoom="${escapeAttr(String(theme.logoZoom || 1))}" data-logo-offset-x="${escapeAttr(String(theme.logoOffsetX || 0))}" data-logo-offset-y="${escapeAttr(String(theme.logoOffsetY || 0))}" style="--logo-zoom:${escapeAttr(String(theme.logoZoom || 1))};--logo-offset-x:${escapeAttr(String(theme.logoOffsetX || 0))};--logo-offset-y:${escapeAttr(String(theme.logoOffsetY || 0))}"`
     : "";
-  const logo = `<div class="${wrapClass}"${cropAttrs}><img class="${logoClass}" src="${escapeAttr(logoSrc)}" alt="" /></div>`;
+  const logoInner = hasThemeLogo
+    ? `<img class="theme-tile-logo" src="${escapeAttr(theme.logoDataUrl)}" alt="" />`
+    : brandLogoMarkup("theme-tile-logo is-brand");
+  const logo = `<div class="${wrapClass}"${cropAttrs}>${logoInner}</div>`;
   const label = editable
     ? `Modifier « ${escapeAttr(theme.name)} »${count > 0 ? `, ${countLabel}` : ""}`
     : `${escapeAttr(theme.name)}${count > 0 ? `, ${countLabel}` : ""}`;
   const attrs = editable
     ? `role="button" tabindex="0" data-edit="${escapeAttr(theme.id)}"`
     : "";
-  const fgClass = fg === "#ffffff" ? " is-light-fg" : "";
 
   return `
-    <article class="theme-tile${editable ? " is-editable" : ""}${fgClass}" style="--theme-accent:${escapeAttr(accent)};--theme-accent-fg:${escapeAttr(fg)}" ${attrs} aria-label="${label}">
+    <article class="theme-tile${editable ? " is-editable" : ""}" style="--theme-accent:${escapeAttr(accent)};--theme-accent-fg:${escapeAttr(fg)}" ${attrs} aria-label="${label}">
       <div class="theme-tile-face">
         <p class="theme-tile-name">${name}</p>
         ${logo}

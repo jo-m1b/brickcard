@@ -127,7 +127,7 @@ function buildPrintDocument(cards, themeMap, layout, settings) {
 /** @param {HTMLElement} root */
 async function waitForImages(root) {
   const imgs = Array.from(
-    root.querySelectorAll(".card-photo-img, .card-brand-logo, .card-theme-logo")
+    root.querySelectorAll(".card-photo-img, .card-theme-logo")
   );
   await Promise.all(
     imgs.map(

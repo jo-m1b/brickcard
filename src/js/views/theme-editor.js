@@ -10,7 +10,7 @@ import {
   getTheme,
 } from "../storage.js";
 import { mountCardBackPreview, refreshCardBackPreview } from "../card-render.js";
-import { DEFAULT_THEME_COLOR } from "../themes-data.js";
+import { contrastText, DEFAULT_THEME_COLOR } from "../themes-data.js";
 import { resolveCardAccent } from "../card-design.js";
 import { confirmDialog } from "../confirm-dialog.js";
 import { setAppDocumentTitle } from "../document-title.js";
@@ -41,6 +41,7 @@ export async function renderThemeEditor(host, opts) {
    *   id: string|null,
    *   name: string,
    *   color: string,
+   *   secondaryColor: string,
    *   logoDataUrl: string,
    *   logoZoom: number,
    *   logoOffsetX: number,
@@ -50,6 +51,7 @@ export async function renderThemeEditor(host, opts) {
     id: existing?.id || null,
     name: existing?.name || "",
     color: existing?.color || "",
+    secondaryColor: existing?.secondaryColor || "",
     logoDataUrl: existing?.logoDataUrl || "",
     logoZoom: existing?.logoZoom || 1,
     logoOffsetX: existing?.logoOffsetX || 0,
@@ -61,6 +63,10 @@ export async function renderThemeEditor(host, opts) {
 
   function themeCropBackground() {
     return resolveCardAccent({ color: draft.color });
+  }
+
+  function autoAccentFg() {
+    return contrastText(themeCropBackground());
   }
 
   host.innerHTML = `
@@ -90,14 +96,25 @@ export async function renderThemeEditor(host, opts) {
                 <p class="form-error" id="theme-name-error" role="alert" hidden></p>
               </div>
               <div class="form-field">
-                <label class="form-label" for="theme-color-hex">Couleur par défaut</label>
-                <p class="form-hint" id="theme-color-hint">Couleur appliquée par défaut aux cartes de ce thème</p>
+                <label class="form-label" for="theme-color-hex">Couleur</label>
+                <p class="form-hint" id="theme-color-hint">Couleur principale des cartes du thème.</p>
                 ${formColorMarkup({
                   id: "theme-color-hex",
                   value: draft.color,
                   fallback: DEFAULT_THEME_COLOR,
                   placeholder: DEFAULT_THEME_COLOR,
                   describedBy: "theme-color-hint",
+                })}
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="theme-secondary-color-hex">Couleur secondaire</label>
+                <p class="form-hint" id="theme-secondary-color-hint">Couleur utilisée pour les textes, icônes et le logo Brickcard. Par défaut cette couleur est déterminée automatiquement (noir ou blanc) en fonction de la couleur principale.</p>
+                ${formColorMarkup({
+                  id: "theme-secondary-color-hex",
+                  value: draft.secondaryColor,
+                  fallback: autoAccentFg(),
+                  placeholder: autoAccentFg(),
+                  describedBy: "theme-secondary-color-hint",
                 })}
               </div>
               <div class="form-field" style="--form-image-aspect: 63 / 44">
@@ -154,6 +171,7 @@ export async function renderThemeEditor(host, opts) {
       id: draft.id || "",
       name: nameInput.value.trim(),
       color: draft.color,
+      secondaryColor: draft.secondaryColor,
       logoDataUrl: draft.logoDataUrl,
       logoZoom: draft.logoZoom,
       logoOffsetX: draft.logoOffsetX,
@@ -177,6 +195,8 @@ export async function renderThemeEditor(host, opts) {
   );
   /** @type {ReturnType<typeof bindFormColor>|null} */
   let themeColorField = null;
+  /** @type {ReturnType<typeof bindFormColor>|null} */
+  let secondaryColorField = null;
   /** @type {ReturnType<typeof bindFormImage>|null} */
   let logoField = null;
 
@@ -189,11 +209,29 @@ export async function renderThemeEditor(host, opts) {
           themeColorField?.setValue("", resolveCardAccent(null));
         }
         logoField?.setPreviewBackground(themeCropBackground());
+        secondaryColorField?.setValue(draft.secondaryColor, autoAccentFg());
         syncPreview();
       },
     });
   }
   themeColorField?.setValue(draft.color, colorDisplay);
+
+  const secondaryRoot = /** @type {HTMLElement|null} */ (
+    q("#theme-secondary-color-hex")?.closest("[data-form-color]")
+  );
+  if (secondaryRoot) {
+    secondaryColorField = bindFormColor(secondaryRoot, {
+      fallbackColor: autoAccentFg(),
+      onChange(value) {
+        draft.secondaryColor = value || "";
+        if (!value) {
+          secondaryColorField?.setValue("", autoAccentFg());
+        }
+        syncPreview();
+      },
+    });
+  }
+  secondaryColorField?.setValue(draft.secondaryColor, autoAccentFg());
 
   if (logoRoot) {
     logoField = bindFormImage(logoRoot, {
@@ -270,6 +308,7 @@ export async function renderThemeEditor(host, opts) {
         id: draft.id || createId(),
         name,
         color: draft.color,
+        secondaryColor: draft.secondaryColor,
         logoDataUrl: draft.logoDataUrl || "",
         logoZoom: draft.logoZoom,
         logoOffsetX: draft.logoOffsetX,
@@ -305,6 +344,7 @@ export async function renderThemeEditor(host, opts) {
 
   return () => {
     themeColorField?.destroy();
+    secondaryColorField?.destroy();
     logoField?.destroy();
     window.removeEventListener("keydown", onKey);
     window.removeEventListener("resize", syncPreview);

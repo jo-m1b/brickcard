@@ -9,12 +9,21 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Added
 
+- Import de sauvegarde : modale `#import` (fichier ou URL, validation en mémoire, choix de fusion, recap live) ; l’écriture n’a lieu qu’au clic **Importer**
+- Sauvegarde de démo : `data/backup-demo-jo.brickcard` (URL : `https://brickcard.org/data/backup-demo-jo.brickcard`)
+- Thèmes (par défaut et perso) : couleur secondaire optionnelle (`secondaryColor`) pour les textes, icônes de badge et logo Brickcard ; vide = noir ou blanc automatique
 - Sauvegarde de la collection : modale `#backup` (type complète / personnalisée, recap live, poids estimé)
-- Sauvegarde : raccourci Ctrl/Cmd+S pour ouvrir `#backup` (hors éditeur carte / thème / presets)
+- Sauvegarde : raccourci Ctrl/Cmd+S pour ouvrir `#backup` (hors éditeur carte / thème / presets et hors `#import`)
 - Espace développeur : galerie **Page de bienvenue** (`#developer/welcome`, `ri-home-smile-fill`) — modèle de l’accueil lorsque la collection est vide
 
 ### Changed
 
+- Import : plus de dialogue Fusionner / Remplacer ; toujours une fusion, configurée dans `#import` (Paramètres et accueil vide ouvrent la modale)
+- Import : messages d’erreur de sauvegarde invalide / version incompatible reformulés (« La sauvegarde chargée… »)
+- Éditeur de thème : placeholder de la couleur secondaire = noir ou blanc auto (suit la couleur principale)
+- Éditeur de thème : libellés « Couleur » / hints principale et secondaire
+- Contraste auto des cartes (`contrastText`) : texte / logo noirs seulement sur un fond vraiment pâle (plus de noir sur les jaunes, oranges et limes saturés)
+- Logo Brickcard des cartes (dos, face sans photo, tuiles thèmes sans logo) : masque CSS coloré par `--card-accent-fg` (plus de swap `brickcard-logo.svg` / `brickcard-logo-white.svg`)
 - Sauvegarde `#backup` : le bouton **Sauvegarder** ferme la modale une fois le fichier lancé ; recap « Aucune carte à sauvegarder ! » (gras) si le bouton est désactivé
 - Images SVG (cartes et logos) : conservées en vectoriel au chargement (fichier / URL) pour pouvoir les retélécharger ; scripts, `foreignObject` et gestionnaires `on*` retirés (y compris à l’import)
 - Sauvegarde de la collection : modale `#backup` (complète ou personnalisée) avant le téléchargement ; version du fichier = version de l’app ; noms `brickcard-backup-…` ; import des anciens fichiers `version` 1–3 et des réglages d’apparence s’ils sont présents

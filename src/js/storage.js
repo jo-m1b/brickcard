@@ -413,6 +413,7 @@ function normalizeTheme(t) {
     id: typeof t.id === "string" && t.id ? t.id : createId(),
     name: String(t.name ?? t.themeName ?? "").trim() || "THÈME",
     color: parseHexColor(t.color ?? t.accentColor),
+    secondaryColor: parseHexColor(t.secondaryColor),
     logoDataUrl: sanitizeSvgDataUrl(String(t.logoDataUrl ?? t.image ?? "")),
     logoZoom: clampLogoZoom(t.logoZoom),
     logoOffsetX: roundCropCoord(t.logoOffsetX),
@@ -610,6 +611,7 @@ export async function upsertTheme(input) {
 
   const logoDataUrl = String(input.logoDataUrl ?? input.image ?? "");
   const color = parseHexColor(input.color ?? input.accentColor);
+  const secondaryColor = parseHexColor(input.secondaryColor);
   const now = new Date().toISOString();
 
   const theme = normalizeTheme({
@@ -617,6 +619,7 @@ export async function upsertTheme(input) {
     id,
     logoDataUrl,
     color,
+    secondaryColor,
     isBuiltin: false,
     updatedAt: now,
   });
@@ -652,15 +655,40 @@ export async function deleteTheme(id) {
 
 /**
  * @param {string|object} input
- * @param {"merge"|"replace"} mode
+ * @param {"merge"|"replace"|{
+ *   mode?: "merge"|"replace",
+ *   includeImages?: boolean,
+ *   includeThemeLogos?: boolean,
+ * }} [modeOrOpts]
  * @returns {Promise<{ imported: number, total: number, themesImported: number, settingsApplied: boolean }>}
  */
-export async function importBackup(input, mode = "merge") {
+export async function importBackup(input, modeOrOpts = "merge") {
+  const opts =
+    modeOrOpts && typeof modeOrOpts === "object"
+      ? modeOrOpts
+      : { mode: modeOrOpts };
+  const mode = opts.mode === "replace" ? "replace" : "merge";
+  const includeImages = opts.includeImages !== false;
+  const includeThemeLogos = opts.includeThemeLogos !== false;
+
   const data = parseBrickcardBackup(input);
   const incoming = data.cards;
   const incomingThemes = data.themes;
 
   const valid = incoming.filter(isValidCard).map((c) => normalizeCard(c));
+
+  /** @param {Card} incomingCard @param {Card|undefined} existing */
+  function mergeCard(incomingCard, existing) {
+    if (includeImages || !existing) return incomingCard;
+    return {
+      ...incomingCard,
+      imageDataUrl: existing.imageDataUrl,
+      imageBackgroundColor: existing.imageBackgroundColor,
+      imageZoom: existing.imageZoom,
+      imageOffsetX: existing.imageOffsetX,
+      imageOffsetY: existing.imageOffsetY,
+    };
+  }
 
   /** @type {Card[]} */
   let result;
@@ -670,7 +698,7 @@ export async function importBackup(input, mode = "merge") {
   } else if (valid.length) {
     const map = new Map((await loadCards()).map((c) => [c.id, c]));
     for (const card of valid) {
-      map.set(card.id, card);
+      map.set(card.id, mergeCard(card, map.get(card.id)));
     }
     result = Array.from(map.values()).sort((a, b) =>
       String(b.updatedAt).localeCompare(String(a.updatedAt))
@@ -699,7 +727,20 @@ export async function importBackup(input, mode = "merge") {
     themesImported = validThemes.length;
   } else {
     for (const theme of validThemes) {
-      await upsertTheme(theme);
+      let next = theme;
+      if (!includeThemeLogos) {
+        const existing = await getTheme(theme.id);
+        if (existing && !existing.isBuiltin) {
+          next = {
+            ...theme,
+            logoDataUrl: existing.logoDataUrl,
+            logoZoom: existing.logoZoom,
+            logoOffsetX: existing.logoOffsetX,
+            logoOffsetY: existing.logoOffsetY,
+          };
+        }
+      }
+      await upsertTheme(next);
       themesImported += 1;
     }
   }

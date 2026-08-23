@@ -209,10 +209,15 @@ export function bindFormColor(root, opts = {}) {
     hex.focus();
   }
 
+  function syncPlaceholder() {
+    if (fallbackColor) hex.placeholder = fallbackColor;
+  }
+
   function setValue(stored, displayFallback) {
     if (displayFallback !== undefined) {
       fallbackColor = normalizeHex(displayFallback ?? "");
     }
+    syncPlaceholder();
     const normalized = normalizeHex(stored);
     hex.value = normalized || "";
     native.value = normalized || pickerSeed();
@@ -230,6 +235,7 @@ export function bindFormColor(root, opts = {}) {
     return completeHex(hex.value) || normalizeHex(hex.value) || "";
   }
 
+  syncPlaceholder();
   applyFromHex(false);
 
   const onHexInput = () => applyFromHex(true);

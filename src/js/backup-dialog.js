@@ -80,7 +80,7 @@ export async function renderBackupDialog(host, opts) {
     .join("");
 
   host.innerHTML = `
-    <div class="modal-backdrop" id="backup-dialog-backdrop" role="presentation">
+    <div class="modal-backdrop collection-xfer-dialog" id="backup-dialog-backdrop" role="presentation">
       <div class="modal modal--md" role="dialog" aria-modal="true" aria-labelledby="backup-dialog-title" aria-describedby="backup-dialog-recap">
         <div class="modal-header">
           <div>

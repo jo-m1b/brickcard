@@ -9,6 +9,7 @@
  * @property {string} id
  * @property {string} name Affichage (ex. "Aquazone", "CITY")
  * @property {string} color Couleur du thème (cartes), hex #rrggbb ou "" si non définie
+ * @property {string} secondaryColor Textes / icônes / logo Brickcard, hex #rrggbb ou "" (contraste auto)
  * @property {string} logoDataUrl Logo PNG/SVG/WebP (data URL ou chemin relatif), optionnel
  * @property {number} logoZoom Zoom largeur logo (1 = 75 % de la largeur de carte)
  * @property {number} logoOffsetX Décalage horizontal logo (fraction de la boîte)
@@ -23,6 +24,7 @@
  * @property {string} id
  * @property {string} name
  * @property {string} [color] Hex ; omis → pas de couleur propre (cascade carte)
+ * @property {string} [secondaryColor] Hex ; omis → noir ou blanc selon l’accent
  * @property {string} [logoSrc] Chemin relatif depuis src/ (ex. "data/theme-logo-….png")
  * @property {number} [logoZoom] Largeur logo (1 = 75 % de la carte) ; omis → 1
  * @property {number} [logoOffsetX] Décalage horizontal ; omis → 0
@@ -157,6 +159,7 @@ export async function getPresetThemes() {
           name,
           isBuiltin: true,
           color,
+          secondaryColor: parseHexColor(entry.secondaryColor),
           logoDataUrl,
           logoZoom: clampLogoZoom(entry.logoZoom),
           logoOffsetX: roundCropCoord(entry.logoOffsetX),
@@ -196,6 +199,8 @@ export function partitionThemes(themes) {
 
 /**
  * Contraste texte sur fond couleur.
+ * Noir seulement si le fond est vraiment pâle (gris clair, pastel, quasi blanc).
+ * Une teinte saturée (jaune, orange, lime…) reste en blanc.
  * @param {string} hex
  * @returns {"#ffffff"|"#141414"}
  */
@@ -205,6 +210,9 @@ export function contrastText(hex) {
   const r = parseInt(c.slice(0, 2), 16);
   const g = parseInt(c.slice(2, 4), 16);
   const b = parseInt(c.slice(4, 6), 16);
+  const max = Math.max(r, g, b) / 255;
+  const min = Math.min(r, g, b) / 255;
   const luma = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luma > 0.55 ? "#141414" : "#ffffff";
+  const sat = max === 0 ? 0 : (max - min) / max;
+  return luma > 0.72 && sat < 0.4 ? "#141414" : "#ffffff";
 }
