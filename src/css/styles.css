@@ -1187,7 +1187,15 @@ html:not([data-theme]) .btn .icon-system {
 .main > .panel:has(> .empty-view:not([hidden])) {
   flex: 1 1 auto;
   min-height: 0;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* `safe` : si le bloc dépasse, aligner en haut pour pouvoir tout défiler —
+   `center` seul clippe le haut et bloque le scroll. */
+.main > .empty-view,
+.main > .panel:has(> .empty-view:not([hidden])) > .empty-view {
+  place-content: safe center;
 }
 
 /* Accueil / chargement : le header est vide visuellement, le centrage dans #main
@@ -1196,6 +1204,19 @@ html:not([data-theme]) .btn .icon-system {
 @media (min-height: 40rem) {
   .main > .empty-view {
     padding-bottom: calc(var(--topbar-h) * 2);
+  }
+}
+
+/* Petite hauteur (ex. téléphone paysage) : coller en haut (`start` évite un
+   scroll fantôme sous les tuiles) et réserver la brique hors flux. */
+@media (max-height: 39.99rem) {
+  .main > .empty-view,
+  .main > .panel:has(> .empty-view:not([hidden])) > .empty-view {
+    place-content: start center;
+  }
+
+  .main > .empty-view > .empty-view-body {
+    margin-top: calc(9px + 40px + 0.75rem);
   }
 }
 

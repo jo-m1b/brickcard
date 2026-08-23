@@ -7,6 +7,11 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Accueil vide : sur petite hauteur (ex. téléphone paysage) le contenu défile ; la brique et « Bienvenue » ne passent plus sous le header
+- Impression : les logos des thèmes par défaut (fichiers `data/theme-logo-…`) sont attendus avant `window.print()` — plus de dos avec seulement le logo Brickcard centré si l’image n’était pas encore chargée
+
 ## [0.8.0] — 2026-08-23
 
 ### Added

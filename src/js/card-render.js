@@ -174,6 +174,12 @@ function applyThemeLogo(root, legoTheme) {
     return;
   }
 
+  // Cadrage connu tout de suite (l’image peut encore être hidden).
+  root.dataset.logoZoom = String(legoTheme?.logoZoom || 1);
+  root.dataset.logoOffsetX = String(legoTheme?.logoOffsetX || 0);
+  root.dataset.logoOffsetY = String(legoTheme?.logoOffsetY || 0);
+  applyThemeLogoTransform(themeLogo, themeWrap, legoTheme);
+
   themeLogo.onload = showThemeLogo;
   themeLogo.onerror = hideThemeLogo;
   themeLogo.alt = legoTheme?.name || "";
@@ -182,9 +188,9 @@ function applyThemeLogo(root, legoTheme) {
     themeWrap.hidden = true;
     root.classList.remove("card-back--has-theme-logo");
     themeLogo.src = logoUrl;
-  } else if (themeLogo.complete) {
-    showThemeLogo();
   }
+  // Cache navigateur : `complete` peut être vrai sans `onload`.
+  if (themeLogo.complete && themeLogo.naturalWidth) showThemeLogo();
 }
 
 /** Icônes méta (header) — valeurs seules, sans libellé. */

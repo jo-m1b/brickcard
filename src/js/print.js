@@ -124,24 +124,54 @@ function buildPrintDocument(cards, themeMap, layout, settings) {
   return root;
 }
 
-/** @param {HTMLElement} root */
+/**
+ * Attend qu’une image soit décodable. Ne remplace pas `onload` / `onerror`
+ * (le dos de carte révèle le logo de thème dans ces handlers).
+ * @param {HTMLImageElement} img
+ */
+function waitForImageReady(img) {
+  if (!img.getAttribute("src")) return Promise.resolve();
+  if (img.complete) return Promise.resolve();
+  const viaEvents = () =>
+    new Promise((resolve) => {
+      img.addEventListener("load", resolve, { once: true });
+      img.addEventListener("error", resolve, { once: true });
+    });
+  if (typeof img.decode === "function") {
+    return img.decode().catch(() => {
+      if (img.complete) return;
+      return viaEvents();
+    });
+  }
+  return viaEvents();
+}
+
+/**
+ * Photos + logos de thème. Les logos restent `hidden` jusqu’à `onload` :
+ * ne pas les ignorer, sinon `window.print()` part trop tôt.
+ * @param {HTMLElement} root
+ */
 async function waitForImages(root) {
   const imgs = Array.from(
-    root.querySelectorAll(".card-photo-img, .card-theme-logo")
-  );
-  await Promise.all(
-    imgs.map(
-      (img) =>
-        new Promise((resolve) => {
-          if (img.hidden || !img.getAttribute("src")) resolve();
-          else if (img.complete && img.naturalWidth) resolve();
-          else {
-            img.onload = () => resolve();
-            img.onerror = () => resolve();
-          }
-        })
-    )
-  );
+    root.querySelectorAll("img.card-photo-img, img.card-theme-logo")
+  ).filter((img) => img instanceof HTMLImageElement);
+  await Promise.all(imgs.map(waitForImageReady));
+}
+
+/**
+ * Si `onload` n’a pas encore révélé un logo déjà décodé, l’afficher maintenant.
+ * @param {HTMLElement} root
+ */
+function revealLoadedThemeLogos(root) {
+  root.querySelectorAll(".card-back").forEach((back) => {
+    const img = back.querySelector(".card-theme-logo");
+    const wrap = back.querySelector(".card-theme");
+    if (!(img instanceof HTMLImageElement) || !wrap) return;
+    if (!img.getAttribute("src") || !img.complete || !img.naturalWidth) return;
+    back.classList.add("card-back--has-theme-logo");
+    img.hidden = false;
+    wrap.hidden = false;
+  });
 }
 
 /** @param {HTMLElement} root */
@@ -198,10 +228,12 @@ export async function printCards(cards, opts = {}) {
   printRoot.classList.add("is-preparing");
 
   await waitForImages(printRoot);
+  revealLoadedThemeLogos(printRoot);
   await waitLayout();
   reapplyTransforms(printRoot);
 
   const onBeforePrint = () => {
+    revealLoadedThemeLogos(printRoot);
     reapplyTransforms(printRoot);
   };
   window.addEventListener("beforeprint", onBeforePrint);
