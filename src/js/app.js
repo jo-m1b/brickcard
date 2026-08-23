@@ -1,4 +1,5 @@
-import { loadCards, loadThemes, exportBackup, importBackup, isBrickcardBackupFilename, parseBrickcardBackup, wipeAllLocalData, deleteAllCards, isResetReloadQuery } from "./storage.js";
+import { loadCards, loadThemes, importBackup, wipeAllLocalData, deleteAllCards, isResetReloadQuery } from "./storage.js";
+import { isBrickcardBackupFilename, parseBrickcardBackup } from "./backup.js";
 import { initTheme } from "./theme.js";
 import { initCardDesign } from "./card-design.js";
 import { initListLayout } from "./list-layout.js";
@@ -12,6 +13,7 @@ import { renderThemeEditor } from "./views/theme-editor.js";
 import { renderPageModal } from "./views/page.js";
 import { renderSettingsModal } from "./views/settings.js";
 import { renderPrintDialog } from "./print-dialog.js";
+import { isCollectionSaveShortcut, renderBackupDialog } from "./backup-dialog.js";
 import { renderDeveloperModal } from "./views/developer/modal.js";
 import { loadingViewMarkup, welcomeViewMarkup } from "./empty-view.js";
 import { confirmDialog, openConfirmDialog } from "./confirm-dialog.js";
@@ -48,6 +50,9 @@ let cleanupDeveloper = null;
 
 /** @type {null | (() => void)} */
 let cleanupPrint = null;
+
+/** @type {null | (() => void)} */
+let cleanupBackup = null;
 
 /** @type {null | (() => void)} */
 let cleanupList = null;
@@ -134,6 +139,7 @@ function parsePath(path) {
   }
   if (path === "settings") return { name: "settings" };
   if (path === "print") return { name: "print" };
+  if (path === "backup") return { name: "backup" };
   if (path.startsWith("page/")) {
     const slug = path.slice("page/".length);
     if (!slug || slug.includes("/")) return { name: "unknown" };
@@ -231,6 +237,7 @@ function isOverlayRoute(info) {
         info.name === "themes" ||
         info.name === "settings" ||
         info.name === "print" ||
+        info.name === "backup" ||
         info.name === "page" ||
         info.name === "developer")
   );
@@ -242,19 +249,33 @@ function overlayOnClose(name) {
   };
 }
 
+/** Éditeur avec brouillon : Ctrl/Cmd+S n’ouvre pas `#backup` (évite de perdre la saisie). */
+function isDraftEditorRoute(info) {
+  if (info.name === "editor") return true;
+  if (info.name === "themes" && info.page !== "list") return true;
+  if (info.name === "developer" && info.presetPage) return true;
+  return false;
+}
+
+/** Second backdrop (confirm, URL d’image…) au-dessus de l’overlay. */
+function hasChildDialog() {
+  return Boolean(modalRoot && modalRoot.querySelectorAll(":scope > .modal-backdrop").length > 1);
+}
+
 /**
  * Retire les listeners des overlays. Le DOM n’est vidé que si `clearDom`.
  * `modal-open` n’est retiré que si `dropModalOpen` (destination accueil).
  * @param {{ clearDom?: boolean, dropModalOpen?: boolean }} [opts]
  */
 function teardownOverlays(opts = {}) {
-  const fns = [cleanupEditor, cleanupPage, cleanupSettings, cleanupThemes, cleanupDeveloper, cleanupPrint];
+  const fns = [cleanupEditor, cleanupPage, cleanupSettings, cleanupThemes, cleanupDeveloper, cleanupPrint, cleanupBackup];
   cleanupEditor = null;
   cleanupPage = null;
   cleanupSettings = null;
   cleanupThemes = null;
   cleanupDeveloper = null;
   cleanupPrint = null;
+  cleanupBackup = null;
   for (const fn of fns) {
     if (fn) fn();
   }
@@ -296,7 +317,6 @@ async function showOverlay(routeInfo) {
     cleanupSettings = renderSettingsModal(modalRoot, {
       onClose: overlayOnClose("settings"),
       onImport: () => importFile?.click(),
-      onExport: exportCards,
       onClearCards: handleClearCards,
       onDevReset: isDeveloperEnabled() ? handleDevReset : undefined,
       cardCount,
@@ -308,6 +328,15 @@ async function showOverlay(routeInfo) {
   if (routeInfo.name === "print") {
     cleanupPrint = renderPrintDialog(modalRoot, {
       onClose: overlayOnClose("print"),
+      toast,
+    });
+    focusTopModal();
+    return;
+  }
+
+  if (routeInfo.name === "backup") {
+    cleanupBackup = await renderBackupDialog(modalRoot, {
+      onClose: overlayOnClose("backup"),
       toast,
     });
     focusTopModal();
@@ -517,22 +546,6 @@ async function route() {
   shownRoute = routeInfo;
 }
 
-async function exportCards() {
-  try {
-    const cards = await loadCards();
-    if (!cards.length) {
-      toast("Aucune carte à sauvegarder", "error");
-      return;
-    }
-    const result = await exportBackup();
-    toast(
-      `Sauvegarde : ${result.cards} carte(s) + ${result.themes} thème(s)`
-    );
-  } catch (err) {
-    toast(err.message || "Sauvegarde impossible", "error");
-  }
-}
-
 async function handleImportFile() {
   const file = importFile?.files && importFile.files[0];
   if (importFile) importFile.value = "";
@@ -577,10 +590,16 @@ async function handleImportFile() {
     }
 
     const result = await importBackup(backup, mode);
-    const themeMsg = result.themesImported
-      ? ` · ${result.themesImported} thème(s)`
-      : "";
-    toast(`${result.imported} carte(s) importée(s) · total ${result.total}${themeMsg}`);
+    const bits = [];
+    if (result.imported) bits.push(`${result.imported} carte(s)`);
+    if (result.themesImported) bits.push(`${result.themesImported} thème(s)`);
+    if (result.settingsApplied) bits.push("apparence des cartes");
+    const suffix = result.imported ? ` · total ${result.total}` : "";
+    toast(
+      bits.length
+        ? `Import : ${bits.join(" · ")}${suffix}`
+        : "Import terminé"
+    );
     underlayStale = true;
     navigate("#", { replace: true });
   } catch (err) {
@@ -622,6 +641,14 @@ if (importFile) {
     handleImportFile();
   });
 }
+
+document.addEventListener("keydown", (e) => {
+  if (!isCollectionSaveShortcut(e)) return;
+  e.preventDefault();
+  const info = parseRoute();
+  if (info.name === "backup" || isDraftEditorRoute(info) || hasChildDialog()) return;
+  navigate("#backup");
+});
 
 document.addEventListener("click", (e) => {
   if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {

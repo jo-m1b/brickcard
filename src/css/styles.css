@@ -3265,6 +3265,23 @@ body.modal-open {
   background: var(--bg);
 }
 
+#backup-dialog-backdrop .settings-panel {
+  padding-bottom: 0;
+}
+
+#backup-dialog-backdrop .form-check-group {
+  margin-bottom: 0;
+}
+
+#backup-dialog-backdrop .modal-footer-start {
+  min-width: 0;
+  flex: 1;
+}
+
+#backup-dialog-backdrop .modal-footer-start .view-desc {
+  margin: 0;
+}
+
 .theme-mode-switch {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(0, 1fr));

@@ -1,26 +1,6 @@
 import { bindFormImage, formImageMarkup } from "../../form-image.js";
-import { IMAGE_LOAD_ERROR } from "../../storage.js";
+import { compressImage, compressThemeImage } from "../../storage.js";
 import { linkMarkup } from "../../link.js";
-
-/**
- * @param {File} file
- * @returns {Promise<string>}
- */
-function readFileAsDataUrl(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = String(reader.result || "");
-      if (!result) {
-        reject(new Error(IMAGE_LOAD_ERROR));
-        return;
-      }
-      resolve(result);
-    };
-    reader.onerror = () => reject(new Error(IMAGE_LOAD_ERROR));
-    reader.readAsDataURL(file);
-  });
-}
 
 /**
  * Galerie du champ image (design system — test uniquement).
@@ -100,7 +80,7 @@ export function renderDeveloperImages(host) {
   );
   if (emptyRoot) {
     const ctl = bindFormImage(emptyRoot, {
-      processFile: readFileAsDataUrl,
+      processFile: compressImage,
       dialogHost,
       downloadBasename: "demo-image",
     });
@@ -114,7 +94,7 @@ export function renderDeveloperImages(host) {
   let filledCtl = null;
   if (filledRoot) {
     filledCtl = bindFormImage(filledRoot, {
-      processFile: readFileAsDataUrl,
+      processFile: compressImage,
       dialogHost,
       downloadBasename: "demo-image-logo",
     });
@@ -128,7 +108,7 @@ export function renderDeveloperImages(host) {
   let themeCtl = null;
   if (themeRoot) {
     themeCtl = bindFormImage(themeRoot, {
-      processFile: readFileAsDataUrl,
+      processFile: compressThemeImage,
       dialogHost,
       previewBackground: "#e3000b",
       downloadBasename: "demo-theme-logo",
@@ -144,7 +124,7 @@ export function renderDeveloperImages(host) {
         return res.blob();
       })
       .then((blob) =>
-        readFileAsDataUrl(new File([blob], "logo.svg", { type: blob.type || "image/svg+xml" }))
+        compressThemeImage(new File([blob], "logo.svg", { type: blob.type || "image/svg+xml" }))
       )
       .then((dataUrl) => {
         filledCtl?.setValue({

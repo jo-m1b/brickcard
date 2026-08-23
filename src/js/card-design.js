@@ -265,6 +265,51 @@ export function refreshRenderedCardAccents() {
   });
 }
 
+/**
+ * Snapshot des 4 réglages « Apparence des cartes » (sauvegarde `.brickcard`).
+ * @returns {{
+ *   faceBorderMm: number,
+ *   cardRadiusMm: number,
+ *   cardImageRadiusMm: number,
+ *   defaultColor: string,
+ * }}
+ */
+export function getCardAppearanceSettings() {
+  return {
+    faceBorderMm: getFaceBorderMm(),
+    cardRadiusMm: getCardRadiusMm(),
+    cardImageRadiusMm: getCardImageRadiusMm(),
+    defaultColor: getConfiguredCardColor(),
+  };
+}
+
+/**
+ * Applique un snapshot d’apparence (import de sauvegarde). Champs absents ignorés.
+ * @param {Partial<{
+ *   faceBorderMm: unknown,
+ *   cardRadiusMm: unknown,
+ *   cardImageRadiusMm: unknown,
+ *   defaultColor: unknown,
+ * }>|null|undefined} raw
+ * @returns {ReturnType<typeof getCardAppearanceSettings>}
+ */
+export function applyCardAppearanceSettings(raw) {
+  if (!raw || typeof raw !== "object") return getCardAppearanceSettings();
+  if (Object.prototype.hasOwnProperty.call(raw, "faceBorderMm")) {
+    setFaceBorderMm(raw.faceBorderMm);
+  }
+  if (Object.prototype.hasOwnProperty.call(raw, "cardRadiusMm")) {
+    setCardRadiusMm(raw.cardRadiusMm);
+  }
+  if (Object.prototype.hasOwnProperty.call(raw, "cardImageRadiusMm")) {
+    setCardImageRadiusMm(raw.cardImageRadiusMm);
+  }
+  if (Object.prototype.hasOwnProperty.call(raw, "defaultColor")) {
+    setConfiguredCardColor(/** @type {string} */ (raw.defaultColor));
+  }
+  return getCardAppearanceSettings();
+}
+
 /** Applique bordure, arrondis et couleur stockés au démarrage. */
 export function initCardDesign() {
   applyFaceBorderMm(getFaceBorderMm());

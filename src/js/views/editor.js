@@ -154,6 +154,7 @@ export async function renderEditor(host, opts) {
                 ${formImageMarkup({
                   id: "card-image",
                   labelledBy: "card-photo-label",
+                  accept: "image/*,image/svg+xml,.svg",
                   dataUrl: existing?.imageDataUrl || "",
                   backgroundColor: storedImageBg,
                   zoom: existing?.imageZoom || 1,

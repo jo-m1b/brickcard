@@ -54,7 +54,6 @@ import {
  * @param {{
  *   onClose: () => void,
  *   onImport: () => void,
- *   onExport: () => void | Promise<void>,
  *   onClearCards?: () => void | Promise<void>,
  *   onDevReset?: () => void | Promise<void>,
  *   cardCount?: number,
@@ -62,7 +61,7 @@ import {
  * @returns {() => void} cleanup
  */
 export function renderSettingsModal(host, opts) {
-  const { onClose, onImport, onExport, onClearCards, onDevReset, cardCount = 0 } = opts;
+  const { onClose, onImport, onClearCards, onDevReset, cardCount = 0 } = opts;
   const showDevReset = Boolean(onDevReset);
   const currentTheme = getTheme();
   const faceBorderMm = getFaceBorderMm();
@@ -249,9 +248,7 @@ export function renderSettingsModal(host, opts) {
                   title: "Sauvegarder",
                   desc: "Enregistrer une sauvegarde de la collection de cartes, thèmes et paramètres",
                   icon: "download",
-                  tag: "button",
-                  id: "settings-export",
-                  disabled: cardCount === 0,
+                  href: "#backup",
                 },
                 {
                   title: "Thèmes",
@@ -456,10 +453,6 @@ export function renderSettingsModal(host, opts) {
 
   host.querySelector("#settings-import")?.addEventListener("click", () => {
     onImport();
-  });
-
-  host.querySelector("#settings-export")?.addEventListener("click", () => {
-    onExport();
   });
 
   const clearCardsBtn = host.querySelector("#settings-clear-cards");

@@ -9,10 +9,15 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Added
 
+- Sauvegarde de la collection : modale `#backup` (type complète / personnalisée, recap live, poids estimé)
+- Sauvegarde : raccourci Ctrl/Cmd+S pour ouvrir `#backup` (hors éditeur carte / thème / presets)
 - Espace développeur : galerie **Page de bienvenue** (`#developer/welcome`, `ri-home-smile-fill`) — modèle de l’accueil lorsque la collection est vide
 
 ### Changed
 
+- Sauvegarde `#backup` : le bouton **Sauvegarder** ferme la modale une fois le fichier lancé ; recap « Aucune carte à sauvegarder ! » (gras) si le bouton est désactivé
+- Images SVG (cartes et logos) : conservées en vectoriel au chargement (fichier / URL) pour pouvoir les retélécharger ; scripts, `foreignObject` et gestionnaires `on*` retirés (y compris à l’import)
+- Sauvegarde de la collection : modale `#backup` (complète ou personnalisée) avant le téléchargement ; version du fichier = version de l’app ; noms `brickcard-backup-…` ; import des anciens fichiers `version` 1–3 et des réglages d’apparence s’ils sont présents
 - Titre de document : slogan par défaut (sans version) ; overlays `{modale} | {section si besoin} | {défaut}` ; nom de fichier PDF inchangé pendant l’impression
 - Service worker : `service-worker.js` à la racine du site (scope `/` ; GitHub Pages ne permet pas de le placer dans `js/`)
 

@@ -1,10 +1,12 @@
 /**
- * Persistance IndexedDB (cartes + thèmes personnalisés) + export/import `.brickcard`.
+ * Persistance IndexedDB (cartes + thèmes personnalisés) + import `.brickcard`.
  * Les thèmes par défaut viennent du JSON, pas d’IndexedDB.
+ * Format / export : `backup.js`.
  */
 
 import { getPresetThemes, getPresetTheme, parseHexColor, clearPresetCache, clampLogoZoom, roundCropCoord } from "./themes-data.js";
-import { downloadBlob } from "./card-export.js";
+import { applyCardAppearanceSettings } from "./card-design.js";
+import { parseBrickcardBackup } from "./backup.js";
 import { APP_ID } from "./version.js?v=0.7.5";
 
 const DB_NAME_BASE = APP_ID;
@@ -12,9 +14,7 @@ const DB_GEN_KEY = `${APP_ID}:db-gen`;
 const DB_VERSION = 2;
 const STORE_CARDS = "cards";
 const STORE_THEMES = "themes";
-const EXPORT_VERSION = 3;
-const BACKUP_EXT = ".brickcard";
-const BACKUP_INVALID = "Ce fichier n’est pas une sauvegarde Brickcard valide.";
+export { isBrickcardBackupFilename, parseBrickcardBackup } from "./backup.js";
 
 /**
  * @typedef {Object} Card
@@ -25,7 +25,7 @@ const BACKUP_INVALID = "Ce fichier n’est pas une sauvegarde Brickcard valide."
  * @property {number|null} pieceCount Nombre de pièces
  * @property {number|null} figurineCount Nombre de figurines (optionnel)
  * @property {number|null} releaseYear Année de sortie (optionnel)
- * @property {string} imageDataUrl Photo (data URL JPEG/PNG)
+ * @property {string} imageDataUrl Photo (data URL JPEG/PNG/SVG)
  * @property {string} imageBackgroundColor Fond derrière l’image (hex) ; vide = blanc à l’affichage
  * @property {number} imageZoom Zoom de cadrage photo (1 = cover / 100 % ; < 1 = dézoom)
  * @property {number} imageOffsetX Décalage horizontal photo (fraction)
@@ -396,7 +396,9 @@ function normalizeCard(c) {
     pieceCount,
     figurineCount,
     releaseYear,
-    imageDataUrl: String(c.imageDataUrl ?? c.setImageDataUrl ?? c.image ?? ""),
+    imageDataUrl: sanitizeSvgDataUrl(
+      String(c.imageDataUrl ?? c.setImageDataUrl ?? c.image ?? "")
+    ),
     imageBackgroundColor: normalizeImageBackground(c.imageBackgroundColor),
     imageZoom: roundCropCoord(c.imageZoom ?? c.zoom) || 1,
     imageOffsetX: roundCropCoord(c.imageOffsetX ?? c.offsetX),
@@ -411,7 +413,7 @@ function normalizeTheme(t) {
     id: typeof t.id === "string" && t.id ? t.id : createId(),
     name: String(t.name ?? t.themeName ?? "").trim() || "THÈME",
     color: parseHexColor(t.color ?? t.accentColor),
-    logoDataUrl: String(t.logoDataUrl ?? t.image ?? ""),
+    logoDataUrl: sanitizeSvgDataUrl(String(t.logoDataUrl ?? t.image ?? "")),
     logoZoom: clampLogoZoom(t.logoZoom),
     logoOffsetX: roundCropCoord(t.logoOffsetX),
     logoOffsetY: roundCropCoord(t.logoOffsetY),
@@ -545,7 +547,7 @@ export async function getCard(id) {
 }
 
 /** @returns {Promise<LegoTheme[]>} thèmes personnalisés IndexedDB (sans les thèmes par défaut) */
-async function loadCustomThemes() {
+export async function loadCustomThemes() {
   await ready();
   const db = await openDb();
   const rows = await reqToPromise(
@@ -648,77 +650,10 @@ export async function deleteTheme(id) {
   await txDone(tx);
 }
 
-/** @param {string} [name] */
-export function isBrickcardBackupFilename(name) {
-  return String(name || "").toLowerCase().endsWith(BACKUP_EXT);
-}
-
-/**
- * @param {string|object} input
- * @returns {{ version: number, app: string, cards: unknown[], themes: unknown[] }}
- */
-export function parseBrickcardBackup(input) {
-  let data;
-  if (typeof input === "string") {
-    try {
-      data = JSON.parse(input);
-    } catch {
-      throw new Error(BACKUP_INVALID);
-    }
-  } else {
-    data = input;
-  }
-  if (!data || typeof data !== "object" || Array.isArray(data)) {
-    throw new Error(BACKUP_INVALID);
-  }
-  const backup = /** @type {Record<string, unknown>} */ (data);
-  if (backup.app !== APP_ID) {
-    throw new Error(BACKUP_INVALID);
-  }
-  if (!Number.isInteger(backup.version) || /** @type {number} */ (backup.version) < 1) {
-    throw new Error(BACKUP_INVALID);
-  }
-  if (/** @type {number} */ (backup.version) > EXPORT_VERSION) {
-    throw new Error(
-      `Cette sauvegarde (v${backup.version}) n’est pas compatible avec cette version de l’app.`
-    );
-  }
-  if (!Array.isArray(backup.cards) || !Array.isArray(backup.themes)) {
-    throw new Error(BACKUP_INVALID);
-  }
-  if (!backup.cards.some(isValidCard)) {
-    throw new Error("Aucune carte valide trouvée dans le fichier.");
-  }
-  return {
-    version: /** @type {number} */ (backup.version),
-    app: /** @type {string} */ (backup.app),
-    cards: backup.cards,
-    themes: backup.themes,
-  };
-}
-
-/** @returns {Promise<{ cards: number, themes: number }>} */
-export async function exportBackup() {
-  const [cards, themes] = await Promise.all([loadCards(), loadCustomThemes()]);
-  const payload = {
-    version: EXPORT_VERSION,
-    app: APP_ID,
-    exportedAt: new Date().toISOString(),
-    cards,
-    themes,
-  };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], {
-    type: "application/json",
-  });
-  const stamp = new Date().toISOString().slice(0, 10);
-  downloadBlob(blob, `brickcard-export-${stamp}${BACKUP_EXT}`);
-  return { cards: cards.length, themes: themes.length };
-}
-
 /**
  * @param {string|object} input
  * @param {"merge"|"replace"} mode
- * @returns {Promise<{ imported: number, total: number, themesImported: number }>}
+ * @returns {Promise<{ imported: number, total: number, themesImported: number, settingsApplied: boolean }>}
  */
 export async function importBackup(input, mode = "merge") {
   const data = parseBrickcardBackup(input);
@@ -727,15 +662,12 @@ export async function importBackup(input, mode = "merge") {
 
   const valid = incoming.filter(isValidCard).map((c) => normalizeCard(c));
 
-  if (!valid.length) {
-    throw new Error("Aucune carte valide trouvée dans le fichier.");
-  }
-
   /** @type {Card[]} */
   let result;
   if (mode === "replace") {
     result = valid;
-  } else {
+    await saveCards(result);
+  } else if (valid.length) {
     const map = new Map((await loadCards()).map((c) => [c.id, c]));
     for (const card of valid) {
       map.set(card.id, card);
@@ -743,36 +675,166 @@ export async function importBackup(input, mode = "merge") {
     result = Array.from(map.values()).sort((a, b) =>
       String(b.updatedAt).localeCompare(String(a.updatedAt))
     );
+    await saveCards(result);
+  } else {
+    result = await loadCards();
   }
 
-  await saveCards(result);
+  const presetIds = await presetIdSet();
+  const validThemes = incomingThemes
+    .filter(isValidTheme)
+    .map(normalizeTheme)
+    .filter((t) => !t.isBuiltin && !presetIds.has(t.id))
+    .map((t) => ({ ...t, isBuiltin: false }));
 
   let themesImported = 0;
-  if (incomingThemes.length) {
-    const presetIds = await presetIdSet();
-    const validThemes = incomingThemes
-      .filter(isValidTheme)
-      .map(normalizeTheme)
-      .filter((t) => !t.isBuiltin && !presetIds.has(t.id))
-      .map((t) => ({ ...t, isBuiltin: false }));
-    if (mode === "replace") {
-      await ready();
-      const db = await openDb();
-      const tx = db.transaction(STORE_THEMES, "readwrite");
-      const store = tx.objectStore(STORE_THEMES);
-      store.clear();
-      for (const theme of validThemes) store.put(theme);
-      await txDone(tx);
-      themesImported = validThemes.length;
-    } else {
-      for (const theme of validThemes) {
-        await upsertTheme(theme);
-        themesImported += 1;
-      }
+  if (mode === "replace") {
+    await ready();
+    const db = await openDb();
+    const tx = db.transaction(STORE_THEMES, "readwrite");
+    const store = tx.objectStore(STORE_THEMES);
+    store.clear();
+    for (const theme of validThemes) store.put(theme);
+    await txDone(tx);
+    themesImported = validThemes.length;
+  } else {
+    for (const theme of validThemes) {
+      await upsertTheme(theme);
+      themesImported += 1;
     }
   }
 
-  return { imported: valid.length, total: result.length, themesImported };
+  const settingsApplied = Boolean(data.settings?.cardAppearance);
+  if (settingsApplied) {
+    applyCardAppearanceSettings(data.settings.cardAppearance);
+  }
+
+  return {
+    imported: valid.length,
+    total: result.length,
+    themesImported,
+    settingsApplied,
+  };
+}
+
+/** @param {string} [type] */
+function isSvgMime(type) {
+  return /svg/i.test(String(type || ""));
+}
+
+/** @param {File|Blob} file */
+function isSvgNamedFile(file) {
+  if (isSvgMime(file?.type)) return true;
+  const name = file && "name" in file ? String(file.name || "") : "";
+  return /\.svg$/i.test(name);
+}
+
+/** @param {string} text */
+function textLooksLikeSvg(text) {
+  return /<svg[\s>/]/i.test(String(text || ""));
+}
+
+/** @param {Blob} blob */
+async function blobLooksLikeSvg(blob) {
+  try {
+    return textLooksLikeSvg(await blob.slice(0, 2048).text());
+  } catch {
+    return false;
+  }
+}
+
+/** @param {File|Blob} file */
+async function fileLooksLikeSvg(file) {
+  if (isSvgNamedFile(file)) return true;
+  return blobLooksLikeSvg(file);
+}
+
+/**
+ * Retire scripts, gestionnaires d’événements et hôtes HTML d’un SVG
+ * (défense en profondeur — un `<img>` n’exécute en général pas les scripts).
+ * @param {string} text
+ * @returns {string}
+ */
+function sanitizeSvgMarkup(text) {
+  let s = String(text || "");
+  s = s.replace(/<[a-zA-Z0-9_-]*:?script\b[^>]*>[\s\S]*?<\/[a-zA-Z0-9_-]*:?script>/gi, "");
+  s = s.replace(/<[a-zA-Z0-9_-]*:?script\b[^>]*\/>/gi, "");
+  s = s.replace(/<foreignObject\b[^>]*>[\s\S]*?<\/foreignObject>/gi, "");
+  s = s.replace(/<(iframe|embed|object)\b[^>]*>[\s\S]*?<\/\1>/gi, "");
+  s = s.replace(/<(iframe|embed|object)\b[^>]*\/>/gi, "");
+  s = s.replace(/\s+on[a-zA-Z]+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/g, "");
+  s = s.replace(
+    /(\b(?:href|src|xlink:href)\s*=\s*")\s*(?:javascript:|data:\s*text\/html)[^"]*/gi,
+    "$1"
+  );
+  s = s.replace(
+    /(\b(?:href|src|xlink:href)\s*=\s*')\s*(?:javascript:|data:\s*text\/html)[^']*/gi,
+    "$1"
+  );
+  return s;
+}
+
+/** @param {string} text */
+function encodeSvgMarkup(text) {
+  const sanitized = sanitizeSvgMarkup(text);
+  if (!sanitized.trim() || !textLooksLikeSvg(sanitized)) {
+    throw new Error(IMAGE_LOAD_ERROR);
+  }
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(sanitized)}`;
+}
+
+/** @param {string} dataUrl */
+function decodeSvgDataUrl(dataUrl) {
+  const raw = String(dataUrl || "").trim();
+  const comma = raw.indexOf(",");
+  if (comma < 0) return "";
+  const header = raw.slice(5, comma);
+  if (!/^image\/svg\+xml/i.test(header)) return "";
+  const payload = raw.slice(comma + 1);
+  try {
+    if (/;base64/i.test(header)) {
+      const bin = atob(payload.replace(/\s/g, ""));
+      const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
+      return new TextDecoder("utf-8").decode(bytes);
+    }
+    return decodeURIComponent(payload);
+  } catch {
+    return "";
+  }
+}
+
+/**
+ * Si la data URL est un SVG, retire les scripts et ré-encode.
+ * Sinon laisse la valeur inchangée. SVG illisible / uniquement script → vide.
+ * @param {string} dataUrl
+ * @returns {string}
+ */
+function sanitizeSvgDataUrl(dataUrl) {
+  const raw = String(dataUrl || "");
+  if (!/^data:image\/svg\+xml/i.test(raw.trim())) return raw;
+  const decoded = decodeSvgDataUrl(raw);
+  if (!decoded) return raw;
+  try {
+    return encodeSvgMarkup(decoded);
+  } catch {
+    return "";
+  }
+}
+
+/** @param {File|Blob} file @returns {Promise<string>} */
+function encodeSvgFile(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        resolve(encodeSvgMarkup(String(reader.result || "")));
+      } catch (err) {
+        reject(err instanceof Error ? err : new Error(IMAGE_LOAD_ERROR));
+      }
+    };
+    reader.onerror = () => reject(new Error(IMAGE_LOAD_ERROR));
+    reader.readAsText(file);
+  });
 }
 
 /**
@@ -812,12 +874,15 @@ export async function fetchImageAsFile(urlString) {
 
   const blob = await res.blob();
   const pathName = decodeURIComponent(url.pathname.split("/").pop() || "image");
-  const looksSvg = /\.svg$/i.test(pathName) || /svg/i.test(blob.type);
-  let type = blob.type || "";
+  const headerType = (res.headers.get("content-type") || "").split(";")[0].trim();
+  let type = blob.type || headerType || "";
+  const looksSvg =
+    /\.svg$/i.test(pathName) || isSvgMime(type) || (await blobLooksLikeSvg(blob));
 
-  if (!type || type === "application/octet-stream") {
-    if (looksSvg) type = "image/svg+xml";
-    else if (/\.webp$/i.test(pathName)) type = "image/webp";
+  if (looksSvg) {
+    type = "image/svg+xml";
+  } else if (!type || type === "application/octet-stream") {
+    if (/\.webp$/i.test(pathName)) type = "image/webp";
     else if (/\.png$/i.test(pathName)) type = "image/png";
     else if (/\.jpe?g$/i.test(pathName)) type = "image/jpeg";
     else if (/\.gif$/i.test(pathName)) type = "image/gif";
@@ -833,17 +898,22 @@ export async function fetchImageAsFile(urlString) {
 }
 
 /**
- * Compresse une image File/Blob en JPEG data URL.
+ * Compresse une image File/Blob en data URL.
+ * SVG : conservé en vectoriel (scripts retirés). Rasters : JPEG, ou PNG si alpha.
  * @param {File|Blob} file
  * @param {{ maxSize?: number, quality?: number }} [opts]
  * @returns {Promise<string>}
  */
-export function compressImage(file, opts = {}) {
+export async function compressImage(file, opts = {}) {
+  if (await fileLooksLikeSvg(file)) {
+    return encodeSvgFile(file);
+  }
+
   const maxSize = opts.maxSize ?? 1600;
   const quality = opts.quality ?? 0.88;
   const keepAlpha =
-    /image\/(png|webp|svg\+xml)/i.test(file.type || "") ||
-    /\.(png|webp|svg)$/i.test(file.name || "");
+    /image\/(png|webp)/i.test(file.type || "") ||
+    /\.(png|webp)$/i.test(file.name || "");
 
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file);
@@ -904,28 +974,14 @@ export function compressImage(file, opts = {}) {
 }
 
 /**
- * Logo de thème : SVG conservé en vectoriel ; PNG (et autres rasters) compressés en PNG transparent.
+ * Logo de thème : SVG conservé en vectoriel (scripts retirés) ;
+ * PNG (et autres rasters) compressés en PNG transparent.
  * @param {File} file
  * @returns {Promise<string>} data URL
  */
-export function compressThemeImage(file) {
-  const isSvg =
-    file.type === "image/svg+xml" || /\.svg$/i.test(file.name || "");
-
-  if (isSvg) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const text = String(reader.result || "");
-        if (!text.trim()) {
-          reject(new Error(IMAGE_LOAD_ERROR));
-          return;
-        }
-        resolve(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(text)}`);
-      };
-      reader.onerror = () => reject(new Error(IMAGE_LOAD_ERROR));
-      reader.readAsText(file);
-    });
+export async function compressThemeImage(file) {
+  if (await fileLooksLikeSvg(file)) {
+    return encodeSvgFile(file);
   }
 
   const maxSize = 400;
