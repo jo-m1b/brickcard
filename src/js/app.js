@@ -5,13 +5,14 @@ import { initListLayout } from "./list-layout.js";
 import { enableDeveloper, isDeveloperEnabled } from "./developer-access.js";
 import { APP_ID, APP_VERSION } from "./version.js?v=0.8.1";
 import { setAppDocumentTitle } from "./document-title.js";
+import { toast } from "./toast.js";
 import { renderEditor } from "./views/editor.js";
-import { renderList, prepareListAfterCardSave } from "./views/list.js";
-import { renderThemesModal, prepareThemesAfterThemeSave } from "./views/themes.js";
+import { renderList, prepareListAfterCardCreate, patchListCard, removeListCard } from "./views/list.js";
+import { renderThemesModal, prepareThemesAfterThemeCreate, refreshThemesListAfterCreate, patchThemeInList, removeThemeFromList } from "./views/themes.js";
 import { renderThemeEditor } from "./views/theme-editor.js";
 import { renderPageModal } from "./views/page.js";
 import { renderSettingsModal } from "./views/settings.js";
-import { renderPrintDialog } from "./print-dialog.js";
+import { isPrintShortcut, renderPrintDialog } from "./print-dialog.js";
 import { isCollectionSaveShortcut, renderBackupDialog } from "./backup-dialog.js";
 import { openDemoBackupDialog, renderImportDialog } from "./import-dialog.js";
 import { renderDeveloperModal } from "./views/developer/modal.js";
@@ -45,6 +46,9 @@ let cleanupSettings = null;
 let cleanupThemes = null;
 
 /** @type {null | (() => void)} */
+let cleanupThemeEditor = null;
+
+/** @type {null | (() => void)} */
 let cleanupDeveloper = null;
 
 /** @type {null | (() => void)} */
@@ -69,15 +73,6 @@ let routeToken = 0;
 
 /** Ignore le hashchange qui suit un popstate (Précédent / Suivant). */
 let ignoreHashchange = false;
-
-function toast(message, type = "info") {
-  document.querySelectorAll(".toast").forEach((t) => t.remove());
-  const el = document.createElement("div");
-  el.className = "toast" + (type === "error" ? " is-error" : "");
-  el.textContent = message;
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 4200);
-}
 
 /**
  * @param {string} hash
@@ -275,10 +270,11 @@ function hasChildDialog() {
  * @param {{ clearDom?: boolean, dropModalOpen?: boolean }} [opts]
  */
 function teardownOverlays(opts = {}) {
-  const fns = [cleanupEditor, cleanupPage, cleanupSettings, cleanupThemes, cleanupDeveloper, cleanupPrint, cleanupBackup, cleanupImport];
+  const fns = [cleanupEditor, cleanupPage, cleanupSettings, cleanupThemeEditor, cleanupThemes, cleanupDeveloper, cleanupPrint, cleanupBackup, cleanupImport];
   cleanupEditor = null;
   cleanupPage = null;
   cleanupSettings = null;
+  cleanupThemeEditor = null;
   cleanupThemes = null;
   cleanupDeveloper = null;
   cleanupPrint = null;
@@ -364,39 +360,72 @@ async function showOverlay(routeInfo) {
 
   if (routeInfo.name === "themes") {
     if (routeInfo.page === "list") {
-      cleanupThemes = await renderThemesModal(modalRoot, {
-        onClose: overlayOnClose("themes"),
-        onCreate: () => navigate("#themes/new"),
-        onEdit: (id) => navigate(`#themes/edit/${encodeURIComponent(id)}`),
-      });
-      focusTopModal();
+      if (cleanupThemeEditor) {
+        cleanupThemeEditor();
+        cleanupThemeEditor = null;
+      }
+      if (!cleanupThemes) {
+        cleanupThemes = await renderThemesModal(modalRoot, {
+          onClose: overlayOnClose("themes"),
+          onCreate: () => navigate("#themes/new"),
+          onEdit: (id) => navigate(`#themes/edit/${encodeURIComponent(id)}`),
+        });
+        focusTopModal();
+      } else {
+        setAppDocumentTitle("Thèmes");
+        focusTopModal({ resetScroll: false });
+      }
       return;
     }
 
-    cleanupThemes = await renderThemeEditor(modalRoot, {
+    if (cleanupThemeEditor) {
+      cleanupThemeEditor();
+      cleanupThemeEditor = null;
+    }
+    if (!cleanupThemes) {
+      modalRoot.innerHTML = "";
+    }
+    cleanupThemeEditor = await renderThemeEditor(modalRoot, {
       themeId: routeInfo.page === "edit" ? routeInfo.themeId : null,
       onClose: () => {
         if (parseRoute().name === "themes") {
           navigate("#themes", { replace: true });
         }
       },
-      onSaved: () => {
-        toast("Thème enregistré");
-        prepareThemesAfterThemeSave();
+      onSaved: (name, meta) => {
+        toast({
+          type: "success",
+          title: "Thème enregistré",
+          message: name,
+          icon: "palette",
+        });
         underlayStale = true;
+        if (meta?.isNew) {
+          if (!refreshThemesListAfterCreate(meta.theme)) {
+            prepareThemesAfterThemeCreate();
+          }
+        } else if (!patchThemeInList(meta?.theme)) {
+          /* liste absente : #themes la remontera */
+        }
         if (parseRoute().name === "themes") {
           navigate("#themes", { replace: true });
         }
       },
-      onDeleted: () => {
-        toast("Thème supprimé");
+      onDeleted: (name, themeId) => {
+        toast({
+          type: "success",
+          title: "Thème supprimé",
+          message: name,
+          icon: "delete-bin-2",
+        });
         underlayStale = true;
+        removeThemeFromList(themeId);
         if (parseRoute().name === "themes") {
           navigate("#themes", { replace: true });
         }
       },
     });
-    if (!cleanupThemes) {
+    if (!cleanupThemeEditor) {
       navigate("#themes", { replace: true });
       return;
     }
@@ -436,6 +465,7 @@ async function showOverlay(routeInfo) {
       }
       enableDeveloper();
     }
+    const staying = Boolean(modalRoot.querySelector("#developer-modal-backdrop"));
     cleanupDeveloper = renderDeveloperModal(modalRoot, {
       page: routeInfo.page,
       presetPage: routeInfo.presetPage,
@@ -443,24 +473,30 @@ async function showOverlay(routeInfo) {
       onClose: overlayOnClose("developer"),
       onNavigate: navigate,
     });
-    focusTopModal();
+    focusTopModal({ resetScroll: !staying });
     return;
   }
 
   if (routeInfo.name === "editor") {
     cleanupEditor = await renderEditor(modalRoot, {
       cardId: routeInfo.cardId,
-      toast,
-      onSaved: () => {
-        toast("Carte enregistrée");
-        prepareListAfterCardSave();
-        underlayStale = true;
+      onSaved: (subject, meta) => {
+        toastCardSavedOrDeleted("saved", subject);
+        if (meta?.isNew) {
+          prepareListAfterCardCreate();
+          underlayStale = true;
+        } else if (!patchListCard(meta?.card)) {
+          underlayStale = true;
+        }
         if (parseRoute().name === "editor") navigate("#", { replace: true });
       },
       onCancel: overlayOnClose("editor"),
-      onDeleted: () => {
-        toast("Carte supprimée");
-        underlayStale = true;
+      onDeleted: (subject, cardId) => {
+        toastCardSavedOrDeleted("deleted", subject);
+        const result = removeListCard(cardId);
+        if (!result || result.empty) {
+          underlayStale = true;
+        }
         if (parseRoute().name === "editor") navigate("#", { replace: true });
       },
     });
@@ -554,7 +590,6 @@ async function route() {
   }
 
   if (prev?.name === "themes" && routeInfo.name === "themes") {
-    teardownOverlays({ clearDom: false, dropModalOpen: false });
     document.body.classList.add("modal-open");
     await showOverlay(routeInfo);
     if (token !== routeToken) return;
@@ -577,11 +612,30 @@ async function route() {
   shownRoute = routeInfo;
 }
 
+/**
+ * @param {"saved"|"deleted"} kind
+ * @param {string} [subject]
+ */
+function toastCardSavedOrDeleted(kind, subject) {
+  const label = kind === "saved" ? "Carte enregistrée" : "Carte supprimée";
+  const trimmed = String(subject || "").trim();
+  toast({
+    type: "success",
+    title: trimmed ? label : false,
+    message: trimmed || label,
+    ...(kind === "deleted" ? { icon: "delete-bin-2" } : {}),
+  });
+}
+
 async function handleClearCards() {
   try {
     await deleteAllCards();
     clearPrintQty();
-    toast("Toutes les cartes ont été supprimées");
+    toast({
+      type: "success",
+      message: "Toutes les cartes ont été supprimées, votre collection est vide",
+      icon: "delete-bin-2",
+    });
     underlayStale = true;
     navigate("#", { replace: true });
   } catch (err) {
@@ -607,18 +661,32 @@ btnNew.addEventListener("click", () => navigate("#new-card"));
 if (btnSettings) btnSettings.addEventListener("click", () => navigate("#settings"));
 
 document.addEventListener("keydown", (e) => {
-  if (!isCollectionSaveShortcut(e)) return;
+  if (isCollectionSaveShortcut(e)) {
+    e.preventDefault();
+    const info = parseRoute();
+    if (
+      info.name === "backup" ||
+      info.name === "import" ||
+      isDraftEditorRoute(info) ||
+      hasChildDialog()
+    ) {
+      return;
+    }
+    navigate("#backup");
+    return;
+  }
+  if (!isPrintShortcut(e)) return;
   e.preventDefault();
   const info = parseRoute();
   if (
-    info.name === "backup" ||
+    info.name === "print" ||
     info.name === "import" ||
     isDraftEditorRoute(info) ||
     hasChildDialog()
   ) {
     return;
   }
-  navigate("#backup");
+  navigate("#print");
 });
 
 document.addEventListener("click", (e) => {

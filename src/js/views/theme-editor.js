@@ -1,11 +1,11 @@
 import { ICON_ADD, ICON_CLOSE, ICON_DELETE_BIN_2, ICON_PENCIL, ICON_SAVE, modalTitleMarkup } from "../icons.js";
 import { bindFormColor, formColorMarkup } from "../form-color.js";
 import { bindFormImage, formImageMarkup } from "../form-image.js";
-import { slugifyFilename } from "../card-export.js";
+import { formatThemeLogoBasename } from "../card-export.js";
 import {
   upsertTheme,
   deleteTheme,
-  compressThemeImage,
+  compressImage,
   createId,
   getTheme,
 } from "../storage.js";
@@ -15,17 +15,14 @@ import { resolveCardAccent } from "../card-design.js";
 import { confirmDialog } from "../confirm-dialog.js";
 import { setAppDocumentTitle } from "../document-title.js";
 
-const THEME_LOGO_ACCEPT =
-  "image/svg+xml,image/png,image/webp,.svg,.png,.webp";
-
 /**
  * Modale d’édition d’un thème personnalisé (`#themes/new`, `#themes/edit/:id`).
  * @param {HTMLElement} host
  * @param {{
  *   themeId?: string|null,
  *   onClose: () => void,
- *   onSaved: () => void,
- *   onDeleted?: () => void,
+ *   onSaved: (name: string, meta: { isNew: boolean, theme: import("../themes-data.js").LegoTheme }) => void,
+ *   onDeleted?: (name: string, themeId: string) => void,
  * }} opts
  * @returns {Promise<(() => void)|null>} cleanup, ou null si id invalide / thème par défaut
  */
@@ -38,7 +35,7 @@ export async function renderThemeEditor(host, opts) {
   document.body.classList.add("modal-open");
 
   /** @type {{
-   *   id: string|null,
+   *   id: string,
    *   name: string,
    *   color: string,
    *   secondaryColor: string,
@@ -48,7 +45,7 @@ export async function renderThemeEditor(host, opts) {
    *   logoOffsetY: number,
    * }} */
   const draft = {
-    id: existing?.id || null,
+    id: existing?.id || createId(),
     name: existing?.name || "",
     color: existing?.color || "",
     secondaryColor: existing?.secondaryColor || "",
@@ -69,7 +66,8 @@ export async function renderThemeEditor(host, opts) {
     return contrastText(themeCropBackground());
   }
 
-  host.innerHTML = `
+  const wrap = document.createElement("div");
+  wrap.innerHTML = `
     <div class="modal-backdrop" id="theme-editor-backdrop" role="presentation">
       <div class="modal modal--lg" role="dialog" aria-modal="true" aria-labelledby="theme-editor-title">
         <div class="modal-header">
@@ -122,7 +120,6 @@ export async function renderThemeEditor(host, opts) {
                 ${formImageMarkup({
                   id: "theme-logo",
                   labelledBy: "theme-logo-label",
-                  accept: THEME_LOGO_ACCEPT,
                   dataUrl: draft.logoDataUrl,
                   zoom: draft.logoZoom,
                   offsetX: draft.logoOffsetX,
@@ -151,12 +148,13 @@ export async function renderThemeEditor(host, opts) {
         </div>
       </div>
     </div>
-  `;
+  `.trim();
+  const backdrop = /** @type {HTMLElement} */ (wrap.firstElementChild);
+  host.appendChild(backdrop);
 
   setAppDocumentTitle(dialogTitle);
 
-  const q = (sel) => host.querySelector(sel);
-  const backdrop = q("#theme-editor-backdrop");
+  const q = (sel) => backdrop.querySelector(sel);
   const nameInput = q("#theme-name");
   const nameError = q("#theme-name-error");
   const errEl = q("#theme-error");
@@ -235,14 +233,15 @@ export async function renderThemeEditor(host, opts) {
 
   if (logoRoot) {
     logoField = bindFormImage(logoRoot, {
-      processFile: compressThemeImage,
+      processFile: compressImage,
       dialogHost: host,
       previewBackground: colorDisplay,
       fit: "logo",
-      downloadBasename: () => {
-        const name = slugifyFilename(nameInput.value);
-        return name !== "brickcard" ? `theme-logo-${name}` : "theme-logo";
-      },
+      downloadBasename: () =>
+        formatThemeLogoBasename({
+          name: nameInput.value,
+          themeId: draft.id,
+        }),
       onChange(value) {
         draft.logoDataUrl = value.dataUrl || "";
         if (draft.logoDataUrl) {
@@ -304,8 +303,8 @@ export async function renderThemeEditor(host, opts) {
     setNameError("");
     errEl.textContent = "";
     try {
-      await upsertTheme({
-        id: draft.id || createId(),
+      const saved = await upsertTheme({
+        id: draft.id,
         name,
         color: draft.color,
         secondaryColor: draft.secondaryColor,
@@ -315,7 +314,7 @@ export async function renderThemeEditor(host, opts) {
         logoOffsetY: draft.logoOffsetY,
         isBuiltin: false,
       });
-      onSaved();
+      onSaved(name, { isNew: !isEdit, theme: saved });
     } catch (ex) {
       errEl.textContent = ex.message || "Enregistrement impossible.";
     }
@@ -325,7 +324,7 @@ export async function renderThemeEditor(host, opts) {
   if (deleteBtn) {
     deleteBtn.onclick = async () => {
       const ok = await confirmDialog(host, {
-        title: `Supprimer le thème "${existing.name}" ?`,
+        title: `Supprimer le thème « ${existing.name} » ?`,
         icon: "delete-bin-2",
         message:
           "Attention, la suppression est définitive et ne pourra pas être annulée ! Souhaitez-vous continuer ?",
@@ -335,7 +334,7 @@ export async function renderThemeEditor(host, opts) {
       if (!ok) return;
       try {
         await deleteTheme(existing.id);
-        onDeleted?.();
+        onDeleted?.(existing.name, existing.id);
       } catch (ex) {
         errEl.textContent = ex.message || "Suppression impossible.";
       }
@@ -348,5 +347,6 @@ export async function renderThemeEditor(host, opts) {
     logoField?.destroy();
     window.removeEventListener("keydown", onKey);
     window.removeEventListener("resize", syncPreview);
+    backdrop.remove();
   };
 }

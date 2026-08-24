@@ -27,12 +27,42 @@ function includesCI(hay, needle) {
 
 let rememberedQuery = "";
 
-/** @type {null | (() => void)} */
-let refreshMountedPresetList = null;
+/** @type {((theme: import("../../preset-draft.js").PresetDraftTheme) => boolean) | null} */
+let mountedRefreshPresetAfterCreate = null;
+/** @type {((theme: import("../../preset-draft.js").PresetDraftTheme, previousId?: string) => boolean) | null} */
+let mountedPatchPresetInList = null;
+/** @type {((id: string) => boolean) | null} */
+let mountedRemovePresetFromList = null;
 
-/** Recharge la liste si elle est affichée (après enregistrement / suppression dans l’éditeur). */
-export function preparePresetDraftAfterSave() {
-  refreshMountedPresetList?.();
+/**
+ * Ajoute un thème au brouillon affiché : recherche vidée, tri date desc, scroll haut.
+ * @param {import("../../preset-draft.js").PresetDraftTheme} theme
+ * @returns {boolean}
+ */
+export function refreshPresetDraftAfterCreate(theme) {
+  if (!mountedRefreshPresetAfterCreate || !theme?.id) return false;
+  return mountedRefreshPresetAfterCreate(theme);
+}
+
+/**
+ * Met à jour la mini-carte d’un thème du brouillon, sans reconstruire la grille.
+ * @param {import("../../preset-draft.js").PresetDraftTheme} theme
+ * @param {string} [previousId]
+ * @returns {boolean}
+ */
+export function patchPresetDraftInList(theme, previousId) {
+  if (!mountedPatchPresetInList || !theme?.id) return false;
+  return mountedPatchPresetInList(theme, previousId);
+}
+
+/**
+ * Retire un thème du brouillon affiché, sans reconstruire la grille.
+ * @param {string} id
+ * @returns {boolean}
+ */
+export function removePresetDraftFromList(id) {
+  if (!mountedRemovePresetFromList || !id) return false;
+  return mountedRemovePresetFromList(id);
 }
 
 function dialogHost() {
@@ -164,20 +194,6 @@ export function renderDeveloperThemePresets(host, opts) {
     return includesCI(theme.name, needle) || includesCI(theme.id, needle);
   }
 
-  /**
-   * @param {import("../../preset-draft.js").PresetDraftTheme[]} list
-   * @returns {import("../../preset-draft.js").PresetDraftTheme[]}
-   */
-  function sorted(list) {
-    return list.slice().sort((a, b) => {
-      const cmp = String(a.name || "").localeCompare(String(b.name || ""), "fr", {
-        sensitivity: "base",
-      });
-      if (cmp !== 0) return cmp;
-      return String(a.id || "").localeCompare(String(b.id || ""), "en");
-    });
-  }
-
   function updateSearchCount(shown) {
     const total = themes.length;
     const query = searchQuery();
@@ -191,48 +207,28 @@ export function renderDeveloperThemePresets(host, opts) {
       : `${total} thèmes`;
   }
 
-  function applyTileLogoCrops() {
-    host.querySelectorAll(".theme-tile-logo-wrap--crop").forEach((wrap) => {
-      if (!(wrap instanceof HTMLElement)) return;
-      const img = wrap.querySelector("img.theme-tile-logo:not(.is-brand)");
-      if (!(img instanceof HTMLImageElement)) return;
-      applyThemeLogoTransform(img, wrap, {
-        logoZoom: Number(wrap.dataset.logoZoom) || 1,
-        logoOffsetX: Number(wrap.dataset.logoOffsetX) || 0,
-        logoOffsetY: Number(wrap.dataset.logoOffsetY) || 0,
+  /**
+   * @param {import("../../preset-draft.js").PresetDraftTheme[]} list
+   * @param {boolean} [byDate]
+   * @returns {import("../../preset-draft.js").PresetDraftTheme[]}
+   */
+  function sorted(list, byDate = false) {
+    return list.slice().sort((a, b) => {
+      if (byDate) {
+        const cmp = String(b.updatedAt || "").localeCompare(String(a.updatedAt || ""));
+        if (cmp !== 0) return cmp;
+      }
+      const cmp = String(a.name || "").localeCompare(String(b.name || ""), "fr", {
+        sensitivity: "base",
       });
+      if (cmp !== 0) return cmp;
+      return String(a.id || "").localeCompare(String(b.id || ""), "en");
     });
   }
 
-  function paint() {
-    const shownThemes = sorted(themes.filter(matchesSearch));
-    const shown = shownThemes.length;
-    if (grid) {
-      grid.innerHTML = shownThemes.map((t) => themeTileMarkup(draftToLegoTheme(t))).join("");
-      grid.hidden = shown === 0;
-    }
-    if (emptyFilter) {
-      const titleEl = emptyFilter.querySelector(".view-title");
-      const textEl = emptyFilter.querySelector(".empty-view-body > p:not(.view-title)");
-      if (!themes.length) {
-        if (titleEl) titleEl.textContent = "Aucun thème";
-        if (textEl) {
-          textEl.textContent =
-            "Le brouillon est vide. Créez un thème ou réinitialisez depuis themes-presets.json.";
-        }
-        emptyFilter.hidden = false;
-      } else if (!shown) {
-        if (titleEl) titleEl.textContent = "Oups !";
-        if (textEl) textEl.textContent = "Aucun thème ne correspond à la recherche.";
-        emptyFilter.hidden = false;
-      } else {
-        emptyFilter.hidden = true;
-      }
-    }
-    if (searchTrail) searchTrail.hidden = themes.length < 2;
-    updateSearchCount(shown);
-
-    host.querySelectorAll("img.theme-tile-logo").forEach((img) => {
+  function bindThemeTileLogos(root) {
+    if (!root) return;
+    root.querySelectorAll("img.theme-tile-logo").forEach((img) => {
       img.onerror = () => fallbackThemeTileToBrandLogo(img);
       if (img.classList.contains("is-brand")) return;
       const wrap = img.closest(".theme-tile-logo-wrap--crop");
@@ -246,6 +242,59 @@ export function renderDeveloperThemePresets(host, opts) {
       };
       apply();
     });
+  }
+
+  /**
+   * @param {{ byDate?: boolean }} [opts]
+   */
+  function paint(opts = {}) {
+    const shownThemes = sorted(themes.filter(matchesSearch), opts.byDate);
+    const shown = shownThemes.length;
+    if (grid) {
+      grid.innerHTML = shownThemes.map((t) => themeTileMarkup(draftToLegoTheme(t))).join("");
+      grid.hidden = shown === 0;
+    }
+    syncPresetChrome(shown);
+    bindThemeTileLogos(host);
+  }
+
+  /** @param {number} [shown] */
+  function syncPresetChrome(shown) {
+    const visible =
+      shown != null ? shown : grid ? grid.querySelectorAll(".theme-tile").length : 0;
+    if (grid) grid.hidden = visible === 0;
+    if (emptyFilter) {
+      const titleEl = emptyFilter.querySelector(".view-title");
+      const textEl = emptyFilter.querySelector(".empty-view-body > p:not(.view-title)");
+      if (!themes.length) {
+        if (titleEl) titleEl.textContent = "Aucun thème";
+        if (textEl) {
+          textEl.textContent =
+            "Le brouillon est vide. Créez un thème ou réinitialisez depuis themes-presets.json.";
+        }
+        emptyFilter.hidden = false;
+      } else if (!visible) {
+        if (titleEl) titleEl.textContent = "Oups !";
+        if (textEl) textEl.textContent = "Aucun thème ne correspond à la recherche.";
+        emptyFilter.hidden = false;
+      } else {
+        emptyFilter.hidden = true;
+      }
+    }
+    if (searchTrail) searchTrail.hidden = themes.length < 2;
+    updateSearchCount(visible);
+  }
+
+  function scrollPresetListTop() {
+    const body = document.getElementById("developer-modal-body");
+    const backdrop = document.getElementById("developer-modal-backdrop");
+    if (body instanceof HTMLElement) body.scrollTop = 0;
+    if (backdrop instanceof HTMLElement) backdrop.scrollTop = 0;
+  }
+
+  /** @param {string} id */
+  function queryPresetTile(id) {
+    return grid?.querySelector(`[data-edit="${CSS.escape(id)}"]`) ?? null;
   }
 
   async function reload() {
@@ -376,14 +425,55 @@ export function renderDeveloperThemePresets(host, opts) {
   grid.addEventListener("keydown", onGridKey);
   window.addEventListener("resize", applyTileLogoCrops);
 
+  function applyTileLogoCrops() {
+    bindThemeTileLogos(host);
+  }
+
   reload();
-  refreshMountedPresetList = () => {
-    if (!cancelled) reload();
+
+  mountedRefreshPresetAfterCreate = (theme) => {
+    if (cancelled) return false;
+    rememberedQuery = "";
+    searchInput.value = "";
+    const idx = themes.findIndex((t) => t.id === theme.id);
+    if (idx >= 0) themes[idx] = theme;
+    else themes.push(theme);
+    paint({ byDate: true });
+    scrollPresetListTop();
+    return true;
+  };
+
+  mountedPatchPresetInList = (theme, previousId) => {
+    if (cancelled) return false;
+    const oldId = previousId && previousId !== theme.id ? previousId : theme.id;
+    const idx = themes.findIndex((t) => t.id === oldId);
+    if (idx >= 0) themes[idx] = theme;
+    else themes.push(theme);
+    const tile = queryPresetTile(oldId);
+    if (!(tile instanceof HTMLElement)) return true;
+    const wrap = document.createElement("div");
+    wrap.innerHTML = themeTileMarkup(draftToLegoTheme(theme)).trim();
+    const next = wrap.firstElementChild;
+    if (!(next instanceof HTMLElement)) return true;
+    tile.replaceWith(next);
+    bindThemeTileLogos(next);
+    return true;
+  };
+
+  mountedRemovePresetFromList = (id) => {
+    if (cancelled) return false;
+    const idx = themes.findIndex((t) => t.id === id);
+    if (idx >= 0) themes.splice(idx, 1);
+    queryPresetTile(id)?.remove();
+    syncPresetChrome();
+    return true;
   };
 
   return () => {
     cancelled = true;
-    if (refreshMountedPresetList) refreshMountedPresetList = null;
+    mountedRefreshPresetAfterCreate = null;
+    mountedPatchPresetInList = null;
+    mountedRemovePresetFromList = null;
     window.removeEventListener("resize", applyTileLogoCrops);
     host.innerHTML = "";
   };

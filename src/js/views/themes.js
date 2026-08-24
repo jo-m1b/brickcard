@@ -81,11 +81,48 @@ function saveSortDir(dir) {
   }
 }
 
-/** Après enregistrement d’un thème : recherche vidée, tri par date de modification (récent d’abord). */
-export function prepareThemesAfterThemeSave() {
+/** Après création d’un thème : recherche vidée, tri par date de modification (récent d’abord). */
+export function prepareThemesAfterThemeCreate() {
   rememberedQuery = "";
   saveSortKey("updatedAt");
   saveSortDir("desc");
+}
+
+/** @type {((theme: import("../themes-data.js").LegoTheme) => boolean) | null} */
+let mountedRefreshThemesAfterCreate = null;
+/** @type {((theme: import("../themes-data.js").LegoTheme) => boolean) | null} */
+let mountedPatchThemeInList = null;
+/** @type {((id: string) => boolean) | null} */
+let mountedRemoveThemeFromList = null;
+
+/**
+ * Ajoute un thème à la liste montée, reset tri/recherche, repeint et scrolle en haut.
+ * @param {import("../themes-data.js").LegoTheme} theme
+ * @returns {boolean} false si la liste n’est pas montée
+ */
+export function refreshThemesListAfterCreate(theme) {
+  if (!mountedRefreshThemesAfterCreate || !theme?.id) return false;
+  return mountedRefreshThemesAfterCreate(theme);
+}
+
+/**
+ * Met à jour la mini-carte d’un thème déjà affiché, sans reconstruire la grille.
+ * @param {import("../themes-data.js").LegoTheme} theme
+ * @returns {boolean} false si la liste n’est pas montée
+ */
+export function patchThemeInList(theme) {
+  if (!mountedPatchThemeInList || !theme?.id) return false;
+  return mountedPatchThemeInList(theme);
+}
+
+/**
+ * Retire un thème de la liste montée (tuile + mémoire + compteurs), sans reconstruire la grille.
+ * @param {string} id
+ * @returns {boolean} false si la liste n’est pas montée
+ */
+export function removeThemeFromList(id) {
+  if (!mountedRemoveThemeFromList || !id) return false;
+  return mountedRemoveThemeFromList(id);
 }
 
 /**
@@ -118,8 +155,8 @@ let rememberedQuery = "";
  */
 export async function renderThemesModal(host, opts) {
   const { onClose, onCreate, onEdit } = opts;
-  const [themes, cards] = await Promise.all([loadThemes(), loadCards()]);
-  const { custom, builtin } = partitionThemes(themes);
+  const [allThemes, cards] = await Promise.all([loadThemes(), loadCards()]);
+  let { custom, builtin } = partitionThemes(allThemes);
 
   /** @type {Map<string, number>} */
   const usage = new Map();
@@ -287,7 +324,7 @@ export async function renderThemesModal(host, opts) {
   }
 
   function updateSearchCount(shown) {
-    const total = themes.length;
+    const total = custom.length + builtin.length;
     const query = searchQuery();
     if (!total) {
       searchCount.textContent = "0 thèmes";
@@ -416,6 +453,24 @@ export async function renderThemesModal(host, opts) {
     });
   }
 
+  function bindThemeTileLogos(root) {
+    if (!root) return;
+    root.querySelectorAll("img.theme-tile-logo").forEach((img) => {
+      img.onerror = () => fallbackThemeTileToBrandLogo(img);
+      if (img.classList.contains("is-brand")) return;
+      const wrap = img.closest(".theme-tile-logo-wrap--crop");
+      const apply = () => {
+        if (!(wrap instanceof HTMLElement)) return;
+        applyThemeLogoTransform(img, wrap, {
+          logoZoom: Number(wrap.dataset.logoZoom) || 1,
+          logoOffsetX: Number(wrap.dataset.logoOffsetX) || 0,
+          logoOffsetY: Number(wrap.dataset.logoOffsetY) || 0,
+        });
+      };
+      apply();
+    });
+  }
+
   function paint() {
     const dateSort = sortKey === "updatedAt" && canSortByDate();
     const customShown = sorted(custom.filter(matchesSearch), dateSort ? "updatedAt" : sortKey);
@@ -438,21 +493,38 @@ export async function renderThemesModal(host, opts) {
     emptyFilter.hidden = shown > 0;
     updateSearchCount(shown);
     syncSortMenu();
+    bindThemeTileLogos(host);
+  }
 
-    host.querySelectorAll("img.theme-tile-logo").forEach((img) => {
-      img.onerror = () => fallbackThemeTileToBrandLogo(img);
-      if (img.classList.contains("is-brand")) return;
-      const wrap = img.closest(".theme-tile-logo-wrap--crop");
-      const apply = () => {
-        if (!(wrap instanceof HTMLElement)) return;
-        applyThemeLogoTransform(img, wrap, {
-          logoZoom: Number(wrap.dataset.logoZoom) || 1,
-          logoOffsetX: Number(wrap.dataset.logoOffsetX) || 0,
-          logoOffsetY: Number(wrap.dataset.logoOffsetY) || 0,
-        });
-      };
-      apply();
-    });
+  /** @param {string} id */
+  function queryCustomTile(id) {
+    return customGrid.querySelector(`[data-edit="${CSS.escape(id)}"]`);
+  }
+
+  function visibleTileCount() {
+    return (
+      customGrid.querySelectorAll(".theme-tile").length +
+      builtinGrid.querySelectorAll(".theme-tile").length
+    );
+  }
+
+  function syncThemesChrome() {
+    const shown = visibleTileCount();
+    customSection.hidden = customGrid.querySelectorAll(".theme-tile").length === 0;
+    builtinSection.hidden = builtinGrid.querySelectorAll(".theme-tile").length === 0;
+    emptyFilter.hidden = shown > 0;
+    updateSearchCount(shown);
+    if (sortKey === "updatedAt" && !canSortByDate()) {
+      sortKey = "cardCount";
+      sortDir = defaultSortDir("cardCount");
+    }
+    syncSortMenu();
+  }
+
+  function scrollThemesListTop() {
+    const body = backdrop?.querySelector(".modal-body");
+    if (backdrop instanceof HTMLElement) backdrop.scrollTop = 0;
+    if (body instanceof HTMLElement) body.scrollTop = 0;
   }
 
   function onSearchInput() {
@@ -495,6 +567,7 @@ export async function renderThemesModal(host, opts) {
       return;
     }
     if (e.key !== "Escape") return;
+    if (document.getElementById("theme-editor-backdrop")) return;
     e.preventDefault();
     close();
   };
@@ -578,6 +651,46 @@ export async function renderThemesModal(host, opts) {
 
   paint();
 
+  mountedRefreshThemesAfterCreate = (theme) => {
+    const idx = custom.findIndex((t) => t.id === theme.id);
+    if (idx >= 0) custom[idx] = theme;
+    else custom.push(theme);
+    prepareThemesAfterThemeCreate();
+    searchInput.value = rememberedQuery;
+    sortKey = loadSortKey();
+    sortDir = loadSortDir(sortKey);
+    if (sortKey === "updatedAt" && !canSortByDate()) {
+      sortKey = "cardCount";
+      sortDir = defaultSortDir("cardCount");
+    }
+    paint();
+    scrollThemesListTop();
+    return true;
+  };
+
+  mountedPatchThemeInList = (theme) => {
+    const idx = custom.findIndex((t) => t.id === theme.id);
+    if (idx >= 0) custom[idx] = theme;
+    else custom.push(theme);
+    const tile = queryCustomTile(theme.id);
+    if (!(tile instanceof HTMLElement)) return true;
+    const wrap = document.createElement("div");
+    wrap.innerHTML = themeTileMarkup(theme, usage.get(theme.id) || 0, true).trim();
+    const next = wrap.firstElementChild;
+    if (!(next instanceof HTMLElement)) return true;
+    tile.replaceWith(next);
+    bindThemeTileLogos(next);
+    return true;
+  };
+
+  mountedRemoveThemeFromList = (id) => {
+    const idx = custom.findIndex((t) => t.id === id);
+    if (idx >= 0) custom.splice(idx, 1);
+    queryCustomTile(id)?.remove();
+    syncThemesChrome();
+    return true;
+  };
+
   q("#btn-add-theme").onclick = () => onCreate();
   customGrid.addEventListener("click", onGridClick);
   customGrid.addEventListener("keydown", (e) => {
@@ -608,6 +721,9 @@ export async function renderThemesModal(host, opts) {
   window.addEventListener("resize", applyTileLogoCrops);
 
   return () => {
+    mountedRefreshThemesAfterCreate = null;
+    mountedPatchThemeInList = null;
+    mountedRemoveThemeFromList = null;
     document.removeEventListener("keydown", onKey);
     document.removeEventListener("click", onDocClick);
     window.removeEventListener("resize", applyTileLogoCrops);

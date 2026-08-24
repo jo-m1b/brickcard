@@ -91,14 +91,44 @@ function saveSortDir(dir) {
   }
 }
 
-/** Après enregistrement d’une carte : recherche vidée, tri par date de modification (récent d’abord). */
-export function prepareListAfterCardSave() {
+/** Après création d’une carte : recherche vidée, tri par date de modification (récent d’abord). */
+export function prepareListAfterCardCreate() {
   const searchInput = document.getElementById("global-search");
   if (searchInput instanceof HTMLInputElement) {
     searchInput.value = "";
   }
   saveSortKey("updatedAt");
   saveSortDir("desc");
+}
+
+/** @type {((card: import("../storage.js").Card) => boolean) | null} */
+let mountedPatchListCard = null;
+/** @type {((id: string) => { empty: boolean } | false) | null} */
+let mountedRemoveListCard = null;
+
+/**
+ * Met à jour l’aperçu d’une carte déjà affichée, sans reconstruire la grille.
+ * @param {import("../storage.js").Card} card
+ * @returns {boolean} false si la liste n’est pas montée
+ */
+export function patchListCard(card) {
+  if (!mountedPatchListCard || !card?.id) return false;
+  return mountedPatchListCard(card);
+}
+
+/**
+ * Retire une carte de la liste montée (tuile + mémoire + compteurs), sans reconstruire la grille.
+ * @param {string} id
+ * @returns {{ empty: boolean } | false} false si la liste n’est pas montée
+ */
+export function removeListCard(id) {
+  if (!mountedRemoveListCard || !id) return false;
+  return mountedRemoveListCard(id);
+}
+
+/** @param {import("../storage.js").Card} card */
+function cardTileAriaLabel(card) {
+  return `Modifier${card.title ? ` « ${card.title} »` : " la carte"}${card.legoSetRef ? ` (${card.legoSetRef})` : ""}`;
 }
 
 /**
@@ -374,7 +404,7 @@ export async function renderList(main, opts) {
     `;
   }
 
-  function renderGrid() {
+  function syncListChrome() {
     const list = filtered();
     const addableCount = list.filter((c) => getPrintQty(c.id) < 1).length;
     syncSearchTrail();
@@ -386,6 +416,16 @@ export async function renderList(main, opts) {
       searching: Boolean(searchQuery()),
       missing: addableCount < list.length,
     });
+  }
+
+  /** @param {string} id */
+  function queryCardTile(id) {
+    return els.grid.querySelector(`.card-tile[data-id="${CSS.escape(id)}"]`);
+  }
+
+  function renderGrid() {
+    const list = filtered();
+    syncListChrome();
 
     const active = document.activeElement;
     /** @type {{ id: string, which: "inc" | "dec" } | null} */
@@ -414,10 +454,7 @@ export async function renderList(main, opts) {
       tile.dataset.id = card.id;
       tile.setAttribute("role", "button");
       tile.tabIndex = 0;
-      tile.setAttribute(
-        "aria-label",
-        `Modifier${card.title ? ` « ${card.title} »` : " la carte"}${card.legoSetRef ? ` (${card.legoSetRef})` : ""}`
-      );
+      tile.setAttribute("aria-label", cardTileAriaLabel(card));
 
       const preview = document.createElement("div");
       preview.className = "card-tile-preview";
@@ -432,9 +469,7 @@ export async function renderList(main, opts) {
     }
 
     if (restoreFocus) {
-      const tile = els.grid.querySelector(
-        `.card-tile[data-id="${CSS.escape(restoreFocus.id)}"]`
-      );
+      const tile = queryCardTile(restoreFocus.id);
       /** @type {HTMLElement|null} */
       let el = null;
       if (restoreFocus.which === "inc") {
@@ -624,10 +659,39 @@ export async function renderList(main, opts) {
     opts.onEdit(tile.dataset.id);
   });
 
+  mountedPatchListCard = (card) => {
+    const idx = cards.findIndex((c) => c.id === card.id);
+    if (idx < 0) return false;
+    cards[idx] = card;
+    const tile = queryCardTile(card.id);
+    if (!(tile instanceof HTMLElement)) return true;
+    const legoTheme = card.brickcardThemeId
+      ? themeMap.get(card.brickcardThemeId)
+      : null;
+    const preview = tile.querySelector(".card-tile-preview");
+    if (preview instanceof HTMLElement) {
+      mountCardPreview(preview, card, { legoTheme });
+    }
+    tile.setAttribute("aria-label", cardTileAriaLabel(card));
+    return true;
+  };
+
+  mountedRemoveListCard = (id) => {
+    const idx = cards.findIndex((c) => c.id === id);
+    if (idx >= 0) cards.splice(idx, 1);
+    if (getPrintQty(id) > 0) setPrintQty(id, 0);
+    queryCardTile(id)?.remove();
+    els.emptyFilter.hidden = filtered().length > 0 || cards.length === 0;
+    syncListChrome();
+    return { empty: cards.length === 0 };
+  };
+
   syncSortMenu();
   renderGrid();
 
   return () => {
+    mountedPatchListCard = null;
+    mountedRemoveListCard = null;
     unregisterGrid();
     if (searchInput) searchInput.removeEventListener("input", onSearchInput);
     if (searchBar) {

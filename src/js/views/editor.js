@@ -15,6 +15,7 @@ import { enhanceFormSelect } from "../form-select.js";
 import { bindFormImage, formImageMarkup } from "../form-image.js";
 import {
   compressImage,
+  createId,
   upsertCard,
   deleteCard,
   getCard,
@@ -22,19 +23,25 @@ import {
   getTheme,
 } from "../storage.js";
 import { mountCardPreview, refreshCardPreview, mountCardBackPreview, refreshCardBackPreview } from "../card-render.js";
-import { slugifyFilename } from "../card-export.js";
+import { formatCardImageBasename } from "../card-export.js";
 import { confirmDialog } from "../confirm-dialog.js";
 import { partitionThemes } from "../themes-data.js";
 import { setAppDocumentTitle } from "../document-title.js";
 
 /**
  * @param {HTMLElement} host Conteneur modale (#modal-root)
- * @param {{ cardId?: string|null, onSaved: () => void, onCancel: () => void, onDeleted?: () => void, toast?: (msg: string, type?: string) => void }} opts
+ * @param {{
+ *   cardId?: string|null,
+ *   onSaved: (subject: string, meta: { isNew: boolean, card: import("../storage.js").Card }) => void,
+ *   onCancel: () => void,
+ *   onDeleted?: (subject: string, cardId: string) => void
+ * }} opts
  * @returns {Promise<() => void>} cleanup
  */
 export async function renderEditor(host, opts) {
   const existing = opts.cardId ? await getCard(opts.cardId) : null;
   const isEdit = Boolean(existing);
+  const cardId = existing?.id || createId();
   const themes = await loadThemes();
   const storedImageBg = existing?.imageBackgroundColor || "";
 
@@ -154,7 +161,6 @@ export async function renderEditor(host, opts) {
                 ${formImageMarkup({
                   id: "card-image",
                   labelledBy: "card-photo-label",
-                  accept: "image/*,image/svg+xml,.svg",
                   dataUrl: existing?.imageDataUrl || "",
                   backgroundColor: storedImageBg,
                   zoom: existing?.imageZoom || 1,
@@ -274,12 +280,11 @@ export async function renderEditor(host, opts) {
   }
 
   function cardImageBasename() {
-    const ref = slugifyFilename(refs.legoSetRef.value);
-    const base =
-      ref !== "brickcard"
-        ? ref
-        : slugifyFilename(refs.title.value.split("\n")[0]);
-    return `brickcard-${base}`;
+    return formatCardImageBasename({
+      legoSetRef: refs.legoSetRef.value,
+      title: refs.title.value,
+      cardId,
+    });
   }
 
   if (imageRoot) {
@@ -294,9 +299,6 @@ export async function renderEditor(host, opts) {
         state.imageOffsetX = value.offsetX;
         state.imageOffsetY = value.offsetY;
         syncPreview();
-      },
-      onDownload() {
-        opts.toast?.("Photo téléchargée");
       },
     });
   }
@@ -330,13 +332,19 @@ export async function renderEditor(host, opts) {
     if (e.target === refs.backdrop) requestClose();
   });
 
-  function cardDeleteTitle() {
+  function cardToastSubject() {
     const data = draft();
-    const refRaw = data.legoSetRef.replace(/^#+\s*/, "").trim();
     const title = data.title.replace(/\s*\n\s*/g, " ").trim();
-    if (title && refRaw) return `Supprimer la carte "${title}" (#${refRaw}) ?`;
-    if (title) return `Supprimer la carte "${title}" ?`;
-    if (refRaw) return `Supprimer la carte (#${refRaw}) ?`;
+    const ref = data.legoSetRef.replace(/^#+\s*/, "").trim();
+    if (title && ref) return `${title} (#${ref})`;
+    if (title) return title;
+    if (ref) return `#${ref}`;
+    return "";
+  }
+
+  function cardDeleteTitle() {
+    const subject = cardToastSubject();
+    if (subject) return `Supprimer la carte « ${subject} » ?`;
     return "Supprimer cette carte ?";
   }
 
@@ -352,11 +360,11 @@ export async function renderEditor(host, opts) {
     refs.error.textContent = "";
     refs.save.disabled = true;
     try {
-      await upsertCard({
+      const saved = await upsertCard({
         ...data,
-        id: existing?.id,
+        id: cardId,
       });
-      opts.onSaved();
+      opts.onSaved(cardToastSubject(), { isNew: !isEdit, card: saved });
     } catch (err) {
       refs.error.textContent = err.message || "Enregistrement impossible.";
       refs.save.disabled = false;
@@ -378,7 +386,7 @@ export async function renderEditor(host, opts) {
       refs.save.disabled = true;
       try {
         await deleteCard(existing.id);
-        if (opts.onDeleted) opts.onDeleted();
+        if (opts.onDeleted) opts.onDeleted(cardToastSubject(), existing.id);
         else opts.onCancel();
       } catch (err) {
         refs.error.textContent = err.message || "Suppression impossible.";
