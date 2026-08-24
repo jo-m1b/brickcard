@@ -1,0 +1,81 @@
+# GitHub Release (notes + zip/tar.gz natifs) à chaque tag vX.Y.Z
+
+name: Release Brickcard
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          git fetch --force --tags
+          NOTES="$(mktemp)"
+
+          PREV=""
+          while IFS= read -r t; do
+            if [ -n "$t" ] && [ "$t" != "$TAG" ]; then
+              PREV="$t"
+              break
+            fi
+          done < <(git tag -l 'v*.*.*' --sort=-version:refname)
+
+          append_section() {
+            local title="$1"
+            local body="$2"
+            if [ -n "$body" ]; then
+              printf '## %s\n\n%s\n' "$title" "$body" >> "$NOTES"
+            fi
+          }
+
+          if [ -n "$PREV" ]; then
+            feats=""
+            fixes=""
+            docs=""
+            chores=""
+            other=""
+            while IFS= read -r line; do
+              [ -z "$line" ] && continue
+              case "$line" in
+                feat:* | feat!:*) feats+="* ${line}"$'\n' ;;
+                fix:* | fix!:*) fixes+="* ${line}"$'\n' ;;
+                docs:* | docs!:*) docs+="* ${line}"$'\n' ;;
+                chore:* | chore!:*) chores+="* ${line}"$'\n' ;;
+                *) other+="* ${line}"$'\n' ;;
+              esac
+            done < <(git log "${PREV}..HEAD" --pretty=format:'%s')
+
+            append_section "Features" "$feats"
+            append_section "Bug Fixes" "$fixes"
+            append_section "Documentation" "$docs"
+            append_section "Internal Changes" "$chores"
+            append_section "Other Changes" "$other"
+
+            printf '**Full Changelog**: https://github.com/%s/compare/%s...%s\n' \
+              "$REPO" "$PREV" "$TAG" >> "$NOTES"
+          else
+            printf 'See [CHANGELOG.md](https://github.com/%s/blob/%s/CHANGELOG.md) for this version.\n\n' \
+              "$REPO" "$TAG" >> "$NOTES"
+            printf '**Full Changelog**: https://github.com/%s/commits/%s\n' \
+              "$REPO" "$TAG" >> "$NOTES"
+          fi
+
+          gh release create "$TAG" --verify-tag --title "$TAG" --notes-file "$NOTES"
