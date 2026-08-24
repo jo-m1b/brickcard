@@ -55,10 +55,10 @@ jobs:
             while IFS= read -r line || [ -n "$line" ]; do
               [ -z "$line" ] && continue
               case "$line" in
-                feat:* | feat!:*) feats+="* ${line}"$'\n' ;;
-                fix:* | fix!:*) fixes+="* ${line}"$'\n' ;;
-                docs:* | docs!:*) docs+="* ${line}"$'\n' ;;
-                chore:* | chore!:*) chores+="* ${line}"$'\n' ;;
+                feat:* | feat!:*) feats+="* ${line#*: }"$'\n' ;;
+                fix:* | fix!:*) fixes+="* ${line#*: }"$'\n' ;;
+                docs:* | docs!:*) docs+="* ${line#*: }"$'\n' ;;
+                chore:* | chore!:*) chores+="* ${line#*: }"$'\n' ;;
                 *) other+="* ${line}"$'\n' ;;
               esac
             done < <(git log "${PREV}..HEAD" --pretty=tformat:'%s')

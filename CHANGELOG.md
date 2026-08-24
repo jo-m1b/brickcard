@@ -7,6 +7,10 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Changed
+
+- GitHub Release : les notes groupées n’affichent plus le préfixe `feat:` / `fix:` / `docs:` / `chore:`
+
 ### Fixed
 
 - GitHub Release : le dernier commit entre deux tags est bien listé dans les notes
