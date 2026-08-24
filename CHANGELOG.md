@@ -7,6 +7,8 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [0.8.2] — 2026-08-24
+
 ### Added
 
 - Notifications (Toast) : types normal / succès / erreur, empilement, fermeture manuelle, notification système HTML5 ; galerie `#developer/notifications`
