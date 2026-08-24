@@ -72,8 +72,8 @@ export function welcomeViewMarkup(opts = {}) {
       : { tag: /** @type {"button"} */ ("button") }),
   };
   const demoTile = {
-    title: "Charger la démonstration",
-    desc: "Importer une sauvegarde de démonstration des cartes de Jo",
+    title: "Charger une démonstration",
+    desc: "Importer une sauvegarde de la collection de cartes des briques de Jo",
     icon: "emotion",
     tag: /** @type {"button"} */ ("button"),
     ...(demoId ? { id: demoId } : {}),
