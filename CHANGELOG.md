@@ -7,6 +7,10 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Fixed
+
+- GitHub Release : le dernier commit entre deux tags est bien listé dans les notes
+
 ## [0.8.1] — 2026-08-24
 
 ### Added

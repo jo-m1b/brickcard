@@ -52,7 +52,7 @@ jobs:
             docs=""
             chores=""
             other=""
-            while IFS= read -r line; do
+            while IFS= read -r line || [ -n "$line" ]; do
               [ -z "$line" ] && continue
               case "$line" in
                 feat:* | feat!:*) feats+="* ${line}"$'\n' ;;
@@ -61,7 +61,7 @@ jobs:
                 chore:* | chore!:*) chores+="* ${line}"$'\n' ;;
                 *) other+="* ${line}"$'\n' ;;
               esac
-            done < <(git log "${PREV}..HEAD" --pretty=format:'%s')
+            done < <(git log "${PREV}..HEAD" --pretty=tformat:'%s')
 
             append_section "Features" "$feats"
             append_section "Bug Fixes" "$fixes"
