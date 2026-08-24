@@ -122,6 +122,12 @@ export function renderDeveloperIndex(host) {
           href: "#developer/modals",
           icon: "window",
         },
+        {
+          title: "Notification (Toast)",
+          desc: "Notifier une information importante",
+          href: "#developer/notifications",
+          icon: "notification-line",
+        },
       ])}
       </section>
     </section>

@@ -215,7 +215,7 @@ export function initPrintMenu(options) {
         ? await hooks.getSelectAllCards()
         : await loadCards();
     } catch (err) {
-      opts?.toast(err.message || "Impossible de charger les cartes", "error");
+      opts?.toast(err.message || "Impossible de sélectionner les cartes", "error");
       return;
     }
     for (const c of cards) {

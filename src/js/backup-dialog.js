@@ -11,6 +11,7 @@ export function isCollectionSaveShortcut(e) {
 }
 
 import { ICON_CLOSE, ICON_DOWNLOAD, modalTitleMarkup } from "./icons.js";
+import { TOAST_DELAY_BACKUP } from "./toast.js";
 import { setAppDocumentTitle } from "./document-title.js";
 import { formRadioMarkup } from "./form-radio.js";
 import { formCheckboxMarkup } from "./form-checkbox.js";
@@ -24,6 +25,7 @@ import {
   exportBackup,
   formatBackupFooterRecap,
   formatBackupThemeChoiceHint,
+  formatBackupToastRecap,
   groupCardsForBackup,
   isBackupPayloadEmpty,
   listBackupThemeChoices,
@@ -313,10 +315,26 @@ export async function renderBackupDialog(host, opts) {
         includeImages,
         includeThemeLogos,
       });
-      const settingsMsg = result.settings ? " · apparence des cartes" : "";
-      toast?.(
-        `Sauvegarde : ${result.cards} carte(s) + ${result.themes} thème(s)${settingsMsg}`
+      const recap = formatBackupToastRecap(
+        {
+          cardCount: result.cards,
+          themeCount: result.themes,
+          settingCount: result.settings ? CARD_APPEARANCE_SETTING_COUNT : 0,
+          bytes: result.bytes,
+        },
+        { filename: result.filename }
       );
+      toast?.({
+        type: "success",
+        title:
+          kind === "full"
+            ? "Sauvegarde complète enregistrée"
+            : "Sauvegarde personnalisée enregistrée",
+        message: recap.message,
+        messageHtml: recap.messageHtml,
+        icon: "save",
+        delay: TOAST_DELAY_BACKUP,
+      });
       close();
     } catch (err) {
       toast?.(err.message || "Sauvegarde impossible", "error");

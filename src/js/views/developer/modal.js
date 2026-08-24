@@ -15,10 +15,13 @@ import { renderDeveloperColors } from "./colors.js";
 import { renderDeveloperImages } from "./images.js";
 import { renderDeveloperSearch } from "./search.js";
 import { renderDeveloperModals } from "./modals.js";
+import { renderDeveloperNotifications } from "./notifications.js";
 import { renderDeveloperLoading } from "./loading.js";
 import { renderDeveloperWelcome } from "./welcome.js";
 import {
-  preparePresetDraftAfterSave,
+  refreshPresetDraftAfterCreate,
+  patchPresetDraftInList,
+  removePresetDraftFromList,
   renderDeveloperThemePresets,
 } from "./theme-presets.js";
 import { renderPresetDraftEditor } from "./theme-presets-editor.js";
@@ -39,6 +42,7 @@ const PAGES = {
   images: renderDeveloperImages,
   search: renderDeveloperSearch,
   modals: renderDeveloperModals,
+  notifications: renderDeveloperNotifications,
   loading: renderDeveloperLoading,
   welcome: renderDeveloperWelcome,
 };
@@ -67,6 +71,7 @@ const PAGE_SECTIONS = {
   images: SECTION_DESIGN,
   search: SECTION_DESIGN,
   modals: SECTION_DESIGN,
+  notifications: SECTION_DESIGN,
   loading: SECTION_MODELS,
   welcome: SECTION_MODELS,
   "theme-presets": SECTION_TOOLS,
@@ -251,12 +256,18 @@ export function renderDeveloperModal(host, opts) {
     const cleanup = await renderPresetDraftEditor(demoRoot, {
       themeId: nextExtras.presetPage === "edit" ? nextExtras.themeId || null : null,
       onClose: goToPresetList,
-      onSaved: () => {
-        preparePresetDraftAfterSave();
+      onSaved: (meta) => {
+        if (meta?.isNew) {
+          if (!refreshPresetDraftAfterCreate(meta.theme)) {
+            /* liste absente */
+          }
+        } else {
+          patchPresetDraftInList(meta.theme, meta.previousId);
+        }
         goToPresetList();
       },
-      onDeleted: () => {
-        preparePresetDraftAfterSave();
+      onDeleted: (id) => {
+        removePresetDraftFromList(id);
         goToPresetList();
       },
     });

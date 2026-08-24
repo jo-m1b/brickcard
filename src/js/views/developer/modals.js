@@ -60,7 +60,7 @@ export function renderDeveloperModals(host) {
               </tr>
               <tr>
                 <td>Header</td>
-                <td><code>modal-header</code> : <code>h1.view-title</code> (icône Remix optionnelle à gauche) + <code>btn primary icon-only modal-close</code> (couleurs inversées, <code>tabindex="-1"</code>)</td>
+                <td><code>modal-header</code> : <code>h1.view-title</code> (icône Remix optionnelle à gauche, centrée ; titre à côté, plusieurs lignes possibles) + <code>btn primary icon-only modal-close</code> (couleurs inversées, <code>tabindex="-1"</code>)</td>
               </tr>
               <tr>
                 <td>Corps</td>
@@ -118,7 +118,7 @@ export function renderDeveloperModals(host) {
         <h2 class="styleguide-section-title">Header</h2>
         <p class="form-hint" style="margin-bottom: 0.65rem">
           Titre court + bouton fermer (<code>btn primary icon-only</code>, couleurs inversées).
-          Les confirmations peuvent avoir un titre plus long (il passe à la ligne).
+          Icône à gauche (centrée) ; le titre à côté, plusieurs lignes si besoin (comme les toasts).
         </p>
         <div class="styleguide-row">
           <button type="button" class="btn secondary" data-demo-modal="header-plain">Titre court</button>
@@ -299,7 +299,7 @@ export function renderDeveloperModals(host) {
     if (kind === "header-confirm") {
       openDemo({
         size: "sm",
-        title: "Supprimer la carte \"Saucer Centurien\" (#6939) ?",
+        title: "Supprimer la carte « Saucer Centurien (#6939) » ?",
         icon: "delete-bin-2",
         bodyHtml: `<p class="modal-confirm-msg">Attention, la suppression est définitive et ne pourra pas être annulée&nbsp;! Souhaitez-vous continuer&nbsp;?</p>`,
         footerHtml: `
@@ -339,7 +339,7 @@ export function renderDeveloperModals(host) {
     if (kind === "footer-danger") {
       openDemo({
         size: "sm",
-        title: "Supprimer le thème \"Star Wars\" ?",
+        title: "Supprimer le thème « Star Wars » ?",
         icon: "delete-bin-2",
         bodyHtml: `<p class="modal-confirm-msg">Cette action est irréversible (démo).</p>`,
         footerHtml: `

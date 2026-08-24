@@ -22,6 +22,7 @@ import { getPresetThemes } from "./themes-data.js";
 import { importBackup } from "./storage.js";
 import { loadingViewMarkup } from "./empty-view.js";
 import { linkMarkup } from "./link.js";
+import { TOAST_DELAY_BACKUP } from "./toast.js";
 import {
   BACKUP_INVALID,
   BACKUP_URL_INVALID,
@@ -36,6 +37,7 @@ import {
   fetchBackupAsText,
   formatBackupFooterRecap,
   formatBackupThemeChoiceHint,
+  formatBackupToastRecap,
   groupCardsForBackup,
   isBrickcardBackupFilename,
   isImportPayloadEmpty,
@@ -44,6 +46,36 @@ import {
 } from "./backup.js";
 
 const UNTHEMED_VALUE = "none";
+
+/**
+ * Toast après un import réussi (même recap que le pied `#import-dialog-recap`).
+ * @param {(msg: string | object, type?: string) => void} [toast]
+ * @param {unknown} payload
+ * @param {{ title?: string, icon?: string }} [opts]
+ */
+function toastImportedBackup(toast, payload, opts = {}) {
+  const data = payload && typeof payload === "object" ? /** @type {Record<string, unknown>} */ (payload) : {};
+  const cards = Array.isArray(data.cards) ? data.cards : [];
+  const themes = Array.isArray(data.themes) ? data.themes : [];
+  const settings =
+    data.settings && typeof data.settings === "object"
+      ? /** @type {Record<string, unknown>} */ (data.settings)
+      : null;
+  const recap = formatBackupToastRecap({
+    cardCount: cards.length,
+    themeCount: themes.length,
+    settingCount: settings?.cardAppearance ? CARD_APPEARANCE_SETTING_COUNT : 0,
+    bytes: backupPayloadBytes(payload),
+  });
+  toast?.({
+    type: "success",
+    title: opts.title || "Sauvegarde importée",
+    ...(opts.icon ? { icon: opts.icon } : {}),
+    message: recap.message,
+    messageHtml: recap.messageHtml,
+    delay: TOAST_DELAY_BACKUP,
+  });
+}
 
 let urlDialogSeq = 0;
 
@@ -330,16 +362,12 @@ export function openDemoBackupDialog(host, opts = {}) {
         importing = true;
         const closeBtn = backdrop.querySelector("[data-demo-dismiss]");
         if (closeBtn instanceof HTMLButtonElement) closeBtn.disabled = true;
-        const result = await importBackup(backup, { mode: "merge" });
+        await importBackup(backup, { mode: "merge" });
         if (settled) return;
-        const bits = [];
-        if (result.imported) bits.push(`${result.imported} carte(s)`);
-        if (result.themesImported) bits.push(`${result.themesImported} thème(s)`);
-        if (result.settingsApplied) bits.push("apparence des cartes");
-        const suffix = result.imported ? ` · total ${result.total}` : "";
-        toast?.(
-          bits.length ? `Import : ${bits.join(" · ")}${suffix}` : "Import terminé"
-        );
+        toastImportedBackup(toast, backup, {
+          title: "Démonstration importée",
+          icon: "emotion",
+        });
         await onImported?.();
         finish(true);
       } catch (err) {
@@ -857,19 +885,12 @@ export async function renderImportDialog(host, opts) {
     }
     setImporting(true);
     try {
-      const result = await importBackup(payload, {
+      await importBackup(payload, {
         mode: "merge",
         includeImages: !hasCardImages || includeImages,
         includeThemeLogos: !hasThemeLogos || includeThemeLogos,
       });
-      const bits = [];
-      if (result.imported) bits.push(`${result.imported} carte(s)`);
-      if (result.themesImported) bits.push(`${result.themesImported} thème(s)`);
-      if (result.settingsApplied) bits.push("apparence des cartes");
-      const suffix = result.imported ? ` · total ${result.total}` : "";
-      toast?.(
-        bits.length ? `Import : ${bits.join(" · ")}${suffix}` : "Import terminé"
-      );
+      toastImportedBackup(toast, payload);
       onImported?.();
       onClose();
     } catch (err) {

@@ -497,6 +497,34 @@ export function formatBackupFooterRecap(recap) {
   return { items, size: formatBackupSize(recap.bytes) };
 }
 
+/**
+ * Recap toast : nom de fichier optionnel + mêmes items que le pied, taille en gras (HTML).
+ * @param {{ cardCount: number, themeCount: number, settingCount: number, bytes: number }} recap
+ * @param {{ filename?: string }} [opts]
+ * @returns {{ message: string, messageHtml: string }}
+ */
+export function formatBackupToastRecap(recap, opts = {}) {
+  const { items, size } = formatBackupFooterRecap(recap);
+  const filename = String(opts.filename || "").trim();
+  /** @type {string[]} */
+  const parts = [];
+  if (filename) parts.push(filename);
+  parts.push(...items);
+  const message = size ? [...parts, size].join(" · ") : parts.join(" · ");
+  const htmlParts = parts.map(escapeBackupToastHtml);
+  if (size) htmlParts.push(`<strong>${escapeBackupToastHtml(size)}</strong>`);
+  return { message, messageHtml: htmlParts.join(" · ") };
+}
+
+/** @param {string} s */
+function escapeBackupToastHtml(s) {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 /** @param {unknown[]} cards */
 export function countBackupCardImages(cards) {
   return (cards || []).filter((c) => {
