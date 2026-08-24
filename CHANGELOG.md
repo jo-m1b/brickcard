@@ -7,13 +7,34 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Added
+
+- Notifications (Toast) : types normal / succès / erreur, empilement, fermeture manuelle, notification système HTML5 ; galerie `#developer/notifications`
+- Paramètres → Interface : case **Optimiser les images** (cochée par défaut) ; convertit les nouveaux rasters en WebP au chargement
+- Impression : raccourci Ctrl/Cmd+P pour ouvrir `#print` (hors éditeur carte / thème / presets et hors `#import`) ; déjà ouverte → lance l’impression
+
 ### Changed
 
+- Accueil vide : tuile **Charger une démonstration** (« Importer une sauvegarde de la collection de cartes des briques de Jo »)
+- Accueil vide : après **Charger une démonstration**, toast **Démonstration importée** (`ri-emotion-fill`) ; recap inchangé
+- Paramètres → Interface : hint **Optimiser les images** (« Convertir automatiquement les nouvelles images ajoutées à la collection dans un format optimisé. »)
+- Liste : après **modification** ou **suppression** d’une carte, la grille n’est plus reconstruite (tuile mise à jour ou retirée, scroll / recherche / tri conservés ; compteurs recherche et impression recalculés) ; après **création**, recherche vidée et tri sur date de modification (récent d’abord)
+- Thèmes (`#themes` et `#developer/theme-presets`) : après **modification** ou **suppression**, la grille n’est plus reconstruite (mini-carte mise à jour ou retirée, scroll / recherche / tri conservés) ; après **création**, recherche vidée, tri date desc et scroll en haut
+- Confirmations de suppression (carte / thème) : guillemets français « » comme les titres d’édition ; titre + référence de carte encadrés ensemble
+- Champ image vide : « Charger une nouvelle image pour la prévisualiser et la recadrer. » (style `form-hint`)
+- Toasts d’action (enregistrement, suppression, import, sauvegarde, photo) : type succès ; délai 7 s (15 s pour l’import / la sauvegarde de la collection) ; les notifications s’empilent au lieu de se remplacer
+- Toasts métier : titres et icônes spécifiques (thème, carte, image, sauvegarde) ; recap sauvegarde/import aligné sur le pied des modales ; erreur de sélection d’impression
 - GitHub Release : les notes groupées n’affichent plus le préfixe `feat:` / `fix:` / `docs:` / `chore:`
+- Image de carte : le bouton **Sauvegarder** télécharge `brickcard-card-image-YYYY-MM-DD-…` (ref, titre, les deux, ou id de la carte)
+- Logo de thème : le bouton **Sauvegarder** télécharge `brickcard-theme-logo-YYYY-MM-DD-…` (slug du nom, ou id du thème)
+- Champ image : un seul pipeline (`compressImage`) pour les photos de cartes et les logos de thèmes ; JPEG / WebP / PNG conservés (retaille canvas au-delà de 2000 px de côté) ; le reste → PNG ; logos : plus de plafond 400 px ni conversion systématique en PNG
+- Sauvegarde de démo (`data/backup-demo-jo.brickcard`) : photos converties en WebP (~41 Mo → ~4,6 Mo)
 
 ### Fixed
 
+- Titre de modale avec icône : le texte reste à droite de l’icône (plusieurs lignes si besoin) au lieu de passer dessous sur petit écran
 - GitHub Release : le dernier commit entre deux tags est bien listé dans les notes
+- Champ image : **Sauvegarder** un WebP télécharge le fichier (plus d’ouverture dans un nouvel onglet)
 
 ## [0.8.1] — 2026-08-24
 
