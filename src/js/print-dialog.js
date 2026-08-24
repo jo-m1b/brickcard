@@ -3,6 +3,7 @@
  * Fermeture (X, Échap, backdrop ; Annuler s’il y a des cartes) → accueil ; les réglages restent enregistrés.
  * « Lancer l’impression » imprime sans fermer la modale.
  * Rien à imprimer : message à la place des options, pas de pied (la croix suffit).
+ * Ctrl/Cmd+P : ouvrir la modale, ou lancer l’impression si elle est déjà ouverte.
  */
 
 import { ICON_CLOSE, ICON_PRINTER, modalTitleMarkup } from "./icons.js";
@@ -24,6 +25,13 @@ import {
   getPrintSettings,
   setPrintSettings,
 } from "./print-settings.js";
+
+/** Ctrl/Cmd+P (sans Alt / Maj) — ouvrir `#print` ou lancer l’impression. */
+export function isPrintShortcut(e) {
+  if (!(e instanceof KeyboardEvent) || e.repeat || e.altKey || e.shiftKey) return false;
+  if (!e.ctrlKey && !e.metaKey) return false;
+  return e.key === "p" || e.key === "P";
+}
 
 /**
  * @param {HTMLElement} host `#modal-root`
@@ -262,6 +270,12 @@ export function renderPrintDialog(host, opts) {
     if (e.key === "Escape") {
       e.preventDefault();
       close();
+      return;
+    }
+    if (isPrintShortcut(e)) {
+      e.preventDefault();
+      const runBtn = host.querySelector("#btn-print-dialog-run");
+      if (runBtn instanceof HTMLButtonElement && !runBtn.disabled) runBtn.click();
     }
   };
 
