@@ -6,6 +6,7 @@
 
 import { getPresetThemes, getPresetTheme, parseHexColor, clearPresetCache, clampLogoZoom, roundCropCoord } from "./themes-data.js";
 import { applyCardAppearanceSettings } from "./card-design.js";
+import { getOptimizeImages } from "./image-optimize.js";
 import { parseBrickcardBackup } from "./backup.js";
 import { APP_ID } from "./version.js?v=0.8.1";
 
@@ -25,7 +26,7 @@ export { isBrickcardBackupFilename, parseBrickcardBackup } from "./backup.js";
  * @property {number|null} pieceCount Nombre de pièces
  * @property {number|null} figurineCount Nombre de figurines (optionnel)
  * @property {number|null} releaseYear Année de sortie (optionnel)
- * @property {string} imageDataUrl Photo (data URL JPEG/PNG/SVG)
+ * @property {string} imageDataUrl Photo (data URL JPEG/PNG/SVG/WebP)
  * @property {string} imageBackgroundColor Fond derrière l’image (hex) ; vide = blanc à l’affichage
  * @property {number} imageZoom Zoom de cadrage photo (1 = cover / 100 % ; < 1 = dézoom)
  * @property {number} imageOffsetX Décalage horizontal photo (fraction)
@@ -41,6 +42,15 @@ export const IMAGE_LOAD_ERROR = "Erreur de chargement de l’image !";
 export const IMAGE_LOAD_ERROR_FORMAT = `${IMAGE_LOAD_ERROR} Format invalide (SVG, PNG, WebP, JPG…).`;
 export const IMAGE_LOAD_ERROR_CORS = `${IMAGE_LOAD_ERROR} Réseau ou CORS - le site source refuse le chargement.`;
 export const IMAGE_URL_INVALID = "L’URL de l’image est invalide.";
+
+/** Côté max des rasters importés (cartes et logos). */
+export const IMAGE_MAX_SIDE = 2000;
+
+/** Qualité JPEG / WebP après retaille canvas. */
+const IMAGE_ENCODE_QUALITY = 0.88;
+
+/** Sélecteur de fichiers (cartes et logos). */
+export const IMAGE_FILE_ACCEPT = "image/*,image/svg+xml,.svg";
 
 /**
  * @typedef {import("./themes-data.js").LegoTheme} LegoTheme
@@ -290,6 +300,7 @@ export async function wipeAllLocalData() {
     localStorage.removeItem("brickcard:themes-sort");
     localStorage.removeItem("brickcard:themes-sort-dir");
     localStorage.removeItem("brickcard:list-cols-max");
+    localStorage.removeItem("brickcard:optimize-images");
     localStorage.removeItem("brickcard:print-qty");
     localStorage.removeItem("brickcard:print-settings");
     localStorage.removeItem("brickcard:developer-enabled");
@@ -939,72 +950,69 @@ export async function fetchImageAsFile(urlString) {
 }
 
 /**
- * Compresse une image File/Blob en data URL.
- * SVG : conservé en vectoriel (scripts retirés). Rasters : JPEG, ou PNG si alpha.
+ * Type source d’un raster : MIME d’abord, puis extension.
+ * JPEG / WebP / PNG conservés ; le reste → PNG.
  * @param {File|Blob} file
- * @param {{ maxSize?: number, quality?: number }} [opts]
- * @returns {Promise<string>}
+ * @returns {"jpeg"|"webp"|"png"|"other"}
  */
-export async function compressImage(file, opts = {}) {
-  if (await fileLooksLikeSvg(file)) {
-    return encodeSvgFile(file);
-  }
+function rasterSourceKind(file) {
+  const type = String(file?.type || "")
+    .toLowerCase()
+    .split(";")[0]
+    .trim();
+  const name = file && "name" in file ? String(file.name || "") : "";
+  if (type === "image/jpeg" || type === "image/jpg") return "jpeg";
+  if (type === "image/webp") return "webp";
+  if (type === "image/png") return "png";
+  if (type.startsWith("image/") && type !== "image/svg+xml") return "other";
+  if (/\.jpe?g$/i.test(name)) return "jpeg";
+  if (/\.webp$/i.test(name)) return "webp";
+  if (/\.png$/i.test(name)) return "png";
+  return "other";
+}
 
-  const maxSize = opts.maxSize ?? 1600;
-  const quality = opts.quality ?? 0.88;
-  const keepAlpha =
-    /image\/(png|webp)/i.test(file.type || "") ||
-    /\.(png|webp)$/i.test(file.name || "");
+/** @param {"jpeg"|"webp"|"png"|"other"} kind */
+function rasterOutputMime(kind) {
+  if (kind === "jpeg") return "image/jpeg";
+  if (kind === "webp") return "image/webp";
+  return "image/png";
+}
 
+/** @param {File|Blob} file @returns {Promise<string>} */
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error(IMAGE_LOAD_ERROR));
+    reader.readAsDataURL(file);
+  });
+}
+
+/** @param {string} dataUrl */
+function dataUrlMime(dataUrl) {
+  const m = /^data:([^;,]+)/i.exec(String(dataUrl || ""));
+  return (m?.[1] || "").toLowerCase();
+}
+
+/**
+ * @param {File|Blob} file
+ * @returns {Promise<{ img: HTMLImageElement, width: number, height: number, cleanup: () => void }>}
+ */
+function loadImageFromFile(file) {
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file);
     const img = new Image();
     img.decoding = "async";
-
     const cleanup = () => URL.revokeObjectURL(url);
-
     img.onload = () => {
-      try {
-        let { naturalWidth: width, naturalHeight: height } = img;
-        if (!width || !height) {
-          width = img.width;
-          height = img.height;
-        }
-        if (!width || !height) {
-          cleanup();
-          reject(new Error(IMAGE_LOAD_ERROR));
-          return;
-        }
-
-        const scale = Math.min(1, maxSize / Math.max(width, height));
-        width = Math.max(1, Math.round(width * scale));
-        height = Math.max(1, Math.round(height * scale));
-
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) {
-          cleanup();
-          reject(new Error(IMAGE_LOAD_ERROR));
-          return;
-        }
-        if (keepAlpha) {
-          ctx.clearRect(0, 0, width, height);
-        } else {
-          ctx.fillStyle = "#ffffff";
-          ctx.fillRect(0, 0, width, height);
-        }
-        ctx.drawImage(img, 0, 0, width, height);
-        const dataUrl = keepAlpha
-          ? canvas.toDataURL("image/png")
-          : canvas.toDataURL("image/jpeg", quality);
-        cleanup();
-        resolve(dataUrl);
-      } catch {
+      let width = img.naturalWidth || img.width;
+      let height = img.naturalHeight || img.height;
+      if (!width || !height) {
         cleanup();
         reject(new Error(IMAGE_LOAD_ERROR));
+        return;
       }
+      resolve({ img, width, height, cleanup });
     };
     img.onerror = () => {
       cleanup();
@@ -1015,47 +1023,73 @@ export async function compressImage(file, opts = {}) {
 }
 
 /**
- * Logo de thème : SVG conservé en vectoriel (scripts retirés) ;
- * PNG (et autres rasters) compressés en PNG transparent.
- * @param {File} file
- * @returns {Promise<string>} data URL
+ * @param {HTMLImageElement} img
+ * @param {number} width
+ * @param {number} height
+ * @param {"image/jpeg"|"image/webp"|"image/png"} outputType
+ * @param {number} quality
+ * @returns {string}
  */
-export async function compressThemeImage(file) {
+function encodeRasterCanvas(img, width, height, outputType, quality) {
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error(IMAGE_LOAD_ERROR);
+  if (outputType === "image/jpeg") {
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, width, height);
+  } else {
+    ctx.clearRect(0, 0, width, height);
+  }
+  ctx.drawImage(img, 0, 0, width, height);
+  if (outputType === "image/jpeg") {
+    return canvas.toDataURL("image/jpeg", quality);
+  }
+  if (outputType === "image/webp") {
+    const dataUrl = canvas.toDataURL("image/webp", quality);
+    if (dataUrlMime(dataUrl) === "image/webp") return dataUrl;
+    return dataUrlMime(dataUrl) === "image/png" ? dataUrl : canvas.toDataURL("image/png");
+  }
+  return canvas.toDataURL("image/png");
+}
+
+/**
+ * Compresse une image File/Blob en data URL (cartes et logos).
+ * SVG : vectoriel, scripts retirés.
+ * Si « Optimiser les images » : rasters → WebP (côté max 2000 ; repli PNG).
+ * Sinon : JPEG / WebP / PNG conservés s’ils tiennent en 2000 px, sinon retaillés
+ * (même format ; WebP → PNG si l’encodage canvas échoue) ; le reste → PNG.
+ * @param {File|Blob} file
+ * @param {{ maxSize?: number, quality?: number }} [opts]
+ * @returns {Promise<string>}
+ */
+export async function compressImage(file, opts = {}) {
   if (await fileLooksLikeSvg(file)) {
     return encodeSvgFile(file);
   }
 
-  const maxSize = 400;
-
-  return new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(file);
-    const img = new Image();
-    img.onload = () => {
-      try {
-        let { width, height } = img;
-        const scale = Math.min(1, maxSize / Math.max(width, height));
-        width = Math.round(width * scale);
-        height = Math.round(height * scale);
-
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) throw new Error(IMAGE_LOAD_ERROR);
-        ctx.clearRect(0, 0, width, height);
-        ctx.drawImage(img, 0, 0, width, height);
-        const dataUrl = canvas.toDataURL("image/png");
-        URL.revokeObjectURL(url);
-        resolve(dataUrl);
-      } catch {
-        URL.revokeObjectURL(url);
-        reject(new Error(IMAGE_LOAD_ERROR));
-      }
-    };
-    img.onerror = () => {
-      URL.revokeObjectURL(url);
-      reject(new Error(IMAGE_LOAD_ERROR));
-    };
-    img.src = url;
-  });
+  const maxSize = opts.maxSize ?? IMAGE_MAX_SIDE;
+  const quality = opts.quality ?? IMAGE_ENCODE_QUALITY;
+  const optimize = getOptimizeImages();
+  const kind = rasterSourceKind(file);
+  const loaded = await loadImageFromFile(file);
+  const { img, cleanup } = loaded;
+  try {
+    const needsResize = Math.max(loaded.width, loaded.height) > maxSize;
+    if (!optimize && !needsResize && kind !== "other") {
+      cleanup();
+      return fileToDataUrl(file);
+    }
+    const scale = Math.min(1, maxSize / Math.max(loaded.width, loaded.height));
+    const width = Math.max(1, Math.round(loaded.width * scale));
+    const height = Math.max(1, Math.round(loaded.height * scale));
+    const outputType = optimize ? "image/webp" : rasterOutputMime(kind);
+    const dataUrl = encodeRasterCanvas(img, width, height, outputType, quality);
+    cleanup();
+    return dataUrl;
+  } catch (err) {
+    cleanup();
+    throw err instanceof Error ? err : new Error(IMAGE_LOAD_ERROR);
+  }
 }

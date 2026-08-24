@@ -27,10 +27,12 @@ import {
 import {
   fetchImageAsFile,
   resolveImageBackground,
+  IMAGE_FILE_ACCEPT,
   IMAGE_LOAD_ERROR,
   IMAGE_LOAD_ERROR_FORMAT,
   IMAGE_URL_INVALID,
 } from "./storage.js";
+import { toastImageSaved } from "./toast.js";
 
 const ZOOM_MIN = 25;
 const ZOOM_MAX = 400;
@@ -116,7 +118,7 @@ function clampZoomPercent(percent, max = ZOOM_MAX) {
  */
 export function formImageMarkup(opts) {
   const id = opts.id;
-  const accept = opts.accept || "image/*";
+  const accept = opts.accept || IMAGE_FILE_ACCEPT;
   const dataUrl = String(opts.dataUrl || "");
   const backgroundColor = String(opts.backgroundColor || "");
   const zoom = Number(opts.zoom) || 1;
@@ -168,7 +170,7 @@ export function formImageMarkup(opts) {
       <input type="file" id="${escapeAttr(fileId)}" class="form-image-file" accept="${escapeAttr(accept)}" hidden />
 
       <div class="form-image-empty" ${hasImage ? "hidden" : ""}>
-        <p class="form-image-empty-text"><strong>Aucune image !</strong> Charger une nouvelle image :</p>
+        <p class="form-hint form-image-empty-text">Charger une nouvelle image pour la prévisualiser et la recadrer.</p>
         <div class="form-image-empty-actions">
           <button type="button" class="btn primary" data-form-image-file>${ICON_FILE_LINE}<span>Depuis mes fichiers</span></button>
           <button type="button" class="btn secondary sm" data-form-image-url>${ICON_LINK}<span>Depuis une URL</span></button>
@@ -710,6 +712,7 @@ export function bindFormImage(root, opts = {}) {
     if (!state.dataUrl) return;
     try {
       await downloadCardPhoto(state.dataUrl, resolveDownloadBasename());
+      toastImageSaved();
       opts.onDownload?.();
     } catch {
       /* src attendue ; échec silencieux */

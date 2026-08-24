@@ -1,7 +1,8 @@
 import { ICON_ADD, ICON_CLOSE, ICON_DELETE_BIN_2, ICON_PENCIL, ICON_SAVE, modalTitleMarkup } from "../../icons.js";
 import { bindFormColor, formColorMarkup } from "../../form-color.js";
 import { bindFormImage, formImageMarkup } from "../../form-image.js";
-import { compressThemeImage } from "../../storage.js";
+import { formatThemeLogoBasename } from "../../card-export.js";
+import { compressImage } from "../../storage.js";
 import { mountCardBackPreview, refreshCardBackPreview } from "../../card-render.js";
 import { contrastText, DEFAULT_THEME_COLOR } from "../../themes-data.js";
 import { resolveCardAccent } from "../../card-design.js";
@@ -19,9 +20,6 @@ import {
   upsertPresetDraftTheme,
 } from "../../preset-draft.js";
 
-const THEME_LOGO_ACCEPT =
-  "image/svg+xml,image/png,image/webp,.svg,.png,.webp";
-
 /** Section d’index `#developer` pour l’outil thèmes par défaut. */
 const PRESETS_SECTION = "Aide au développement";
 
@@ -31,8 +29,8 @@ const PRESETS_SECTION = "Aide au développement";
  * @param {{
  *   themeId?: string|null,
  *   onClose: () => void,
- *   onSaved: () => void,
- *   onDeleted?: () => void,
+ *   onSaved: (meta: { isNew: boolean, theme: import("../../preset-draft.js").PresetDraftTheme, previousId: string }) => void,
+ *   onDeleted?: (id: string) => void,
  * }} opts
  * @returns {Promise<(() => void)|null>}
  */
@@ -140,7 +138,6 @@ export async function renderPresetDraftEditor(host, opts) {
                 ${formImageMarkup({
                   id: "preset-theme-logo",
                   labelledBy: "preset-theme-logo-label",
-                  accept: THEME_LOGO_ACCEPT,
                   dataUrl: displayLogo,
                   zoom: draft.logoZoom,
                   offsetX: draft.logoOffsetX,
@@ -261,14 +258,15 @@ export async function renderPresetDraftEditor(host, opts) {
 
   if (logoRoot) {
     logoField = bindFormImage(logoRoot, {
-      processFile: compressThemeImage,
+      processFile: compressImage,
       dialogHost: host,
       previewBackground: colorDisplay,
       fit: "logo",
-      downloadBasename: () => {
-        const id = idInput.value.trim();
-        return id && isValidPresetId(id) ? `theme-logo-${id}` : "theme-logo";
-      },
+      downloadBasename: () =>
+        formatThemeLogoBasename({
+          name: nameInput.value,
+          themeId: idInput.value.trim() || draft.id,
+        }),
       onChange(value) {
         const src = String(value.dataUrl || "").trim();
         if (!src) {
@@ -388,7 +386,7 @@ export async function renderPresetDraftEditor(host, opts) {
     }
 
     try {
-      await upsertPresetDraftTheme(
+      const saved = await upsertPresetDraftTheme(
         {
           id,
           name,
@@ -403,7 +401,7 @@ export async function renderPresetDraftEditor(host, opts) {
         },
         { previousId: draft.previousId }
       );
-      onSaved();
+      onSaved({ isNew: !isEdit, theme: saved, previousId: draft.previousId });
     } catch (ex) {
       errEl.textContent = ex.message || "Enregistrement impossible.";
     }
@@ -423,7 +421,7 @@ export async function renderPresetDraftEditor(host, opts) {
       if (!ok) return;
       try {
         await deletePresetDraftTheme(existing.id);
-        onDeleted?.();
+        onDeleted?.(existing.id);
       } catch (ex) {
         errEl.textContent = ex.message || "Suppression impossible.";
       }

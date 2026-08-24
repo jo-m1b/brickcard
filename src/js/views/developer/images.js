@@ -1,5 +1,5 @@
 import { bindFormImage, formImageMarkup } from "../../form-image.js";
-import { compressImage, compressThemeImage } from "../../storage.js";
+import { compressImage } from "../../storage.js";
 import { linkMarkup } from "../../link.js";
 
 /**
@@ -108,7 +108,7 @@ export function renderDeveloperImages(host) {
   let themeCtl = null;
   if (themeRoot) {
     themeCtl = bindFormImage(themeRoot, {
-      processFile: compressThemeImage,
+      processFile: compressImage,
       dialogHost,
       previewBackground: "#e3000b",
       downloadBasename: "demo-theme-logo",
@@ -124,7 +124,7 @@ export function renderDeveloperImages(host) {
         return res.blob();
       })
       .then((blob) =>
-        compressThemeImage(new File([blob], "logo.svg", { type: blob.type || "image/svg+xml" }))
+        compressImage(new File([blob], "logo.svg", { type: blob.type || "image/svg+xml" }))
       )
       .then((dataUrl) => {
         filledCtl?.setValue({

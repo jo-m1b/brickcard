@@ -10,7 +10,7 @@
  * @property {string} name Affichage (ex. "Aquazone", "CITY")
  * @property {string} color Couleur du thème (cartes), hex #rrggbb ou "" si non définie
  * @property {string} secondaryColor Textes / icônes / logo Brickcard, hex #rrggbb ou "" (contraste auto)
- * @property {string} logoDataUrl Logo PNG/SVG/WebP (data URL ou chemin relatif), optionnel
+ * @property {string} logoDataUrl Logo JPEG/PNG/SVG/WebP (data URL ou chemin relatif), optionnel
  * @property {number} logoZoom Zoom largeur logo (1 = 75 % de la largeur de carte)
  * @property {number} logoOffsetX Décalage horizontal logo (fraction de la boîte)
  * @property {number} logoOffsetY Décalage vertical logo (fraction de la boîte)

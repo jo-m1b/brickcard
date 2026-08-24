@@ -3,17 +3,75 @@
  */
 
 /**
+ * Segment kebab-case pour un nom de fichier (vide si rien d’utilisable).
  * @param {string} text
  * @returns {string}
  */
-export function slugifyFilename(text) {
-  const s = String(text || "")
+export function filenameSlug(text) {
+  return String(text || "")
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
-  return s || "brickcard";
+}
+
+/**
+ * @param {string} text
+ * @returns {string}
+ */
+export function slugifyFilename(text) {
+  return filenameSlug(text) || "brickcard";
+}
+
+/**
+ * Nom de fichier (sans extension) d’une photo de carte.
+ * Préfixe `brickcard-card-image-YYYY-MM-DD-` ; suite = ref, titre, les deux, ou id.
+ * @param {{
+ *   legoSetRef?: string,
+ *   title?: string,
+ *   cardId?: string,
+ *   date?: string,
+ * }} [opts]
+ * @returns {string}
+ */
+export function formatCardImageBasename(opts = {}) {
+  const date = opts.date || new Date().toISOString().slice(0, 10);
+  const refSlug = filenameSlug(opts.legoSetRef);
+  const titleSlug = filenameSlug(opts.title);
+  const parts = ["brickcard-card-image", date];
+  if (refSlug && titleSlug) {
+    parts.push(refSlug, titleSlug);
+  } else if (refSlug) {
+    parts.push(refSlug);
+  } else if (titleSlug) {
+    parts.push(titleSlug);
+  } else {
+    parts.push(filenameSlug(opts.cardId) || "card");
+  }
+  return parts.join("-");
+}
+
+/**
+ * Nom de fichier (sans extension) d’un logo de thème.
+ * Préfixe `brickcard-theme-logo-YYYY-MM-DD-` ; suite = slug du nom, ou id.
+ * @param {{
+ *   name?: string,
+ *   themeId?: string,
+ *   date?: string,
+ * }} [opts]
+ * @returns {string}
+ */
+export function formatThemeLogoBasename(opts = {}) {
+  const date = opts.date || new Date().toISOString().slice(0, 10);
+  const nameSlug = filenameSlug(opts.name);
+  const parts = ["brickcard-theme-logo", date];
+  if (nameSlug) {
+    parts.push(nameSlug);
+  } else {
+    parts.push(filenameSlug(opts.themeId) || "theme");
+  }
+  return parts.join("-");
 }
 
 /**
@@ -84,6 +142,7 @@ export function downloadBlob(blob, filename) {
 
 /**
  * Télécharge une data URL, un chemin same-origin, ou une URL.
+ * Toujours via `blob:` : un `href` data URL ignore `download` pour le WebP (nouvel onglet).
  * @param {string} src
  * @param {string} [basename] Sans extension
  * @returns {Promise<void>}
@@ -95,19 +154,13 @@ export async function downloadCardPhoto(src, basename = "brickcard-photo") {
   }
 
   const base = slugifyFilename(basename);
-
-  if (raw.startsWith("data:")) {
-    const { ext } = mimeFromDataUrl(raw);
-    triggerDownload(raw, `${base}.${ext}`);
-    return;
-  }
-
-  const fetchUrl = raw.split("?")[0];
-  const res = await fetch(fetchUrl, { cache: "no-store" });
+  const isData = raw.startsWith("data:");
+  const fetchUrl = isData ? raw : raw.split("?")[0];
+  const res = await fetch(fetchUrl, isData ? undefined : { cache: "no-store" });
   if (!res.ok) {
     throw new Error("Téléchargement impossible.");
   }
   const blob = await res.blob();
-  const ext = extFromMime(blob.type) || extFromSrc(raw) || "png";
+  const ext = (isData ? mimeFromDataUrl(raw).ext : "") || extFromMime(blob.type) || extFromSrc(raw) || "png";
   downloadBlob(blob, `${base}.${ext}`);
 }
