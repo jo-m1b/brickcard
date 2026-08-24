@@ -5,7 +5,7 @@
 
 import { downloadBlob } from "./card-export.js";
 import { getCardAppearanceSettings } from "./card-design.js";
-import { APP_ID, APP_VERSION } from "./version.js?v=0.8.0";
+import { APP_ID, APP_VERSION } from "./version.js?v=0.8.1";
 
 export const BACKUP_EXT = ".brickcard";
 export const BACKUP_INVALID = "La sauvegarde chargée est invalide !";

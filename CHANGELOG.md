@@ -7,6 +7,12 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [0.8.1] — 2026-08-24
+
+### Added
+
+- GitHub Releases : publication automatique (notes groupées + zip/tar.gz source) à chaque tag `vX.Y.Z`
+
 ### Fixed
 
 - Accueil vide : sur petite hauteur (ex. téléphone paysage) le contenu défile ; la brique et « Bienvenue » ne passent plus sous le header

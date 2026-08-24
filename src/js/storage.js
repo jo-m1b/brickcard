@@ -7,7 +7,7 @@
 import { getPresetThemes, getPresetTheme, parseHexColor, clearPresetCache, clampLogoZoom, roundCropCoord } from "./themes-data.js";
 import { applyCardAppearanceSettings } from "./card-design.js";
 import { parseBrickcardBackup } from "./backup.js";
-import { APP_ID } from "./version.js?v=0.8.0";
+import { APP_ID } from "./version.js?v=0.8.1";
 
 const DB_NAME_BASE = APP_ID;
 const DB_GEN_KEY = `${APP_ID}:db-gen`;

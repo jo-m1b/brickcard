@@ -2,7 +2,7 @@
  * Titre de l’onglet : défaut `APP_DOCUMENT_TITLE`, overlays, verrou pendant l’impression PDF.
  */
 
-import { APP_DOCUMENT_TITLE } from "./version.js?v=0.8.0";
+import { APP_DOCUMENT_TITLE } from "./version.js?v=0.8.1";
 
 export { APP_DOCUMENT_TITLE };
 
