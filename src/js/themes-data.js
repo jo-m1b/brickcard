@@ -36,6 +36,17 @@ const PRESETS_URL = "data/themes-presets.json";
 /** Gris neutre d’usine — dernier recours pour l’accent carte. */
 export const DEFAULT_THEME_COLOR = "#6e6e6e";
 
+/** Anciens ids de thèmes par défaut → id actuel (`themes-presets.json`). */
+const PRESET_ID_ALIASES = {
+  "the-lord-of-the-rings": "lord-of-the-rings",
+};
+
+/** @param {unknown} id @returns {string} */
+export function resolvePresetThemeId(id) {
+  const s = String(id || "").trim();
+  return PRESET_ID_ALIASES[s] || s;
+}
+
 /** Hosts locaux (bouton reset + fetch sans cache HTTP). */
 export function isLocalDevHost() {
   const host = location.hostname;
