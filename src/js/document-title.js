@@ -68,8 +68,9 @@ export function popModalDocumentTitle() {
 }
 
 /**
- * Remplace le titre par le nom de fichier PDF le temps de `window.print()`.
- * Les mises à jour overlay / enfants sont mémorisées et réappliquées après.
+ * Remplace le titre par le nom de fichier PDF pendant le dialogue d’impression.
+ * Firefox déclenche `afterprint` dès le clone (dialogue encore ouvert) : ne pas
+ * restaurer le titre dans ce handler, sinon Save to PDF → `127.0.0.1.pdf`.
  * @param {string} printTitle
  */
 export function beginPrintDocumentTitle(printTitle) {

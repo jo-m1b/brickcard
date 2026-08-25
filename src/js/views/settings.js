@@ -49,8 +49,13 @@ import {
   computePrintLayout,
   formatPrintGridSize,
   getPrintSettings,
-  normalizeCardSort,
-  printCardSortRadiosMarkup,
+  normalizeCardPrintOrder,
+  printCardOrderRadiosMarkup,
+  printCutMarksGroupMarkup,
+  printBleedGroupMarkup,
+  cutMarksFromCheckboxes,
+  bleedFromCheckboxes,
+  syncPrintBleedDisabled,
   setPrintSettings,
 } from "../print-settings.js";
 import { includesCI } from "../includes-ci.js";
@@ -110,7 +115,7 @@ export function renderSettingsModal(host, opts) {
         <div class="modal-body" tabindex="-1">
           <div class="settings-sections">
             <section class="settings-panel">
-              <h2 class="section-title">Interface</h2>
+              <h2 class="section-title">Application</h2>
               <fieldset class="form-check-group">
                 <legend class="form-label">Mode d’affichage</legend>
                 <div class="form-check-list">
@@ -262,60 +267,74 @@ export function renderSettingsModal(host, opts) {
                   ${formRangeResetMarkup()}
                 </div>
               </div>
+              ${printCutMarksGroupMarkup({
+                idPrefix: "settings-cut-marks",
+                name: "settings-cut-marks",
+                face: printSettings.cutMarkFace,
+                back: printSettings.cutMarkBack,
+              })}
+              ${printBleedGroupMarkup({
+                idPrefix: "settings-bleed",
+                name: "settings-bleed",
+                face: printSettings.bleedFace,
+                back: printSettings.bleedBack,
+                cutMarkFace: printSettings.cutMarkFace,
+                cutMarkBack: printSettings.cutMarkBack,
+              })}
               <fieldset class="form-check-group">
-                <legend class="form-label">Tri des cartes</legend>
+                <legend class="form-label">Ordre d’impression des cartes</legend>
                 <div class="form-check-list form-check-list--row">
-                  ${printCardSortRadiosMarkup({
-                    idPrefix: "settings-card-sort",
-                    name: "settings-card-sort",
-                    selected: printSettings.cardSort,
+                  ${printCardOrderRadiosMarkup({
+                    idPrefix: "settings-card-print-order",
+                    name: "settings-card-print-order",
+                    selected: printSettings.cardPrintOrder,
                   })}
                 </div>
               </fieldset>
               <fieldset class="form-check-group">
-                <legend class="form-label">Côtés des cartes à imprimer</legend>
+                <legend class="form-label">Côté d’impression</legend>
                 <div class="form-check-list form-check-list--row">
                   ${formRadioMarkup({
-                    id: "settings-card-sides-face-and-back",
-                    name: "settings-card-sides",
-                    value: "faceAndBack",
-                    label: "Face et dos",
-                    checked: printSettings.cardSidesToPrint === "faceAndBack",
+                    id: "settings-print-side-both",
+                    name: "settings-print-side",
+                    value: "both",
+                    label: "Les deux faces",
+                    checked: printSettings.printSide === "both",
                   })}
                   ${formRadioMarkup({
-                    id: "settings-card-sides-face-only",
-                    name: "settings-card-sides",
+                    id: "settings-print-side-face-only",
+                    name: "settings-print-side",
                     value: "faceOnly",
-                    label: "Face seulement",
-                    checked: printSettings.cardSidesToPrint === "faceOnly",
+                    label: "Face uniquement",
+                    checked: printSettings.printSide === "faceOnly",
                   })}
                   ${formRadioMarkup({
-                    id: "settings-card-sides-back-only",
-                    name: "settings-card-sides",
+                    id: "settings-print-side-back-only",
+                    name: "settings-print-side",
                     value: "backOnly",
-                    label: "Dos seulement",
-                    checked: printSettings.cardSidesToPrint === "backOnly",
+                    label: "Dos uniquement",
+                    checked: printSettings.printSide === "backOnly",
                   })}
                 </div>
               </fieldset>
-              <fieldset class="form-check-group" id="settings-recto-verso-field">
-                <legend class="form-label">Impression recto-verso des feuilles</legend>
+              <fieldset class="form-check-group" id="settings-sheet-assembly-field">
+                <legend class="form-label">Assemblage des feuilles</legend>
                 <div class="form-check-list">
                   ${formRadioMarkup({
-                    id: "settings-recto-verso-alternate",
-                    name: "settings-recto-verso",
+                    id: "settings-sheet-assembly-alternate",
+                    name: "settings-sheet-assembly",
                     value: "alternate",
                     label: "Alterner",
                     hint: "Une feuille à la fois (imprimante recto-verso)",
-                    checked: printSettings.sheetRectoVerso === "alternate",
+                    checked: printSettings.sheetAssembly === "alternate",
                   })}
                   ${formRadioMarkup({
-                    id: "settings-recto-verso-grouped",
-                    name: "settings-recto-verso",
+                    id: "settings-sheet-assembly-grouped",
+                    name: "settings-sheet-assembly",
                     value: "grouped",
                     label: "Regrouper",
                     hint: "Tous les rectos d’abord, puis retourner la pile pour ensuite imprimer tous les versos",
-                    checked: printSettings.sheetRectoVerso === "grouped",
+                    checked: printSettings.sheetAssembly === "grouped",
                   })}
                 </div>
               </fieldset>
@@ -398,10 +417,12 @@ export function renderSettingsModal(host, opts) {
   const settingsSections = host.querySelector(".settings-sections");
   const emptyFilter = host.querySelector("#settings-empty-filter");
   const themeInputs = host.querySelectorAll('input[name="settings-theme"]');
-  const printSortInputs = host.querySelectorAll('input[name="settings-card-sort"]');
-  const printSidesInputs = host.querySelectorAll('input[name="settings-card-sides"]');
-  const printDuplexInputs = host.querySelectorAll('input[name="settings-recto-verso"]');
-  const printDuplexField = host.querySelector("#settings-recto-verso-field");
+  const printOrderInputs = host.querySelectorAll('input[name="settings-card-print-order"]');
+  const printCutMarksInputs = host.querySelectorAll('input[name="settings-cut-marks"]');
+  const printBleedInputs = host.querySelectorAll('input[name="settings-bleed"]');
+  const printSideInputs = host.querySelectorAll('input[name="settings-print-side"]');
+  const printAssemblyInputs = host.querySelectorAll('input[name="settings-sheet-assembly"]');
+  const printAssemblyField = host.querySelector("#settings-sheet-assembly-field");
 
   /** @type {ReturnType<typeof bindFormRange>[]} */
   const rangeFields = [];
@@ -493,7 +514,7 @@ export function renderSettingsModal(host, opts) {
 
   function applyFilter() {
     const needle = (searchInput?.value || "").trim();
-    const duplexAllowed = currentPrintSettings.cardSidesToPrint === "faceAndBack";
+    const assemblyAllowed = currentPrintSettings.printSide === "both";
     let anyPanel = false;
     settingsSections?.querySelectorAll(":scope > .settings-panel").forEach((panel) => {
       const titleMatch =
@@ -505,8 +526,8 @@ export function renderSettingsModal(host, opts) {
         if (show) anyChild = true;
       });
       panel.querySelectorAll(":scope > .form-check-group").forEach((group) => {
-        const duplexBlocked = group === printDuplexField && !duplexAllowed;
-        const show = !duplexBlocked && (titleMatch || matchesLabels(group, needle));
+        const assemblyBlocked = group === printAssemblyField && !assemblyAllowed;
+        const show = !assemblyBlocked && (titleMatch || matchesLabels(group, needle));
         group.hidden = !show;
         if (show) anyChild = true;
       });
@@ -533,6 +554,7 @@ export function renderSettingsModal(host, opts) {
   }
 
   function refreshPrintSettingsUi() {
+    syncPrintBleedDisabled(printBleedInputs, currentPrintSettings);
     applyFilter();
     syncPrintMenu();
   }
@@ -557,31 +579,39 @@ export function renderSettingsModal(host, opts) {
       persistPrintSettings({ printGrid: Number(value) });
     },
   });
-  /** @param {Event} e */
-  const onPrintSortChange = (e) => {
-    const input = e.currentTarget;
-    if (!(input instanceof HTMLInputElement) || !input.checked) return;
-    persistPrintSettings({ cardSort: normalizeCardSort(input.value) });
+  const onPrintCutMarksChange = () => {
+    persistPrintSettings(cutMarksFromCheckboxes(printCutMarksInputs));
+  };
+  const onPrintBleedChange = () => {
+    persistPrintSettings(bleedFromCheckboxes(printBleedInputs));
   };
   /** @param {Event} e */
-  const onPrintSidesChange = (e) => {
+  const onPrintOrderChange = (e) => {
     const input = e.currentTarget;
     if (!(input instanceof HTMLInputElement) || !input.checked) return;
-    if (input.value !== "faceAndBack" && input.value !== "faceOnly" && input.value !== "backOnly") {
+    persistPrintSettings({ cardPrintOrder: normalizeCardPrintOrder(input.value) });
+  };
+  /** @param {Event} e */
+  const onPrintSideChange = (e) => {
+    const input = e.currentTarget;
+    if (!(input instanceof HTMLInputElement) || !input.checked) return;
+    if (input.value !== "both" && input.value !== "faceOnly" && input.value !== "backOnly") {
       return;
     }
-    persistPrintSettings({ cardSidesToPrint: input.value });
+    persistPrintSettings({ printSide: input.value });
   };
   /** @param {Event} e */
-  const onPrintDuplexChange = (e) => {
+  const onPrintAssemblyChange = (e) => {
     const input = e.currentTarget;
     if (!(input instanceof HTMLInputElement) || !input.checked) return;
     if (input.value !== "alternate" && input.value !== "grouped") return;
-    persistPrintSettings({ sheetRectoVerso: input.value });
+    persistPrintSettings({ sheetAssembly: input.value });
   };
-  printSortInputs.forEach((input) => input.addEventListener("change", onPrintSortChange));
-  printSidesInputs.forEach((input) => input.addEventListener("change", onPrintSidesChange));
-  printDuplexInputs.forEach((input) => input.addEventListener("change", onPrintDuplexChange));
+  printCutMarksInputs.forEach((input) => input.addEventListener("change", onPrintCutMarksChange));
+  printBleedInputs.forEach((input) => input.addEventListener("change", onPrintBleedChange));
+  printOrderInputs.forEach((input) => input.addEventListener("change", onPrintOrderChange));
+  printSideInputs.forEach((input) => input.addEventListener("change", onPrintSideChange));
+  printAssemblyInputs.forEach((input) => input.addEventListener("change", onPrintAssemblyChange));
 
   const clearCardsBtn = host.querySelector("#settings-clear-cards");
   if (clearCardsBtn && onClearCards) {
@@ -646,9 +676,11 @@ export function renderSettingsModal(host, opts) {
     defaultColorField?.destroy();
     rangeFields.forEach((field) => field.destroy());
     themeInputs.forEach((input) => input.removeEventListener("change", onThemeChange));
-    printSortInputs.forEach((input) => input.removeEventListener("change", onPrintSortChange));
-    printSidesInputs.forEach((input) => input.removeEventListener("change", onPrintSidesChange));
-    printDuplexInputs.forEach((input) => input.removeEventListener("change", onPrintDuplexChange));
+    printCutMarksInputs.forEach((input) => input.removeEventListener("change", onPrintCutMarksChange));
+    printBleedInputs.forEach((input) => input.removeEventListener("change", onPrintBleedChange));
+    printOrderInputs.forEach((input) => input.removeEventListener("change", onPrintOrderChange));
+    printSideInputs.forEach((input) => input.removeEventListener("change", onPrintSideChange));
+    printAssemblyInputs.forEach((input) => input.removeEventListener("change", onPrintAssemblyChange));
     optimizeInput?.removeEventListener("change", onOptimizeChange);
     searchInput?.removeEventListener("input", onSearchInput);
     document.removeEventListener("keydown", onKey);

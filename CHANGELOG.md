@@ -8,10 +8,29 @@ Les versions antérieures à 0.8 sont regroupées par mineure ; le détail patch
 
 ## [Unreleased]
 
+### Added
+
+- Impression : paramètre **Tracé de découpe** (cases Sur la face avant / Sur le dos (arrière), face cochée par défaut) dans `#settings` et `#print` ; le filet 1 px `#000000` n’apparaît que sur les côtés cochés
+- Impression : paramètre **Fond perdu** (cases Sur la face avant / Sur le dos (arrière), dos coché par défaut) dans `#settings` et `#print` ; 2 mm des quatre côtés, y compris sur la face ; désactivé et ignoré si le tracé de découpe du même côté est coché
+- Cartes (face, dos) et mini-cartes : filet 2 px `--ink` à l’écran pour lire le bord sur fond clair ou sombre
+
+### Fixed
+
+- Impression PDF : le nom de fichier reste `brickcard-…` même avec beaucoup de cartes (Firefox : `afterprint` trop tôt au clone ; plus de repli `127.0.0.1.pdf`)
+- Impression : le logo Brickcard (dos / face sans photo) reste net (SVG inline au lieu d’un masque CSS rasterisé)
+
 ### Changed
 
 - Cache-bust des modules `app.js` et `version.js` via une import map dans `index.html` (plus de `?v=` sur les imports JS)
+- Impression dos : fond perdu 2 mm des quatre côtés (plus de 1 mm L/R)
+- Impression : écart horizontal des cartes 5 mm (comme le vertical ; plus de chevauchement du fond perdu)
 - Sauvegarde de démo : dernière photo PNG convertie en WebP (~4,6 Mo → ~2,9 Mo)
+- Paramètres : section **Interface** renommée **Application**
+- Accueil vide : toast **Démonstration chargée** (à la place de **Démonstration importée**)
+- Impression (`#print`) : séparateur du détail « rectos puis versos » en point médian `·` (comme le recap des sauvegardes)
+- Impression : hint **Tracé de découpe** « Imprimer un tracé technique pour faciliter la découpe des cartes » ; cases **Sur la face avant** / **Sur le dos (arrière)**
+- Impression : **Ordre d’impression des cartes**, **Côté d’impression** (Les deux faces / Face uniquement / Dos uniquement), **Assemblage des feuilles**
+- Impression : clés `brickcard:print-settings` alignées sur l’UI (`cardPrintOrder`, `printSide`/`both`, `sheetAssembly`) ; pas de migration des anciennes clés
 
 ## [0.8.3] — 2026-08-25
 

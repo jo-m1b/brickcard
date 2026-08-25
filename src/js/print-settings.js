@@ -3,6 +3,7 @@
  * N’impacte que le document imprimé et le libellé de feuilles du menu.
  */
 
+import { formCheckboxMarkup } from "./form-checkbox.js";
 import { formRadioMarkup } from "./form-radio.js";
 import { CARD_SORT_KEYS } from "./card-sort.js";
 
@@ -12,16 +13,20 @@ export const PRINT_GRID_MIN = 1;
 export const PRINT_GRID_MAX = 10;
 export const DEFAULT_PRINT_GRID = 3;
 
-/** @typedef {"faceAndBack" | "faceOnly" | "backOnly"} CardSidesToPrint */
-/** @typedef {"alternate" | "grouped"} SheetRectoVerso */
+/** @typedef {"both" | "faceOnly" | "backOnly"} PrintSide */
+/** @typedef {"alternate" | "grouped"} SheetAssembly */
 /** @typedef {import("./card-sort.js").CardSortKey} CardSortKey */
 
-export const DEFAULT_CARD_SIDES_TO_PRINT = /** @type {CardSidesToPrint} */ ("faceAndBack");
-export const DEFAULT_SHEET_RECTO_VERSO = /** @type {SheetRectoVerso} */ ("alternate");
-export const DEFAULT_CARD_SORT = /** @type {CardSortKey} */ ("legoSetRef");
+export const DEFAULT_PRINT_SIDE = /** @type {PrintSide} */ ("both");
+export const DEFAULT_SHEET_ASSEMBLY = /** @type {SheetAssembly} */ ("alternate");
+export const DEFAULT_CARD_PRINT_ORDER = /** @type {CardSortKey} */ ("legoSetRef");
+export const DEFAULT_CUT_MARK_FACE = true;
+export const DEFAULT_CUT_MARK_BACK = false;
+export const DEFAULT_BLEED_FACE = false;
+export const DEFAULT_BLEED_BACK = true;
 
 /** @type {{ value: CardSortKey, label: string }[]} */
-export const PRINT_CARD_SORT_OPTIONS = [
+export const PRINT_CARD_ORDER_OPTIONS = [
   { value: "legoSetRef", label: "Référence" },
   { value: "title", label: "Titre" },
   { value: "releaseYear", label: "Année de sortie" },
@@ -35,15 +40,19 @@ const PAGE_H_MM = 297;
 const PAGE_PAD_MM = 5;
 const CARD_W_MM = 63;
 const CARD_H_MM = 88;
-const GAP_X_MM = 3;
+const GAP_X_MM = 5;
 const GAP_Y_MM = 5;
 
 /**
  * @typedef {{
  *   printGrid: number,
- *   cardSort: CardSortKey,
- *   cardSidesToPrint: CardSidesToPrint,
- *   sheetRectoVerso: SheetRectoVerso,
+ *   cardPrintOrder: CardSortKey,
+ *   printSide: PrintSide,
+ *   sheetAssembly: SheetAssembly,
+ *   cutMarkFace: boolean,
+ *   cutMarkBack: boolean,
+ *   bleedFace: boolean,
+ *   bleedBack: boolean,
  * }} PrintSettings
  */
 
@@ -65,35 +74,59 @@ export function normalizePrintGrid(value) {
   return Math.min(PRINT_GRID_MAX, Math.max(PRINT_GRID_MIN, n));
 }
 
-/** @param {unknown} value @returns {CardSidesToPrint} */
-export function normalizeCardSidesToPrint(value) {
-  if (value === "faceOnly" || value === "backOnly" || value === "faceAndBack") {
+/** @param {unknown} value @returns {PrintSide} */
+export function normalizePrintSide(value) {
+  if (value === "faceOnly" || value === "backOnly" || value === "both") {
     return value;
   }
-  return DEFAULT_CARD_SIDES_TO_PRINT;
+  return DEFAULT_PRINT_SIDE;
 }
 
-/** @param {unknown} value @returns {SheetRectoVerso} */
-export function normalizeSheetRectoVerso(value) {
+/** @param {unknown} value @returns {SheetAssembly} */
+export function normalizeSheetAssembly(value) {
   if (value === "grouped" || value === "alternate") return value;
-  return DEFAULT_SHEET_RECTO_VERSO;
+  return DEFAULT_SHEET_ASSEMBLY;
 }
 
 /** @param {unknown} value @returns {CardSortKey} */
-export function normalizeCardSort(value) {
+export function normalizeCardPrintOrder(value) {
   if (CARD_SORT_KEYS.includes(/** @type {CardSortKey} */ (value))) {
     return /** @type {CardSortKey} */ (value);
   }
-  return DEFAULT_CARD_SORT;
+  return DEFAULT_CARD_PRINT_ORDER;
+}
+
+/** @param {unknown} value @returns {boolean} */
+export function normalizeCutMarkFace(value) {
+  if (typeof value === "boolean") return value;
+  return DEFAULT_CUT_MARK_FACE;
+}
+
+/** @param {unknown} value @returns {boolean} */
+export function normalizeCutMarkBack(value) {
+  if (typeof value === "boolean") return value;
+  return DEFAULT_CUT_MARK_BACK;
+}
+
+/** @param {unknown} value @returns {boolean} */
+export function normalizeBleedFace(value) {
+  if (typeof value === "boolean") return value;
+  return DEFAULT_BLEED_FACE;
+}
+
+/** @param {unknown} value @returns {boolean} */
+export function normalizeBleedBack(value) {
+  if (typeof value === "boolean") return value;
+  return DEFAULT_BLEED_BACK;
 }
 
 /**
- * Radios horizontales « Tri des cartes » (Paramètres et `#print`).
+ * Radios horizontales « Ordre d’impression des cartes » (Paramètres et `#print`).
  * @param {{ idPrefix: string, name: string, selected: CardSortKey }} opts
  * @returns {string}
  */
-export function printCardSortRadiosMarkup(opts) {
-  return PRINT_CARD_SORT_OPTIONS.map((opt) =>
+export function printCardOrderRadiosMarkup(opts) {
+  return PRINT_CARD_ORDER_OPTIONS.map((opt) =>
     formRadioMarkup({
       id: `${opts.idPrefix}-${opt.value}`,
       name: opts.name,
@@ -102,6 +135,133 @@ export function printCardSortRadiosMarkup(opts) {
       checked: opts.selected === opt.value,
     })
   ).join("");
+}
+
+/**
+ * Groupe de cases « Tracé de découpe » (Paramètres et `#print`).
+ * @param {{ idPrefix: string, name: string, face: boolean, back: boolean }} opts
+ * @returns {string}
+ */
+export function printCutMarksGroupMarkup(opts) {
+  const hintId = `${opts.idPrefix}-hint`;
+  return `<fieldset class="form-check-group" aria-describedby="${hintId}">
+    <legend class="form-label">Tracé de découpe</legend>
+    <p class="form-hint" id="${hintId}">Imprimer un tracé technique pour faciliter la découpe des cartes</p>
+    <div class="form-check-list form-check-list--row">
+      ${formCheckboxMarkup({
+        id: `${opts.idPrefix}-face`,
+        name: opts.name,
+        value: "face",
+        label: "Sur la face avant",
+        checked: opts.face,
+      })}
+      ${formCheckboxMarkup({
+        id: `${opts.idPrefix}-back`,
+        name: opts.name,
+        value: "back",
+        label: "Sur le dos (arrière)",
+        checked: opts.back,
+      })}
+    </div>
+  </fieldset>`;
+}
+
+/**
+ * Lit les cases Face / Dos d’un groupe « Tracé de découpe ».
+ * @param {NodeListOf<Element>|Element[]} inputs
+ * @returns {{ cutMarkFace: boolean, cutMarkBack: boolean }}
+ */
+export function cutMarksFromCheckboxes(inputs) {
+  let face = false;
+  let back = false;
+  for (const input of inputs) {
+    if (!(input instanceof HTMLInputElement)) continue;
+    if (input.value === "face") face = input.checked;
+    if (input.value === "back") back = input.checked;
+  }
+  return { cutMarkFace: face, cutMarkBack: back };
+}
+
+/**
+ * Groupe de cases « Fond perdu » (Paramètres et `#print`).
+ * Les cases d’un côté sont désactivées si le tracé de découpe correspondant
+ * est coché (inutile d’imprimer un fond perdu avec un filet de coupe).
+ * @param {{
+ *   idPrefix: string,
+ *   name: string,
+ *   face: boolean,
+ *   back: boolean,
+ *   cutMarkFace: boolean,
+ *   cutMarkBack: boolean,
+ * }} opts
+ * @returns {string}
+ */
+export function printBleedGroupMarkup(opts) {
+  const hintId = `${opts.idPrefix}-hint`;
+  return `<fieldset class="form-check-group" aria-describedby="${hintId}">
+    <legend class="form-label">Fond perdu</legend>
+    <p class="form-hint" id="${hintId}">Étendre la couleur de fond des cartes au-delà de la zone de coupe pour éviter des bords avec du blanc lors de la découpe</p>
+    <div class="form-check-list form-check-list--row">
+      ${formCheckboxMarkup({
+        id: `${opts.idPrefix}-face`,
+        name: opts.name,
+        value: "face",
+        label: "Sur la face avant",
+        checked: opts.face,
+        disabled: opts.cutMarkFace,
+      })}
+      ${formCheckboxMarkup({
+        id: `${opts.idPrefix}-back`,
+        name: opts.name,
+        value: "back",
+        label: "Sur le dos (arrière)",
+        checked: opts.back,
+        disabled: opts.cutMarkBack,
+      })}
+    </div>
+  </fieldset>`;
+}
+
+/**
+ * Lit les cases Face / Dos d’un groupe « Fond perdu ».
+ * @param {NodeListOf<Element>|Element[]} inputs
+ * @returns {{ bleedFace: boolean, bleedBack: boolean }}
+ */
+export function bleedFromCheckboxes(inputs) {
+  let face = false;
+  let back = false;
+  for (const input of inputs) {
+    if (!(input instanceof HTMLInputElement)) continue;
+    if (input.value === "face") face = input.checked;
+    if (input.value === "back") back = input.checked;
+  }
+  return { bleedFace: face, bleedBack: back };
+}
+
+/**
+ * Grise / désactive les cases Fond perdu selon le tracé de découpe.
+ * @param {NodeListOf<Element>|Element[]} inputs
+ * @param {{ cutMarkFace: boolean, cutMarkBack: boolean }} cutMarks
+ */
+export function syncPrintBleedDisabled(inputs, cutMarks) {
+  for (const input of inputs) {
+    if (!(input instanceof HTMLInputElement)) continue;
+    if (input.value === "face") input.disabled = Boolean(cutMarks.cutMarkFace);
+    if (input.value === "back") input.disabled = Boolean(cutMarks.cutMarkBack);
+  }
+}
+
+/**
+ * Fond perdu effectivement imprimé : jamais si le tracé de découpe du même
+ * côté est coché.
+ * @param {PrintSettings} [settings]
+ * @returns {{ face: boolean, back: boolean }}
+ */
+export function effectivePrintBleed(settings = getPrintSettings()) {
+  return {
+    face: settings.bleedFace && !settings.cutMarkFace,
+    back: settings.bleedBack && !settings.cutMarkBack,
+  };
 }
 
 /**
@@ -134,9 +294,13 @@ export function computePrintLayout(printGrid = DEFAULT_PRINT_GRID) {
 function defaultPrintSettings() {
   return {
     printGrid: DEFAULT_PRINT_GRID,
-    cardSort: DEFAULT_CARD_SORT,
-    cardSidesToPrint: DEFAULT_CARD_SIDES_TO_PRINT,
-    sheetRectoVerso: DEFAULT_SHEET_RECTO_VERSO,
+    cardPrintOrder: DEFAULT_CARD_PRINT_ORDER,
+    printSide: DEFAULT_PRINT_SIDE,
+    sheetAssembly: DEFAULT_SHEET_ASSEMBLY,
+    cutMarkFace: DEFAULT_CUT_MARK_FACE,
+    cutMarkBack: DEFAULT_CUT_MARK_BACK,
+    bleedFace: DEFAULT_BLEED_FACE,
+    bleedBack: DEFAULT_BLEED_BACK,
   };
 }
 
@@ -148,9 +312,13 @@ export function getPrintSettings() {
     const parsed = JSON.parse(raw);
     return {
       printGrid: normalizePrintGrid(parsed?.printGrid),
-      cardSort: normalizeCardSort(parsed?.cardSort),
-      cardSidesToPrint: normalizeCardSidesToPrint(parsed?.cardSidesToPrint),
-      sheetRectoVerso: normalizeSheetRectoVerso(parsed?.sheetRectoVerso),
+      cardPrintOrder: normalizeCardPrintOrder(parsed?.cardPrintOrder),
+      printSide: normalizePrintSide(parsed?.printSide),
+      sheetAssembly: normalizeSheetAssembly(parsed?.sheetAssembly),
+      cutMarkFace: normalizeCutMarkFace(parsed?.cutMarkFace),
+      cutMarkBack: normalizeCutMarkBack(parsed?.cutMarkBack),
+      bleedFace: normalizeBleedFace(parsed?.bleedFace),
+      bleedBack: normalizeBleedBack(parsed?.bleedBack),
     };
   } catch {
     return defaultPrintSettings();
@@ -168,16 +336,34 @@ export function setPrintSettings(partial) {
       partial.printGrid != null
         ? normalizePrintGrid(partial.printGrid)
         : current.printGrid,
-    cardSort:
-      partial.cardSort != null ? normalizeCardSort(partial.cardSort) : current.cardSort,
-    cardSidesToPrint:
-      partial.cardSidesToPrint != null
-        ? normalizeCardSidesToPrint(partial.cardSidesToPrint)
-        : current.cardSidesToPrint,
-    sheetRectoVerso:
-      partial.sheetRectoVerso != null
-        ? normalizeSheetRectoVerso(partial.sheetRectoVerso)
-        : current.sheetRectoVerso,
+    cardPrintOrder:
+      partial.cardPrintOrder != null
+        ? normalizeCardPrintOrder(partial.cardPrintOrder)
+        : current.cardPrintOrder,
+    printSide:
+      partial.printSide != null
+        ? normalizePrintSide(partial.printSide)
+        : current.printSide,
+    sheetAssembly:
+      partial.sheetAssembly != null
+        ? normalizeSheetAssembly(partial.sheetAssembly)
+        : current.sheetAssembly,
+    cutMarkFace:
+      partial.cutMarkFace != null
+        ? normalizeCutMarkFace(partial.cutMarkFace)
+        : current.cutMarkFace,
+    cutMarkBack:
+      partial.cutMarkBack != null
+        ? normalizeCutMarkBack(partial.cutMarkBack)
+        : current.cutMarkBack,
+    bleedFace:
+      partial.bleedFace != null
+        ? normalizeBleedFace(partial.bleedFace)
+        : current.bleedFace,
+    bleedBack:
+      partial.bleedBack != null
+        ? normalizeBleedBack(partial.bleedBack)
+        : current.bleedBack,
   };
   try {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(next));
@@ -210,14 +396,14 @@ export function formatPrintSheetsLabel(cardCount, settings = getPrintSettings())
   const sheets = countPrintSheets(cardCount, settings.printGrid);
   if (!sheets) return "";
   const s = sheets > 1 ? "s" : "";
-  if (settings.cardSidesToPrint === "faceOnly") {
+  if (settings.printSide === "faceOnly") {
     return `${sheets} feuille${s} A4 (faces)`;
   }
-  if (settings.cardSidesToPrint === "backOnly") {
+  if (settings.printSide === "backOnly") {
     return `${sheets} feuille${s} A4 (dos)`;
   }
-  if (settings.sheetRectoVerso === "grouped") {
-    return `${sheets} feuille${s} A4 — rectos puis versos`;
+  if (settings.sheetAssembly === "grouped") {
+    return `${sheets} feuille${s} A4 · rectos puis versos`;
   }
   return `${sheets} feuille${s} A4 recto-verso`;
 }
@@ -270,16 +456,16 @@ export function formatPrintPdfBasename(
   const date = new Date().toISOString().slice(0, 10);
   const grid = `${layout.cols}x${layout.rows}`;
   const sides =
-    settings.cardSidesToPrint === "faceOnly"
+    settings.printSide === "faceOnly"
       ? "face"
-      : settings.cardSidesToPrint === "backOnly"
+      : settings.printSide === "backOnly"
         ? "dos"
         : "face-et-dos";
   const parts = ["brickcard", date, "grille", grid, sides];
-  if (settings.cardSidesToPrint === "faceAndBack") {
+  if (settings.printSide === "both") {
     parts.push(
       "recto-verso",
-      settings.sheetRectoVerso === "grouped" ? "regrouper" : "alterner"
+      settings.sheetAssembly === "grouped" ? "regrouper" : "alterner"
     );
   }
   parts.push(`${n}-carte${n > 1 ? "s" : ""}`);

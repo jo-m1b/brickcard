@@ -2041,7 +2041,8 @@ html:not([data-theme]) .btn .icon-system {
 }
 
 .form-check-group > legend.form-label + .form-check-list,
-.form-check-group > .form-hint + .form-check-list {
+.form-check-group > .form-hint + .form-check-list,
+.form-check-group > legend.form-label + .form-hint + .form-check-list {
   margin-top: 0.5rem;
 }
 
@@ -3723,9 +3724,7 @@ textarea {
   max-height: 2.5rem;
   flex-shrink: 0;
   aspect-ratio: 1;
-  background-color: currentColor;
-  -webkit-mask: url("../img/brickcard-logo.svg") center / contain no-repeat;
-  mask: url("../img/brickcard-logo.svg") center / contain no-repeat;
+  overflow: visible;
   opacity: 0.9;
 }
 
@@ -3740,6 +3739,17 @@ textarea {
 .nested-panel {
   margin-top: 0.5rem;
   background: var(--input-bg);
+}
+
+/*
+ * Filet écran : silhouette vs --bg (cartes très claires / très foncées).
+ * box-shadow (pas border) : suit --card-radius, ne change pas le 63×88 mm.
+ * Impression : filet sombre sur le slot (papier blanc) — voir .print-slot.
+ */
+.card,
+.card-back,
+.theme-tile-face {
+  box-shadow: 0 0 0 2px var(--ink);
 }
 
 /*
@@ -3907,9 +3917,7 @@ textarea {
   width: var(--card-brand-logo-h, 16mm);
   max-width: 28mm;
   flex-shrink: 0;
-  background-color: currentColor;
-  -webkit-mask: url("../img/brickcard-logo.svg") center / contain no-repeat;
-  mask: url("../img/brickcard-logo.svg") center / contain no-repeat;
+  overflow: visible;
   opacity: 0.9;
 }
 
@@ -4101,7 +4109,7 @@ textarea {
   display: grid;
   grid-template-columns: repeat(var(--cols), calc(var(--card-w) * var(--print-scale)));
   grid-template-rows: repeat(var(--rows), calc(var(--card-h) * var(--print-scale)));
-  gap: calc(5mm * var(--print-scale)) calc(3mm * var(--print-scale));
+  gap: calc(5mm * var(--print-scale));
   justify-content: center;
   align-content: center;
   box-sizing: border-box;
@@ -4117,9 +4125,29 @@ textarea {
 }
 
 .print-slot {
+  position: relative;
   width: calc(var(--card-w) * var(--print-scale));
   height: calc(var(--card-h) * var(--print-scale));
   overflow: hidden;
+}
+
+/*
+ * Filet d’impression (tracé de découpe) : 1 px #000 (papier blanc).
+ * Overlay ::after au-dessus de la carte — un outline sur le slot passe
+ * dessous et s’imprime trop fin. Visible seulement si Face / Dos est coché.
+ */
+.print-document.print-cut-mark-face .print-sheet--front .print-slot:not(.is-empty)::after,
+.print-document.print-cut-mark-back .print-sheet--back .print-slot:not(.is-empty)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  box-sizing: border-box;
+  border: 1px solid #000000;
+  border-radius: calc(var(--card-radius, 2mm) * var(--print-scale));
+  pointer-events: none;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 
 .print-slot > .card,
@@ -4128,6 +4156,7 @@ textarea {
   transform-origin: top left;
   margin-right: calc(var(--card-w) * (var(--print-scale) - 1));
   margin-bottom: calc(var(--card-h) * (var(--print-scale) - 1));
+  box-shadow: none;
 }
 
 .print-slot.is-empty {
@@ -4349,32 +4378,40 @@ textarea {
   }
 
   .card,
-  .card-back {
+  .card-back,
+  .print-slot {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
-  /*
-   * Fond perdu dos : rectangle sur le slot (repère feuille, pas le
-   * transform de la carte). 1 mm L/R, 2 mm H/B — scale avec la grille
-   * (gap 3 mm / 5 mm).
-   */
-  .print-sheet--back {
-    --print-bleed-x: calc(1mm * var(--print-scale));
-    --print-bleed-y: calc(2mm * var(--print-scale));
-    overflow: hidden;
+  .card-brand-logo {
+    opacity: 1;
   }
 
-  .print-sheet--back .print-slot:not(.is-empty) {
-    position: relative;
+  /*
+   * Fond perdu : rectangle sur le slot (repère feuille, pas le
+   * transform de la carte). 2 mm des quatre côtés — scale avec la grille.
+   * Face / dos selon .print-bleed-face / .print-bleed-back (jamais si
+   * le tracé de découpe du même côté est coché).
+   */
+  .print-document.print-bleed-face .print-sheet--front,
+  .print-document.print-bleed-back .print-sheet--back {
+    --print-bleed: calc(2mm * var(--print-scale));
+  }
+
+  .print-document.print-bleed-face .print-sheet--front .print-slot:not(.is-empty),
+  .print-document.print-bleed-back .print-sheet--back .print-slot:not(.is-empty) {
     overflow: visible;
   }
 
-  .print-sheet--back .print-slot:not(.is-empty)::before {
+  .print-document.print-bleed-face .print-sheet--front .print-slot:not(.is-empty)::before,
+  .print-document.print-bleed-back .print-sheet--back .print-slot:not(.is-empty)::before {
     content: "";
     position: absolute;
-    inset: calc(-1 * var(--print-bleed-y)) calc(-1 * var(--print-bleed-x));
+    inset: calc(-1 * var(--print-bleed));
     background: var(--card-accent, var(--card-default-accent, #6e6e6e));
     pointer-events: none;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }

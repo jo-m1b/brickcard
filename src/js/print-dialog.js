@@ -25,8 +25,13 @@ import {
   formatPrintGridSize,
   formatPrintMenuDesc,
   getPrintSettings,
-  normalizeCardSort,
-  printCardSortRadiosMarkup,
+  normalizeCardPrintOrder,
+  printCardOrderRadiosMarkup,
+  printCutMarksGroupMarkup,
+  printBleedGroupMarkup,
+  cutMarksFromCheckboxes,
+  bleedFromCheckboxes,
+  syncPrintBleedDisabled,
   setPrintSettings,
 } from "./print-settings.js";
 
@@ -101,60 +106,74 @@ export function renderPrintDialog(host, opts) {
               ${formRangeResetMarkup()}
             </div>
           </div>
+          ${printCutMarksGroupMarkup({
+            idPrefix: "print-dialog-cut-marks",
+            name: "print-dialog-cut-marks",
+            face: settings.cutMarkFace,
+            back: settings.cutMarkBack,
+          })}
+          ${printBleedGroupMarkup({
+            idPrefix: "print-dialog-bleed",
+            name: "print-dialog-bleed",
+            face: settings.bleedFace,
+            back: settings.bleedBack,
+            cutMarkFace: settings.cutMarkFace,
+            cutMarkBack: settings.cutMarkBack,
+          })}
           <fieldset class="form-check-group">
-            <legend class="form-label">Tri des cartes</legend>
+            <legend class="form-label">Ordre d’impression des cartes</legend>
             <div class="form-check-list form-check-list--row">
-              ${printCardSortRadiosMarkup({
-                idPrefix: "print-dialog-card-sort",
-                name: "print-dialog-card-sort",
-                selected: settings.cardSort,
+              ${printCardOrderRadiosMarkup({
+                idPrefix: "print-dialog-card-print-order",
+                name: "print-dialog-card-print-order",
+                selected: settings.cardPrintOrder,
               })}
             </div>
           </fieldset>
           <fieldset class="form-check-group">
-            <legend class="form-label">Côtés des cartes à imprimer</legend>
+            <legend class="form-label">Côté d’impression</legend>
             <div class="form-check-list form-check-list--row">
               ${formRadioMarkup({
-                id: "print-dialog-card-sides-face-and-back",
-                name: "print-dialog-card-sides",
-                value: "faceAndBack",
-                label: "Face et dos",
-                checked: settings.cardSidesToPrint === "faceAndBack",
+                id: "print-dialog-print-side-both",
+                name: "print-dialog-print-side",
+                value: "both",
+                label: "Les deux faces",
+                checked: settings.printSide === "both",
               })}
               ${formRadioMarkup({
-                id: "print-dialog-card-sides-face-only",
-                name: "print-dialog-card-sides",
+                id: "print-dialog-print-side-face-only",
+                name: "print-dialog-print-side",
                 value: "faceOnly",
-                label: "Face seulement",
-                checked: settings.cardSidesToPrint === "faceOnly",
+                label: "Face uniquement",
+                checked: settings.printSide === "faceOnly",
               })}
               ${formRadioMarkup({
-                id: "print-dialog-card-sides-back-only",
-                name: "print-dialog-card-sides",
+                id: "print-dialog-print-side-back-only",
+                name: "print-dialog-print-side",
                 value: "backOnly",
-                label: "Dos seulement",
-                checked: settings.cardSidesToPrint === "backOnly",
+                label: "Dos uniquement",
+                checked: settings.printSide === "backOnly",
               })}
             </div>
           </fieldset>
-          <fieldset class="form-check-group" id="print-dialog-duplex-field">
-            <legend class="form-label">Impression recto-verso des feuilles</legend>
+          <fieldset class="form-check-group" id="print-dialog-sheet-assembly-field">
+            <legend class="form-label">Assemblage des feuilles</legend>
             <div class="form-check-list">
               ${formRadioMarkup({
-                id: "print-dialog-recto-verso-alternate",
-                name: "print-dialog-recto-verso",
+                id: "print-dialog-sheet-assembly-alternate",
+                name: "print-dialog-sheet-assembly",
                 value: "alternate",
                 label: "Alterner",
                 hint: "Une feuille à la fois (imprimante recto-verso)",
-                checked: settings.sheetRectoVerso === "alternate",
+                checked: settings.sheetAssembly === "alternate",
               })}
               ${formRadioMarkup({
-                id: "print-dialog-recto-verso-grouped",
-                name: "print-dialog-recto-verso",
+                id: "print-dialog-sheet-assembly-grouped",
+                name: "print-dialog-sheet-assembly",
                 value: "grouped",
                 label: "Regrouper",
                 hint: "Tous les rectos d’abord, puis retourner la pile pour ensuite imprimer tous les versos",
-                checked: settings.sheetRectoVerso === "grouped",
+                checked: settings.sheetAssembly === "grouped",
               })}
             </div>
           </fieldset>`
@@ -195,10 +214,12 @@ export function renderPrintDialog(host, opts) {
     const gridRow = /** @type {HTMLElement|null} */ (
       host.querySelector("#print-dialog-grid")?.closest(".form-range-row")
     );
-    const sortInputs = host.querySelectorAll('input[name="print-dialog-card-sort"]');
-    const sidesInputs = host.querySelectorAll('input[name="print-dialog-card-sides"]');
-    const duplexInputs = host.querySelectorAll('input[name="print-dialog-recto-verso"]');
-    const duplexField = host.querySelector("#print-dialog-duplex-field");
+    const orderInputs = host.querySelectorAll('input[name="print-dialog-card-print-order"]');
+    const cutMarksInputs = host.querySelectorAll('input[name="print-dialog-cut-marks"]');
+    const bleedInputs = host.querySelectorAll('input[name="print-dialog-bleed"]');
+    const sideInputs = host.querySelectorAll('input[name="print-dialog-print-side"]');
+    const assemblyInputs = host.querySelectorAll('input[name="print-dialog-sheet-assembly"]');
+    const assemblyField = host.querySelector("#print-dialog-sheet-assembly-field");
     const runBtn = host.querySelector("#btn-print-dialog-run");
 
     function refresh() {
@@ -215,9 +236,10 @@ export function renderPrintDialog(host, opts) {
           )
         );
       }
-      if (duplexField instanceof HTMLElement) {
-        duplexField.hidden = settings.cardSidesToPrint !== "faceAndBack";
+      if (assemblyField instanceof HTMLElement) {
+        assemblyField.hidden = settings.printSide !== "both";
       }
+      syncPrintBleedDisabled(bleedInputs, settings);
       syncPrintMenu();
     }
 
@@ -237,26 +259,36 @@ export function renderPrintDialog(host, opts) {
       });
     }
 
-    sortInputs.forEach((input) => {
+    orderInputs.forEach((input) => {
       input.addEventListener("change", () => {
         if (!(input instanceof HTMLInputElement) || !input.checked) return;
-        persist({ cardSort: normalizeCardSort(input.value) });
+        persist({ cardPrintOrder: normalizeCardPrintOrder(input.value) });
       });
     });
-    sidesInputs.forEach((input) => {
+    cutMarksInputs.forEach((input) => {
+      input.addEventListener("change", () => {
+        persist(cutMarksFromCheckboxes(cutMarksInputs));
+      });
+    });
+    bleedInputs.forEach((input) => {
+      input.addEventListener("change", () => {
+        persist(bleedFromCheckboxes(bleedInputs));
+      });
+    });
+    sideInputs.forEach((input) => {
       input.addEventListener("change", () => {
         if (!(input instanceof HTMLInputElement) || !input.checked) return;
-        if (input.value !== "faceAndBack" && input.value !== "faceOnly" && input.value !== "backOnly") {
+        if (input.value !== "both" && input.value !== "faceOnly" && input.value !== "backOnly") {
           return;
         }
-        persist({ cardSidesToPrint: input.value });
+        persist({ printSide: input.value });
       });
     });
-    duplexInputs.forEach((input) => {
+    assemblyInputs.forEach((input) => {
       input.addEventListener("change", () => {
         if (!(input instanceof HTMLInputElement) || !input.checked) return;
         if (input.value !== "alternate" && input.value !== "grouped") return;
-        persist({ sheetRectoVerso: input.value });
+        persist({ sheetAssembly: input.value });
       });
     });
 
@@ -266,7 +298,7 @@ export function renderPrintDialog(host, opts) {
         const cards = await loadCards();
         const selected = cards
           .filter((card) => getPrintQty(card.id) > 0)
-          .sort((a, b) => compareCardsAsc(a, b, settings.cardSort));
+          .sort((a, b) => compareCardsAsc(a, b, settings.cardPrintOrder));
         /** @type {import("./storage.js").Card[]} */
         const toPrint = [];
         for (const card of selected) {

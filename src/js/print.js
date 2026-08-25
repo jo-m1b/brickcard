@@ -8,6 +8,7 @@ import { renderCardFace, renderCardBack, applyImageTransform, applyThemeLogoTran
 import { loadThemes } from "./storage.js";
 import {
   computePrintLayout,
+  effectivePrintBleed,
   formatPrintPdfBasename,
   getPrintSettings,
 } from "./print-settings.js";
@@ -74,6 +75,10 @@ function buildSheet(pageCards, side, themeMap, layout) {
         face.dataset.imageZoom = String(card.imageZoom || 1);
         face.dataset.imageOffsetX = String(card.imageOffsetX || 0);
         face.dataset.imageOffsetY = String(card.imageOffsetY || 0);
+        slot.style.setProperty(
+          "--card-accent",
+          face.style.getPropertyValue("--card-accent")
+        );
         slot.appendChild(face);
       } else {
         const back = renderCardBack(card, { legoTheme });
@@ -99,6 +104,11 @@ function buildSheet(pageCards, side, themeMap, layout) {
 function buildPrintDocument(cards, themeMap, layout, settings) {
   const root = document.createElement("div");
   root.className = "print-document";
+  if (settings.cutMarkFace) root.classList.add("print-cut-mark-face");
+  if (settings.cutMarkBack) root.classList.add("print-cut-mark-back");
+  const bleed = effectivePrintBleed(settings);
+  if (bleed.face) root.classList.add("print-bleed-face");
+  if (bleed.back) root.classList.add("print-bleed-back");
   const pages = chunk(cards, layout.cardsPerPage);
 
   /** @param {"front"|"back"} side */
@@ -108,11 +118,11 @@ function buildPrintDocument(cards, themeMap, layout, settings) {
     }
   }
 
-  if (settings.cardSidesToPrint === "faceOnly") {
+  if (settings.printSide === "faceOnly") {
     appendSide("front");
-  } else if (settings.cardSidesToPrint === "backOnly") {
+  } else if (settings.printSide === "backOnly") {
     appendSide("back");
-  } else if (settings.sheetRectoVerso === "grouped") {
+  } else if (settings.sheetAssembly === "grouped") {
     appendSide("front");
     appendSide("back");
   } else {
@@ -217,9 +227,14 @@ export async function printCards(cards, opts = {}) {
   const printRoot = document.getElementById("print-root");
   if (!printRoot) throw new Error("Zone d'impression introuvable");
 
+  const settings = getPrintSettings();
+  const pdfName = formatPrintPdfBasename(cards.length, settings);
+  // Verrouiller tôt : Gecko met à jour contentTitle en async ; un gros DOM
+  // juste avant print() laisse souvent le titre vide → 127.0.0.1.pdf.
+  beginPrintDocumentTitle(pdfName);
+
   const themes = await loadThemes();
   const themeMap = new Map(themes.map((t) => [t.id, t]));
-  const settings = getPrintSettings();
   const layout = computePrintLayout(settings.printGrid);
 
   printRoot.innerHTML = "";
@@ -233,12 +248,14 @@ export async function printCards(cards, opts = {}) {
   reapplyTransforms(printRoot);
 
   const onBeforePrint = () => {
+    document.title = pdfName;
     revealLoadedThemeLogos(printRoot);
     reapplyTransforms(printRoot);
   };
-  window.addEventListener("beforeprint", onBeforePrint);
 
   let cleaned = false;
+  let inPrintCall = false;
+  let printReturnedAt = 0;
   const cleanup = () => {
     if (cleaned) return;
     cleaned = true;
@@ -246,13 +263,26 @@ export async function printCards(cards, opts = {}) {
     printRoot.classList.remove("is-preparing");
     printRoot.innerHTML = "";
     window.removeEventListener("beforeprint", onBeforePrint);
-    window.removeEventListener("afterprint", cleanup);
+    window.removeEventListener("afterprint", onAfterPrint);
     opts.onDone?.();
   };
 
-  window.addEventListener("afterprint", cleanup);
-  await new Promise((r) => setTimeout(r, 80));
-  beginPrintDocumentTitle(formatPrintPdfBasename(cards.length, settings));
+  /** Firefox : afterprint = clone prêt, dialogue encore ouvert. Chrome : dialogue fermé. */
+  const onAfterPrint = () => {
+    if (inPrintCall) return;
+    if (printReturnedAt && performance.now() - printReturnedAt < 1500) return;
+    cleanup();
+  };
+
+  window.addEventListener("beforeprint", onBeforePrint);
+  window.addEventListener("afterprint", onAfterPrint);
+
+  inPrintCall = true;
+  const printStarted = performance.now();
   window.print();
-  setTimeout(cleanup, 2500);
+  printReturnedAt = performance.now();
+  inPrintCall = false;
+  if (printReturnedAt - printStarted > 250) cleanup();
+
+  setTimeout(cleanup, 10 * 60 * 1000);
 }

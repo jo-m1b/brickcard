@@ -365,7 +365,7 @@ export function openDemoBackupDialog(host, opts = {}) {
         await importBackup(backup, { mode: "merge" });
         if (settled) return;
         toastImportedBackup(toast, backup, {
-          title: "Démonstration importée",
+          title: "Démonstration chargée",
           icon: "emotion",
         });
         await onImported?.();

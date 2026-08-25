@@ -182,7 +182,7 @@ export function renderDeveloperTypography(host) {
             </button>
           </div>
           <div class="modal-body" tabindex="-1">
-            <h2 class="section-title">Interface</h2>
+            <h2 class="section-title">Application</h2>
             <p class="form-label">Mode d’affichage</p>
           </div>
         </div>
