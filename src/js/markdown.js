@@ -6,7 +6,7 @@
  */
 
 import { linkMarkup } from "./link.js";
-import { APP_VERSION } from "./version.js?v=0.8.2";
+import { APP_VERSION } from "./version.js?v=0.8.3";
 
 /**
  * Échappe le HTML brut.

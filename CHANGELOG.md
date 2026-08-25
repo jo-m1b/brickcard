@@ -8,6 +8,8 @@ Les versions antérieures à 0.8 sont regroupées par mineure ; le détail patch
 
 ## [Unreleased]
 
+## [0.8.3] — 2026-08-25
+
 ### Added
 
 - Impression : paramètre **Tri des cartes** (référence par défaut, toujours croissant) dans `#settings` et `#print` ; l’ordre du document imprimé suit ce choix

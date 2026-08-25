@@ -3,7 +3,7 @@ import { initTheme } from "./theme.js";
 import { initCardDesign } from "./card-design.js";
 import { initListLayout } from "./list-layout.js";
 import { enableDeveloper, isDeveloperEnabled } from "./developer-access.js";
-import { APP_ID, APP_VERSION } from "./version.js?v=0.8.2";
+import { APP_ID, APP_VERSION } from "./version.js?v=0.8.3";
 import { setAppDocumentTitle } from "./document-title.js";
 import { toast } from "./toast.js";
 import { renderEditor } from "./views/editor.js";
