@@ -104,7 +104,7 @@ export async function renderBackupDialog(host, opts) {
                     name: "backup-kind",
                     value: "full",
                     label: "Sauvegarde complète",
-                    hint: "Toutes les cartes, thèmes personnalisés et paramètres de votre collection.",
+                    hint: "Toutes les cartes, thèmes personnalisés et paramètres de votre collection",
                     checked: true,
                   })}
                   ${formRadioMarkup({
@@ -112,7 +112,7 @@ export async function renderBackupDialog(host, opts) {
                     name: "backup-kind",
                     value: "custom",
                     label: "Sauvegarde personnalisée",
-                    hint: "Sauvegarder uniquement les données sélectionnées.",
+                    hint: "Sauvegarder uniquement les données sélectionnées",
                   })}
                 </div>
               </fieldset>
@@ -125,14 +125,14 @@ export async function renderBackupDialog(host, opts) {
                     id: "backup-include-images",
                     name: "backup-include-images",
                     label: "Images des cartes",
-                    hint: "Sauvegarder les images des cartes de la collection.",
+                    hint: "Sauvegarder les images des cartes de la collection",
                     checked: true,
                   })}
                   ${formCheckboxMarkup({
                     id: "backup-include-theme-logos",
                     name: "backup-include-theme-logos",
                     label: "Logos des thèmes personnalisés",
-                    hint: "Sauvegarder les logos des thèmes personnalisés.",
+                    hint: "Sauvegarder les logos des thèmes personnalisés",
                     checked: true,
                   })}
                 </div>
@@ -146,7 +146,7 @@ export async function renderBackupDialog(host, opts) {
                     id: "backup-include-settings",
                     name: "backup-include-settings",
                     label: "Apparence des cartes",
-                    hint: "Sauvegarder les paramètres de bordure, arrondis et couleur par défaut des cartes.",
+                    hint: "Sauvegarder les paramètres de bordure, arrondis et couleur par défaut des cartes",
                     checked: true,
                   })}
                 </div>
@@ -157,7 +157,7 @@ export async function renderBackupDialog(host, opts) {
                 ? `<section class="settings-panel backup-custom-panel" hidden>
               <h2 class="section-title" id="backup-cards-title">Cartes</h2>
               <fieldset class="form-check-group" aria-labelledby="backup-cards-title">
-                <p class="form-hint">Sauvegarder uniquement les cartes des thèmes sélectionnés.</p>
+                <p class="form-hint">Sauvegarder uniquement les cartes des thèmes sélectionnés</p>
                 <div class="form-check-list form-check-list--row">
                   ${themeChecksHtml}
                 </div>

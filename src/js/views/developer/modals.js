@@ -74,8 +74,8 @@ export function renderDeveloperModals(host) {
           </table>
         </div>
         <p class="form-hint" style="margin-top: 0.75rem">
-          Appliqué dans l’app&nbsp;: paramètres / page MD (<code>modal--md</code>),
-          thèmes + éditeur carte + éditeur de thème + espace développeur (<code>modal--lg</code>).
+          Appliqué dans l’app&nbsp;: paramètres / page MD / espace développeur / impression (<code>modal--md</code>),
+          thèmes + éditeur carte + éditeur de thème + thèmes par défaut (<code>modal--lg</code>)
         </p>
       </div>
 
@@ -87,8 +87,8 @@ export function renderDeveloperModals(host) {
               <tr><th>Usage</th><th>Taille</th></tr>
             </thead>
             <tbody>
-              <tr><td>Paramètres / page MD</td><td><code>modal--md</code></td></tr>
-              <tr><td>Thèmes LEGO / éditeur carte / éditeur de thème / espace développeur</td><td><code>modal--lg</code></td></tr>
+              <tr><td>Paramètres / page MD / espace développeur / impression</td><td><code>modal--md</code></td></tr>
+              <tr><td>Thèmes LEGO / éditeur carte / éditeur de thème / thèmes par défaut</td><td><code>modal--lg</code></td></tr>
             </tbody>
           </table>
         </div>
@@ -128,7 +128,7 @@ export function renderDeveloperModals(host) {
 
       <div class="styleguide-section">
         <h2 class="styleguide-section-title">Corps long</h2>
-        <p class="form-hint" style="margin-bottom: 0.65rem">Grande modale avec beaucoup de contenu (scroll dans le body).</p>
+        <p class="form-hint" style="margin-bottom: 0.65rem">Grande modale avec beaucoup de contenu (scroll dans le body)</p>
         <div class="styleguide-row">
           <button type="button" class="btn secondary" data-demo-modal="scroll">Ouvrir (contenu long)</button>
         </div>

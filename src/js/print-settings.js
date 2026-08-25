@@ -3,6 +3,9 @@
  * N’impacte que le document imprimé et le libellé de feuilles du menu.
  */
 
+import { formRadioMarkup } from "./form-radio.js";
+import { CARD_SORT_KEYS } from "./card-sort.js";
+
 const SETTINGS_KEY = "brickcard:print-settings";
 
 export const PRINT_GRID_MIN = 1;
@@ -11,9 +14,21 @@ export const DEFAULT_PRINT_GRID = 3;
 
 /** @typedef {"faceAndBack" | "faceOnly" | "backOnly"} CardSidesToPrint */
 /** @typedef {"alternate" | "grouped"} SheetRectoVerso */
+/** @typedef {import("./card-sort.js").CardSortKey} CardSortKey */
 
 export const DEFAULT_CARD_SIDES_TO_PRINT = /** @type {CardSidesToPrint} */ ("faceAndBack");
 export const DEFAULT_SHEET_RECTO_VERSO = /** @type {SheetRectoVerso} */ ("alternate");
+export const DEFAULT_CARD_SORT = /** @type {CardSortKey} */ ("legoSetRef");
+
+/** @type {{ value: CardSortKey, label: string }[]} */
+export const PRINT_CARD_SORT_OPTIONS = [
+  { value: "legoSetRef", label: "Référence" },
+  { value: "title", label: "Titre" },
+  { value: "releaseYear", label: "Année de sortie" },
+  { value: "pieceCount", label: "Nombre de pièces" },
+  { value: "figurineCount", label: "Nombre de figurines" },
+  { value: "updatedAt", label: "Date de modification" },
+];
 
 const PAGE_W_MM = 210;
 const PAGE_H_MM = 297;
@@ -26,6 +41,7 @@ const GAP_Y_MM = 5;
 /**
  * @typedef {{
  *   printGrid: number,
+ *   cardSort: CardSortKey,
  *   cardSidesToPrint: CardSidesToPrint,
  *   sheetRectoVerso: SheetRectoVerso,
  * }} PrintSettings
@@ -63,6 +79,31 @@ export function normalizeSheetRectoVerso(value) {
   return DEFAULT_SHEET_RECTO_VERSO;
 }
 
+/** @param {unknown} value @returns {CardSortKey} */
+export function normalizeCardSort(value) {
+  if (CARD_SORT_KEYS.includes(/** @type {CardSortKey} */ (value))) {
+    return /** @type {CardSortKey} */ (value);
+  }
+  return DEFAULT_CARD_SORT;
+}
+
+/**
+ * Radios horizontales « Tri des cartes » (Paramètres et `#print`).
+ * @param {{ idPrefix: string, name: string, selected: CardSortKey }} opts
+ * @returns {string}
+ */
+export function printCardSortRadiosMarkup(opts) {
+  return PRINT_CARD_SORT_OPTIONS.map((opt) =>
+    formRadioMarkup({
+      id: `${opts.idPrefix}-${opt.value}`,
+      name: opts.name,
+      value: opt.value,
+      label: opt.label,
+      checked: opts.selected === opt.value,
+    })
+  ).join("");
+}
+
 /**
  * Grille A4 : 3×3 = échelle 1 (taille poker).
  * Sinon l’échelle remplit la largeur utile (agrandir à 1–2 / réduire à 4–10).
@@ -93,6 +134,7 @@ export function computePrintLayout(printGrid = DEFAULT_PRINT_GRID) {
 function defaultPrintSettings() {
   return {
     printGrid: DEFAULT_PRINT_GRID,
+    cardSort: DEFAULT_CARD_SORT,
     cardSidesToPrint: DEFAULT_CARD_SIDES_TO_PRINT,
     sheetRectoVerso: DEFAULT_SHEET_RECTO_VERSO,
   };
@@ -106,6 +148,7 @@ export function getPrintSettings() {
     const parsed = JSON.parse(raw);
     return {
       printGrid: normalizePrintGrid(parsed?.printGrid),
+      cardSort: normalizeCardSort(parsed?.cardSort),
       cardSidesToPrint: normalizeCardSidesToPrint(parsed?.cardSidesToPrint),
       sheetRectoVerso: normalizeSheetRectoVerso(parsed?.sheetRectoVerso),
     };
@@ -125,6 +168,8 @@ export function setPrintSettings(partial) {
       partial.printGrid != null
         ? normalizePrintGrid(partial.printGrid)
         : current.printGrid,
+    cardSort:
+      partial.cardSort != null ? normalizeCardSort(partial.cardSort) : current.cardSort,
     cardSidesToPrint:
       partial.cardSidesToPrint != null
         ? normalizeCardSidesToPrint(partial.cardSidesToPrint)

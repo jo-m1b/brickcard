@@ -6,6 +6,7 @@ import {
 } from "../../icons.js";
 import { emptyViewMarkup } from "../../empty-view.js";
 import { confirmDialog } from "../../confirm-dialog.js";
+import { toast } from "../../toast.js";
 import {
   applyThemeLogoTransform,
   brandLogoMarkup,
@@ -19,11 +20,7 @@ import {
   loadPresetDraftThemes,
   resetPresetDraft,
 } from "../../preset-draft.js";
-
-/** @param {string} hay @param {string} needle */
-function includesCI(hay, needle) {
-  return hay.toLowerCase().includes(needle.toLowerCase());
-}
+import { includesCI } from "../../includes-ci.js";
 
 let rememberedQuery = "";
 
@@ -33,6 +30,10 @@ let mountedRefreshPresetAfterCreate = null;
 let mountedPatchPresetInList = null;
 /** @type {((id: string) => boolean) | null} */
 let mountedRemovePresetFromList = null;
+/** @type {((id: string) => boolean) | null} */
+let mountedFocusPresetInList = null;
+/** @type {string | null} */
+let pendingFocusPresetId = null;
 
 /**
  * Ajoute un thème au brouillon affiché : recherche vidée, tri date desc, scroll haut.
@@ -53,6 +54,38 @@ export function refreshPresetDraftAfterCreate(theme) {
 export function patchPresetDraftInList(theme, previousId) {
   if (!mountedPatchPresetInList || !theme?.id) return false;
   return mountedPatchPresetInList(theme, previousId);
+}
+
+/**
+ * Place le focus clavier sur la mini-carte d’un thème du brouillon.
+ * Si la tuile n’est pas encore dans la grille, le focus est appliqué au prochain rendu.
+ * @param {string} [id]
+ */
+export function focusPresetDraftInList(id) {
+  if (!id) return;
+  pendingFocusPresetId = id;
+  if (mountedFocusPresetInList?.(id)) {
+    pendingFocusPresetId = null;
+    return;
+  }
+  requestAnimationFrame(() => applyPendingPresetFocus());
+}
+
+/** Applique un focus de tuile en attente (après `focusTopModal` au retour liste). */
+export function applyPendingPresetFocus() {
+  if (!pendingFocusPresetId) return;
+  if (mountedFocusPresetInList?.(pendingFocusPresetId)) pendingFocusPresetId = null;
+}
+
+/**
+ * @param {Element | null | undefined} tile
+ * @returns {boolean}
+ */
+function applyPresetTileFocus(tile) {
+  if (!(tile instanceof HTMLElement)) return false;
+  tile.scrollIntoView({ block: "nearest", inline: "nearest" });
+  tile.focus({ preventScroll: true, focusVisible: true });
+  return true;
 }
 
 /**
@@ -102,8 +135,6 @@ export function renderDeveloperThemePresets(host, opts) {
         </div>
       </div>
       <p class="view-desc">Copie locale de <code>themes-presets.json</code> — n’affecte pas la collection. Téléchargez le JSON et les logos pour les placer dans <code>data/</code>.</p>
-      <p class="form-hint" id="preset-draft-status" hidden></p>
-      <p class="form-error" id="preset-draft-error" role="alert" hidden></p>
       <div class="themes-grid" id="preset-draft-grid" hidden></div>
       ${emptyViewMarkup({
         id: "preset-draft-empty-filter",
@@ -150,8 +181,6 @@ export function renderDeveloperThemePresets(host, opts) {
   const grid = q("#preset-draft-grid");
   const emptyFilter = q("#preset-draft-empty-filter");
   const loadingEl = q("#preset-draft-loading");
-  const statusEl = q("#preset-draft-status");
-  const errorEl = q("#preset-draft-error");
   const btnNew = q("#preset-draft-new");
   const btnJson = q("#preset-draft-json");
   const btnLogos = q("#preset-draft-logos");
@@ -163,18 +192,6 @@ export function renderDeveloperThemePresets(host, opts) {
   let themes = [];
   let cancelled = false;
   let busy = false;
-
-  function setStatus(message, isError = false) {
-    const text = String(message || "");
-    if (statusEl) {
-      statusEl.textContent = isError ? "" : text;
-      statusEl.hidden = isError || !text;
-    }
-    if (errorEl) {
-      errorEl.textContent = isError ? text : "";
-      errorEl.hidden = !isError || !text;
-    }
-  }
 
   function setBusy(next) {
     busy = next;
@@ -308,7 +325,7 @@ export function renderDeveloperThemePresets(host, opts) {
       if (cancelled) return;
       if (loadingEl) loadingEl.hidden = true;
       if (emptyFilter) emptyFilter.hidden = true;
-      setStatus(err.message || "Impossible de charger le brouillon.", true);
+      toast(err.message || "Impossible de charger le brouillon", "error");
     }
   }
 
@@ -356,12 +373,16 @@ export function renderDeveloperThemePresets(host, opts) {
   btnJson.onclick = async () => {
     if (busy) return;
     setBusy(true);
-    setStatus("");
     try {
       const { count } = await downloadPresetDraftJson();
-      setStatus(`${count} thème(s) — fichier themes-presets.json téléchargé.`);
+      if (cancelled) return;
+      toast({
+        type: "success",
+        message: `${count} thème(s) — fichier themes-presets.json téléchargé`,
+        messageHtml: `${count} thème(s) — fichier <code>themes-presets.json</code> téléchargé`,
+      });
     } catch (err) {
-      setStatus(err.message || "Téléchargement du JSON impossible.", true);
+      if (!cancelled) toast(err.message || "Téléchargement du JSON impossible", "error");
     } finally {
       setBusy(false);
     }
@@ -370,18 +391,25 @@ export function renderDeveloperThemePresets(host, opts) {
   btnLogos.onclick = async () => {
     if (busy) return;
     setBusy(true);
-    setStatus("Préparation des logos…");
     try {
       const { ok, skipped } = await downloadPresetDraftLogos();
+      if (cancelled) return;
       if (!ok && skipped) {
-        setStatus("Aucun logo n’a pu être téléchargé.", true);
+        toast("Aucun logo n’a pu être téléchargé", "error");
       } else if (skipped) {
-        setStatus(`${ok} logo(s) téléchargé(s), ${skipped} ignoré(s).`);
+        toast({
+          type: "success",
+          message: `${ok} logo(s) téléchargé(s), ${skipped} ignoré(s)`,
+        });
       } else {
-        setStatus(`${ok} logo(s) téléchargé(s) (theme-logo-{id}.{ext}).`);
+        toast({
+          type: "success",
+          message: `${ok} logo(s) téléchargé(s) (theme-logo-{id}.{ext})`,
+          messageHtml: `${ok} logo(s) téléchargé(s) (<code>theme-logo-{id}.{ext}</code>)`,
+        });
       }
     } catch (err) {
-      setStatus(err.message || "Téléchargement des logos impossible.", true);
+      if (!cancelled) toast(err.message || "Téléchargement des logos impossible", "error");
     } finally {
       setBusy(false);
     }
@@ -401,16 +429,21 @@ export function renderDeveloperThemePresets(host, opts) {
     });
     if (!ok || cancelled) return;
     setBusy(true);
-    setStatus("");
     try {
       themes = await resetPresetDraft();
       if (cancelled) return;
       rememberedQuery = "";
       searchInput.value = "";
       paint();
-      setStatus("Brouillon rechargé depuis themes-presets.json.");
+      toast({
+        type: "success",
+        message: "Brouillon rechargé depuis le fichier /data/themes-presets.json",
+        messageHtml:
+          "Brouillon rechargé depuis le fichier <code>/data/themes-presets.json</code>",
+      });
     } catch (err) {
-      setStatus(err.message || "Impossible de réinitialiser le brouillon.", true);
+      if (cancelled) return;
+      toast(err.message || "Impossible de réinitialiser le brouillon", "error");
     } finally {
       setBusy(false);
     }
@@ -428,6 +461,8 @@ export function renderDeveloperThemePresets(host, opts) {
   function applyTileLogoCrops() {
     bindThemeTileLogos(host);
   }
+
+  mountedFocusPresetInList = (id) => applyPresetTileFocus(queryPresetTile(id));
 
   reload();
 
@@ -474,6 +509,7 @@ export function renderDeveloperThemePresets(host, opts) {
     mountedRefreshPresetAfterCreate = null;
     mountedPatchPresetInList = null;
     mountedRemovePresetFromList = null;
+    mountedFocusPresetInList = null;
     window.removeEventListener("resize", applyTileLogoCrops);
     host.innerHTML = "";
   };

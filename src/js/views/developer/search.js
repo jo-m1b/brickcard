@@ -37,7 +37,8 @@ export function renderDeveloperSearch(host) {
         Slot topbar&nbsp;: <code>topbar-search</code> centre le bloc.
         Compteur + tri&nbsp;: visibles seulement s’il y a <strong>au moins 2</strong>
         éléments. Libellé toujours «&nbsp;cartes&nbsp;».
-        Appliqué : liste des cartes (topbar) · modale thèmes (compteur + tri).
+        Appliqué : liste des cartes (topbar) · modale thèmes (compteur + tri) ·
+        accueil espace développeur et paramètres (<code>search-bar--input-only</code>).
       </p>
 
       <div class="styleguide-section">
@@ -65,7 +66,7 @@ export function renderDeveloperSearch(host) {
 
       <div class="styleguide-section">
         <h2 class="styleguide-section-title">Avec compteur</h2>
-        <p class="form-hint" style="margin-bottom: 0.65rem">Tape pour voir le compteur se mettre à jour (démo locale).</p>
+        <p class="form-hint" style="margin-bottom: 0.65rem">Tape pour voir le compteur se mettre à jour (démo locale)</p>
         <div class="styleguide-search-demo">
           <div class="search-bar">
             ${controlIconMarkup(ICON_SEARCH_LINE)}
@@ -124,7 +125,7 @@ export function renderDeveloperSearch(host) {
 
       <div class="styleguide-section">
         <h2 class="styleguide-section-title">Moins de 2 éléments</h2>
-        <p class="form-hint" style="margin-bottom: 0.65rem">Trail masqué (<code>hidden</code>) — même rendu qu’un champ texte seul.</p>
+        <p class="form-hint" style="margin-bottom: 0.65rem">Trail masqué (<code>hidden</code>) — même rendu qu’un champ texte seul</p>
         <div class="styleguide-search-demo">
           <div class="search-bar">
             ${controlIconMarkup(ICON_SEARCH_LINE)}

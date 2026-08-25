@@ -7,8 +7,8 @@ import { APP_ID, APP_VERSION } from "./version.js?v=0.8.2";
 import { setAppDocumentTitle } from "./document-title.js";
 import { toast } from "./toast.js";
 import { renderEditor } from "./views/editor.js";
-import { renderList, prepareListAfterCardCreate, patchListCard, removeListCard } from "./views/list.js";
-import { renderThemesModal, prepareThemesAfterThemeCreate, refreshThemesListAfterCreate, patchThemeInList, removeThemeFromList } from "./views/themes.js";
+import { renderList, prepareListAfterCardCreate, patchListCard, removeListCard, focusListCard } from "./views/list.js";
+import { renderThemesModal, prepareThemesAfterThemeCreate, refreshThemesListAfterCreate, patchThemeInList, removeThemeFromList, focusThemeInList, applyPendingThemeFocus } from "./views/themes.js";
 import { renderThemeEditor } from "./views/theme-editor.js";
 import { renderPageModal } from "./views/page.js";
 import { renderSettingsModal } from "./views/settings.js";
@@ -16,6 +16,7 @@ import { isPrintShortcut, renderPrintDialog } from "./print-dialog.js";
 import { isCollectionSaveShortcut, renderBackupDialog } from "./backup-dialog.js";
 import { openDemoBackupDialog, renderImportDialog } from "./import-dialog.js";
 import { renderDeveloperModal } from "./views/developer/modal.js";
+import { applyPendingPresetFocus } from "./views/developer/theme-presets.js";
 import { loadingViewMarkup, welcomeViewMarkup } from "./empty-view.js";
 import { openConfirmDialog } from "./confirm-dialog.js";
 import { bindModalFocusTrap, focusTopModal } from "./modal-focus.js";
@@ -369,11 +370,21 @@ async function showOverlay(routeInfo) {
           onClose: overlayOnClose("themes"),
           onCreate: () => navigate("#themes/new"),
           onEdit: (id) => navigate(`#themes/edit/${encodeURIComponent(id)}`),
+          onClearedCustomThemes: () => {
+            toast({
+              type: "success",
+              message: "Tous les thèmes personnalisés ont été supprimés",
+              icon: "delete-bin-2",
+            });
+            underlayStale = true;
+          },
         });
         focusTopModal();
+        applyPendingThemeFocus();
       } else {
         setAppDocumentTitle("Thèmes");
         focusTopModal({ resetScroll: false });
+        applyPendingThemeFocus();
       }
       return;
     }
@@ -388,9 +399,11 @@ async function showOverlay(routeInfo) {
     cleanupThemeEditor = await renderThemeEditor(modalRoot, {
       themeId: routeInfo.page === "edit" ? routeInfo.themeId : null,
       onClose: () => {
+        const id = routeInfo.page === "edit" ? routeInfo.themeId : null;
         if (parseRoute().name === "themes") {
           navigate("#themes", { replace: true });
         }
+        if (id) focusThemeInList(id);
       },
       onSaved: (name, meta) => {
         toast({
@@ -410,6 +423,7 @@ async function showOverlay(routeInfo) {
         if (parseRoute().name === "themes") {
           navigate("#themes", { replace: true });
         }
+        focusThemeInList(meta?.theme?.id);
       },
       onDeleted: (name, themeId) => {
         toast({
@@ -474,6 +488,7 @@ async function showOverlay(routeInfo) {
       onNavigate: navigate,
     });
     focusTopModal({ resetScroll: !staying });
+    applyPendingPresetFocus();
     return;
   }
 
@@ -489,8 +504,13 @@ async function showOverlay(routeInfo) {
           underlayStale = true;
         }
         if (parseRoute().name === "editor") navigate("#", { replace: true });
+        focusListCard(meta?.card?.id);
       },
-      onCancel: overlayOnClose("editor"),
+      onCancel: () => {
+        const id = routeInfo.cardId;
+        overlayOnClose("editor")();
+        if (id) focusListCard(id);
+      },
       onDeleted: (subject, cardId) => {
         toastCardSavedOrDeleted("deleted", subject);
         const result = removeListCard(cardId);

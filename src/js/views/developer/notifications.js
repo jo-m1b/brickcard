@@ -103,7 +103,7 @@ export function renderDeveloperNotifications(host) {
 
       <div class="styleguide-section">
         <h2 class="styleguide-section-title">Types</h2>
-        <p class="form-hint" style="margin-bottom: 0.65rem">Les toasts s’empilent en bas à droite (au-dessus de cette modale).</p>
+        <p class="form-hint" style="margin-bottom: 0.65rem">Les toasts s’empilent en bas à droite (au-dessus de cette modale)</p>
         <div class="styleguide-row">
           <button type="button" class="btn secondary" data-demo-toast="normal">Normal</button>
           <button type="button" class="btn secondary" data-demo-toast="success">Succès</button>
@@ -169,7 +169,7 @@ export function renderDeveloperNotifications(host) {
           </div>
           <div class="form-field">
             <label class="form-label" for="toast-secondary">Texte secondaire</label>
-            <p class="form-hint" id="toast-secondary-hint">Affiché à droite du header (<code>small</code>).</p>
+            <p class="form-hint" id="toast-secondary-hint">Affiché à droite du header (<code>small</code>)</p>
             <input class="form-control" type="text" id="toast-secondary" name="toast-secondary" placeholder="à l’instant" autocomplete="off" aria-describedby="toast-secondary-hint" />
           </div>
           <div class="form-field">
@@ -186,7 +186,7 @@ export function renderDeveloperNotifications(host) {
               id: "toast-hide-title",
               name: "toast-hide-title",
               label: "Sans titre",
-              hint: "Icône et croix passent dans le body.",
+              hint: "Icône et croix passent dans le body",
             })}
             ${formCheckboxMarkup({
               id: "toast-hide-icon",
@@ -209,7 +209,7 @@ export function renderDeveloperNotifications(host) {
               id: "toast-system",
               name: "toast-system",
               label: "Notification système HTML5",
-              hint: "Décochez pour n’afficher que dans le navigateur.",
+              hint: "Décochez pour n’afficher que dans le navigateur",
               checked: true,
             })}
           </div>

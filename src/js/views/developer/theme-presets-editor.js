@@ -7,6 +7,7 @@ import { mountCardBackPreview, refreshCardBackPreview } from "../../card-render.
 import { contrastText, DEFAULT_THEME_COLOR } from "../../themes-data.js";
 import { resolveCardAccent } from "../../card-design.js";
 import { confirmDialog } from "../../confirm-dialog.js";
+import { toast } from "../../toast.js";
 import { focusTopModal } from "../../modal-focus.js";
 import { popModalDocumentTitle, pushModalDocumentTitle } from "../../document-title.js";
 import {
@@ -113,7 +114,7 @@ export async function renderPresetDraftEditor(host, opts) {
               </div>
               <div class="form-field">
                 <label class="form-label" for="preset-theme-color-hex">Couleur</label>
-                <p class="form-hint" id="preset-theme-color-hint">Couleur principale des cartes du thème.</p>
+                <p class="form-hint" id="preset-theme-color-hint">Couleur principale des cartes du thème</p>
                 ${formColorMarkup({
                   id: "preset-theme-color-hex",
                   value: draft.color,
@@ -147,7 +148,6 @@ export async function renderPresetDraftEditor(host, opts) {
                   fit: "logo",
                 })}
               </div>
-              <p class="form-error" id="preset-theme-error" role="alert"></p>
             </div>
           </div>
         </div>
@@ -176,7 +176,6 @@ export async function renderPresetDraftEditor(host, opts) {
   const idInput = /** @type {HTMLInputElement} */ (q("#preset-theme-id"));
   const nameError = q("#preset-theme-name-error");
   const idError = q("#preset-theme-id-error");
-  const errEl = q("#preset-theme-error");
   const logoRoot = /** @type {HTMLElement|null} */ (q("#preset-theme-logo"));
   const previewHost = /** @type {HTMLElement} */ (q("#preset-preview-back-host"));
 
@@ -353,7 +352,6 @@ export async function renderPresetDraftEditor(host, opts) {
   q("#preset-theme-save").onclick = async () => {
     const name = nameInput.value.trim();
     const id = idInput.value.trim();
-    errEl.textContent = "";
     setFieldError(nameError, nameInput, "", "preset-theme-name-error");
     setFieldError(idError, idInput, "", "preset-theme-id-error");
 
@@ -403,7 +401,7 @@ export async function renderPresetDraftEditor(host, opts) {
       );
       onSaved({ isNew: !isEdit, theme: saved, previousId: draft.previousId });
     } catch (ex) {
-      errEl.textContent = ex.message || "Enregistrement impossible.";
+      toast(ex.message || "Enregistrement impossible", "error");
     }
   };
 
@@ -423,7 +421,7 @@ export async function renderPresetDraftEditor(host, opts) {
         await deletePresetDraftTheme(existing.id);
         onDeleted?.(existing.id);
       } catch (ex) {
-        errEl.textContent = ex.message || "Suppression impossible.";
+        toast(ex.message || "Suppression impossible", "error");
       }
     };
   }

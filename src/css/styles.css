@@ -1637,7 +1637,13 @@ html:not([data-theme]) .btn .icon-system {
   margin-bottom: 1rem;
 }
 
-.form-field[hidden] {
+.form-field[hidden],
+.form-check-group[hidden],
+.settings-panel[hidden],
+.settings-sections[hidden],
+.styleguide-section[hidden],
+.tile-list[hidden],
+.tile-list > li[hidden] {
   display: none;
 }
 
@@ -1668,10 +1674,6 @@ html:not([data-theme]) .btn .icon-system {
 .form-hint strong {
   font-weight: 700;
   color: var(--ink);
-}
-
-.theme-mode-switch + .form-hint {
-  text-align: center;
 }
 
 .form-error {
@@ -2047,6 +2049,15 @@ html:not([data-theme]) .btn .icon-system {
   display: flex;
   flex-direction: column;
   gap: 0.65rem;
+}
+
+/* Groupe : décalage à gauche sous la légende (vertical et horizontal). */
+.form-check-group > .form-check-list {
+  padding-inline-start: 1.5rem;
+}
+
+.form-check-group > .form-error {
+  padding-inline-start: 1.5rem;
 }
 
 .form-check-list--row {
@@ -2805,6 +2816,7 @@ button.form-select-trigger.sm {
   min-width: 0;
   box-sizing: border-box;
   border-radius: 2px;
+  scroll-margin-top: calc(var(--topbar-h) + 0.5rem);
 }
 
 .card-tile:focus,
@@ -2988,11 +3000,12 @@ button.form-select-trigger.sm {
 
 /* Hauteur fixe (évite le yoyo selon le nombre de résultats) */
 #themes-modal-backdrop > .modal,
+#settings-modal-backdrop > .modal,
 #developer-modal-backdrop > .modal.is-fixed-h {
   height: var(--modal-max-h);
 }
 
-/* Outil presets : état vide / chargement centré sous la recherche (brique hors flux) */
+/* Accueil développeur / presets : état vide / chargement centré sous la recherche (brique hors flux) */
 #developer-modal-backdrop > .modal.is-fixed-h .modal-body:has(.empty-view:not([hidden])) {
   display: flex;
   flex-direction: column;
@@ -3178,6 +3191,15 @@ button.form-select-trigger.sm {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
+}
+
+/* `display: flex` / `.btn { display: inline-flex }` gagnent sur le UA `[hidden]` */
+.modal-footer-start[hidden],
+.modal-footer-end[hidden],
+.modal-footer-start.is-hidden,
+.modal-footer-end.is-hidden,
+.modal-footer .btn[hidden] {
+  display: none !important;
 }
 
 .modal-footer-end {
@@ -3374,16 +3396,6 @@ body.modal-open {
 .url-dialog-loading .empty-view {
   padding: 0;
   place-content: start center;
-}
-
-.theme-mode-switch {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
-  gap: 0.4rem;
-}
-
-.theme-mode-switch .btn {
-  width: 100%;
 }
 
 .md-content {
@@ -3587,6 +3599,7 @@ textarea {
   color: inherit;
   font: inherit;
   text-align: center;
+  scroll-margin-top: 0.5rem;
 }
 
 .theme-tile.is-editable {

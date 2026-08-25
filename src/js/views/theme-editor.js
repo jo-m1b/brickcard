@@ -95,7 +95,7 @@ export async function renderThemeEditor(host, opts) {
               </div>
               <div class="form-field">
                 <label class="form-label" for="theme-color-hex">Couleur</label>
-                <p class="form-hint" id="theme-color-hint">Couleur principale des cartes du thème.</p>
+                <p class="form-hint" id="theme-color-hint">Couleur principale des cartes du thème</p>
                 ${formColorMarkup({
                   id: "theme-color-hex",
                   value: draft.color,

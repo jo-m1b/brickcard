@@ -38,7 +38,7 @@ export function renderDeveloperSliders(host) {
           </div>
           <div class="form-field">
             <label class="form-label" for="demo-range-hinted">Bordure (face)</label>
-            <p class="form-hint" id="demo-range-hinted-desc">Épaisseur de la bordure colorée sur la face de la carte.</p>
+            <p class="form-hint" id="demo-range-hinted-desc">Épaisseur de la bordure colorée sur la face de la carte</p>
             <div class="form-range-row">
               <input type="range" id="demo-range-hinted" name="demo-range-hinted" min="0" max="8" step="0.5" value="3" aria-valuemin="0" aria-valuemax="8" aria-valuenow="3" aria-describedby="demo-range-hinted-desc demo-range-hinted-out" />
               <output id="demo-range-hinted-out" for="demo-range-hinted">3&nbsp;mm</output>
@@ -59,7 +59,7 @@ export function renderDeveloperSliders(host) {
         <div class="styleguide-fields">
           <div class="form-field">
             <label class="form-label" for="demo-range-reset-default">Zoom</label>
-            <p class="form-hint" id="demo-range-reset-default-desc">Icône masquée tant que la valeur est le défaut (100&nbsp;%).</p>
+            <p class="form-hint" id="demo-range-reset-default-desc">Icône masquée tant que la valeur est le défaut (100&nbsp;%)</p>
             <div class="form-range-row">
               <input type="range" id="demo-range-reset-default" name="demo-range-reset-default" min="25" max="400" step="1" value="100" aria-valuemin="25" aria-valuemax="400" aria-valuenow="100" aria-describedby="demo-range-reset-default-desc demo-range-reset-default-out" />
               <output id="demo-range-reset-default-out" for="demo-range-reset-default">100&nbsp;%</output>
@@ -68,7 +68,7 @@ export function renderDeveloperSliders(host) {
           </div>
           <div class="form-field">
             <label class="form-label" for="demo-range-reset-custom">Bordure (face)</label>
-            <p class="form-hint" id="demo-range-reset-custom-desc">Défaut 3&nbsp;mm ; ici 6&nbsp;mm → output gras et reset visible.</p>
+            <p class="form-hint" id="demo-range-reset-custom-desc">Défaut 3&nbsp;mm ; ici 6&nbsp;mm → output gras et reset visible</p>
             <div class="form-range-row">
               <input type="range" id="demo-range-reset-custom" name="demo-range-reset-custom" min="0" max="8" step="0.5" value="6" aria-valuemin="0" aria-valuemax="8" aria-valuenow="6" aria-describedby="demo-range-reset-custom-desc demo-range-reset-custom-out" />
               <output id="demo-range-reset-custom-out" for="demo-range-reset-custom">6&nbsp;mm</output>
@@ -85,7 +85,7 @@ export function renderDeveloperSliders(host) {
           </div>
           <div class="form-field">
             <label class="form-label" for="demo-range-reset-bare">Opacité</label>
-            <p class="form-hint" id="demo-range-reset-bare-desc">Sans <code>output</code> : le reset se place après la piste.</p>
+            <p class="form-hint" id="demo-range-reset-bare-desc">Sans <code>output</code> : le reset se place après la piste</p>
             <div class="form-range-row">
               <input type="range" id="demo-range-reset-bare" name="demo-range-reset-bare" min="0" max="100" step="1" value="80" aria-describedby="demo-range-reset-bare-desc" />
               ${formRangeResetMarkup()}
@@ -99,7 +99,7 @@ export function renderDeveloperSliders(host) {
         <div class="styleguide-fields">
           <div class="form-field">
             <label class="form-label" for="demo-range-bare">Opacité</label>
-            <p class="form-hint" id="demo-range-bare-desc">Le <code>output</code> est optionnel.</p>
+            <p class="form-hint" id="demo-range-bare-desc">Le <code>output</code> est optionnel</p>
             <div class="form-range-row">
               <input type="range" id="demo-range-bare" name="demo-range-bare" min="0" max="100" step="1" value="80" aria-describedby="demo-range-bare-desc" />
             </div>
@@ -132,7 +132,7 @@ export function renderDeveloperSliders(host) {
           </div>
           <div class="form-field">
             <label class="form-label" for="demo-range-invalid">Erreur</label>
-            <p class="form-hint" id="demo-range-invalid-hint">Le hint reste visible au-dessus.</p>
+            <p class="form-hint" id="demo-range-invalid-hint">Le hint reste visible au-dessus</p>
             <div class="form-range-row">
               <input type="range" id="demo-range-invalid" name="demo-range-invalid" min="2" max="10" step="1" value="1" aria-invalid="true" aria-valuemin="2" aria-valuemax="10" aria-valuenow="1" aria-describedby="demo-range-invalid-hint demo-range-invalid-out demo-range-invalid-err" />
               <output id="demo-range-invalid-out" for="demo-range-invalid">1</output>

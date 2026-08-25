@@ -1,6 +1,7 @@
 import {
   ICON_ADD,
   ICON_CLOSE,
+  ICON_DELETE_BIN_2,
   ICON_FILTER_3,
   ICON_PALETTE,
   ICON_SEARCH_LINE,
@@ -8,7 +9,9 @@ import {
   ICON_SORT_DESC,
   modalTitleMarkup,
 } from "../icons.js";
-import { loadCards, loadThemes } from "../storage.js";
+import { confirmDialog } from "../confirm-dialog.js";
+import { toast } from "../toast.js";
+import { deleteAllCustomThemes, loadCards, loadThemes } from "../storage.js";
 import { partitionThemes } from "../themes-data.js";
 import { resolveCardAccent, resolveCardAccentFg } from "../card-design.js";
 import {
@@ -18,11 +21,7 @@ import {
 } from "../card-render.js";
 import { emptyViewMarkup } from "../empty-view.js";
 import { setAppDocumentTitle } from "../document-title.js";
-
-/** @param {string} hay @param {string} needle */
-function includesCI(hay, needle) {
-  return hay.toLowerCase().includes(needle.toLowerCase());
-}
+import { includesCI } from "../includes-ci.js";
 
 const SORT_KEY = "brickcard:themes-sort";
 const SORT_DIR_KEY = "brickcard:themes-sort-dir";
@@ -94,6 +93,10 @@ let mountedRefreshThemesAfterCreate = null;
 let mountedPatchThemeInList = null;
 /** @type {((id: string) => boolean) | null} */
 let mountedRemoveThemeFromList = null;
+/** @type {((id: string) => boolean) | null} */
+let mountedFocusThemeInList = null;
+/** @type {string | null} */
+let pendingFocusThemeId = null;
 
 /**
  * Ajoute un thème à la liste montée, reset tri/recherche, repeint et scrolle en haut.
@@ -113,6 +116,38 @@ export function refreshThemesListAfterCreate(theme) {
 export function patchThemeInList(theme) {
   if (!mountedPatchThemeInList || !theme?.id) return false;
   return mountedPatchThemeInList(theme);
+}
+
+/**
+ * Place le focus clavier sur la mini-carte d’un thème personnalisé.
+ * Si la tuile n’est pas encore dans la grille, le focus est appliqué au prochain rendu.
+ * @param {string} [id]
+ */
+export function focusThemeInList(id) {
+  if (!id) return;
+  pendingFocusThemeId = id;
+  if (mountedFocusThemeInList?.(id)) {
+    pendingFocusThemeId = null;
+    return;
+  }
+  requestAnimationFrame(() => applyPendingThemeFocus());
+}
+
+/** Applique un focus de tuile en attente (après `focusTopModal` au retour liste). */
+export function applyPendingThemeFocus() {
+  if (!pendingFocusThemeId) return;
+  if (mountedFocusThemeInList?.(pendingFocusThemeId)) pendingFocusThemeId = null;
+}
+
+/**
+ * @param {Element | null | undefined} tile
+ * @returns {boolean}
+ */
+function applyThemeTileFocus(tile) {
+  if (!(tile instanceof HTMLElement)) return false;
+  tile.scrollIntoView({ block: "nearest", inline: "nearest" });
+  tile.focus({ preventScroll: true, focusVisible: true });
+  return true;
 }
 
 /**
@@ -150,11 +185,12 @@ let rememberedQuery = "";
  *   onClose: () => void,
  *   onCreate: () => void,
  *   onEdit: (id: string) => void,
+ *   onClearedCustomThemes?: () => void,
  * }} opts
  * @returns {Promise<() => void>} cleanup
  */
 export async function renderThemesModal(host, opts) {
-  const { onClose, onCreate, onEdit } = opts;
+  const { onClose, onCreate, onEdit, onClearedCustomThemes } = opts;
   const [allThemes, cards] = await Promise.all([loadThemes(), loadCards()]);
   let { custom, builtin } = partitionThemes(allThemes);
 
@@ -173,6 +209,17 @@ export async function renderThemesModal(host, opts) {
 
   function canSortByDate() {
     return custom.length >= 2;
+  }
+
+  function canDeleteAllCustom() {
+    return custom.length > 2;
+  }
+
+  function syncDeleteAllCustomBtn() {
+    const show = canDeleteAllCustom();
+    if (!(deleteAllWrap instanceof HTMLElement)) return;
+    deleteAllWrap.hidden = !show;
+    deleteAllWrap.classList.toggle("is-hidden", !show);
   }
 
   if (sortKey === "updatedAt" && !canSortByDate()) {
@@ -256,6 +303,12 @@ export async function renderThemesModal(host, opts) {
           })}
         </div>
         <div class="modal-footer">
+          <div class="modal-footer-start is-hidden" id="themes-footer-danger" hidden>
+            <button type="button" class="btn danger" id="btn-delete-all-custom-themes">
+              ${ICON_DELETE_BIN_2}
+              <span>Supprimer tous les thèmes personnalisés</span>
+            </button>
+          </div>
           <div class="modal-footer-end">
             <button type="button" class="btn primary" id="btn-add-theme">
               ${ICON_ADD}
@@ -282,6 +335,9 @@ export async function renderThemesModal(host, opts) {
   const customGrid = q("#themes-grid-custom");
   const builtinGrid = q("#themes-grid-builtin");
   const emptyFilter = q("#themes-empty-filter");
+  const deleteAllWrap = q("#themes-footer-danger");
+  const deleteAllBtn = q("#btn-delete-all-custom-themes");
+  const btnAddTheme = q("#btn-add-theme");
 
   searchInput.value = rememberedQuery;
 
@@ -493,6 +549,7 @@ export async function renderThemesModal(host, opts) {
     emptyFilter.hidden = shown > 0;
     updateSearchCount(shown);
     syncSortMenu();
+    syncDeleteAllCustomBtn();
     bindThemeTileLogos(host);
   }
 
@@ -519,6 +576,7 @@ export async function renderThemesModal(host, opts) {
       sortDir = defaultSortDir("cardCount");
     }
     syncSortMenu();
+    syncDeleteAllCustomBtn();
   }
 
   function scrollThemesListTop() {
@@ -651,6 +709,8 @@ export async function renderThemesModal(host, opts) {
 
   paint();
 
+  mountedFocusThemeInList = (id) => applyThemeTileFocus(queryCustomTile(id));
+
   mountedRefreshThemesAfterCreate = (theme) => {
     const idx = custom.findIndex((t) => t.id === theme.id);
     if (idx >= 0) custom[idx] = theme;
@@ -691,7 +751,34 @@ export async function renderThemesModal(host, opts) {
     return true;
   };
 
-  q("#btn-add-theme").onclick = () => onCreate();
+  btnAddTheme.onclick = () => onCreate();
+  if (deleteAllBtn) {
+    deleteAllBtn.onclick = async () => {
+      if (!canDeleteAllCustom()) return;
+      const ok = await confirmDialog(host, {
+        title: "Supprimer tous les thèmes personnalisés ?",
+        icon: "delete-bin-2",
+        message:
+          "Tous les thèmes personnalisés seront supprimés définitivement. Les cartes des thèmes supprimés sont conservées mais ne seront plus associées à un thème.",
+        okLabel: "Supprimer",
+        danger: true,
+      });
+      if (!ok) return;
+      deleteAllBtn.setAttribute("disabled", "true");
+      try {
+        await deleteAllCustomThemes();
+        custom.length = 0;
+        customGrid.innerHTML = "";
+        syncThemesChrome();
+        onClearedCustomThemes?.();
+        btnAddTheme?.focus();
+      } catch (ex) {
+        toast(ex.message || "Impossible de supprimer les thèmes personnalisés", "error");
+      } finally {
+        deleteAllBtn.removeAttribute("disabled");
+      }
+    };
+  }
   customGrid.addEventListener("click", onGridClick);
   customGrid.addEventListener("keydown", (e) => {
     if (e.key !== "Enter" && e.key !== " ") return;
@@ -724,6 +811,7 @@ export async function renderThemesModal(host, opts) {
     mountedRefreshThemesAfterCreate = null;
     mountedPatchThemeInList = null;
     mountedRemoveThemeFromList = null;
+    mountedFocusThemeInList = null;
     document.removeEventListener("keydown", onKey);
     document.removeEventListener("click", onDocClick);
     window.removeEventListener("resize", applyTileLogoCrops);

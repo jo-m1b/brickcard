@@ -75,7 +75,7 @@ export function renderDeveloperColors(host) {
           </div>
           <div class="form-field">
             <label class="form-label" for="demo-color-empty-none-hex">Vide sans couleur par défaut</label>
-            <p class="form-hint" id="demo-color-empty-none-desc">Pas de défaut → pastille en damier (transparent).</p>
+            <p class="form-hint" id="demo-color-empty-none-desc">Pas de défaut → pastille en damier (transparent)</p>
             <div class="form-color" data-form-color data-fallback="">
               <input class="form-control form-color-hex" type="text" id="demo-color-empty-none-hex" name="demo-color-empty-none-hex" value="" maxlength="7" placeholder="#rrggbb" spellcheck="false" autocomplete="off" aria-describedby="demo-color-empty-none-desc" />
               <label class="form-color-swatch is-empty" title="Choisir une couleur">
@@ -95,7 +95,7 @@ export function renderDeveloperColors(host) {
         <div class="styleguide-fields">
           <div class="form-field">
             <label class="form-label" for="demo-color-noclear-hex">Couleur figée (clear désactivé)</label>
-            <p class="form-hint" id="demo-color-noclear-desc">Le bouton est <code>disabled</code> : visible seulement s’il y a une valeur, mais non cliquable.</p>
+            <p class="form-hint" id="demo-color-noclear-desc">Le bouton est <code>disabled</code> : visible seulement s’il y a une valeur, mais non cliquable</p>
             <div class="form-color" data-form-color data-fallback="#ffffff">
               <input class="form-control form-color-hex" type="text" id="demo-color-noclear-hex" name="demo-color-noclear-hex" value="#ffd500" maxlength="7" placeholder="#ffffff" spellcheck="false" autocomplete="off" aria-describedby="demo-color-noclear-desc" />
               <label class="form-color-swatch" title="Choisir une couleur" style="--swatch:#ffd500">
@@ -157,7 +157,7 @@ export function renderDeveloperColors(host) {
           </div>
           <div class="form-field">
             <label class="form-label" for="demo-color-invalid-hex">Erreur / saisie invalide</label>
-            <p class="form-hint" id="demo-color-invalid-hint">Pastille = défaut (#6e6e6e) tant que le code n’est pas un hex valide.</p>
+            <p class="form-hint" id="demo-color-invalid-hint">Pastille = défaut (#6e6e6e) tant que le code n’est pas un hex valide</p>
             <div class="form-color" data-form-color data-fallback="#6e6e6e">
               <input class="form-control form-color-hex is-invalid" type="text" id="demo-color-invalid-hex" name="demo-color-invalid-hex" value="pas-hex" maxlength="16" aria-invalid="true" aria-describedby="demo-color-invalid-hint demo-color-invalid-err" spellcheck="false" autocomplete="off" />
               <label class="form-color-swatch" title="Choisir une couleur" style="--swatch:#6e6e6e">
@@ -172,7 +172,7 @@ export function renderDeveloperColors(host) {
           </div>
           <div class="form-field">
             <label class="form-label" for="demo-color-invalid-none-hex">Invalide sans défaut</label>
-            <p class="form-hint" id="demo-color-invalid-none-desc">Sans couleur par défaut → pastille transparente.</p>
+            <p class="form-hint" id="demo-color-invalid-none-desc">Sans couleur par défaut → pastille transparente</p>
             <div class="form-color" data-form-color data-fallback="">
               <input class="form-control form-color-hex is-invalid" type="text" id="demo-color-invalid-none-hex" name="demo-color-invalid-none-hex" value="xyz" maxlength="16" aria-invalid="true" aria-describedby="demo-color-invalid-none-desc demo-color-invalid-none-err" spellcheck="false" autocomplete="off" />
               <label class="form-color-swatch is-empty" title="Choisir une couleur">

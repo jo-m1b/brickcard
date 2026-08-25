@@ -44,7 +44,7 @@ export function renderDeveloperSelects(host) {
           </div>
           <div class="form-field">
             <label class="form-label" for="demo-select-hinted">Tri</label>
-            <p class="form-hint" id="demo-select-hinted-desc">Critère d’affichage de la liste.</p>
+            <p class="form-hint" id="demo-select-hinted-desc">Critère d’affichage de la liste</p>
             <select class="form-control" id="demo-select-hinted" name="demo-select-hinted" aria-describedby="demo-select-hinted-desc">
               <option value="updatedAt">Date de modification</option>
               <option value="title">Titre</option>
@@ -96,7 +96,7 @@ export function renderDeveloperSelects(host) {
           </div>
           <div class="form-field">
             <label class="form-label" for="demo-select-invalid">Erreur</label>
-            <p class="form-hint" id="demo-select-invalid-hint">Choisis le thème adapté.</p>
+            <p class="form-hint" id="demo-select-invalid-hint">Choisis le thème adapté</p>
             <select class="form-control is-invalid" id="demo-select-invalid" name="demo-select-invalid" aria-invalid="true" aria-describedby="demo-select-invalid-hint demo-select-invalid-err">
               <option value="">— Choisir —</option>
               <option value="a">Option A</option>
@@ -112,7 +112,7 @@ export function renderDeveloperSelects(host) {
         <div class="styleguide-fields">
           <div class="form-field">
             <label class="form-label" for="demo-select-icon-left">Icône à gauche</label>
-            <p class="form-hint" id="demo-select-icon-left-desc"><code>data-icon-left</code> sur chaque <code>option</code>.</p>
+            <p class="form-hint" id="demo-select-icon-left-desc"><code>data-icon-left</code> sur chaque <code>option</code></p>
             <select class="form-control" id="demo-select-icon-left" name="demo-select-icon-left" aria-describedby="demo-select-icon-left-desc">
               <option value="">— Choisir —</option>
               <option value="print" data-icon-left="printer">Imprimer</option>
@@ -123,7 +123,7 @@ export function renderDeveloperSelects(host) {
           </div>
           <div class="form-field">
             <label class="form-label" for="demo-select-icon-right">Icône à droite</label>
-            <p class="form-hint" id="demo-select-icon-right-desc"><code>data-icon-right</code> sur chaque <code>option</code>.</p>
+            <p class="form-hint" id="demo-select-icon-right-desc"><code>data-icon-right</code> sur chaque <code>option</code></p>
             <select class="form-control" id="demo-select-icon-right" name="demo-select-icon-right" aria-describedby="demo-select-icon-right-desc">
               <option value="">— Choisir —</option>
               <option value="next" data-icon-right="arrow-right">Continuer</option>
@@ -133,7 +133,7 @@ export function renderDeveloperSelects(host) {
           </div>
           <div class="form-field">
             <label class="form-label" for="demo-select-icon-both">Icônes des deux côtés</label>
-            <p class="form-hint" id="demo-select-icon-both-desc"><code>data-icon-left</code> + <code>data-icon-right</code>.</p>
+            <p class="form-hint" id="demo-select-icon-both-desc"><code>data-icon-left</code> + <code>data-icon-right</code></p>
             <select class="form-control" id="demo-select-icon-both" name="demo-select-icon-both" aria-describedby="demo-select-icon-both-desc">
               <option value="">— Choisir —</option>
               <option value="export" data-icon-left="printer" data-icon-right="arrow-right">Exporter / imprimer</option>

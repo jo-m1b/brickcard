@@ -24,7 +24,7 @@ export function renderDeveloperCheckboxes(host) {
         <code>readonly</code> est ignoré par les checkboxes).
         Module&nbsp;: <code>form-checkbox.js</code>.
         Groupes&nbsp;: <code>form-check-group</code> + légende optionnelle,
-        liste en colonne ou en rangée.
+        liste verticale ou horizontale.
       </p>
 
       <div class="styleguide-section">
@@ -43,7 +43,7 @@ export function renderDeveloperCheckboxes(host) {
               id: "demo-check-hinted",
               name: "demo-check-hinted",
               label: "Afficher l’année de sortie",
-              hint: "Visible sur la face, sous le titre.",
+              hint: "Visible sur la face, sous le titre",
             })}
           </div>
         </div>
@@ -57,7 +57,7 @@ export function renderDeveloperCheckboxes(host) {
               id: "demo-check-sm",
               name: "demo-check-sm",
               label: "Mode compact",
-              hint: "Même libellé ; case plus petite.",
+              hint: "Même libellé ; case plus petite",
               sm: true,
               checked: true,
             })}
@@ -73,7 +73,7 @@ export function renderDeveloperCheckboxes(host) {
               id: "demo-check-disabled",
               name: "demo-check-disabled",
               label: "Disabled",
-              hint: "Non cliquable, non soumise.",
+              hint: "Non cliquable, non soumise",
               disabled: true,
             })}
           </div>
@@ -82,7 +82,7 @@ export function renderDeveloperCheckboxes(host) {
               id: "demo-check-readonly",
               name: "demo-check-readonly",
               label: "Lecture seule",
-              hint: "Cochée et figée ; la valeur reste soumise.",
+              hint: "Cochée et figée ; la valeur reste soumise",
               checked: true,
               readonly: true,
             })}
@@ -92,7 +92,7 @@ export function renderDeveloperCheckboxes(host) {
               id: "demo-check-invalid",
               name: "demo-check-invalid",
               label: "Conditions d’utilisation",
-              hint: "Obligatoire pour continuer.",
+              hint: "Obligatoire pour continuer",
               describedBy: "demo-check-invalid-err",
             })}
             <p class="form-error" id="demo-check-invalid-err">Tu dois accepter les conditions.</p>
@@ -101,11 +101,11 @@ export function renderDeveloperCheckboxes(host) {
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Groupe (colonne)</h2>
+        <h2 class="styleguide-section-title">Groupe (vertical)</h2>
         <div class="styleguide-fields">
         <fieldset class="form-check-group" aria-describedby="demo-check-group-hint">
           <legend class="form-label">Côtés à imprimer</legend>
-          <p class="form-hint" id="demo-check-group-hint">Au moins une face.</p>
+          <p class="form-hint" id="demo-check-group-hint">Au moins une face</p>
           <div class="form-check-list">
             ${formCheckboxMarkup({
               id: "demo-check-group-face",
@@ -119,7 +119,7 @@ export function renderDeveloperCheckboxes(host) {
               name: "demo-check-group",
               value: "back",
               label: "Dos",
-              hint: "Miroir horizontal (flip bord long).",
+              hint: "Miroir horizontal (flip bord long)",
               checked: true,
             })}
             ${formCheckboxMarkup({
@@ -134,7 +134,7 @@ export function renderDeveloperCheckboxes(host) {
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Groupe (rangée)</h2>
+        <h2 class="styleguide-section-title">Groupe (horizontal)</h2>
         <div class="styleguide-fields">
         <fieldset class="form-check-group" aria-describedby="demo-check-row-err">
           <legend class="form-label">Formats</legend>

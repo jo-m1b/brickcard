@@ -41,7 +41,7 @@ export function renderDeveloperFields(host) {
           </div>
           <div class="form-field">
             <label class="form-label" for="demo-text-icon">Titre avec icône</label>
-            <p class="form-hint" id="demo-text-icon-desc">Icône optionnelle (<code>ri-text</code>).</p>
+            <p class="form-hint" id="demo-text-icon-desc">Icône optionnelle (<code>ri-text</code>)</p>
             <div class="form-control-wrap">
               <span class="form-control-icon" aria-hidden="true">${ICON_TEXT}</span>
               <input class="form-control" type="text" id="demo-text-icon" name="demo-text-icon" placeholder="Ex. Camion de pompiers" autocomplete="off" aria-describedby="demo-text-icon-desc" />
@@ -49,7 +49,7 @@ export function renderDeveloperFields(host) {
           </div>
           <div class="form-field">
             <label class="form-label" for="demo-text-hinted">Référence</label>
-            <p class="form-hint" id="demo-text-hinted-desc">Numéro de set LEGO, éventuellement composé.</p>
+            <p class="form-hint" id="demo-text-hinted-desc">Numéro de set LEGO, éventuellement composé</p>
             <div class="form-control-wrap">
               <span class="form-control-icon" aria-hidden="true">${ICON_HASHTAG}</span>
               <input class="form-control" type="text" id="demo-text-hinted" name="demo-text-hinted" placeholder="6140/6109" aria-describedby="demo-text-hinted-desc" autocomplete="off" />
@@ -71,7 +71,7 @@ export function renderDeveloperFields(host) {
           </div>
           <div class="form-field">
             <label class="form-label" for="demo-number-icon">Pièces avec icône</label>
-            <p class="form-hint" id="demo-number-icon-desc">Même champ avec <code>ri-hashtag</code>.</p>
+            <p class="form-hint" id="demo-number-icon-desc">Même champ avec <code>ri-hashtag</code></p>
             <div class="form-control-wrap">
               <span class="form-control-icon" aria-hidden="true">${ICON_HASHTAG}</span>
               <input class="form-control" type="number" id="demo-number-icon" name="demo-number-icon" min="0" step="1" placeholder="232" inputmode="numeric" aria-describedby="demo-number-icon-desc" />
@@ -79,7 +79,7 @@ export function renderDeveloperFields(host) {
           </div>
           <div class="form-field">
             <label class="form-label" for="demo-number-year">Année de sortie</label>
-            <p class="form-hint" id="demo-number-year-desc">Optionnel — icône <code>ri-calendar-line</code>.</p>
+            <p class="form-hint" id="demo-number-year-desc">Optionnel — icône <code>ri-calendar-line</code></p>
             <div class="form-control-wrap">
               <span class="form-control-icon" aria-hidden="true">${ICON_CALENDAR_LINE}</span>
               <input class="form-control" type="number" id="demo-number-year" name="demo-number-year" min="1949" max="2100" step="1" placeholder="1998" inputmode="numeric" aria-describedby="demo-number-year-desc" />
@@ -97,7 +97,7 @@ export function renderDeveloperFields(host) {
           </div>
           <div class="form-field">
             <label class="form-label" for="demo-textarea-icon">Description avec icône</label>
-            <p class="form-hint" id="demo-textarea-icon-desc">Icône en haut à gauche (<code>ri-file-text-line</code>).</p>
+            <p class="form-hint" id="demo-textarea-icon-desc">Icône en haut à gauche (<code>ri-file-text-line</code>)</p>
             <div class="form-control-wrap">
               <span class="form-control-icon" aria-hidden="true">${ICON_FILE_TEXT_LINE}</span>
               <textarea class="form-control" id="demo-textarea-icon" name="demo-textarea-icon" rows="4" placeholder="Notes libres…" aria-describedby="demo-textarea-icon-desc"></textarea>
@@ -151,7 +151,7 @@ export function renderDeveloperFields(host) {
           </div>
           <div class="form-field">
             <label class="form-label" for="demo-invalid">Erreur</label>
-            <p class="form-hint" id="demo-invalid-hint">Le hint reste visible au-dessus.</p>
+            <p class="form-hint" id="demo-invalid-hint">Le hint reste visible au-dessus</p>
             <input class="form-control is-invalid" type="text" id="demo-invalid" name="demo-invalid" aria-invalid="true" aria-describedby="demo-invalid-hint demo-invalid-err" autocomplete="off" />
             <p class="form-error" id="demo-invalid-err">Ce champ est obligatoire.</p>
           </div>

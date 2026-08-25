@@ -10,10 +10,12 @@ import { ICON_CLOSE, ICON_PRINTER, modalTitleMarkup } from "./icons.js";
 import { setAppDocumentTitle } from "./document-title.js";
 import { emptyViewMarkup } from "./empty-view.js";
 import { bindFormRange, formRangeResetMarkup } from "./form-range.js";
+import { formRadioMarkup } from "./form-radio.js";
 import { loadCards } from "./storage.js";
 import { printCards } from "./print.js";
 import { syncPrintMenu } from "./print-menu.js";
 import { getPrintQty, totalPrintCount } from "./print-qty.js";
+import { compareCardsAsc } from "./card-sort.js";
 import {
   DEFAULT_PRINT_GRID,
   PRINT_GRID_MAX,
@@ -23,6 +25,8 @@ import {
   formatPrintGridSize,
   formatPrintMenuDesc,
   getPrintSettings,
+  normalizeCardSort,
+  printCardSortRadiosMarkup,
   setPrintSettings,
 } from "./print-settings.js";
 
@@ -53,7 +57,7 @@ export function renderPrintDialog(host, opts) {
 
   host.innerHTML = `
     <div class="modal-backdrop" id="print-dialog-backdrop" role="presentation">
-      <div class="modal modal--sm" role="dialog" aria-modal="true" aria-labelledby="print-dialog-title"${empty ? ` aria-describedby="print-dialog-empty"` : ` aria-describedby="print-dialog-count print-dialog-desc"`}>
+      <div class="modal modal--md" role="dialog" aria-modal="true" aria-labelledby="print-dialog-title"${empty ? ` aria-describedby="print-dialog-empty"` : ` aria-describedby="print-dialog-count print-dialog-desc"`}>
         <div class="modal-header">
           <div>
             <h1 class="view-title" id="print-dialog-title">${modalTitleMarkup("Paramètres d’impression", ICON_PRINTER)}</h1>
@@ -97,22 +101,63 @@ export function renderPrintDialog(host, opts) {
               ${formRangeResetMarkup()}
             </div>
           </div>
-          <div class="form-field">
-            <p class="form-label" id="print-dialog-card-sides-label">Côtés des cartes à imprimer</p>
-            <div class="theme-mode-switch" role="radiogroup" aria-labelledby="print-dialog-card-sides-label">
-              <button type="button" class="btn ${settings.cardSidesToPrint === "faceAndBack" ? "primary" : "secondary"}" data-card-sides="faceAndBack" aria-pressed="${settings.cardSidesToPrint === "faceAndBack"}">Face et dos</button>
-              <button type="button" class="btn ${settings.cardSidesToPrint === "faceOnly" ? "primary" : "secondary"}" data-card-sides="faceOnly" aria-pressed="${settings.cardSidesToPrint === "faceOnly"}">Face seulement</button>
-              <button type="button" class="btn ${settings.cardSidesToPrint === "backOnly" ? "primary" : "secondary"}" data-card-sides="backOnly" aria-pressed="${settings.cardSidesToPrint === "backOnly"}">Dos seulement</button>
+          <fieldset class="form-check-group">
+            <legend class="form-label">Tri des cartes</legend>
+            <div class="form-check-list form-check-list--row">
+              ${printCardSortRadiosMarkup({
+                idPrefix: "print-dialog-card-sort",
+                name: "print-dialog-card-sort",
+                selected: settings.cardSort,
+              })}
             </div>
-          </div>
-          <div class="form-field" id="print-dialog-duplex-field">
-            <p class="form-label" id="print-dialog-recto-verso-label">Impression recto-verso des feuilles</p>
-            <div class="theme-mode-switch" role="radiogroup" aria-labelledby="print-dialog-recto-verso-label" aria-describedby="print-dialog-recto-verso-hint">
-              <button type="button" class="btn ${settings.sheetRectoVerso === "alternate" ? "primary" : "secondary"}" data-sheet-recto-verso="alternate" aria-pressed="${settings.sheetRectoVerso === "alternate"}">Alterner</button>
-              <button type="button" class="btn ${settings.sheetRectoVerso === "grouped" ? "primary" : "secondary"}" data-sheet-recto-verso="grouped" aria-pressed="${settings.sheetRectoVerso === "grouped"}">Regrouper</button>
+          </fieldset>
+          <fieldset class="form-check-group">
+            <legend class="form-label">Côtés des cartes à imprimer</legend>
+            <div class="form-check-list form-check-list--row">
+              ${formRadioMarkup({
+                id: "print-dialog-card-sides-face-and-back",
+                name: "print-dialog-card-sides",
+                value: "faceAndBack",
+                label: "Face et dos",
+                checked: settings.cardSidesToPrint === "faceAndBack",
+              })}
+              ${formRadioMarkup({
+                id: "print-dialog-card-sides-face-only",
+                name: "print-dialog-card-sides",
+                value: "faceOnly",
+                label: "Face seulement",
+                checked: settings.cardSidesToPrint === "faceOnly",
+              })}
+              ${formRadioMarkup({
+                id: "print-dialog-card-sides-back-only",
+                name: "print-dialog-card-sides",
+                value: "backOnly",
+                label: "Dos seulement",
+                checked: settings.cardSidesToPrint === "backOnly",
+              })}
             </div>
-            <p class="form-hint" id="print-dialog-recto-verso-hint"></p>
-          </div>`
+          </fieldset>
+          <fieldset class="form-check-group" id="print-dialog-duplex-field">
+            <legend class="form-label">Impression recto-verso des feuilles</legend>
+            <div class="form-check-list">
+              ${formRadioMarkup({
+                id: "print-dialog-recto-verso-alternate",
+                name: "print-dialog-recto-verso",
+                value: "alternate",
+                label: "Alterner",
+                hint: "Une feuille à la fois (imprimante recto-verso)",
+                checked: settings.sheetRectoVerso === "alternate",
+              })}
+              ${formRadioMarkup({
+                id: "print-dialog-recto-verso-grouped",
+                name: "print-dialog-recto-verso",
+                value: "grouped",
+                label: "Regrouper",
+                hint: "Tous les rectos d’abord, puis retourner la pile pour ensuite imprimer tous les versos",
+                checked: settings.sheetRectoVerso === "grouped",
+              })}
+            </div>
+          </fieldset>`
           }
         </div>
         ${
@@ -150,29 +195,11 @@ export function renderPrintDialog(host, opts) {
     const gridRow = /** @type {HTMLElement|null} */ (
       host.querySelector("#print-dialog-grid")?.closest(".form-range-row")
     );
-    const sidesBtns = Array.from(host.querySelectorAll("[data-card-sides]"));
-    const duplexBtns = Array.from(host.querySelectorAll("[data-sheet-recto-verso]"));
+    const sortInputs = host.querySelectorAll('input[name="print-dialog-card-sort"]');
+    const sidesInputs = host.querySelectorAll('input[name="print-dialog-card-sides"]');
+    const duplexInputs = host.querySelectorAll('input[name="print-dialog-recto-verso"]');
     const duplexField = host.querySelector("#print-dialog-duplex-field");
-    const duplexHint = host.querySelector("#print-dialog-recto-verso-hint");
     const runBtn = host.querySelector("#btn-print-dialog-run");
-
-    function syncSidesButtons(cardSidesToPrint) {
-      sidesBtns.forEach((btn) => {
-        const on = btn.getAttribute("data-card-sides") === cardSidesToPrint;
-        btn.setAttribute("aria-pressed", on ? "true" : "false");
-        btn.classList.toggle("primary", on);
-        btn.classList.toggle("secondary", !on);
-      });
-    }
-
-    function syncDuplexButtons(sheetRectoVerso) {
-      duplexBtns.forEach((btn) => {
-        const on = btn.getAttribute("data-sheet-recto-verso") === sheetRectoVerso;
-        btn.setAttribute("aria-pressed", on ? "true" : "false");
-        btn.classList.toggle("primary", on);
-        btn.classList.toggle("secondary", !on);
-      });
-    }
 
     function refresh() {
       if (countEl instanceof HTMLElement) {
@@ -191,14 +218,6 @@ export function renderPrintDialog(host, opts) {
       if (duplexField instanceof HTMLElement) {
         duplexField.hidden = settings.cardSidesToPrint !== "faceAndBack";
       }
-      if (duplexHint instanceof HTMLElement) {
-        duplexHint.textContent =
-          settings.sheetRectoVerso === "grouped"
-            ? "Tous les rectos d’abord, puis retourner la pile pour ensuite imprimer tous les versos."
-            : "Une feuille à la fois (imprimante recto-verso).";
-      }
-      syncSidesButtons(settings.cardSidesToPrint);
-      syncDuplexButtons(settings.sheetRectoVerso);
       syncPrintMenu();
     }
 
@@ -218,18 +237,26 @@ export function renderPrintDialog(host, opts) {
       });
     }
 
-    sidesBtns.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const cardSidesToPrint = btn.getAttribute("data-card-sides");
-        if (!cardSidesToPrint) return;
-        persist({ cardSidesToPrint });
+    sortInputs.forEach((input) => {
+      input.addEventListener("change", () => {
+        if (!(input instanceof HTMLInputElement) || !input.checked) return;
+        persist({ cardSort: normalizeCardSort(input.value) });
       });
     });
-    duplexBtns.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const sheetRectoVerso = btn.getAttribute("data-sheet-recto-verso");
-        if (!sheetRectoVerso) return;
-        persist({ sheetRectoVerso });
+    sidesInputs.forEach((input) => {
+      input.addEventListener("change", () => {
+        if (!(input instanceof HTMLInputElement) || !input.checked) return;
+        if (input.value !== "faceAndBack" && input.value !== "faceOnly" && input.value !== "backOnly") {
+          return;
+        }
+        persist({ cardSidesToPrint: input.value });
+      });
+    });
+    duplexInputs.forEach((input) => {
+      input.addEventListener("change", () => {
+        if (!(input instanceof HTMLInputElement) || !input.checked) return;
+        if (input.value !== "alternate" && input.value !== "grouped") return;
+        persist({ sheetRectoVerso: input.value });
       });
     });
 
@@ -237,9 +264,12 @@ export function renderPrintDialog(host, opts) {
       if (runBtn instanceof HTMLButtonElement) runBtn.disabled = true;
       try {
         const cards = await loadCards();
+        const selected = cards
+          .filter((card) => getPrintQty(card.id) > 0)
+          .sort((a, b) => compareCardsAsc(a, b, settings.cardSort));
         /** @type {import("./storage.js").Card[]} */
         const toPrint = [];
-        for (const card of cards) {
+        for (const card of selected) {
           const qty = getPrintQty(card.id);
           for (let i = 0; i < qty; i++) toPrint.push(card);
         }

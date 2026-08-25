@@ -249,7 +249,7 @@ const APP_ID = "brickcard";</code></pre>
         <div class="styleguide-type-demo styleguide-fields">
           <div class="form-field">
             <label class="form-label form-label--required" for="typo-demo-input">Label de champ</label>
-            <p class="form-hint" id="typo-demo-hint">Hint / description au-dessus du contrôle (0.8rem, ink-soft).</p>
+            <p class="form-hint" id="typo-demo-hint">Hint / description au-dessus du contrôle (0.8rem, ink-soft)</p>
             <input class="form-control" id="typo-demo-input" type="text" value="Valeur d’exemple" aria-describedby="typo-demo-hint typo-demo-error" />
             <p class="form-error" id="typo-demo-error" role="alert">Message d’erreur (form-error).</p>
           </div>

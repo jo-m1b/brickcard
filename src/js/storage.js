@@ -4,7 +4,7 @@
  * Format / export : `backup.js`.
  */
 
-import { getPresetThemes, getPresetTheme, parseHexColor, clearPresetCache, clampLogoZoom, roundCropCoord } from "./themes-data.js";
+import { getPresetThemes, getPresetTheme, parseHexColor, clearPresetCache, clampLogoZoom, roundCropCoord, resolvePresetThemeId } from "./themes-data.js";
 import { applyCardAppearanceSettings } from "./card-design.js";
 import { getOptimizeImages } from "./image-optimize.js";
 import { parseBrickcardBackup } from "./backup.js";
@@ -401,9 +401,9 @@ function normalizeCard(c) {
     id: typeof c.id === "string" && c.id ? c.id : createId(),
     legoSetRef: String(c.legoSetRef ?? c.ref ?? "").trim(),
     title: String(c.title ?? c.setTitle ?? "").trim(),
-    brickcardThemeId: String(
+    brickcardThemeId: resolvePresetThemeId(
       c.brickcardThemeId ?? c.legoThemeId ?? c.themeId ?? ""
-    ).trim(),
+    ),
     pieceCount,
     figurineCount,
     releaseYear,
@@ -645,6 +645,26 @@ export async function upsertTheme(input) {
   return theme;
 }
 
+/**
+ * Vide `brickcardThemeId` des cartes associées à l’un des thèmes.
+ * @param {Iterable<string>} themeIds
+ */
+async function clearCardsThemeAssociation(themeIds) {
+  const idSet =
+    themeIds instanceof Set ? themeIds : new Set([...themeIds].filter(Boolean));
+  if (!idSet.size) return;
+  const cards = await loadCards();
+  const changed = cards.filter((c) => idSet.has(c.brickcardThemeId));
+  if (!changed.length) return;
+  const db = await openDb();
+  const tx = db.transaction(STORE_CARDS, "readwrite");
+  const store = tx.objectStore(STORE_CARDS);
+  for (const card of changed) {
+    store.put({ ...card, brickcardThemeId: "" });
+  }
+  await txDone(tx);
+}
+
 /** Supprime un thème personnalisé uniquement. */
 export async function deleteTheme(id) {
   await ready();
@@ -662,6 +682,21 @@ export async function deleteTheme(id) {
   const tx = db.transaction(STORE_THEMES, "readwrite");
   tx.objectStore(STORE_THEMES).delete(id);
   await txDone(tx);
+  await clearCardsThemeAssociation([id]);
+}
+
+/** Supprime tous les thèmes personnalisés et détache les cartes associées. */
+export async function deleteAllCustomThemes() {
+  await ready();
+  const custom = await loadCustomThemes();
+  if (!custom.length) return;
+  const ids = custom.map((t) => t.id);
+  const db = await openDb();
+  const tx = db.transaction(STORE_THEMES, "readwrite");
+  const store = tx.objectStore(STORE_THEMES);
+  for (const id of ids) store.delete(id);
+  await txDone(tx);
+  await clearCardsThemeAssociation(ids);
 }
 
 /**

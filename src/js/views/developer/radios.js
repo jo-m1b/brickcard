@@ -26,8 +26,8 @@ export function renderDeveloperRadios(host) {
         <code>readonly</code> est ignoré par les radios).
         Module&nbsp;: <code>form-radio.js</code>.
         Groupes&nbsp;: même <code>name</code> pour une option unique ;
-        <code>form-check-group</code> + légende optionnelle, liste en colonne
-        ou en rangée.
+        <code>form-check-group</code> + légende optionnelle, liste verticale
+        ou horizontale.
       </p>
 
       <div class="styleguide-section">
@@ -48,7 +48,7 @@ export function renderDeveloperRadios(host) {
               name: "demo-radio",
               value: "back",
               label: "Dos",
-              hint: "Miroir horizontal (flip bord long).",
+              hint: "Miroir horizontal (flip bord long)",
             })}
           </div>
         </div>
@@ -63,7 +63,7 @@ export function renderDeveloperRadios(host) {
               name: "demo-radio-sm",
               value: "on",
               label: "Mode compact",
-              hint: "Même libellé ; rond plus petit.",
+              hint: "Même libellé ; rond plus petit",
               sm: true,
               checked: true,
             })}
@@ -89,7 +89,7 @@ export function renderDeveloperRadios(host) {
               name: "demo-radio-disabled",
               value: "off",
               label: "Disabled",
-              hint: "Non cliquable, non soumise.",
+              hint: "Non cliquable, non soumise",
               disabled: true,
             })}
           </div>
@@ -99,7 +99,7 @@ export function renderDeveloperRadios(host) {
               name: "demo-radio-readonly",
               value: "on",
               label: "Lecture seule",
-              hint: "Cochée et figée ; la valeur reste soumise.",
+              hint: "Cochée et figée ; la valeur reste soumise",
               checked: true,
               readonly: true,
             })}
@@ -110,7 +110,7 @@ export function renderDeveloperRadios(host) {
               name: "demo-radio-readonly",
               value: "off",
               label: "Autre option",
-              hint: "Le choix figé empêche de changer de radio.",
+              hint: "Le choix figé empêche de changer de radio",
             })}
           </div>
           <div class="form-field">
@@ -134,11 +134,11 @@ export function renderDeveloperRadios(host) {
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Groupe (colonne)</h2>
+        <h2 class="styleguide-section-title">Groupe (vertical)</h2>
         <div class="styleguide-fields">
         <fieldset class="form-check-group" aria-describedby="demo-radio-group-hint">
           <legend class="form-label">Côtés à imprimer</legend>
-          <p class="form-hint" id="demo-radio-group-hint">Une seule face.</p>
+          <p class="form-hint" id="demo-radio-group-hint">Une seule face</p>
           <div class="form-check-list">
             ${formRadioMarkup({
               id: "demo-radio-group-face",
@@ -152,7 +152,7 @@ export function renderDeveloperRadios(host) {
               name: "demo-radio-group",
               value: "back",
               label: "Dos",
-              hint: "Miroir horizontal (flip bord long).",
+              hint: "Miroir horizontal (flip bord long)",
             })}
             ${formRadioMarkup({
               id: "demo-radio-group-both",
@@ -166,7 +166,7 @@ export function renderDeveloperRadios(host) {
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Groupe (rangée)</h2>
+        <h2 class="styleguide-section-title">Groupe (horizontal)</h2>
         <div class="styleguide-fields">
         <fieldset class="form-check-group" aria-describedby="demo-radio-row-err">
           <legend class="form-label">Format</legend>

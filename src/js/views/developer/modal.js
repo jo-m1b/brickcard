@@ -22,6 +22,8 @@ import {
   refreshPresetDraftAfterCreate,
   patchPresetDraftInList,
   removePresetDraftFromList,
+  focusPresetDraftInList,
+  applyPendingPresetFocus,
   renderDeveloperThemePresets,
 } from "./theme-presets.js";
 import { renderPresetDraftEditor } from "./theme-presets-editor.js";
@@ -183,7 +185,7 @@ export function renderDeveloperModal(host, opts) {
 
   host.innerHTML = `
     <div class="modal-backdrop" id="developer-modal-backdrop" role="presentation">
-      <div class="modal modal--lg" role="dialog" aria-modal="true" aria-labelledby="developer-modal-title">
+      <div class="modal ${page === "theme-presets" ? "modal--lg" : "modal--md"}" role="dialog" aria-modal="true" aria-labelledby="developer-modal-title">
         <div class="modal-header">
           <div>
             <h1 class="view-title" id="developer-modal-title">${modalTitleMarkup("Espace développeur", "tools")}</h1>
@@ -255,7 +257,11 @@ export function renderDeveloperModal(host, opts) {
     const token = editorToken;
     const cleanup = await renderPresetDraftEditor(demoRoot, {
       themeId: nextExtras.presetPage === "edit" ? nextExtras.themeId || null : null,
-      onClose: goToPresetList,
+      onClose: () => {
+        const id = nextExtras.presetPage === "edit" ? nextExtras.themeId : null;
+        goToPresetList();
+        if (id) focusPresetDraftInList(id);
+      },
       onSaved: (meta) => {
         if (meta?.isNew) {
           if (!refreshPresetDraftAfterCreate(meta.theme)) {
@@ -265,6 +271,7 @@ export function renderDeveloperModal(host, opts) {
           patchPresetDraftInList(meta.theme, meta.previousId);
         }
         goToPresetList();
+        focusPresetDraftInList(meta?.theme?.id);
       },
       onDeleted: (id) => {
         removePresetDraftFromList(id);
@@ -293,9 +300,6 @@ export function renderDeveloperModal(host, opts) {
       if (renderedPage === "theme-presets") closePresetEditor();
       pageCleanup();
       clearLiftedChrome(modal);
-      if (modal) {
-        modal.classList.toggle("is-fixed-h", nextPage === "theme-presets");
-      }
       if (!body || !titleEl) return;
       if (nextPage === "theme-presets") {
         pageCleanup =
@@ -312,6 +316,13 @@ export function renderDeveloperModal(host, opts) {
       if (modal) {
         liftThemesToolbar(body, modal);
         liftModalFooter(body, modal);
+        const presets = nextPage === "theme-presets";
+        modal.classList.toggle("modal--lg", presets);
+        modal.classList.toggle("modal--md", !presets);
+        modal.classList.toggle(
+          "is-fixed-h",
+          Boolean(modal.querySelector(":scope > .themes-toolbar")),
+        );
       }
       body.scrollTop = 0;
       if (backdrop) backdrop.scrollTop = 0;

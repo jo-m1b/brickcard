@@ -170,7 +170,7 @@ export function formImageMarkup(opts) {
       <input type="file" id="${escapeAttr(fileId)}" class="form-image-file" accept="${escapeAttr(accept)}" hidden />
 
       <div class="form-image-empty" ${hasImage ? "hidden" : ""}>
-        <p class="form-hint form-image-empty-text">Charger une nouvelle image pour la prévisualiser et la recadrer.</p>
+        <p class="form-hint form-image-empty-text">Charger une nouvelle image pour la prévisualiser et la recadrer</p>
         <div class="form-image-empty-actions">
           <button type="button" class="btn primary" data-form-image-file>${ICON_FILE_LINE}<span>Depuis mes fichiers</span></button>
           <button type="button" class="btn secondary sm" data-form-image-url>${ICON_LINK}<span>Depuis une URL</span></button>

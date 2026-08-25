@@ -714,7 +714,7 @@ export async function renderImportDialog(host, opts) {
                           id: "import-include-images",
                           name: "import-include-images",
                           label: "Images des cartes",
-                          hint: "Importer les images des cartes de la sauvegarde.",
+                          hint: "Importer les images des cartes de la sauvegarde",
                           checked: includeImages,
                         })
                       : ""
@@ -725,7 +725,7 @@ export async function renderImportDialog(host, opts) {
                           id: "import-include-theme-logos",
                           name: "import-include-theme-logos",
                           label: "Logos des thèmes personnalisés",
-                          hint: "Importer les logos des thèmes personnalisés.",
+                          hint: "Importer les logos des thèmes personnalisés",
                           checked: includeThemeLogos,
                         })
                       : ""
@@ -744,7 +744,7 @@ export async function renderImportDialog(host, opts) {
                     id: "import-include-settings",
                     name: "import-include-settings",
                     label: "Apparence des cartes",
-                    hint: "Importer les paramètres de bordure, arrondis et couleur par défaut des cartes.",
+                    hint: "Importer les paramètres de bordure, arrondis et couleur par défaut des cartes",
                     checked: includeSettings,
                   })}
                 </div>
@@ -769,7 +769,7 @@ export async function renderImportDialog(host, opts) {
       ? `<section class="settings-panel">
               <h2 class="section-title" id="import-cards-title">Cartes</h2>
               <fieldset class="form-check-group" aria-labelledby="import-cards-title">
-                <p class="form-hint">Importer uniquement les cartes des thèmes sélectionnés.</p>
+                <p class="form-hint">Importer uniquement les cartes des thèmes sélectionnés</p>
                 <div class="form-check-list form-check-list--row">
                   ${themeChecksHtml}
                 </div>

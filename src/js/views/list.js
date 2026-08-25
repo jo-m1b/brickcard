@@ -1,4 +1,5 @@
 import { ICON_ADD, ICON_PRINTER, ICON_SORT_ASC, ICON_SORT_DESC, ICON_SUBTRACT } from "../icons.js";
+import { CARD_SORT_KEYS, compareCardsAsc } from "../card-sort.js";
 import { loadCards, loadThemes } from "../storage.js";
 import {
   printQty,
@@ -13,16 +14,9 @@ import {
   syncPrintMenu,
 } from "../print-menu.js";
 import { emptyViewMarkup } from "../empty-view.js";
+import { includesCI } from "../includes-ci.js";
 import { registerCardsGrid } from "../list-layout.js";
 import { mountCardPreview } from "../card-render.js";
-
-/**
- * @param {string} hay
- * @param {string} needle
- */
-function includesCI(hay, needle) {
-  return hay.toLowerCase().includes(needle.toLowerCase());
-}
 
 const ICON_PRINT = ICON_PRINTER;
 const ICON_MINUS = ICON_SUBTRACT;
@@ -31,18 +25,10 @@ const ICON_PLUS = ICON_ADD;
 const SORT_KEY = "brickcard:list-sort";
 const SORT_DIR_KEY = "brickcard:list-sort-dir";
 
-/** @typedef {"updatedAt"|"legoSetRef"|"title"|"releaseYear"|"pieceCount"|"figurineCount"} ListSortKey */
+/** @typedef {import("../card-sort.js").CardSortKey} ListSortKey */
 /** @typedef {"asc"|"desc"} ListSortDir */
 
-/** @type {ListSortKey[]} */
-const SORT_KEYS = [
-  "updatedAt",
-  "legoSetRef",
-  "title",
-  "releaseYear",
-  "pieceCount",
-  "figurineCount",
-];
+const SORT_KEYS = CARD_SORT_KEYS;
 
 /** @param {ListSortKey} key @returns {ListSortDir} */
 function defaultSortDir(key) {
@@ -105,6 +91,10 @@ export function prepareListAfterCardCreate() {
 let mountedPatchListCard = null;
 /** @type {((id: string) => { empty: boolean } | false) | null} */
 let mountedRemoveListCard = null;
+/** @type {((id: string) => boolean) | null} */
+let mountedFocusListCard = null;
+/** @type {string | null} */
+let pendingFocusCardId = null;
 
 /**
  * Met à jour l’aperçu d’une carte déjà affichée, sans reconstruire la grille.
@@ -114,6 +104,28 @@ let mountedRemoveListCard = null;
 export function patchListCard(card) {
   if (!mountedPatchListCard || !card?.id) return false;
   return mountedPatchListCard(card);
+}
+
+/**
+ * Place le focus clavier sur la tuile d’une carte (création / modification).
+ * Si la tuile n’est pas encore dans la grille, le focus est appliqué au prochain rendu.
+ * @param {string} [id]
+ */
+export function focusListCard(id) {
+  if (!id) return;
+  pendingFocusCardId = id;
+  if (mountedFocusListCard?.(id)) pendingFocusCardId = null;
+}
+
+/**
+ * @param {Element | null | undefined} tile
+ * @returns {boolean}
+ */
+function applyListCardFocus(tile) {
+  if (!(tile instanceof HTMLElement)) return false;
+  tile.scrollIntoView({ block: "nearest", inline: "nearest" });
+  tile.focus({ preventScroll: true, focusVisible: true });
+  return true;
 }
 
 /**
@@ -129,53 +141,6 @@ export function removeListCard(id) {
 /** @param {import("../storage.js").Card} card */
 function cardTileAriaLabel(card) {
   return `Modifier${card.title ? ` « ${card.title} »` : " la carte"}${card.legoSetRef ? ` (${card.legoSetRef})` : ""}`;
-}
-
-/**
- * @param {import("../storage.js").Card} a
- * @param {import("../storage.js").Card} b
- * @param {ListSortKey} key
- */
-function compareCardsAsc(a, b, key) {
-  if (key === "updatedAt") {
-    return String(a.updatedAt || "").localeCompare(String(b.updatedAt || ""));
-  }
-  if (key === "legoSetRef") {
-    return String(a.legoSetRef || "").localeCompare(String(b.legoSetRef || ""), undefined, {
-      numeric: true,
-      sensitivity: "base",
-    });
-  }
-  if (key === "title") {
-    return String(a.title || "").localeCompare(String(b.title || ""), undefined, {
-      sensitivity: "base",
-    });
-  }
-  if (key === "releaseYear") {
-    const ay = a.releaseYear;
-    const by = b.releaseYear;
-    if (ay == null && by == null) return 0;
-    if (ay == null) return 1;
-    if (by == null) return -1;
-    return ay - by;
-  }
-  if (key === "pieceCount") {
-    const ap = a.pieceCount;
-    const bp = b.pieceCount;
-    if (ap == null && bp == null) return 0;
-    if (ap == null) return 1;
-    if (bp == null) return -1;
-    return ap - bp;
-  }
-  if (key === "figurineCount") {
-    const af = a.figurineCount;
-    const bf = b.figurineCount;
-    if (af == null && bf == null) return 0;
-    if (af == null) return 1;
-    if (bf == null) return -1;
-    return af - bf;
-  }
-  return 0;
 }
 
 /**
@@ -480,6 +445,10 @@ export async function renderList(main, opts) {
       }
       el?.focus({ preventScroll: true });
     }
+
+    if (pendingFocusCardId && applyListCardFocus(queryCardTile(pendingFocusCardId))) {
+      pendingFocusCardId = null;
+    }
   }
 
   function onSearchInput() {
@@ -659,6 +628,8 @@ export async function renderList(main, opts) {
     opts.onEdit(tile.dataset.id);
   });
 
+  mountedFocusListCard = (id) => applyListCardFocus(queryCardTile(id));
+
   mountedPatchListCard = (card) => {
     const idx = cards.findIndex((c) => c.id === card.id);
     if (idx < 0) return false;
@@ -692,6 +663,7 @@ export async function renderList(main, opts) {
   return () => {
     mountedPatchListCard = null;
     mountedRemoveListCard = null;
+    mountedFocusListCard = null;
     unregisterGrid();
     if (searchInput) searchInput.removeEventListener("input", onSearchInput);
     if (searchBar) {

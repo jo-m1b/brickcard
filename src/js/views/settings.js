@@ -1,7 +1,8 @@
-import { ICON_CLOSE, ICON_TOOLS, modalTitleMarkup } from "../icons.js";
+import { ICON_CLOSE, ICON_SEARCH_LINE, ICON_TOOLS, modalTitleMarkup } from "../icons.js";
 import { bindFormColor, formColorMarkup } from "../form-color.js";
 import { bindFormRange, formRangeResetMarkup } from "../form-range.js";
 import { formCheckboxMarkup } from "../form-checkbox.js";
+import { formRadioMarkup } from "../form-radio.js";
 import { getOptimizeImages, setOptimizeImages } from "../image-optimize.js";
 import { getTheme, setTheme } from "../theme.js";
 import {
@@ -37,6 +38,7 @@ import {
 } from "../list-layout.js";
 import { DEFAULT_THEME_COLOR } from "../themes-data.js";
 import { tileListMarkup } from "../tile.js";
+import { emptyViewMarkup } from "../empty-view.js";
 import { confirmDialog } from "../confirm-dialog.js";
 import { setAppDocumentTitle } from "../document-title.js";
 import { syncPrintMenu } from "../print-menu.js";
@@ -47,8 +49,11 @@ import {
   computePrintLayout,
   formatPrintGridSize,
   getPrintSettings,
+  normalizeCardSort,
+  printCardSortRadiosMarkup,
   setPrintSettings,
 } from "../print-settings.js";
+import { includesCI } from "../includes-ci.js";
 
 /**
  * Modale de configuration.
@@ -89,18 +94,50 @@ export function renderSettingsModal(host, opts) {
             <span class="visually-hidden">Fermer</span>
           </button>
         </div>
+        <div class="themes-toolbar">
+          <div class="search-bar search-bar--input-only" id="settings-search-bar">
+            <span class="form-control-icon" aria-hidden="true">${ICON_SEARCH_LINE}</span>
+            <input
+              class="form-control"
+              type="search"
+              id="settings-search"
+              placeholder="Rechercher…"
+              autocomplete="off"
+              aria-label="Rechercher un paramètre"
+            />
+          </div>
+        </div>
         <div class="modal-body" tabindex="-1">
           <div class="settings-sections">
             <section class="settings-panel">
               <h2 class="section-title">Interface</h2>
-              <div class="form-field">
-                <p class="form-label" id="settings-theme-label">Mode d’affichage</p>
-                <div class="theme-mode-switch" role="radiogroup" aria-labelledby="settings-theme-label">
-                  <button type="button" class="btn ${currentTheme === "system" ? "primary" : "secondary"}" data-theme-mode="system" aria-pressed="${currentTheme === "system"}">Système</button>
-                  <button type="button" class="btn ${currentTheme === "light" ? "primary" : "secondary"}" data-theme-mode="light" aria-pressed="${currentTheme === "light"}">Clair</button>
-                  <button type="button" class="btn ${currentTheme === "dark" ? "primary" : "secondary"}" data-theme-mode="dark" aria-pressed="${currentTheme === "dark"}">Sombre</button>
+              <fieldset class="form-check-group">
+                <legend class="form-label">Mode d’affichage</legend>
+                <div class="form-check-list">
+                  ${formRadioMarkup({
+                    id: "settings-theme-light",
+                    name: "settings-theme",
+                    value: "light",
+                    label: "Thème clair",
+                    checked: currentTheme === "light",
+                  })}
+                  ${formRadioMarkup({
+                    id: "settings-theme-dark",
+                    name: "settings-theme",
+                    value: "dark",
+                    label: "Thème sombre",
+                    checked: currentTheme === "dark",
+                  })}
+                  ${formRadioMarkup({
+                    id: "settings-theme-system",
+                    name: "settings-theme",
+                    value: "system",
+                    label: "Système",
+                    hint: "Utilise les paramètres système",
+                    checked: currentTheme === "system",
+                  })}
                 </div>
-              </div>
+              </fieldset>
               <div class="form-field">
                 <label class="form-label" for="settings-list-cols">Nombre de cartes par ligne maximum</label>
                 <div class="form-range-row">
@@ -125,7 +162,7 @@ export function renderSettingsModal(host, opts) {
                 ${formCheckboxMarkup({
                   id: "settings-optimize-images",
                   label: "Optimiser les images",
-                  hint: "Convertir automatiquement les nouvelles images ajoutées à la collection dans un format optimisé.",
+                  hint: "Convertir automatiquement les nouvelles images ajoutées à la collection dans un format optimisé",
                   checked: getOptimizeImages(),
                 })}
               </div>
@@ -135,7 +172,7 @@ export function renderSettingsModal(host, opts) {
               <h2 class="section-title">Apparence des cartes</h2>
               <div class="form-field">
                 <label class="form-label" for="settings-default-color-hex">Couleur par défaut</label>
-                <p class="form-hint" id="settings-default-color-hint">Couleur appliquée par défaut aux cartes sans thème ou sans couleur personnalisée.</p>
+                <p class="form-hint" id="settings-default-color-hint">Couleur appliquée par défaut aux cartes sans thème ou sans couleur personnalisée</p>
                 ${formColorMarkup({
                   id: "settings-default-color-hex",
                   value: configuredColor,
@@ -225,48 +262,89 @@ export function renderSettingsModal(host, opts) {
                   ${formRangeResetMarkup()}
                 </div>
               </div>
-              <div class="form-field">
-                <p class="form-label" id="settings-card-sides-label">Côtés des cartes à imprimer</p>
-                <div class="theme-mode-switch" role="radiogroup" aria-labelledby="settings-card-sides-label">
-                  <button type="button" class="btn ${printSettings.cardSidesToPrint === "faceAndBack" ? "primary" : "secondary"}" data-card-sides="faceAndBack" aria-pressed="${printSettings.cardSidesToPrint === "faceAndBack"}">Face et dos</button>
-                  <button type="button" class="btn ${printSettings.cardSidesToPrint === "faceOnly" ? "primary" : "secondary"}" data-card-sides="faceOnly" aria-pressed="${printSettings.cardSidesToPrint === "faceOnly"}">Face seulement</button>
-                  <button type="button" class="btn ${printSettings.cardSidesToPrint === "backOnly" ? "primary" : "secondary"}" data-card-sides="backOnly" aria-pressed="${printSettings.cardSidesToPrint === "backOnly"}">Dos seulement</button>
+              <fieldset class="form-check-group">
+                <legend class="form-label">Tri des cartes</legend>
+                <div class="form-check-list form-check-list--row">
+                  ${printCardSortRadiosMarkup({
+                    idPrefix: "settings-card-sort",
+                    name: "settings-card-sort",
+                    selected: printSettings.cardSort,
+                  })}
                 </div>
-              </div>
-              <div class="form-field" id="settings-recto-verso-field">
-                <p class="form-label" id="settings-recto-verso-label">Impression recto-verso des feuilles</p>
-                <div class="theme-mode-switch" role="radiogroup" aria-labelledby="settings-recto-verso-label" aria-describedby="settings-recto-verso-hint">
-                  <button type="button" class="btn ${printSettings.sheetRectoVerso === "alternate" ? "primary" : "secondary"}" data-sheet-recto-verso="alternate" aria-pressed="${printSettings.sheetRectoVerso === "alternate"}">Alterner</button>
-                  <button type="button" class="btn ${printSettings.sheetRectoVerso === "grouped" ? "primary" : "secondary"}" data-sheet-recto-verso="grouped" aria-pressed="${printSettings.sheetRectoVerso === "grouped"}">Regrouper</button>
+              </fieldset>
+              <fieldset class="form-check-group">
+                <legend class="form-label">Côtés des cartes à imprimer</legend>
+                <div class="form-check-list form-check-list--row">
+                  ${formRadioMarkup({
+                    id: "settings-card-sides-face-and-back",
+                    name: "settings-card-sides",
+                    value: "faceAndBack",
+                    label: "Face et dos",
+                    checked: printSettings.cardSidesToPrint === "faceAndBack",
+                  })}
+                  ${formRadioMarkup({
+                    id: "settings-card-sides-face-only",
+                    name: "settings-card-sides",
+                    value: "faceOnly",
+                    label: "Face seulement",
+                    checked: printSettings.cardSidesToPrint === "faceOnly",
+                  })}
+                  ${formRadioMarkup({
+                    id: "settings-card-sides-back-only",
+                    name: "settings-card-sides",
+                    value: "backOnly",
+                    label: "Dos seulement",
+                    checked: printSettings.cardSidesToPrint === "backOnly",
+                  })}
                 </div>
-                <p class="form-hint" id="settings-recto-verso-hint"></p>
-              </div>
+              </fieldset>
+              <fieldset class="form-check-group" id="settings-recto-verso-field">
+                <legend class="form-label">Impression recto-verso des feuilles</legend>
+                <div class="form-check-list">
+                  ${formRadioMarkup({
+                    id: "settings-recto-verso-alternate",
+                    name: "settings-recto-verso",
+                    value: "alternate",
+                    label: "Alterner",
+                    hint: "Une feuille à la fois (imprimante recto-verso)",
+                    checked: printSettings.sheetRectoVerso === "alternate",
+                  })}
+                  ${formRadioMarkup({
+                    id: "settings-recto-verso-grouped",
+                    name: "settings-recto-verso",
+                    value: "grouped",
+                    label: "Regrouper",
+                    hint: "Tous les rectos d’abord, puis retourner la pile pour ensuite imprimer tous les versos",
+                    checked: printSettings.sheetRectoVerso === "grouped",
+                  })}
+                </div>
+              </fieldset>
             </section>
 
             <section class="settings-panel">
-              <h2 class="section-title">Gestion de la collection</h2>
+              <h2 class="section-title">Gestion de votre collection</h2>
               ${tileListMarkup([
                 {
                   title: "Importer",
-                  desc: "Charger une sauvegarde pour ajouter ou fusionner un lot de cartes, thèmes ou paramètres",
+                  desc: "Charger une sauvegarde pour ajouter ou fusionner un lot de cartes, thèmes ou paramètres à votre collection",
                   icon: "upload",
                   href: "#import",
                 },
                 {
                   title: "Sauvegarder",
-                  desc: "Enregistrer une sauvegarde de la collection de cartes, thèmes et paramètres",
+                  desc: "Enregistrer une sauvegarde de votre collection de cartes, thèmes et paramètres",
                   icon: "download",
                   href: "#backup",
                 },
                 {
                   title: "Thèmes",
-                  desc: "Gérer et personnaliser les thèmes disponibles",
+                  desc: "Gérer les thèmes disponibles pour votre collection",
                   href: "#themes",
                   icon: "palette",
                 },
                 {
                   title: "Supprimer toutes les cartes",
-                  desc: "Retirer définitivement toutes les cartes, sans modifier les thèmes ni les paramètres enregistrés",
+                  desc: "Retirer toutes les cartes de votre collection (conserve les thèmes et les paramètres enregistrés)",
                   icon: "delete-bin-2",
                   tag: "button",
                   id: "settings-clear-cards",
@@ -300,6 +378,13 @@ export function renderSettingsModal(host, opts) {
                 : ""
             }
           </div>
+          ${emptyViewMarkup({
+            id: "settings-empty-filter",
+            hidden: true,
+            titleTag: "p",
+            title: "Oups !",
+            text: "Aucun paramètre ne correspond à la recherche.",
+          })}
         </div>
       </div>
     </div>
@@ -309,13 +394,14 @@ export function renderSettingsModal(host, opts) {
 
   const backdrop = host.querySelector("#settings-modal-backdrop");
   const btnClose = host.querySelector("#btn-settings-close");
-  const themeBtns = /** @type {NodeListOf<HTMLButtonElement>} */ (
-    host.querySelectorAll("[data-theme-mode]")
-  );
-  const printSidesBtns = Array.from(host.querySelectorAll("[data-card-sides]"));
-  const printDuplexBtns = Array.from(host.querySelectorAll("[data-sheet-recto-verso]"));
+  const searchInput = /** @type {HTMLInputElement|null} */ (host.querySelector("#settings-search"));
+  const settingsSections = host.querySelector(".settings-sections");
+  const emptyFilter = host.querySelector("#settings-empty-filter");
+  const themeInputs = host.querySelectorAll('input[name="settings-theme"]');
+  const printSortInputs = host.querySelectorAll('input[name="settings-card-sort"]');
+  const printSidesInputs = host.querySelectorAll('input[name="settings-card-sides"]');
+  const printDuplexInputs = host.querySelectorAll('input[name="settings-recto-verso"]');
   const printDuplexField = host.querySelector("#settings-recto-verso-field");
-  const printDuplexHint = host.querySelector("#settings-recto-verso-hint");
 
   /** @type {ReturnType<typeof bindFormRange>[]} */
   const rangeFields = [];
@@ -383,58 +469,76 @@ export function renderSettingsModal(host, opts) {
   }
   const close = () => onClose();
 
-  function syncThemeButtons(mode) {
-    themeBtns.forEach((btn) => {
-      const on = btn.dataset.themeMode === mode;
-      btn.setAttribute("aria-pressed", on ? "true" : "false");
-      btn.classList.toggle("primary", on);
-      btn.classList.toggle("secondary", !on);
-    });
-  }
-  syncThemeButtons(currentTheme);
-
-  themeBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const mode = /** @type {"system"|"light"|"dark"} */ (btn.dataset.themeMode);
-      if (!mode) return;
-      setTheme(mode);
-      syncThemeButtons(mode);
-    });
-  });
+  /** @param {Event} e */
+  const onThemeChange = (e) => {
+    const input = e.currentTarget;
+    if (!(input instanceof HTMLInputElement) || !input.checked) return;
+    if (input.value !== "light" && input.value !== "dark" && input.value !== "system") {
+      return;
+    }
+    setTheme(input.value);
+  };
+  themeInputs.forEach((input) => input.addEventListener("change", onThemeChange));
 
   let currentPrintSettings = printSettings;
 
-  function syncPrintSidesButtons(cardSidesToPrint) {
-    printSidesBtns.forEach((btn) => {
-      const on = btn.getAttribute("data-card-sides") === cardSidesToPrint;
-      btn.setAttribute("aria-pressed", on ? "true" : "false");
-      btn.classList.toggle("primary", on);
-      btn.classList.toggle("secondary", !on);
-    });
+  /** @param {ParentNode} root @param {string} needle */
+  function matchesLabels(root, needle) {
+    if (!needle) return true;
+    for (const el of root.querySelectorAll(".form-label, .form-hint")) {
+      if (includesCI(el.textContent || "", needle)) return true;
+    }
+    return false;
   }
 
-  function syncPrintDuplexButtons(sheetRectoVerso) {
-    printDuplexBtns.forEach((btn) => {
-      const on = btn.getAttribute("data-sheet-recto-verso") === sheetRectoVerso;
-      btn.setAttribute("aria-pressed", on ? "true" : "false");
-      btn.classList.toggle("primary", on);
-      btn.classList.toggle("secondary", !on);
+  function applyFilter() {
+    const needle = (searchInput?.value || "").trim();
+    const duplexAllowed = currentPrintSettings.cardSidesToPrint === "faceAndBack";
+    let anyPanel = false;
+    settingsSections?.querySelectorAll(":scope > .settings-panel").forEach((panel) => {
+      const titleMatch =
+        !needle || includesCI(panel.querySelector(":scope > .section-title")?.textContent || "", needle);
+      let anyChild = false;
+      panel.querySelectorAll(":scope > .form-field").forEach((field) => {
+        const show = titleMatch || matchesLabels(field, needle);
+        field.hidden = !show;
+        if (show) anyChild = true;
+      });
+      panel.querySelectorAll(":scope > .form-check-group").forEach((group) => {
+        const duplexBlocked = group === printDuplexField && !duplexAllowed;
+        const show = !duplexBlocked && (titleMatch || matchesLabels(group, needle));
+        group.hidden = !show;
+        if (show) anyChild = true;
+      });
+      panel.querySelectorAll(":scope > .tile-list").forEach((list) => {
+        let anyTile = false;
+        list.querySelectorAll(":scope > li").forEach((li) => {
+          const href = li.querySelector("a.tile")?.getAttribute("href") || "";
+          const show =
+            titleMatch ||
+            includesCI(li.querySelector(".tile-title")?.textContent || "", needle) ||
+            includesCI(li.querySelector(".tile-desc")?.textContent || "", needle) ||
+            includesCI(href, needle);
+          li.hidden = !show;
+          if (show) anyTile = true;
+        });
+        list.hidden = !anyTile;
+        if (anyTile) anyChild = true;
+      });
+      panel.hidden = !anyChild;
+      if (anyChild) anyPanel = true;
     });
+    if (settingsSections) settingsSections.hidden = !anyPanel;
+    if (emptyFilter) emptyFilter.hidden = anyPanel;
   }
 
   function refreshPrintSettingsUi() {
-    if (printDuplexField instanceof HTMLElement) {
-      printDuplexField.hidden = currentPrintSettings.cardSidesToPrint !== "faceAndBack";
-    }
-    if (printDuplexHint instanceof HTMLElement) {
-      printDuplexHint.textContent =
-        currentPrintSettings.sheetRectoVerso === "grouped"
-          ? "Tous les rectos d’abord, puis retourner la pile pour ensuite imprimer tous les versos."
-          : "Une feuille à la fois (imprimante recto-verso).";
-    }
-    syncPrintSidesButtons(currentPrintSettings.cardSidesToPrint);
-    syncPrintDuplexButtons(currentPrintSettings.sheetRectoVerso);
+    applyFilter();
     syncPrintMenu();
+  }
+
+  function onSearchInput() {
+    applyFilter();
   }
 
   /** @param {Partial<typeof currentPrintSettings>} partial */
@@ -444,6 +548,7 @@ export function renderSettingsModal(host, opts) {
   }
 
   refreshPrintSettingsUi();
+  searchInput?.addEventListener("input", onSearchInput);
 
   bindSettingsRange("#settings-print-grid", {
     defaultValue: DEFAULT_PRINT_GRID,
@@ -452,20 +557,31 @@ export function renderSettingsModal(host, opts) {
       persistPrintSettings({ printGrid: Number(value) });
     },
   });
-  printSidesBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const cardSidesToPrint = btn.getAttribute("data-card-sides");
-      if (!cardSidesToPrint) return;
-      persistPrintSettings({ cardSidesToPrint });
-    });
-  });
-  printDuplexBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const sheetRectoVerso = btn.getAttribute("data-sheet-recto-verso");
-      if (!sheetRectoVerso) return;
-      persistPrintSettings({ sheetRectoVerso });
-    });
-  });
+  /** @param {Event} e */
+  const onPrintSortChange = (e) => {
+    const input = e.currentTarget;
+    if (!(input instanceof HTMLInputElement) || !input.checked) return;
+    persistPrintSettings({ cardSort: normalizeCardSort(input.value) });
+  };
+  /** @param {Event} e */
+  const onPrintSidesChange = (e) => {
+    const input = e.currentTarget;
+    if (!(input instanceof HTMLInputElement) || !input.checked) return;
+    if (input.value !== "faceAndBack" && input.value !== "faceOnly" && input.value !== "backOnly") {
+      return;
+    }
+    persistPrintSettings({ cardSidesToPrint: input.value });
+  };
+  /** @param {Event} e */
+  const onPrintDuplexChange = (e) => {
+    const input = e.currentTarget;
+    if (!(input instanceof HTMLInputElement) || !input.checked) return;
+    if (input.value !== "alternate" && input.value !== "grouped") return;
+    persistPrintSettings({ sheetRectoVerso: input.value });
+  };
+  printSortInputs.forEach((input) => input.addEventListener("change", onPrintSortChange));
+  printSidesInputs.forEach((input) => input.addEventListener("change", onPrintSidesChange));
+  printDuplexInputs.forEach((input) => input.addEventListener("change", onPrintDuplexChange));
 
   const clearCardsBtn = host.querySelector("#settings-clear-cards");
   if (clearCardsBtn && onClearCards) {
@@ -529,7 +645,12 @@ export function renderSettingsModal(host, opts) {
   function cleanup() {
     defaultColorField?.destroy();
     rangeFields.forEach((field) => field.destroy());
+    themeInputs.forEach((input) => input.removeEventListener("change", onThemeChange));
+    printSortInputs.forEach((input) => input.removeEventListener("change", onPrintSortChange));
+    printSidesInputs.forEach((input) => input.removeEventListener("change", onPrintSidesChange));
+    printDuplexInputs.forEach((input) => input.removeEventListener("change", onPrintDuplexChange));
     optimizeInput?.removeEventListener("change", onOptimizeChange);
+    searchInput?.removeEventListener("input", onSearchInput);
     document.removeEventListener("keydown", onKey);
     backdrop?.removeEventListener("click", onBackdropClick);
     btnClose?.removeEventListener("click", close);
