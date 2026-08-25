@@ -2,7 +2,8 @@
  * Service worker minimal (install PWA + cache same-origin).
  * Doit rester à la racine du site : le scope par défaut est le dossier du script,
  * et GitHub Pages ne peut pas envoyer Service-Worker-Allowed pour l’élargir.
- * Aligner CACHE sur APP_VERSION (version.js) et les ?v= de index.html.
+ * Aligner CACHE sur APP_VERSION (version.js) et les ?v= de index.html
+ * (CSS + import map app.js / version.js).
  */
 const CACHE = "brickcard-0.8.3";
 

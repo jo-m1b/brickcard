@@ -14,6 +14,14 @@
   <link rel="icon" href="img/brickcard-favicon.ico" sizes="48x48" />
   <link rel="apple-touch-icon" href="img/brickcard-apple-touch-icon.png" sizes="180x180" />
   <link rel="stylesheet" href="css/styles.css?v=0.8.3" />
+  <script type="importmap">
+  {
+    "imports": {
+      "./js/app.js": "./js/app.js?v=0.8.3",
+      "./js/version.js": "./js/version.js?v=0.8.3"
+    }
+  }
+  </script>
   <script>
     /* Après styles.css (script bloquant) : pas de flush layout avant CSS, pas de flash thème */
     (function () {
@@ -208,7 +216,7 @@
     })();
   </script>
   <script type="module">
-    import("./js/app.js?v=0.8.3").catch(function (err) {
+    import("./js/app.js").catch(function (err) {
       if (typeof showBootError === "function") showBootError(err);
     });
   </script>

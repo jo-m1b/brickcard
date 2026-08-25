@@ -3,7 +3,7 @@
  * Pas d’animation : affichage / suppression seulement.
  */
 
-import { APP_NAME } from "./version.js?v=0.8.3";
+import { APP_NAME } from "./version.js";
 import { ICON_CLOSE, remixIconByName } from "./icons.js";
 
 export const TOAST_DELAY_DEFAULT = 7000;

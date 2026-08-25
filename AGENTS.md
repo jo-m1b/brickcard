@@ -20,7 +20,7 @@ Tout le code applicatif est dans **`src/`**.
 
 | Fichier | Rôle |
 |---------|------|
-| `src/index.html` | Coquille : `<title>` = `APP_DOCUMENT_TITLE`, topbar sticky, `#main`, `#modal-root`, `#toast-root`, `#print-root` |
+| `src/index.html` | Coquille : `<title>` = `APP_DOCUMENT_TITLE`, topbar sticky, `#main`, `#modal-root`, `#toast-root`, `#print-root` ; import map (`?v=` sur `app.js` / `version.js`) |
 | `src/manifest.webmanifest` | Manifest PWA (nom, icônes, `standalone`) |
 | `src/service-worker.js` | Service worker à la racine du site (scope `/` ; GitHub Pages n’autorise pas un SW dans `js/`) ; `CACHE` = `APP_VERSION` ; fetch en ligne avec `cache: "reload"` ; précache install non bloquant ; pas d’interception de son propre script |
 | `src/data/themes-presets.json` | Liste des thèmes LEGO par défaut (éditable sans toucher au JS) |
@@ -54,7 +54,7 @@ Tout le code applicatif est dans **`src/`**.
 | `src/js/print-settings.js` | Réglages d’impression (grille, tri des cartes, côtés, recto-verso) — localStorage |
 | `src/js/card-sort.js` | Comparaison ASC des cartes (liste d’accueil et impression) |
 | `src/js/print-dialog.js` | Modale paramètres d’impression (`#print`) |
-| `src/js/version.js` | Version SemVer (`APP_VERSION`), `APP_ID`, `APP_NAME`, `APP_DOCUMENT_TITLE` — source unique |
+| `src/js/version.js` | Version SemVer (`APP_VERSION`), `APP_ID`, `APP_NAME`, `APP_DOCUMENT_TITLE` — source unique ; cache-bust via import map (`index.html`) |
 | `src/js/document-title.js` | Titre d’onglet (`document.title`) : défaut, overlays, verrou pendant l’impression PDF |
 | `src/js/icons.js` | Icônes UI ([Remix Icon](https://remixicon.com/)) — paths + helpers (`remixIconByName`, `modalTitleMarkup`) |
 | `src/js/link.js` | Markup liens (`a.link` / externe / icône) |
@@ -389,5 +389,5 @@ A4 portrait ; **grille** 1×1 à 10×10 (défaut **3×3** poker 63×88 mm). Autr
 - **Notifications** : succès et erreurs **générales** → `toast()` en priorité (`success` / `error`). Validation de formulaire → `form-error` sous le champ concerné, pas de toast.
 - Pas de dépendances npm sauf demande explicite.
 - **Git — commits** : commit dès qu’une intention (feature ou fix) est **terminée**, ou **avant** d’en commencer une autre. Un commit = une intention (un revert = une seule chose). Ne pas attendre « commit ». Ne pas tout coller en un dump de session. Ne jamais committer `.local/` ni `.cursor/`.
-- **Git — version, tag et push** : **seulement sur demande explicite**. N’incrémenter `APP_VERSION` (ni le `?v=` de cache dans `index.html` / imports `version.js`, ni `CACHE` dans `service-worker.js`, ni une entrée datée dans `CHANGELOG.md`) que sur demande. Entre deux versions, noter les changements sous `## [Unreleased]`. Si le numéro n’est pas dit, demander (patch / mineure / majeure) — ne pas choisir. Cible acceptée **sans confirmation** : uniquement le prochain patch (`0.8.0` → `0.8.1`), la prochaine mineure (`0.8.0` → `0.9.0`) ou la prochaine majeure (`0.8.0` → `1.0.0`), d’après `APP_VERSION` actuelle. Tout le reste (saut `0.7.1` → `0.9.0`, downgrade, même numéro, SemVer invalide, tag `vX.Y.Z` déjà présent) : **s’arrêter et demander** avant bump / tag / push. Bump OK → commit `chore: bump to X.Y.Z` + tag annoté `vX.Y.Z`. Push (commits **et** tags) seulement si demandé. Le push du tag `vX.Y.Z` publie la GitHub Release (workflow `release.yml`, zip/tar.gz natifs) ; ne pas appeler `gh release create` en local.
+- **Git — version, tag et push** : **seulement sur demande explicite**. N’incrémenter `APP_VERSION` (ni le `?v=` de cache dans `index.html` : CSS et import map `app.js` / `version.js`, ni `CACHE` dans `service-worker.js`, ni une entrée datée dans `CHANGELOG.md`) que sur demande. Entre deux versions, noter les changements sous `## [Unreleased]`. Si le numéro n’est pas dit, demander (patch / mineure / majeure) — ne pas choisir. Cible acceptée **sans confirmation** : uniquement le prochain patch (`0.8.0` → `0.8.1`), la prochaine mineure (`0.8.0` → `0.9.0`) ou la prochaine majeure (`0.8.0` → `1.0.0`), d’après `APP_VERSION` actuelle. Tout le reste (saut `0.7.1` → `0.9.0`, downgrade, même numéro, SemVer invalide, tag `vX.Y.Z` déjà présent) : **s’arrêter et demander** avant bump / tag / push. Bump OK → commit `chore: bump to X.Y.Z` + tag annoté `vX.Y.Z`. Push (commits **et** tags) seulement si demandé. Le push du tag `vX.Y.Z` publie la GitHub Release (workflow `release.yml`, zip/tar.gz natifs) ; ne pas appeler `gh release create` en local.
 - **Git — messages** : `feat` / `fix` / `docs` / `chore` + 1 phrase *pourquoi* (anglais) ; corps optionnel. `feat` = nouvelle capacité, `fix` = correctif, `docs` = AGENTS / README, `chore` = bump de version, CI, assets. Pas de scope (`feat(print):`), pas d’autre type.

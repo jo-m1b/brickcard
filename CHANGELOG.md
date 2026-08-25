@@ -8,6 +8,10 @@ Les versions antérieures à 0.8 sont regroupées par mineure ; le détail patch
 
 ## [Unreleased]
 
+### Changed
+
+- Cache-bust des modules `app.js` et `version.js` via une import map dans `index.html` (plus de `?v=` sur les imports JS)
+
 ## [0.8.3] — 2026-08-25
 
 ### Added
