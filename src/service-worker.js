@@ -5,7 +5,7 @@
  * Aligner CACHE sur APP_VERSION (version.js) et les ?v= de index.html
  * (CSS + import map app.js / version.js).
  */
-const CACHE = "brickcard-0.8.3";
+const CACHE = "brickcard-0.8.4";
 
 function shouldHandleFetch(request) {
   if (request.method !== "GET") return false;

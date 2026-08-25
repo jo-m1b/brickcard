@@ -8,6 +8,8 @@ Les versions antérieures à 0.8 sont regroupées par mineure ; le détail patch
 
 ## [Unreleased]
 
+## [0.8.4] — 2026-08-25
+
 ### Added
 
 - Impression : paramètre **Tracé de découpe** (cases Sur la face avant / Sur le dos (arrière), face cochée par défaut) dans `#settings` et `#print` ; le filet 1 px `#000000` n’apparaît que sur les côtés cochés
