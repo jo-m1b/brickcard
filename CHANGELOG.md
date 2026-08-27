@@ -8,6 +8,8 @@ Les versions antérieures à 0.8 sont regroupées par mineure ; le détail patch
 
 ## [Unreleased]
 
+## [0.8.5] — 2026-08-27
+
 ### Added
 
 - Accueil : bouton **Réessayer** sous le message d’erreur de chargement (refresh cache-bust `?r=` ; galerie `#developer/loading`)
