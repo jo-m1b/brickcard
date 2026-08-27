@@ -33,10 +33,6 @@ const PRESETS = {
     message: "Cette notification reste affichée jusqu’à fermeture.",
     delay: false,
   },
-  "no-system": {
-    message: "Uniquement dans le navigateur.",
-    system: false,
-  },
   stack: [
     { message: "Première notification" },
     { type: "success", message: "Deuxième notification" },
@@ -89,10 +85,6 @@ export function renderDeveloperNotifications(host) {
                 <td>croix (défaut) · auto <code>delay</code> ${TOAST_DELAY_DEFAULT}&nbsp;ms · import/sauvegarde collection 15&nbsp;s · <code>delay: false</code> force la croix</td>
               </tr>
               <tr>
-                <td>Système</td>
-                <td>Notification HTML5 par défaut · <code>system: false</code> = in-app seulement</td>
-              </tr>
-              <tr>
                 <td>Pile</td>
                 <td>nouvelles en bas à droite · les précédentes remontent · ≤&nbsp;640px&nbsp;: pleine largeur centrée (marge 1,25rem)</td>
               </tr>
@@ -121,11 +113,10 @@ export function renderDeveloperNotifications(host) {
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Fermeture et système</h2>
+        <h2 class="styleguide-section-title">Fermeture</h2>
         <div class="styleguide-row">
           <button type="button" class="btn secondary" data-demo-toast="delay">Délai 2&nbsp;s</button>
           <button type="button" class="btn secondary" data-demo-toast="sticky">Sans auto-fermeture</button>
-          <button type="button" class="btn secondary" data-demo-toast="no-system">Sans notification système</button>
           <button type="button" class="btn secondary" data-demo-toast="stack">Empiler 3</button>
         </div>
       </div>
@@ -203,13 +194,6 @@ export function renderDeveloperNotifications(host) {
               id: "toast-autohide",
               name: "toast-autohide",
               label: "Fermeture automatique",
-              checked: true,
-            })}
-            ${formCheckboxMarkup({
-              id: "toast-system",
-              name: "toast-system",
-              label: "Notification système HTML5",
-              hint: "Décochez pour n’afficher que dans le navigateur",
               checked: true,
             })}
           </div>
@@ -298,7 +282,6 @@ export function renderDeveloperNotifications(host) {
     } else {
       opts.delay = false;
     }
-    opts.system = Boolean(data.get("toast-system"));
     toast(opts);
   };
   form?.addEventListener("submit", onSubmit);

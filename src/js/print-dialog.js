@@ -11,8 +11,8 @@ import { setAppDocumentTitle } from "./document-title.js";
 import { emptyViewMarkup } from "./empty-view.js";
 import { bindFormRange, formRangeResetMarkup } from "./form-range.js";
 import { formRadioMarkup } from "./form-radio.js";
+import { isPrintShortcut } from "./hotkeys.js";
 import { loadCards } from "./storage.js";
-import { printCards } from "./print.js";
 import { syncPrintMenu } from "./print-menu.js";
 import { getPrintQty, totalPrintCount } from "./print-qty.js";
 import { compareCardsAsc } from "./card-sort.js";
@@ -34,13 +34,6 @@ import {
   syncPrintBleedDisabled,
   setPrintSettings,
 } from "./print-settings.js";
-
-/** Ctrl/Cmd+P (sans Alt / Maj) — ouvrir `#print` ou lancer l’impression. */
-export function isPrintShortcut(e) {
-  if (!(e instanceof KeyboardEvent) || e.repeat || e.altKey || e.shiftKey) return false;
-  if (!e.ctrlKey && !e.metaKey) return false;
-  return e.key === "p" || e.key === "P";
-}
 
 /**
  * @param {HTMLElement} host `#modal-root`
@@ -309,6 +302,7 @@ export function renderPrintDialog(host, opts) {
           toast?.("Aucune carte à imprimer", "error");
           return;
         }
+        const { printCards } = await import("./print.js");
         await printCards(toPrint);
       } catch (err) {
         toast?.(err.message || "Erreur d'impression", "error");

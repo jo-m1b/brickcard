@@ -7,7 +7,6 @@
 import { getPresetThemes, getPresetTheme, parseHexColor, clearPresetCache, clampLogoZoom, roundCropCoord, resolvePresetThemeId } from "./themes-data.js";
 import { applyCardAppearanceSettings } from "./card-design.js";
 import { getOptimizeImages } from "./image-optimize.js";
-import { parseBrickcardBackup } from "./backup.js";
 import { APP_ID } from "./version.js";
 
 const DB_NAME_BASE = APP_ID;
@@ -15,7 +14,6 @@ const DB_GEN_KEY = `${APP_ID}:db-gen`;
 const DB_VERSION = 2;
 const STORE_CARDS = "cards";
 const STORE_THEMES = "themes";
-export { isBrickcardBackupFilename, parseBrickcardBackup } from "./backup.js";
 
 /**
  * @typedef {Object} Card
@@ -84,6 +82,18 @@ export function isResetReloadQuery(search = typeof location !== "undefined" ? lo
   if (params.has("_")) return true;
   const keys = [...params.keys()];
   return keys.length === 1 && /^\d+$/.test(keys[0]) && params.get(keys[0]) === "";
+}
+
+/**
+ * Query de rechargement après **Réessayer** (échec de boot) : `?r={timestamp}`.
+ * Même cache-bust que le reset, sans le motif `?{timestamp}` / `?_=` qui peut
+ * réparer une base IndexedDB coincée.
+ * @param {string} [search]
+ */
+export function isBootRetryQuery(search = typeof location !== "undefined" ? location.search : "") {
+  if (!search || search === "?") return false;
+  const r = new URLSearchParams(search).get("r");
+  return Boolean(r && /^\d+$/.test(r));
 }
 
 /**
@@ -301,6 +311,7 @@ export async function wipeAllLocalData() {
     localStorage.removeItem("brickcard:themes-sort-dir");
     localStorage.removeItem("brickcard:list-cols-max");
     localStorage.removeItem("brickcard:optimize-images");
+    localStorage.removeItem("brickcard:telemetry");
     localStorage.removeItem("brickcard:print-qty");
     localStorage.removeItem("brickcard:print-settings");
     localStorage.removeItem("brickcard:developer-enabled");
@@ -717,6 +728,7 @@ export async function importBackup(input, modeOrOpts = "merge") {
   const includeImages = opts.includeImages !== false;
   const includeThemeLogos = opts.includeThemeLogos !== false;
 
+  const { parseBrickcardBackup } = await import("./backup.js");
   const data = parseBrickcardBackup(input);
   const incoming = data.cards;
   const incomingThemes = data.themes;

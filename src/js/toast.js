@@ -1,9 +1,8 @@
 /**
- * Notifications empilables (toast) — in-app + optionnellement Notification HTML5.
+ * Notifications empilables (toast) in-app.
  * Pas d’animation : affichage / suppression seulement.
  */
 
-import { APP_NAME } from "./version.js";
 import { ICON_CLOSE, remixIconByName } from "./icons.js";
 
 export const TOAST_DELAY_DEFAULT = 7000;
@@ -15,14 +14,13 @@ export const TOAST_DELAY_BACKUP = 15000;
 /**
  * @typedef {object} ToastOptions
  * @property {string} message
- * @property {string} [messageHtml] HTML de confiance pour le corps in-app (`message` reste le texte brut, ex. Notification)
+ * @property {string} [messageHtml] HTML de confiance pour le corps (`message` reste le texte brut)
  * @property {ToastType | "info"} [type]
  * @property {string | false} [title]
  * @property {string | false} [icon]
  * @property {string} [secondary]
  * @property {number | false} [delay]
  * @property {boolean} [closeButton]
- * @property {boolean} [system]
  */
 
 /**
@@ -41,7 +39,6 @@ export const TOAST_DELAY_BACKUP = 15000;
  * @property {string} secondary
  * @property {number} delay
  * @property {boolean} closeButton
- * @property {boolean} system
  */
 
 const TYPE_DEFAULTS = {
@@ -52,7 +49,7 @@ const TYPE_DEFAULTS = {
 
 let nextId = 1;
 
-/** @type {Map<number, { el: HTMLElement, timer: ReturnType<typeof setTimeout> | null, notification: Notification | null }>} */
+/** @type {Map<number, { el: HTMLElement, timer: ReturnType<typeof setTimeout> | null }>} */
 const active = new Map();
 
 /**
@@ -84,8 +81,7 @@ export function toast(messageOrOpts, typeOrOpts) {
     timer = setTimeout(dismiss, opts.delay);
   }
 
-  active.set(id, { el, timer, notification: null });
-  void attachSystemNotification(id, opts);
+  active.set(id, { el, timer });
 
   return { id, dismiss };
 }
@@ -108,11 +104,6 @@ export function dismissToast(id) {
   if (!entry) return;
   active.delete(id);
   if (entry.timer != null) clearTimeout(entry.timer);
-  if (entry.notification) {
-    entry.notification.onclose = null;
-    entry.notification.onclick = null;
-    entry.notification.close();
-  }
   entry.el.remove();
 }
 
@@ -164,10 +155,9 @@ function normalizeToast(raw) {
   }
 
   const closeButton = delay === 0 ? true : raw.closeButton !== false;
-  const system = raw.system !== false;
   const messageHtml = raw.messageHtml ? String(raw.messageHtml) : "";
 
-  return { message, messageHtml, type, title, icon, secondary, delay, closeButton, system };
+  return { message, messageHtml, type, title, icon, secondary, delay, closeButton };
 }
 
 /**
@@ -234,53 +224,6 @@ function getToastRoot() {
     document.body.appendChild(root);
   }
   return root;
-}
-
-/**
- * @param {number} id
- * @param {NormalizedToast} opts
- */
-async function attachSystemNotification(id, opts) {
-  if (!opts.system) return;
-  if (typeof Notification === "undefined") return;
-
-  let perm = Notification.permission;
-  if (perm === "default") {
-    try {
-      perm = await Notification.requestPermission();
-    } catch {
-      return;
-    }
-  }
-  if (perm !== "granted") return;
-
-  const entry = active.get(id);
-  if (!entry) return;
-
-  try {
-    const n = new Notification(opts.title || APP_NAME, {
-      body: opts.message,
-      icon: new URL("img/brickcard-web-app-manifest-192x192.png", document.baseURI).href,
-      tag: `brickcard-toast-${id}`,
-    });
-    n.onclick = () => {
-      window.focus();
-      n.close();
-    };
-    n.onclose = () => {
-      dismissToast(id);
-    };
-    const live = active.get(id);
-    if (!live) {
-      n.onclose = null;
-      n.onclick = null;
-      n.close();
-      return;
-    }
-    live.notification = n;
-  } catch {
-    /* Notification peut échouer hors contexte sécurisé */
-  }
 }
 
 /** @param {string} s */

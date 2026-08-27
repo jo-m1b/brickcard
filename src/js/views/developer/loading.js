@@ -30,6 +30,17 @@ export function renderDeveloperLoading(host) {
           error: SAMPLE_BOOT_ERROR,
         })}
       </div>
+
+      <div class="styleguide-section">
+        <h2 class="styleguide-section-title">Erreur de chargement — réessayer</h2>
+        ${loadingViewMarkup({
+          titleTag: "p",
+          busy: false,
+          error: SAMPLE_BOOT_ERROR,
+          retry: true,
+          retryId: false,
+        })}
+      </div>
     </section>
   `;
   return () => {

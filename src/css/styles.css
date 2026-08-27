@@ -551,7 +551,8 @@ textarea {
 }
 
 .topbar-actions.is-hidden,
-.btn.is-hidden {
+.btn.is-hidden,
+.btn[hidden] {
   display: none !important;
 }
 
@@ -1419,6 +1420,11 @@ html:not([data-theme]) .btn .icon-system {
   font-size: 0.85rem;
   line-height: 1.4;
   overflow-wrap: anywhere;
+  text-align: center;
+}
+
+.empty-view-body > .btn {
+  margin-top: 1.25rem;
 }
 
 .empty-view .tile-list {

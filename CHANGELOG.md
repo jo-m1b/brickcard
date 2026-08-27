@@ -8,6 +8,16 @@ Les versions antérieures à 0.8 sont regroupées par mineure ; le détail patch
 
 ## [Unreleased]
 
+### Added
+
+- Accueil : bouton **Réessayer** sous le message d’erreur de chargement (refresh cache-bust `?r=` ; galerie `#developer/loading`)
+- Paramètres : case **Télémétrie** (cochée par défaut) pour envoyer des données de télémétrie d’utilisation anonyme
+
+### Changed
+
+- Chargement JS : overlays de route et galeries `#developer/…` en `import()` à l’ouverture (boot = liste + stockage + chrome)
+- Notifications : toasts in-app seulement (plus de Notification HTML5 / permission navigateur)
+
 ## [0.8.4] — 2026-08-25
 
 ### Added

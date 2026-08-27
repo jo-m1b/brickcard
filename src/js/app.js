@@ -1,22 +1,14 @@
-import { loadCards, loadThemes, wipeAllLocalData, deleteAllCards, isResetReloadQuery } from "./storage.js";
+import { loadCards, loadThemes, wipeAllLocalData, deleteAllCards, isResetReloadQuery, isBootRetryQuery } from "./storage.js";
 import { initTheme } from "./theme.js";
+import { initTelemetry, trackTelemetryPage } from "./telemetry.js";
 import { initCardDesign } from "./card-design.js";
 import { initListLayout } from "./list-layout.js";
 import { enableDeveloper, isDeveloperEnabled } from "./developer-access.js";
 import { APP_ID, APP_VERSION } from "./version.js";
 import { setAppDocumentTitle } from "./document-title.js";
 import { toast } from "./toast.js";
-import { renderEditor } from "./views/editor.js";
 import { renderList, prepareListAfterCardCreate, patchListCard, removeListCard, focusListCard } from "./views/list.js";
-import { renderThemesModal, prepareThemesAfterThemeCreate, refreshThemesListAfterCreate, patchThemeInList, removeThemeFromList, focusThemeInList, applyPendingThemeFocus } from "./views/themes.js";
-import { renderThemeEditor } from "./views/theme-editor.js";
-import { renderPageModal } from "./views/page.js";
-import { renderSettingsModal } from "./views/settings.js";
-import { isPrintShortcut, renderPrintDialog } from "./print-dialog.js";
-import { isCollectionSaveShortcut, renderBackupDialog } from "./backup-dialog.js";
-import { openDemoBackupDialog, renderImportDialog } from "./import-dialog.js";
-import { renderDeveloperModal } from "./views/developer/modal.js";
-import { applyPendingPresetFocus } from "./views/developer/theme-presets.js";
+import { isPrintShortcut, isCollectionSaveShortcut } from "./hotkeys.js";
 import { loadingViewMarkup, welcomeViewMarkup } from "./empty-view.js";
 import { openConfirmDialog } from "./confirm-dialog.js";
 import { bindModalFocusTrap, focusTopModal } from "./modal-focus.js";
@@ -288,6 +280,24 @@ function teardownOverlays(opts = {}) {
   if (opts.dropModalOpen) document.body.classList.remove("modal-open");
 }
 
+/**
+ * Charge un module d’overlay. Échec → toast + accueil (le boot reste utilisable).
+ * @template T
+ * @param {() => Promise<T>} loader
+ * @returns {Promise<T|null>}
+ */
+async function loadOverlay(loader) {
+  try {
+    return await loader();
+  } catch (err) {
+    console.error(err);
+    const msg = err && err.message ? err.message : String(err || "Erreur de chargement");
+    toast(msg, "error");
+    dismissOverlay();
+    return null;
+  }
+}
+
 async function ensureUnderlay() {
   if (underlayReady && !underlayStale) return;
   let cards;
@@ -313,13 +323,15 @@ async function showOverlay(routeInfo) {
   document.body.classList.add("modal-open");
 
   if (routeInfo.name === "settings") {
+    const settings = await loadOverlay(() => import("./views/settings.js"));
+    if (!settings) return;
     let cardCount = 0;
     try {
       cardCount = (await loadCards()).length;
     } catch {
       /* ignore */
     }
-    cleanupSettings = renderSettingsModal(modalRoot, {
+    cleanupSettings = settings.renderSettingsModal(modalRoot, {
       onClose: overlayOnClose("settings"),
       onClearCards: handleClearCards,
       onDevReset: isDeveloperEnabled() ? handleDevReset : undefined,
@@ -330,7 +342,9 @@ async function showOverlay(routeInfo) {
   }
 
   if (routeInfo.name === "print") {
-    cleanupPrint = renderPrintDialog(modalRoot, {
+    const printDlg = await loadOverlay(() => import("./print-dialog.js"));
+    if (!printDlg) return;
+    cleanupPrint = printDlg.renderPrintDialog(modalRoot, {
       onClose: overlayOnClose("print"),
       toast,
     });
@@ -339,7 +353,9 @@ async function showOverlay(routeInfo) {
   }
 
   if (routeInfo.name === "backup") {
-    cleanupBackup = await renderBackupDialog(modalRoot, {
+    const backup = await loadOverlay(() => import("./backup-dialog.js"));
+    if (!backup) return;
+    cleanupBackup = await backup.renderBackupDialog(modalRoot, {
       onClose: overlayOnClose("backup"),
       toast,
     });
@@ -348,7 +364,9 @@ async function showOverlay(routeInfo) {
   }
 
   if (routeInfo.name === "import") {
-    cleanupImport = await renderImportDialog(modalRoot, {
+    const importDlg = await loadOverlay(() => import("./import-dialog.js"));
+    if (!importDlg) return;
+    cleanupImport = await importDlg.renderImportDialog(modalRoot, {
       onClose: overlayOnClose("import"),
       onImported: () => {
         underlayStale = true;
@@ -360,13 +378,15 @@ async function showOverlay(routeInfo) {
   }
 
   if (routeInfo.name === "themes") {
+    const themes = await loadOverlay(() => import("./views/themes.js"));
+    if (!themes) return;
     if (routeInfo.page === "list") {
       if (cleanupThemeEditor) {
         cleanupThemeEditor();
         cleanupThemeEditor = null;
       }
       if (!cleanupThemes) {
-        cleanupThemes = await renderThemesModal(modalRoot, {
+        cleanupThemes = await themes.renderThemesModal(modalRoot, {
           onClose: overlayOnClose("themes"),
           onCreate: () => navigate("#themes/new"),
           onEdit: (id) => navigate(`#themes/edit/${encodeURIComponent(id)}`),
@@ -380,15 +400,17 @@ async function showOverlay(routeInfo) {
           },
         });
         focusTopModal();
-        applyPendingThemeFocus();
+        themes.applyPendingThemeFocus();
       } else {
         setAppDocumentTitle("Thèmes");
         focusTopModal({ resetScroll: false });
-        applyPendingThemeFocus();
+        themes.applyPendingThemeFocus();
       }
       return;
     }
 
+    const themeEditor = await loadOverlay(() => import("./views/theme-editor.js"));
+    if (!themeEditor) return;
     if (cleanupThemeEditor) {
       cleanupThemeEditor();
       cleanupThemeEditor = null;
@@ -396,14 +418,14 @@ async function showOverlay(routeInfo) {
     if (!cleanupThemes) {
       modalRoot.innerHTML = "";
     }
-    cleanupThemeEditor = await renderThemeEditor(modalRoot, {
+    cleanupThemeEditor = await themeEditor.renderThemeEditor(modalRoot, {
       themeId: routeInfo.page === "edit" ? routeInfo.themeId : null,
       onClose: () => {
         const id = routeInfo.page === "edit" ? routeInfo.themeId : null;
         if (parseRoute().name === "themes") {
           navigate("#themes", { replace: true });
         }
-        if (id) focusThemeInList(id);
+        if (id) themes.focusThemeInList(id);
       },
       onSaved: (name, meta) => {
         toast({
@@ -414,16 +436,16 @@ async function showOverlay(routeInfo) {
         });
         underlayStale = true;
         if (meta?.isNew) {
-          if (!refreshThemesListAfterCreate(meta.theme)) {
-            prepareThemesAfterThemeCreate();
+          if (!themes.refreshThemesListAfterCreate(meta.theme)) {
+            themes.prepareThemesAfterThemeCreate();
           }
-        } else if (!patchThemeInList(meta?.theme)) {
+        } else if (!themes.patchThemeInList(meta?.theme)) {
           /* liste absente : #themes la remontera */
         }
         if (parseRoute().name === "themes") {
           navigate("#themes", { replace: true });
         }
-        focusThemeInList(meta?.theme?.id);
+        themes.focusThemeInList(meta?.theme?.id);
       },
       onDeleted: (name, themeId) => {
         toast({
@@ -433,7 +455,7 @@ async function showOverlay(routeInfo) {
           icon: "delete-bin-2",
         });
         underlayStale = true;
-        removeThemeFromList(themeId);
+        themes.removeThemeFromList(themeId);
         if (parseRoute().name === "themes") {
           navigate("#themes", { replace: true });
         }
@@ -448,7 +470,9 @@ async function showOverlay(routeInfo) {
   }
 
   if (routeInfo.name === "page") {
-    cleanupPage = await renderPageModal(modalRoot, {
+    const page = await loadOverlay(() => import("./views/page.js"));
+    if (!page) return;
+    cleanupPage = await page.renderPageModal(modalRoot, {
       slug: routeInfo.slug,
       toast,
       onClose: overlayOnClose("page"),
@@ -479,21 +503,32 @@ async function showOverlay(routeInfo) {
       }
       enableDeveloper();
     }
+    const developer = await loadOverlay(() => import("./views/developer/modal.js"));
+    if (!developer) return;
     const staying = Boolean(modalRoot.querySelector("#developer-modal-backdrop"));
-    cleanupDeveloper = renderDeveloperModal(modalRoot, {
-      page: routeInfo.page,
-      presetPage: routeInfo.presetPage,
-      themeId: routeInfo.themeId,
-      onClose: overlayOnClose("developer"),
-      onNavigate: navigate,
-    });
+    try {
+      cleanupDeveloper = await developer.renderDeveloperModal(modalRoot, {
+        page: routeInfo.page,
+        presetPage: routeInfo.presetPage,
+        themeId: routeInfo.themeId,
+        onClose: overlayOnClose("developer"),
+        onNavigate: navigate,
+      });
+    } catch (err) {
+      console.error(err);
+      const msg = err && err.message ? err.message : String(err || "Erreur de chargement");
+      toast(msg, "error");
+      dismissOverlay();
+      return;
+    }
     focusTopModal({ resetScroll: !staying });
-    applyPendingPresetFocus();
     return;
   }
 
   if (routeInfo.name === "editor") {
-    cleanupEditor = await renderEditor(modalRoot, {
+    const editor = await loadOverlay(() => import("./views/editor.js"));
+    if (!editor) return;
+    cleanupEditor = await editor.renderEditor(modalRoot, {
       cardId: routeInfo.cardId,
       onSaved: (subject, meta) => {
         toastCardSavedOrDeleted("saved", subject);
@@ -533,18 +568,25 @@ function disposeList() {
 
 function renderEmpty() {
   main.innerHTML = welcomeViewMarkup();
-  main.querySelector("#empty-import-demo")?.addEventListener("click", () => {
+  main.querySelector("#empty-import-demo")?.addEventListener("click", async () => {
     if (!modalRoot) {
       toast("Modale indisponible", "error");
       return;
     }
-    openDemoBackupDialog(modalRoot, {
-      toast,
-      onImported: async () => {
-        underlayStale = true;
-        await ensureUnderlay();
-      },
-    });
+    try {
+      const { openDemoBackupDialog } = await import("./import-dialog.js");
+      openDemoBackupDialog(modalRoot, {
+        toast,
+        onImported: async () => {
+          underlayStale = true;
+          await ensureUnderlay();
+        },
+      });
+    } catch (err) {
+      console.error(err);
+      const msg = err && err.message ? err.message : String(err || "Erreur de chargement");
+      toast(msg, "error");
+    }
   });
 }
 
@@ -588,6 +630,8 @@ async function route() {
       );
     }
   }
+
+  trackTelemetryPage();
 
   const prev = shownRoute;
   const nextIsOverlay = isOverlayRoute(routeInfo);
@@ -755,6 +799,7 @@ async function boot() {
     }
     setAppDocumentTitle();
     initTheme();
+    initTelemetry();
     initCardDesign();
     initListLayout();
     initPrintMenu({ toast, onOpenPrint: () => navigate("#print") });
@@ -764,7 +809,7 @@ async function boot() {
     history.replaceState({ app: APP_ID, depth: 0 }, "", hashUrl(location.hash));
 
     await Promise.all([loadCards(), loadThemes()]);
-    if (isResetReloadQuery(location.search)) {
+    if (isResetReloadQuery(location.search) || isBootRetryQuery(location.search)) {
       const h = normalizeHash(location.hash);
       const clean = h === "#" ? location.pathname : `${location.pathname}${h}`;
       history.replaceState({ app: APP_ID, depth: 0 }, "", clean);
@@ -778,7 +823,10 @@ async function boot() {
     } else if (main) {
       const msg = err && err.message ? err.message : String(err || "Erreur inconnue");
       main.removeAttribute("aria-busy");
-      main.innerHTML = loadingViewMarkup({ error: msg, busy: false });
+      main.innerHTML = loadingViewMarkup({ error: msg, busy: false, retry: true });
+      main.querySelector("#boot-retry")?.addEventListener("click", () => {
+        location.replace(`${location.pathname}?r=${Date.now()}${location.hash || ""}`);
+      });
     }
   }
 }

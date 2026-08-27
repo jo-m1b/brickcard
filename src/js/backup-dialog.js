@@ -3,14 +3,8 @@
  * Fermeture (X, Échap, backdrop, Annuler, ou après un export réussi) → accueil.
  */
 
-/** Ctrl/Cmd+S (sans Alt / Maj) — ouvrir `#backup` ou lancer l’export. */
-export function isCollectionSaveShortcut(e) {
-  if (!(e instanceof KeyboardEvent) || e.repeat || e.altKey || e.shiftKey) return false;
-  if (!e.ctrlKey && !e.metaKey) return false;
-  return e.key === "s" || e.key === "S";
-}
-
 import { ICON_CLOSE, ICON_DOWNLOAD, modalTitleMarkup } from "./icons.js";
+import { isCollectionSaveShortcut } from "./hotkeys.js";
 import { TOAST_DELAY_BACKUP } from "./toast.js";
 import { setAppDocumentTitle } from "./document-title.js";
 import { formRadioMarkup } from "./form-radio.js";

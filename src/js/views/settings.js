@@ -4,6 +4,7 @@ import { bindFormRange, formRangeResetMarkup } from "../form-range.js";
 import { formCheckboxMarkup } from "../form-checkbox.js";
 import { formRadioMarkup } from "../form-radio.js";
 import { getOptimizeImages, setOptimizeImages } from "../image-optimize.js";
+import { getTelemetry, setTelemetry } from "../telemetry.js";
 import { getTheme, setTheme } from "../theme.js";
 import {
   CARD_IMAGE_RADIUS_MAX_MM,
@@ -169,6 +170,14 @@ export function renderSettingsModal(host, opts) {
                   label: "Optimiser les images",
                   hint: "Convertir automatiquement les nouvelles images ajoutées à la collection dans un format optimisé",
                   checked: getOptimizeImages(),
+                })}
+              </div>
+              <div class="form-field">
+                ${formCheckboxMarkup({
+                  id: "settings-telemetry",
+                  label: "Télémétrie",
+                  hint: "Envoyer des données de télémétrie d’utilisation anonyme",
+                  checked: getTelemetry(),
                 })}
               </div>
             </section>
@@ -452,6 +461,13 @@ export function renderSettingsModal(host, opts) {
     if (input instanceof HTMLInputElement) setOptimizeImages(input.checked);
   };
   optimizeInput?.addEventListener("change", onOptimizeChange);
+  const telemetryInput = host.querySelector("#settings-telemetry");
+  /** @param {Event} e */
+  const onTelemetryChange = (e) => {
+    const input = e.currentTarget;
+    if (input instanceof HTMLInputElement) setTelemetry(input.checked);
+  };
+  telemetryInput?.addEventListener("change", onTelemetryChange);
   bindSettingsRange("#settings-face-border", {
     defaultValue: DEFAULT_FACE_BORDER_MM,
     format: (v) => `${v}\u00a0mm`,
@@ -682,6 +698,7 @@ export function renderSettingsModal(host, opts) {
     printSideInputs.forEach((input) => input.removeEventListener("change", onPrintSideChange));
     printAssemblyInputs.forEach((input) => input.removeEventListener("change", onPrintAssemblyChange));
     optimizeInput?.removeEventListener("change", onOptimizeChange);
+    telemetryInput?.removeEventListener("change", onTelemetryChange);
     searchInput?.removeEventListener("input", onSearchInput);
     document.removeEventListener("keydown", onKey);
     backdrop?.removeEventListener("click", onBackdropClick);

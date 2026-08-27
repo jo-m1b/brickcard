@@ -183,6 +183,11 @@
           </div>
           <h1 class="view-title">Chargement<span class="visually-hidden">...</span><span class="loading-dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span></h1>
           <p class="empty-view-error" id="boot-error" role="alert" hidden></p>
+          <button type="button" class="btn primary is-hidden" id="boot-retry" hidden>
+            <!-- ri-refresh-fill -->
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><path d="M5.46257 4.43262C7.21556 2.91688 9.5007 2 12 2C17.5228 2 22 6.47715 22 12C22 14.1361 21.3302 16.1158 20.1862 17.7406L17 12H20C20 7.58172 16.4183 4 12 4C9.84982 4 7.89777 4.84827 6.46023 6.22842L5.46257 4.43262ZM18.5374 19.5674C16.7844 21.0831 14.4993 22 12 22C6.47715 22 2 17.5228 2 12C2 9.86386 2.66979 7.88416 3.81382 6.25944L7 12H4C4 16.4183 7.58172 20 12 20C14.1502 20 16.1022 19.1517 17.5398 17.7716L18.5374 19.5674Z"/></svg>
+            <span>Réessayer</span>
+          </button>
         </div>
       </section>
     </main>
@@ -197,6 +202,9 @@
   <script>
     /* Hors module : un import cassé n’atteint jamais boot() */
     (function () {
+      function bustingReload() {
+        location.replace(location.pathname + "?r=" + Date.now() + (location.hash || ""));
+      }
       function showBootError(err) {
         var main = document.getElementById("main");
         var el = document.getElementById("boot-error");
@@ -204,9 +212,16 @@
         var msg = err && err.message ? err.message : String(err || "Erreur inconnue");
         el.hidden = false;
         el.textContent = msg;
+        var retry = document.getElementById("boot-retry");
+        if (retry) {
+          retry.hidden = false;
+          retry.classList.remove("is-hidden");
+        }
         main.removeAttribute("aria-busy");
       }
       window.showBootError = showBootError;
+      var retryBtn = document.getElementById("boot-retry");
+      if (retryBtn) retryBtn.addEventListener("click", bustingReload);
       window.addEventListener("error", function (e) {
         showBootError(e.error || e.message || e);
       });

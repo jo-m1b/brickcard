@@ -5,7 +5,7 @@
  */
 
 import { tileListMarkup } from "./tile.js";
-import { ICON_ERROR_WARNING_LINE } from "./icons.js";
+import { ICON_ERROR_WARNING_LINE, ICON_REFRESH } from "./icons.js";
 
 /**
  * @param {string} s
@@ -98,12 +98,15 @@ export function welcomeViewMarkup(opts = {}) {
 /**
  * Markup de la page de chargement (brique animée + « Chargement... »).
  * Le boot réel reste inline dans `index.html` (modules pas encore chargés) ; garder les deux alignés.
+ * `retry` : bouton **Réessayer** (accueil / boot uniquement ; pas les chargements d’image).
  *
  * @param {{
  *   titleTag?: "h1" | "h2" | "p",
  *   error?: string,
  *   errorId?: string,
  *   busy?: boolean,
+ *   retry?: boolean,
+ *   retryId?: string | false,
  * }} [opts]
  * @returns {string}
  */
@@ -117,5 +120,13 @@ export function loadingViewMarkup(opts = {}) {
     const idAttr = opts.errorId ? ` id="${escapeAttr(opts.errorId)}"` : "";
     error = `<p class="empty-view-error"${idAttr} role="alert" hidden></p>`;
   }
-  return `<section class="empty-view no-print"${busy}><div class="empty-view-body"><div class="brick" aria-hidden="true"><span class="brick-error-icon">${ICON_ERROR_WARNING_LINE}</span></div><${tag} class="view-title">Chargement<span class="visually-hidden">...</span><span class="loading-dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span></${tag}>${error}</div></section>`;
+  let retry = "";
+  if (opts.retry) {
+    const retryId = opts.retryId === false ? "" : opts.retryId || "boot-retry";
+    const idAttr = retryId ? ` id="${escapeAttr(retryId)}"` : "";
+    const hidden = opts.error ? "" : " hidden";
+    const hiddenClass = opts.error ? "" : " is-hidden";
+    retry = `<button type="button" class="btn primary${hiddenClass}"${idAttr}${hidden}>${ICON_REFRESH}<span>Réessayer</span></button>`;
+  }
+  return `<section class="empty-view no-print"${busy}><div class="empty-view-body"><div class="brick" aria-hidden="true"><span class="brick-error-icon">${ICON_ERROR_WARNING_LINE}</span></div><${tag} class="view-title">Chargement<span class="visually-hidden">...</span><span class="loading-dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span></${tag}>${error}${retry}</div></section>`;
 }

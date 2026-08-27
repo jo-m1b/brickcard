@@ -1,52 +1,27 @@
 import { ICON_ARROW_RIGHT_WIDE, ICON_CLOSE, modalTitleMarkup } from "../../icons.js";
 import { linkMarkup } from "../../link.js";
 import { setAppDocumentTitle } from "../../document-title.js";
-import { renderDeveloperIndex } from "./index.js";
-import { renderDeveloperTypography } from "./typography.js";
-import { renderDeveloperLinks } from "./links.js";
-import { renderDeveloperTiles } from "./tiles.js";
-import { renderDeveloperButtons } from "./buttons.js";
-import { renderDeveloperFields } from "./fields.js";
-import { renderDeveloperSelects } from "./selects.js";
-import { renderDeveloperSliders } from "./sliders.js";
-import { renderDeveloperCheckboxes } from "./checkboxes.js";
-import { renderDeveloperRadios } from "./radios.js";
-import { renderDeveloperColors } from "./colors.js";
-import { renderDeveloperImages } from "./images.js";
-import { renderDeveloperSearch } from "./search.js";
-import { renderDeveloperModals } from "./modals.js";
-import { renderDeveloperNotifications } from "./notifications.js";
-import { renderDeveloperLoading } from "./loading.js";
-import { renderDeveloperWelcome } from "./welcome.js";
-import {
-  refreshPresetDraftAfterCreate,
-  patchPresetDraftInList,
-  removePresetDraftFromList,
-  focusPresetDraftInList,
-  applyPendingPresetFocus,
-  renderDeveloperThemePresets,
-} from "./theme-presets.js";
-import { renderPresetDraftEditor } from "./theme-presets-editor.js";
+import { toast } from "../../toast.js";
 
-/** @type {Record<string, (host: HTMLElement) => (() => void)|void>} */
-const PAGES = {
-  index: renderDeveloperIndex,
-  typography: renderDeveloperTypography,
-  links: renderDeveloperLinks,
-  tiles: renderDeveloperTiles,
-  buttons: renderDeveloperButtons,
-  fields: renderDeveloperFields,
-  selects: renderDeveloperSelects,
-  sliders: renderDeveloperSliders,
-  checkboxes: renderDeveloperCheckboxes,
-  radios: renderDeveloperRadios,
-  colors: renderDeveloperColors,
-  images: renderDeveloperImages,
-  search: renderDeveloperSearch,
-  modals: renderDeveloperModals,
-  notifications: renderDeveloperNotifications,
-  loading: renderDeveloperLoading,
-  welcome: renderDeveloperWelcome,
+/** @type {Record<string, () => Promise<(host: HTMLElement) => (() => void)|void>>} */
+const PAGE_LOADERS = {
+  index: () => import("./index.js").then((m) => m.renderDeveloperIndex),
+  typography: () => import("./typography.js").then((m) => m.renderDeveloperTypography),
+  links: () => import("./links.js").then((m) => m.renderDeveloperLinks),
+  tiles: () => import("./tiles.js").then((m) => m.renderDeveloperTiles),
+  buttons: () => import("./buttons.js").then((m) => m.renderDeveloperButtons),
+  fields: () => import("./fields.js").then((m) => m.renderDeveloperFields),
+  selects: () => import("./selects.js").then((m) => m.renderDeveloperSelects),
+  sliders: () => import("./sliders.js").then((m) => m.renderDeveloperSliders),
+  checkboxes: () => import("./checkboxes.js").then((m) => m.renderDeveloperCheckboxes),
+  radios: () => import("./radios.js").then((m) => m.renderDeveloperRadios),
+  colors: () => import("./colors.js").then((m) => m.renderDeveloperColors),
+  images: () => import("./images.js").then((m) => m.renderDeveloperImages),
+  search: () => import("./search.js").then((m) => m.renderDeveloperSearch),
+  modals: () => import("./modals.js").then((m) => m.renderDeveloperModals),
+  notifications: () => import("./notifications.js").then((m) => m.renderDeveloperNotifications),
+  loading: () => import("./loading.js").then((m) => m.renderDeveloperLoading),
+  welcome: () => import("./welcome.js").then((m) => m.renderDeveloperWelcome),
 };
 
 /** @typedef {{ name: string, icon?: string }} DeveloperSection */
@@ -82,7 +57,7 @@ const PAGE_SECTIONS = {
 /**
  * @type {null | {
  *   cleanup: () => void,
- *   setPage: (page: string, extras?: { presetPage?: string, themeId?: string }) => void,
+ *   setPage: (page: string, extras?: { presetPage?: string, themeId?: string }) => Promise<void>,
  *   setOnClose: (fn: () => void) => void,
  *   setOnNavigate: (fn: (hash: string, opts?: { replace?: boolean }) => void) => void,
  * }}
@@ -166,9 +141,9 @@ function clearLiftedChrome(modal) {
  *   onClose: () => void,
  *   onNavigate: (hash: string, opts?: { replace?: boolean }) => void,
  * }} opts
- * @returns {() => void}
+ * @returns {Promise<() => void>}
  */
-export function renderDeveloperModal(host, opts) {
+export async function renderDeveloperModal(host, opts) {
   let onClose = opts.onClose;
   let onNavigate = opts.onNavigate;
   const page = opts.page || "index";
@@ -177,7 +152,7 @@ export function renderDeveloperModal(host, opts) {
   if (session && host.querySelector("#developer-modal-backdrop")) {
     session.setOnClose(onClose);
     session.setOnNavigate(onNavigate);
-    session.setPage(page, extras);
+    await session.setPage(page, extras);
     return session.cleanup;
   }
 
@@ -212,12 +187,20 @@ export function renderDeveloperModal(host, opts) {
   let pageCleanup = () => {};
   /** @type {string} */
   let renderedPage = "";
+  let pageToken = 0;
   let editorToken = 0;
   /** @type {() => void} */
   let editorCleanup = () => {};
   let shownPresetKey = "";
+  /** @type {typeof import("./theme-presets.js") | null} */
+  let presetsMod = null;
 
   const PRESET_LIST_HASH = "#developer/theme-presets";
+
+  async function ensurePresets() {
+    if (!presetsMod) presetsMod = await import("./theme-presets.js");
+    return presetsMod;
+  }
 
   function closePresetEditor() {
     editorToken += 1;
@@ -255,26 +238,40 @@ export function renderDeveloperModal(host, opts) {
     if (!nextKey || !demoRoot) return;
 
     const token = editorToken;
-    const cleanup = await renderPresetDraftEditor(demoRoot, {
+    let editor;
+    let presets;
+    try {
+      presets = await ensurePresets();
+      editor = await import("./theme-presets-editor.js");
+    } catch (err) {
+      console.error(err);
+      const msg = err && err.message ? err.message : String(err || "Erreur de chargement");
+      toast(msg, "error");
+      goToPresetList();
+      return;
+    }
+    if (token !== editorToken) return;
+
+    const cleanup = await editor.renderPresetDraftEditor(demoRoot, {
       themeId: nextExtras.presetPage === "edit" ? nextExtras.themeId || null : null,
       onClose: () => {
         const id = nextExtras.presetPage === "edit" ? nextExtras.themeId : null;
         goToPresetList();
-        if (id) focusPresetDraftInList(id);
+        if (id) presets.focusPresetDraftInList(id);
       },
       onSaved: (meta) => {
         if (meta?.isNew) {
-          if (!refreshPresetDraftAfterCreate(meta.theme)) {
+          if (!presets.refreshPresetDraftAfterCreate(meta.theme)) {
             /* liste absente */
           }
         } else {
-          patchPresetDraftInList(meta.theme, meta.previousId);
+          presets.patchPresetDraftInList(meta.theme, meta.previousId);
         }
         goToPresetList();
-        focusPresetDraftInList(meta?.theme?.id);
+        presets.focusPresetDraftInList(meta?.theme?.id);
       },
       onDeleted: (id) => {
-        removePresetDraftFromList(id);
+        presets.removePresetDraftFromList(id);
         goToPresetList();
       },
     });
@@ -294,31 +291,61 @@ export function renderDeveloperModal(host, opts) {
    * @param {string} nextPage
    * @param {{ presetPage?: string, themeId?: string }} [nextExtras]
    */
-  function setPage(nextPage, nextExtras = {}) {
+  async function setPage(nextPage, nextExtras = {}) {
     const stayOnPresets = renderedPage === "theme-presets" && nextPage === "theme-presets";
+    let pageToRender = nextPage;
     if (!stayOnPresets) {
+      const token = ++pageToken;
+      /** @type {((host: HTMLElement) => (() => void)|void) | null} */
+      let renderFn = null;
+      /** @type {typeof import("./theme-presets.js") | null} */
+      let presets = null;
+      try {
+        if (pageToRender === "theme-presets") {
+          presets = await ensurePresets();
+        } else {
+          const loader = PAGE_LOADERS[pageToRender] || PAGE_LOADERS.index;
+          if (!PAGE_LOADERS[pageToRender]) pageToRender = "index";
+          renderFn = await loader();
+        }
+      } catch (err) {
+        console.error(err);
+        if (renderedPage) {
+          const msg = err && err.message ? err.message : String(err || "Erreur de chargement");
+          toast(msg, "error");
+          return;
+        }
+        if (pageToRender !== "index") {
+          const msg = err && err.message ? err.message : String(err || "Erreur de chargement");
+          toast(msg, "error");
+          pageToRender = "index";
+          renderFn = await PAGE_LOADERS.index();
+        } else {
+          throw err;
+        }
+      }
+      if (token !== pageToken) return;
       if (renderedPage === "theme-presets") closePresetEditor();
       pageCleanup();
       clearLiftedChrome(modal);
       if (!body || !titleEl) return;
-      if (nextPage === "theme-presets") {
+      if (pageToRender === "theme-presets" && presets) {
         pageCleanup =
-          renderDeveloperThemePresets(body, {
+          presets.renderDeveloperThemePresets(body, {
             onCreate: () => onNavigate(`${PRESET_LIST_HASH}/new`),
             onEdit: (id) =>
               onNavigate(`${PRESET_LIST_HASH}/edit/${encodeURIComponent(id)}`),
           }) || (() => {});
-      } else {
-        const renderPage = PAGES[nextPage] || PAGES.index;
-        pageCleanup = renderPage(body) || (() => {});
+      } else if (renderFn) {
+        pageCleanup = renderFn(body) || (() => {});
       }
-      liftStyleguideHeader(body, titleEl, nextPage);
+      liftStyleguideHeader(body, titleEl, pageToRender);
       if (modal) {
         liftThemesToolbar(body, modal);
         liftModalFooter(body, modal);
-        const presets = nextPage === "theme-presets";
-        modal.classList.toggle("modal--lg", presets);
-        modal.classList.toggle("modal--md", !presets);
+        const isPresets = pageToRender === "theme-presets";
+        modal.classList.toggle("modal--lg", isPresets);
+        modal.classList.toggle("modal--md", !isPresets);
         modal.classList.toggle(
           "is-fixed-h",
           Boolean(modal.querySelector(":scope > .themes-toolbar")),
@@ -327,9 +354,13 @@ export function renderDeveloperModal(host, opts) {
       body.scrollTop = 0;
       if (backdrop) backdrop.scrollTop = 0;
       if (modal) modal.scrollTop = 0;
-      renderedPage = nextPage;
+      renderedPage = pageToRender;
     }
-    void syncPresetEditor(nextPage, nextExtras);
+    await syncPresetEditor(pageToRender, nextExtras);
+    if (pageToRender === "theme-presets") {
+      const presets = await ensurePresets();
+      requestAnimationFrame(() => presets.applyPendingPresetFocus());
+    }
   }
 
   const close = () => onClose();
@@ -372,6 +403,11 @@ export function renderDeveloperModal(host, opts) {
     },
   };
 
-  setPage(page, extras);
+  try {
+    await setPage(page, extras);
+  } catch (err) {
+    cleanup();
+    throw err;
+  }
   return cleanup;
 }
