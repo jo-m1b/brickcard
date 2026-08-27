@@ -4,7 +4,7 @@ import { bindFormRange, formRangeResetMarkup } from "../form-range.js";
 import { formCheckboxMarkup } from "../form-checkbox.js";
 import { formRadioMarkup } from "../form-radio.js";
 import { getOptimizeImages, setOptimizeImages } from "../image-optimize.js";
-import { getTelemetry, setTelemetry } from "../telemetry.js";
+import { getTelemetry, isTelemetryAvailable, setTelemetry } from "../telemetry.js";
 import { getTheme, setTheme } from "../theme.js";
 import {
   CARD_IMAGE_RADIUS_MAX_MM,
@@ -75,6 +75,7 @@ import { includesCI } from "../includes-ci.js";
 export function renderSettingsModal(host, opts) {
   const { onClose, onClearCards, onDevReset, cardCount = 0 } = opts;
   const showDevReset = Boolean(onDevReset);
+  const showTelemetry = isTelemetryAvailable();
   const currentTheme = getTheme();
   const faceBorderMm = getFaceBorderMm();
   const cardRadiusMm = getCardRadiusMm();
@@ -172,14 +173,18 @@ export function renderSettingsModal(host, opts) {
                   checked: getOptimizeImages(),
                 })}
               </div>
-              <div class="form-field">
+              ${
+                showTelemetry
+                  ? `<div class="form-field">
                 ${formCheckboxMarkup({
                   id: "settings-telemetry",
                   label: "Télémétrie",
                   hint: "Envoyer des données de télémétrie d’utilisation anonyme",
                   checked: getTelemetry(),
                 })}
-              </div>
+              </div>`
+                  : ""
+              }
             </section>
 
             <section class="settings-panel">

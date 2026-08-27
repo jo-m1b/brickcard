@@ -8,6 +8,14 @@ Les versions antérieures à 0.8 sont regroupées par mineure ; le détail patch
 
 ## [Unreleased]
 
+### Changed
+
+- Paramètres : case **Télémétrie** masquée en local (le script n’y est pas chargé)
+
+### Fixed
+
+- Télémétrie : envoi des vues de page avec le payload complet (plus d’erreur 400 / CORS sur le collecteur)
+
 ## [0.8.5] — 2026-08-27
 
 ### Added

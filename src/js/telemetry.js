@@ -38,6 +38,11 @@ export function setTelemetry(on) {
   applyTelemetry(on);
 }
 
+/** Disponible hors local seulement (pas d’injection, pas de champ Paramètres). */
+export function isTelemetryAvailable() {
+  return !isLocalDevHost();
+}
+
 export function initTelemetry() {
   applyTelemetry(getTelemetry());
 }
@@ -77,7 +82,7 @@ function trackCurrentView() {
   const url = currentViewUrl();
   if (url === lastTrackedUrl) return;
   lastTrackedUrl = url;
-  tracker.track({ url, title: document.title });
+  tracker.track((props) => ({ ...props, url, title: document.title }));
 }
 
 function onHashChange() {
