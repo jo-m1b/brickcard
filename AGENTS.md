@@ -79,7 +79,8 @@ Tout le code applicatif est dans **`src/`**.
 | `src/js/views/page.js` | Modale page Markdown |
 | `src/js/views/settings.js` | Modale paramètres (interface, cartes, impression, collection) |
 | `src/js/views/developer/` | Espace développeur / styleguide UI en modale (`#developer`, `#developer/typography`, …) ; chaque galerie en `import()` ; outil thèmes par défaut `#developer/theme-presets` |
-| `README.md` | Landing GitHub (EN) ; captures dans `screenshots/` |
+| `README.md` | Landing GitHub (EN) ; badge shields.io **FR / Lisez-moi** vers `README.fr.md` ; captures dans `screenshots/` |
+| `README.fr.md` | Même landing en français ; badge shields.io **EN / README** vers `README.md` (GitHub n’auto-sélectionne pas la langue) |
 | `screenshots/` | Captures README (WebP) ; pas de dossier `docs/` (pas de site de doc) |
 | `CHANGELOG.md` | Historique des versions (Keep a Changelog) |
 
