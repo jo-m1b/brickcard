@@ -10,7 +10,7 @@
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/I5P825YXAH)
 
-> LEGO® est une marque du LEGO Group. Ceci est un projet personnel, non affilié ni sponsorisé par le LEGO Group.
+> LEGO® est une marque du LEGO Group. Cette application est un projet personnel, non affilié ni sponsorisé par le LEGO Group.
 
 Brickcard est une petite appli pour créer et imprimer des cartes format carte à jouer qui décrivent des sets LEGO® (référence, photo, titre, thème, année et nombre de pièces).
 
@@ -41,7 +41,7 @@ Puis ouvrez http://127.0.0.1:3615/
 
 ## Aide et discussion
 
-Merci de chercher d’abord dans les issues et discussions existantes. Je fais de mon mieux pour répondre, mais je n’ai pas toujours le temps. Comment contribuer : [CONTRIBUTING.md](CONTRIBUTING.md).
+Merci de chercher d’abord dans les issues et discussions existantes. Je fais de mon mieux pour répondre, mais je n’ai pas toujours le temps.
 
 ### Bugs et demandes de fonctionnalités
 

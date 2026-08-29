@@ -41,7 +41,7 @@ Then open http://127.0.0.1:3615/
 
 ## Help and discussion
 
-Please search existing issues and discussions before opening a new one. I do my best to reply, but i may not always have time. How to contribute: [CONTRIBUTING.md](CONTRIBUTING.md).
+Please search existing issues and discussions before opening a new one. I do my best to reply, but i may not always have time.
 
 ### Bug reports and feature requests
 
