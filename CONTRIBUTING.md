@@ -1,31 +1,22 @@
-# Contribuer
+# Contributing
 
-Merci de ton intérêt pour Brickcard.
+Thanks for your interest in Brickcard.
 
-## Ajouter ou modifier des thèmes par défaut
+## Issues
 
-1. Mets le logo dans `src/data/` (ex. `theme-logo-mon-theme.png` / `.webp` / `.svg`)
-2. Déclare le thème dans `src/data/themes-presets.json` (`id`, `name`, `logoSrc` optionnel ex. `data/theme-logo-mon-theme.png`, et/ou `color` — sans couleur → gris `#6e6e6e` ; sans logo → le nom s’affiche sur la carte)
-3. Recharge la page. Les thèmes par défaut se lisent dans le JSON (lecture seule dans l’app). Reset dev dans Paramètres pour tout remettre à zéro.
+Please search [issues](https://github.com/jo-m1b/brickcard/issues) and [discussions](https://github.com/jo-m1b/brickcard/discussions) first.
 
-## Crédits & sources
-
-Quand tu ajoutes des assets, documente leur provenance ici et dans le [README](README.md#crédits) si besoin.
-
-### Logos de thèmes
-
-Une grande partie des logos de thèmes par défaut provient de :
-
-**[Brickipedia — List of themes](https://brickipedia.fandom.com/wiki/List_of_themes)**
-
-Brickipedia est un wiki communautaire hébergé par Fandom. Les logos et marques LEGO® restent la propriété de The LEGO Group. Ce projet est un outil fan / personnel, **non officiel**, non affilié ni sponsorisé par The LEGO Group.
-
-### Logo de l’application
-
-Icône *brick outline* par [Joko Sutrisno](https://www.vecteezy.com/members/108458460840346680378) via [Vecteezy](https://www.vecteezy.com/vector-art/12802525-brick-outline-icon).
+- Bugs and feature requests → [GitHub Issues](https://github.com/jo-m1b/brickcard/issues/new/choose)
+- Questions → [GitHub Discussions](https://github.com/jo-m1b/brickcard/discussions)
 
 ## Pull requests
 
-- Garde le périmètre petit et ciblé
-- Pas de bundler / framework sauf discussion préalable
-- UI en français
+Keep the change small and focused.
+
+- UI copy stays in French
+- No bundler, framework, or Node — `src/` is the app
+- Default themes live in `src/data/themes-presets.json` (logos in `src/data/`)
+
+See the [README](README.md) to run locally.
+
+By contributing, you agree that your work is licensed under the [MIT License](LICENSE).
