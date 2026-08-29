@@ -829,6 +829,17 @@ a.link > svg {
   display: block;
 }
 
+/* Libellé image (badge Markdown) : pas d’icône externe ni soulignement sur le wrap */
+a.link:has(img) > svg {
+  display: none;
+}
+
+a.link:has(> span > img) > span,
+a.link:has(> span > img):hover > span,
+a.link:has(> span > img):focus-visible > span {
+  text-decoration: none;
+}
+
 a.link.disabled,
 a.link[aria-disabled="true"] {
   color: var(--muted);
@@ -2412,6 +2423,17 @@ html:not([data-theme]) .btn .icon-system {
   pointer-events: auto;
 }
 
+.form-image[data-readonly] .form-image-empty-text {
+  margin-bottom: 0;
+}
+
+.form-image[data-readonly] .form-image-crop:focus,
+.form-image[data-readonly] .form-image-crop.is-editing {
+  outline: none;
+  cursor: default;
+  touch-action: pan-y;
+}
+
 input.form-control,
 textarea.form-control,
 select.form-control,
@@ -3423,8 +3445,7 @@ body.modal-open {
 
 .md-content p,
 .md-content ul,
-.md-content ol,
-.md-content blockquote {
+.md-content ol {
   margin: 0 0 0.9rem;
 }
 
@@ -3465,9 +3486,14 @@ body.modal-open {
 }
 
 .md-content blockquote {
+  margin: 0 0 0.9rem;
   padding: 0.15rem 0 0.15rem 0.9rem;
   border-left: 3px solid var(--line-strong);
   color: var(--ink-soft);
+}
+
+.md-content blockquote > *:last-child {
+  margin-bottom: 0;
 }
 
 .md-content hr {
@@ -3481,40 +3507,31 @@ body.modal-open {
   height: auto;
 }
 
-.md-content .about-logo {
+.md-content .about-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   margin: 0 0 0.9rem;
 }
 
-.md-content .about-logo img {
-  width: 100px;
+.md-content .about-brand .brand-logo {
+  width: 40px;
+  max-width: 40px;
   height: auto;
-  display: block;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .md-content .about-logo img {
-    filter: invert(1);
-  }
-}
-
-:root[data-theme="dark"] .md-content .about-logo img {
-  filter: invert(1);
-}
-
-.md-content .about-kofi {
-  margin: 0 0 0.9rem;
-}
-
-.md-content .about-kofi a,
-.md-content .about-kofi a:hover,
-.md-content .about-kofi a:focus-visible,
-.md-content .about-kofi a:visited {
+.md-content a:has(> img) {
   text-decoration: none;
 }
 
-.md-content .about-kofi img {
-  display: block;
-  height: auto;
+.md-content a:has(> img):hover,
+.md-content a:has(> img):focus-visible {
+  text-decoration: none;
+}
+
+.md-content a:has(> img) img {
+  display: inline-block;
+  vertical-align: middle;
 }
 
 /* ——— Editor ——— */
@@ -3576,11 +3593,34 @@ textarea {
   }
 }
 
-@media (max-width: 840px) and (min-width: 540px) {
+@media (max-width: 840px) and (min-width: 550px) {
   .preview-wrap--pair {
     grid-template-columns: repeat(2, max-content);
     justify-content: center;
     width: 100%;
+  }
+}
+
+@media (max-width: 549px) {
+  .preview-wrap--pair {
+    cursor: pointer;
+  }
+
+  .preview-wrap--pair > .card-preview + .card-preview {
+    display: none;
+  }
+
+  .preview-wrap--pair.is-showing-back > .card-preview:first-child {
+    display: none;
+  }
+
+  .preview-wrap--pair.is-showing-back > .card-preview + .card-preview {
+    display: block;
+  }
+
+  .preview-wrap--pair[role="button"]:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 1px;
   }
 }
 
@@ -4129,6 +4169,7 @@ textarea {
 
 .print-sheet {
   --print-scale: 1;
+  position: relative;
   width: 210mm;
   height: 297mm;
   padding: 5mm;
@@ -4145,6 +4186,35 @@ textarea {
   background: #fff;
 }
 
+/*
+ * Folio haut / bas : hors flux (absolute, pas une piste de grille).
+ * Sous les cartes (z-index) — une carte qui recouvre cache le texte.
+ */
+.print-sheet-folio {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 0;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  font-family: var(--font-ui);
+  font-size: 7pt;
+  font-weight: 400;
+  line-height: 1;
+  color: #000000;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.print-sheet-folio--top {
+  top: 2.5mm;
+}
+
+.print-sheet-folio--bottom {
+  bottom: 2.5mm;
+}
+
 .print-sheet:last-child {
   page-break-after: auto;
   break-after: auto;
@@ -4152,6 +4222,7 @@ textarea {
 
 .print-slot {
   position: relative;
+  z-index: 1;
   width: calc(var(--card-w) * var(--print-scale));
   height: calc(var(--card-h) * var(--print-scale));
   overflow: hidden;
