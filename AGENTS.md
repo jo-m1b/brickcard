@@ -85,6 +85,7 @@ Tout le code applicatif est dans **`src/`**.
 | `CHANGELOG.md` | Historique des versions (Keep a Changelog) |
 | `.github/CODEOWNERS` | Owners GitHub : `* @jo-m1b` (review auto des PR si le projet grossit) |
 | `.github/ISSUE_TEMPLATE/bug_report.yml` | Formulaire d’issue bug (What happened / expected / reproduce, version, environment, device, browser) |
+| `.github/ISSUE_TEMPLATE/feature_request.yml` | Formulaire d’issue enhancement (What would you like / Why ; lien vers les issues `enhancement` existantes) |
 
 ## Modèle carte (`Card`)
 
