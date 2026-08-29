@@ -11,6 +11,7 @@ Les versions antérieures à 0.8 sont regroupées par mineure ; le détail patch
 ### Changed
 
 - Paramètres : case **Télémétrie** masquée en local (le script n’y est pas chargé)
+- README : landing GitHub en anglais, captures dans `screenshots/` (plus de dossier `docs/`)
 
 ### Fixed
 

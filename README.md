@@ -1,97 +1,55 @@
 # Brickcard
 
-Mini application web (HTML / CSS / JS) pour créer des **Brickcards** — cartes format carte à jouer décrivant un set LEGO : référence, photo, titre, thème, année, pièces.
+[![MIT license](https://img.shields.io/github/license/jo-m1b/brickcard?style=flat-square&color=ffffff)](https://github.com/jo-m1b/brickcard/blob/main/LICENSE) [![Try it live](https://img.shields.io/badge/Try%20it%20live-brickcard.org-ff6699?style=flat-square)](https://brickcard.org)
 
-Version courante : voir `src/js/version.js` (SemVer) et [`CHANGELOG.md`](CHANGELOG.md).
+> LEGO® is a trademark of the LEGO Group. This is a personal project that is not affiliated with or sponsored by the LEGO Group.
 
-![Liste des cartes](docs/screenshots/brickcard-liste.png)
+Brickcard is a tiny app for creating and printing playing-card sized cards that describe LEGO® sets (reference, photo, title, theme, year, and piece count).
 
-![Éditeur de carte](docs/screenshots/brickcard-editor.png)
+Create cards, print them, laminate them, and slip them into a clear sleeve with a set whose box has gone missing. My kids love them — and it helps avoid unpacking the wrong set by mistake :P
 
-Usage typique : imprimer, plastifier et glisser dans une pochette transparente avec un set dont la boîte a disparu — pour retrouver facilement le set et ses références (plans).
+[<img src="screenshots/brickcard-screenshot-cards.webp" width="250" alt="Screenshot of Brickcard playing-card list.">](screenshots/brickcard-screenshot-cards.webp) [<img src="screenshots/brickcard-screenshot-cards-dark-mode.webp" width="250" alt="Screenshot of Brickcard playing-card list in dark mode.">](screenshots/brickcard-screenshot-cards-dark-mode.webp) [<img src="screenshots/brickcard-screenshot-cards-creation.webp" width="250" alt="Screenshot of Brickcard card creation.">](screenshots/brickcard-screenshot-cards-creation.webp) [<img src="screenshots/brickcard-screenshot-cards-editor.webp" width="250" alt="Screenshot of Brickcard card editor.">](screenshots/brickcard-screenshot-cards-editor.webp) [<img src="screenshots/brickcard-screenshot-themes.webp" width="250" alt="Screenshot of Brickcard themes.">](screenshots/brickcard-screenshot-themes.webp) [<img src="screenshots/brickcard-screenshot-print-dialog-and-settings.webp" width="250" alt="Screenshot of Brickcard print settings.">](screenshots/brickcard-screenshot-print-dialog-and-settings.webp)
 
-## Fonctionnalités
+## Features
 
-- Création / édition de plusieurs cartes (référence, photo, titre, thème, année, pièces…)
-- Thèmes LEGO par défaut (nom, logo, couleur) + thèmes personnalisés
-- Sauvegarde automatique dans le navigateur (**IndexedDB**, grande capacité)
-- Export / import `.brickcard` (cartes + thèmes)
-- Liste filtrable (recherche)
-- Impression A4 : grille 1×1 à 10×10, face + dos alignés (recto-verso bord long)
-- Installable sur smartphone / ordinateur (**PWA**, HTTPS)
+- **Create & edit cards**: Reference, photo, title, theme, year, piece count…
+- **Print-ready**: A4 grids from 1×1 to 10×10, front + back aligned for duplex printing
+- **Themes**: Built-in themes (name, logo, color) + your own custom themes
+- **Auto-save**: Everything is stored in the browser (IndexedDB)
+- **Export / import**: `.brickcard` files (cards + custom themes) to back up and share your collection
+- **Searchable list**: Quickly find and select any card to print
+- **Installable**: Works as a PWA on phone or desktop
 
-## Lancer en local
+## Getting started
 
-Pas besoin d’installer Node ni de compiler. Il faut juste un **petit serveur HTTP** (les modules JavaScript ne marchent pas en ouvrant le fichier directement).
+Just use the live version at [brickcard.org](https://brickcard.org), or run a tiny local server (no build step, no Node required - but ES modules need a server):
 
 ```bash
 cd src
-python3 -m http.server 8765
+python3 -m http.server 3615
 ```
 
-Puis ouvrir : [http://127.0.0.1:8765/](http://127.0.0.1:8765/)
+Then open http://127.0.0.1:3615/
 
-## Structure du projet
+## Help and discussion
 
-```
-├── AGENTS.md
-├── README.md
-├── CONTRIBUTING.md
-├── LICENSE
-├── .gitignore
-├── .github/workflows/
-├── docs/screenshots/              # captures README
-└── src/
-    ├── index.html
-    ├── data/
-    │   ├── themes-presets.json
-    │   └── page-about.md          # pages Markdown : page-{{slug}}.md
-    ├── fonts/                     # Open Sans + Inter (woff2) + OFL
-    ├── img/
-    ├── css/styles.css
-    └── js/
-        ├── app.js
-        ├── version.js             # SemVer (source unique)
-        ├── markdown.js            # parser MD + loadPage
-        ├── theme.js
-        ├── themes-data.js
-        ├── storage.js
-        ├── card-render.js
-        ├── print.js
-        └── views/
-```
+Please search existing issues and discussions before opening a new one. I do my best to reply, but i may not always have time.
 
-## Illustration IA (prompt)
+### Bug reports and feature requests
 
-Prompt testé pour générer une illustration cartoon à partir d’une photo de set / boîte LEGO (ex. Gemini), à importer ensuite comme image de Brickcard :
+Please post them on [GitHub issues](https://github.com/jo-m1b/brickcard/issues).
 
-```
-Generate a cute modern cartoon illustration of LEGO models and minifigures in a dynamic action scene.
+### Support and general discussion
 
-The models and characters are arranged dynamically as if in the middle of an action moment: vehicles tilting, flying or speeding, characters in active poses (running, jumping, reacting, interacting), with a clear sense of movement and energy.
+Please use [GitHub discussions](https://github.com/jo-m1b/brickcard/discussions).
 
-Flat 2D cartoon style, clean bold outlines, soft cel-shaded colors, no realistic lighting, no plastic shine, no 3D depth, no volumetric shadows. Soft simple drop shadows only under the models.
+## Credits
 
-Bright cheerful colors, friendly and adorable children’s book illustration look. Soft warm lighting, gentle gradients.
+- **Brickcard app logo**: Brick outline icon by [Joko Sutrisno](https://www.vecteezy.com/members/108458460840346680378) on [Vecteezy](https://www.vecteezy.com/vector-art/12802525-brick-outline-icon).
+- **Some default theme logos**: From [Brickipedia](https://brickipedia.fandom.com/wiki/List_of_themes) and [Logopedia](https://logos.fandom.com/fr/wiki/Logopedia).
+- **Open Sans Font**: Designed by [Steve Matteson](https://mattesontypographics.com), maintained by [The Open Sans Project Authors](https://github.com/googlefonts/opensans).
+- **Inter Font**: (card text) Designed by [Rasmus Andersson](https://rsms.me) maintained at [github.com/rsms/inter](https://github.com/rsms/inter)
 
-Plain solid pastel background color #fbf1dd, no environment, no extra elements.
+## License
 
-Keep every LEGO brick shape, stud, color and detail faithful to the real models — do not invent new bricks.
-
-Centered composition, 16:9 format, energetic and dynamic arrangement, subject compact with a sense of movement.
-
-High quality, clean line art, no text, no logos, no watermarks.
-```
-
-## Crédits
-
-- Logo de l’app (`src/img/brickcard-logo.svg`) : icône *brick outline* par [Joko Sutrisno](https://www.vecteezy.com/members/108458460840346680378) via [Vecteezy](https://www.vecteezy.com/vector-art/12802525-brick-outline-icon) (attribution requise).
-- Logos de certains thèmes LEGO par défaut (`src/data/theme-logo-*`) : issus de [Brickipedia — List of themes](https://brickipedia.fandom.com/wiki/List_of_themes) (contenu communautaire / Fandom). LEGO® est une marque de The LEGO Group ; ce projet n’est pas affilié ni sponsorisé par The LEGO Group.
-- Police **Open Sans** (UI, `src/fonts/OpenSans-Variable.woff2`) : conçue par [Steve Matteson](https://fonts.google.com/specimen/Open+Sans), maintenue par [The Open Sans Project Authors](https://github.com/googlefonts/opensans). Licence [SIL Open Font License 1.1](https://scripts.sil.org/OFL) (`src/fonts/OFL-OpenSans.txt`).
-- Police **Inter** (texte des cartes, `src/fonts/InterVariable.woff2`) : conçue par [Rasmus Andersson](https://rsms.me/) / [Inter](https://rsms.me/inter/) ([dépôt](https://github.com/rsms/inter)). Licence [SIL Open Font License 1.1](https://scripts.sil.org/OFL) (`src/fonts/OFL-Inter.txt`).
-
-Voir aussi [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## Licence
-
-[MIT](LICENSE) — libre d’utilisation, modification et redistribution.
+Brickcard is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
