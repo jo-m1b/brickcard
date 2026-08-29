@@ -113,6 +113,7 @@ function clampZoomPercent(percent, max = ZOOM_MAX) {
  *   withBackgroundColor?: boolean,
  *   previewBackground?: string,
  *   fit?: "cover" | "logo",
+ *   readOnly?: boolean,
  * }} opts
  * @returns {string}
  */
@@ -126,6 +127,7 @@ export function formImageMarkup(opts) {
   const offsetY = Number(opts.offsetY) || 0;
   const hasImage = Boolean(dataUrl);
   const withBackgroundColor = opts.withBackgroundColor !== false;
+  const readOnly = Boolean(opts.readOnly);
   const previewBackground = String(opts.previewBackground || "");
   const bgDisplay = withBackgroundColor
     ? resolveImageBackground(backgroundColor)
@@ -134,7 +136,7 @@ export function formImageMarkup(opts) {
   const fileId = `${id}-file`;
   const cropId = `${id}-crop`;
   const errorId = `${id}-empty-error`;
-  const dirty = hasImage && !isDefaultCrop(zoom, offsetX, offsetY);
+  const dirty = !readOnly && hasImage && !isDefaultCrop(zoom, offsetX, offsetY);
   const cropClass =
     opts.fit === "logo" ? "form-image-crop form-image-crop--logo" : "form-image-crop";
   const labelledBy = opts.labelledBy
@@ -143,6 +145,9 @@ export function formImageMarkup(opts) {
   const describedBy = opts.describedBy
     ? ` aria-describedby="${escapeAttr(opts.describedBy)}"`
     : "";
+  const cropLabel = readOnly
+    ? "Aperçu de l’image"
+    : "Aperçu de cadrage. Clic ou Tab pour activer, glisser ou flèches pour déplacer, molette ou plus/moins pour zoomer.";
 
   const colorFieldHtml = withBackgroundColor
     ? `<div class="form-field">
@@ -152,6 +157,7 @@ export function formImageMarkup(opts) {
             value: backgroundColor,
             fallback: bgDisplay,
             placeholder: "#ffffff",
+            disabled: readOnly,
           })}
         </div>`
     : "";
@@ -166,16 +172,25 @@ export function formImageMarkup(opts) {
       data-offset-x="${escapeAttr(String(offsetX))}"
       data-offset-y="${escapeAttr(String(offsetY))}"
       ${withBackgroundColor ? "" : 'data-form-image-bg="0"'}
+      ${readOnly ? "data-readonly" : ""}
     >
       <input type="file" id="${escapeAttr(fileId)}" class="form-image-file" accept="${escapeAttr(accept)}" hidden />
 
       <div class="form-image-empty" ${hasImage ? "hidden" : ""}>
-        <p class="form-hint form-image-empty-text">Charger une nouvelle image pour la prévisualiser et la recadrer</p>
-        <div class="form-image-empty-actions">
+        <p class="form-hint form-image-empty-text">${
+          readOnly
+            ? "Aucun logo"
+            : "Charger une nouvelle image pour la prévisualiser et la recadrer"
+        }</p>
+        ${
+          readOnly
+            ? ""
+            : `<div class="form-image-empty-actions">
           <button type="button" class="btn primary" data-form-image-file>${ICON_FILE_LINE}<span>Depuis mes fichiers</span></button>
           <button type="button" class="btn secondary sm" data-form-image-url>${ICON_LINK}<span>Depuis une URL</span></button>
         </div>
-        <p class="form-error" id="${escapeAttr(errorId)}" role="alert"></p>
+        <p class="form-error" id="${escapeAttr(errorId)}" role="alert"></p>`
+        }
       </div>
 
       <div class="form-image-filled" ${hasImage ? "" : "hidden"}>
@@ -183,9 +198,8 @@ export function formImageMarkup(opts) {
         <div
           class="${cropClass}"
           id="${escapeAttr(cropId)}"
-          tabindex="0"
-          role="application"
-          aria-label="Aperçu de cadrage. Clic ou Tab pour activer, glisser ou flèches pour déplacer, molette ou plus/moins pour zoomer."
+          ${readOnly ? 'tabindex="-1"' : 'tabindex="0" role="application"'}
+          aria-label="${escapeAttr(cropLabel)}"
           style="background-color:${escapeAttr(bgDisplay)}"
         >
           <img class="form-image-crop-img" alt="" ${
@@ -196,15 +210,23 @@ export function formImageMarkup(opts) {
             <span class="btn primary sm form-image-crop-badge" data-form-image-badge="x">${ICON_ALIGN_ITEM_HORIZONTAL_CENTER}<span>${formatOffsetPercent(offsetX)}</span></span>
             <span class="btn primary sm form-image-crop-badge" data-form-image-badge="y">${ICON_ALIGN_ITEM_VERTICAL_CENTER}<span>${formatOffsetPercent(offsetY)}</span></span>
           </div>
-          <button type="button" class="btn ghost sm icon-only form-image-crop-reset" ${
-            dirty ? "" : "hidden"
-          }>
+          ${
+            readOnly
+              ? ""
+              : `<button type="button" class="btn ghost sm icon-only form-image-crop-reset" ${
+                  dirty ? "" : "hidden"
+                }>
             ${ICON_CLOSE_CIRCLE}
             <span class="visually-hidden">Réinitialiser le cadrage</span>
-          </button>
+          </button>`
+          }
           <div class="form-image-crop-bar">
             <button type="button" class="btn primary sm" data-form-image-download>${ICON_DOWNLOAD}<span>Sauvegarder</span></button>
-            <button type="button" class="btn primary sm" data-form-image-delete>${ICON_DELETE_BIN_2}<span>Supprimer</span></button>
+            ${
+              readOnly
+                ? ""
+                : `<button type="button" class="btn primary sm" data-form-image-delete>${ICON_DELETE_BIN_2}<span>Supprimer</span></button>`
+            }
           </div>
         </div>
       </div>
@@ -396,6 +418,7 @@ function openImageUrlDialog(host, opts) {
  *   downloadBasename?: string | (() => string),
  *   previewBackground?: string,
  *   fit?: "cover" | "logo",
+ *   readOnly?: boolean,
  *   onChange?: (value: FormImageValue) => void,
  *   onDownload?: () => void,
  * }} opts
@@ -409,6 +432,7 @@ function openImageUrlDialog(host, opts) {
 export function bindFormImage(root, opts = {}) {
   const processFile = opts.processFile;
   const onChange = opts.onChange;
+  const readOnly = Boolean(opts.readOnly) || root.hasAttribute("data-readonly");
   const dialogHost =
     opts.dialogHost ||
     root.closest("#modal-root") ||
@@ -495,7 +519,10 @@ export function bindFormImage(root, opts = {}) {
     if (badgeX) badgeX.textContent = formatOffsetPercent(state.offsetX);
     if (badgeY) badgeY.textContent = formatOffsetPercent(state.offsetY);
     if (resetBtn) {
-      resetBtn.hidden = !state.dataUrl || isDefaultCrop(state.zoom, state.offsetX, state.offsetY);
+      resetBtn.hidden =
+        readOnly ||
+        !state.dataUrl ||
+        isDefaultCrop(state.zoom, state.offsetX, state.offsetY);
     }
   }
 
@@ -836,23 +863,25 @@ export function bindFormImage(root, opts = {}) {
     e.stopPropagation();
   }
 
-  fileBtn?.addEventListener("click", onFileBtnClick);
-  fileInput?.addEventListener("change", onFileChange);
-  urlBtn?.addEventListener("click", onUrlBtnClick);
-  deleteBtn?.addEventListener("click", onDeleteClick);
   downloadBtn?.addEventListener("click", onDownloadClick);
-  resetBtn?.addEventListener("click", onResetClick);
-  resetBtn?.addEventListener("pointerdown", stopOverlayPointer);
-  deleteBtn?.addEventListener("pointerdown", stopOverlayPointer);
   downloadBtn?.addEventListener("pointerdown", stopOverlayPointer);
-  crop?.addEventListener("pointerdown", onCropPointerDown);
-  crop?.addEventListener("pointermove", onCropPointerMove);
-  crop?.addEventListener("pointerup", endDrag);
-  crop?.addEventListener("pointercancel", endDrag);
-  crop?.addEventListener("wheel", onCropWheel, { passive: false });
-  crop?.addEventListener("keydown", onCropKeyDown);
-  crop?.addEventListener("focus", onCropFocus);
-  crop?.addEventListener("blur", onCropBlur);
+  if (!readOnly) {
+    fileBtn?.addEventListener("click", onFileBtnClick);
+    fileInput?.addEventListener("change", onFileChange);
+    urlBtn?.addEventListener("click", onUrlBtnClick);
+    deleteBtn?.addEventListener("click", onDeleteClick);
+    resetBtn?.addEventListener("click", onResetClick);
+    resetBtn?.addEventListener("pointerdown", stopOverlayPointer);
+    deleteBtn?.addEventListener("pointerdown", stopOverlayPointer);
+    crop?.addEventListener("pointerdown", onCropPointerDown);
+    crop?.addEventListener("pointermove", onCropPointerMove);
+    crop?.addEventListener("pointerup", endDrag);
+    crop?.addEventListener("pointercancel", endDrag);
+    crop?.addEventListener("wheel", onCropWheel, { passive: false });
+    crop?.addEventListener("keydown", onCropKeyDown);
+    crop?.addEventListener("focus", onCropFocus);
+    crop?.addEventListener("blur", onCropBlur);
+  }
   window.addEventListener("resize", onResize);
 
   const ro =
@@ -865,23 +894,25 @@ export function bindFormImage(root, opts = {}) {
     destroy() {
       destroyed = true;
       colorField?.destroy();
-      fileBtn?.removeEventListener("click", onFileBtnClick);
-      fileInput?.removeEventListener("change", onFileChange);
-      urlBtn?.removeEventListener("click", onUrlBtnClick);
-      deleteBtn?.removeEventListener("click", onDeleteClick);
       downloadBtn?.removeEventListener("click", onDownloadClick);
-      resetBtn?.removeEventListener("click", onResetClick);
-      resetBtn?.removeEventListener("pointerdown", stopOverlayPointer);
-      deleteBtn?.removeEventListener("pointerdown", stopOverlayPointer);
       downloadBtn?.removeEventListener("pointerdown", stopOverlayPointer);
-      crop?.removeEventListener("pointerdown", onCropPointerDown);
-      crop?.removeEventListener("pointermove", onCropPointerMove);
-      crop?.removeEventListener("pointerup", endDrag);
-      crop?.removeEventListener("pointercancel", endDrag);
-      crop?.removeEventListener("wheel", onCropWheel);
-      crop?.removeEventListener("keydown", onCropKeyDown);
-      crop?.removeEventListener("focus", onCropFocus);
-      crop?.removeEventListener("blur", onCropBlur);
+      if (!readOnly) {
+        fileBtn?.removeEventListener("click", onFileBtnClick);
+        fileInput?.removeEventListener("change", onFileChange);
+        urlBtn?.removeEventListener("click", onUrlBtnClick);
+        deleteBtn?.removeEventListener("click", onDeleteClick);
+        resetBtn?.removeEventListener("click", onResetClick);
+        resetBtn?.removeEventListener("pointerdown", stopOverlayPointer);
+        deleteBtn?.removeEventListener("pointerdown", stopOverlayPointer);
+        crop?.removeEventListener("pointerdown", onCropPointerDown);
+        crop?.removeEventListener("pointermove", onCropPointerMove);
+        crop?.removeEventListener("pointerup", endDrag);
+        crop?.removeEventListener("pointercancel", endDrag);
+        crop?.removeEventListener("wheel", onCropWheel);
+        crop?.removeEventListener("keydown", onCropKeyDown);
+        crop?.removeEventListener("focus", onCropFocus);
+        crop?.removeEventListener("blur", onCropBlur);
+      }
       window.removeEventListener("resize", onResize);
       ro?.disconnect();
     },

@@ -21,8 +21,9 @@ export function renderDeveloperImages(host) {
         Avec image&nbsp;: couleur de fond (sans hint) puis aperçu de cadrage
         (badges zoom / alignement, reset, supprimer, sauvegarder).
         Cadrage&nbsp;: focus ou clic, puis glisser / molette / flèches / <code>+</code> <code>−</code>.
+        Lecture seule (<code>readOnly</code>)&nbsp;: aperçu figé, <strong>Sauvegarder</strong> conservé (pas de chargement / cadrage / suppression).
         Module&nbsp;: <code>form-image.js</code>.
-        Appliqué&nbsp;: éditeur de carte ; logos de thèmes (<code>withBackgroundColor: false</code>, fond = couleur du thème).
+        Appliqué&nbsp;: éditeur de carte ; logos de thèmes (<code>withBackgroundColor: false</code>, fond = couleur du thème) ; vue thème par défaut.
       </p>
 
       <div class="styleguide-section">
@@ -47,6 +48,33 @@ export function renderDeveloperImages(host) {
               zoom: 1.25,
               offsetX: 0.08,
               offsetY: -0.05,
+            })}
+          </div>
+        </div>
+      </div>
+
+      <div class="styleguide-section">
+        <h2 class="styleguide-section-title">Lecture seule</h2>
+        <p class="form-hint">Aperçu et badges figés ; seul <strong>Sauvegarder</strong> reste actif. Vide&nbsp;: «&nbsp;Aucun logo&nbsp;».</p>
+        <div class="styleguide-fields">
+          <div class="form-field">
+            <label class="form-label" id="demo-image-readonly-label">Image</label>
+            ${formImageMarkup({
+              id: "demo-image-readonly",
+              labelledBy: "demo-image-readonly-label",
+              backgroundColor: "#e8f4ff",
+              zoom: 1.25,
+              offsetX: 0.08,
+              offsetY: -0.05,
+              readOnly: true,
+            })}
+          </div>
+          <div class="form-field">
+            <label class="form-label" id="demo-image-readonly-empty-label">Sans image</label>
+            ${formImageMarkup({
+              id: "demo-image-readonly-empty",
+              labelledBy: "demo-image-readonly-empty-label",
+              readOnly: true,
             })}
           </div>
         </div>
@@ -117,7 +145,32 @@ export function renderDeveloperImages(host) {
     unbind.push(() => themeCtl?.destroy());
   }
 
-  if (filledCtl || themeCtl) {
+  const readonlyRoot = /** @type {HTMLElement|null} */ (
+    host.querySelector("#demo-image-readonly")?.closest("[data-form-image]")
+  );
+  /** @type {ReturnType<typeof bindFormImage>|null} */
+  let readonlyCtl = null;
+  if (readonlyRoot) {
+    readonlyCtl = bindFormImage(readonlyRoot, {
+      dialogHost,
+      downloadBasename: "demo-image-readonly",
+      readOnly: true,
+    });
+    unbind.push(() => readonlyCtl?.destroy());
+  }
+
+  const readonlyEmptyRoot = /** @type {HTMLElement|null} */ (
+    host.querySelector("#demo-image-readonly-empty")?.closest("[data-form-image]")
+  );
+  if (readonlyEmptyRoot) {
+    const ctl = bindFormImage(readonlyEmptyRoot, {
+      dialogHost,
+      readOnly: true,
+    });
+    unbind.push(() => ctl.destroy());
+  }
+
+  if (filledCtl || themeCtl || readonlyCtl) {
     fetch("img/brickcard-logo.svg")
       .then((res) => {
         if (!res.ok) throw new Error("Démo : logo introuvable.");
@@ -135,6 +188,13 @@ export function renderDeveloperImages(host) {
           offsetY: -0.05,
         });
         themeCtl?.setValue({ dataUrl });
+        readonlyCtl?.setValue({
+          dataUrl,
+          backgroundColor: "#e8f4ff",
+          zoom: 1.25,
+          offsetX: 0.08,
+          offsetY: -0.05,
+        });
       })
       .catch(() => {
         /* galerie : laisser le contrôle vide si le logo ne charge pas */

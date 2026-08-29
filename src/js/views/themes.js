@@ -119,7 +119,7 @@ export function patchThemeInList(theme) {
 }
 
 /**
- * Place le focus clavier sur la mini-carte d’un thème personnalisé.
+ * Place le focus clavier sur la mini-carte d’un thème (perso ou par défaut).
  * Si la tuile n’est pas encore dans la grille, le focus est appliqué au prochain rendu.
  * @param {string} [id]
  */
@@ -185,12 +185,13 @@ let rememberedQuery = "";
  *   onClose: () => void,
  *   onCreate: () => void,
  *   onEdit: (id: string) => void,
+ *   onView: (id: string) => void,
  *   onClearedCustomThemes?: () => void,
  * }} opts
  * @returns {Promise<() => void>} cleanup
  */
 export async function renderThemesModal(host, opts) {
-  const { onClose, onCreate, onEdit, onClearedCustomThemes } = opts;
+  const { onClose, onCreate, onEdit, onView, onClearedCustomThemes } = opts;
   const [allThemes, cards] = await Promise.all([loadThemes(), loadCards()]);
   let { custom, builtin } = partitionThemes(allThemes);
 
@@ -538,10 +539,10 @@ export async function renderThemesModal(host, opts) {
     const shown = customShown.length + builtinShown.length;
 
     customGrid.innerHTML = customShown
-      .map((t) => themeTileMarkup(t, usage.get(t.id) || 0, true))
+      .map((t) => themeTileMarkup(t, usage.get(t.id) || 0, "edit"))
       .join("");
     builtinGrid.innerHTML = builtinShown
-      .map((t) => themeTileMarkup(t, usage.get(t.id) || 0, false))
+      .map((t) => themeTileMarkup(t, usage.get(t.id) || 0, "view"))
       .join("");
 
     customSection.hidden = customShown.length === 0;
@@ -556,6 +557,14 @@ export async function renderThemesModal(host, opts) {
   /** @param {string} id */
   function queryCustomTile(id) {
     return customGrid.querySelector(`[data-edit="${CSS.escape(id)}"]`);
+  }
+
+  /** @param {string} id */
+  function queryThemeTile(id) {
+    return (
+      queryCustomTile(id) ||
+      builtinGrid.querySelector(`[data-view="${CSS.escape(id)}"]`)
+    );
   }
 
   function visibleTileCount() {
@@ -698,18 +707,38 @@ export async function renderThemesModal(host, opts) {
     if (idx >= 0) setSortActive(idx);
   }
 
+  /** @param {Element} tile */
+  function openThemeTile(tile) {
+    const editId = tile.getAttribute("data-edit");
+    if (editId) {
+      onEdit(editId);
+      return;
+    }
+    const viewId = tile.getAttribute("data-view");
+    if (viewId) onView?.(viewId);
+  }
+
   /** @param {MouseEvent} e */
   function onGridClick(e) {
     const t = /** @type {HTMLElement} */ (e.target);
-    const tile = t.closest("[data-edit]");
+    const tile = t.closest("[data-edit], [data-view]");
     if (!tile) return;
-    const id = tile.getAttribute("data-edit");
-    if (id) onEdit(id);
+    openThemeTile(tile);
+  }
+
+  /** @param {KeyboardEvent} e */
+  function onGridKeydown(e) {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    const t = /** @type {HTMLElement} */ (e.target);
+    const tile = t.closest("[data-edit], [data-view]");
+    if (!tile) return;
+    e.preventDefault();
+    openThemeTile(tile);
   }
 
   paint();
 
-  mountedFocusThemeInList = (id) => applyThemeTileFocus(queryCustomTile(id));
+  mountedFocusThemeInList = (id) => applyThemeTileFocus(queryThemeTile(id));
 
   mountedRefreshThemesAfterCreate = (theme) => {
     const idx = custom.findIndex((t) => t.id === theme.id);
@@ -735,7 +764,7 @@ export async function renderThemesModal(host, opts) {
     const tile = queryCustomTile(theme.id);
     if (!(tile instanceof HTMLElement)) return true;
     const wrap = document.createElement("div");
-    wrap.innerHTML = themeTileMarkup(theme, usage.get(theme.id) || 0, true).trim();
+    wrap.innerHTML = themeTileMarkup(theme, usage.get(theme.id) || 0, "edit").trim();
     const next = wrap.firstElementChild;
     if (!(next instanceof HTMLElement)) return true;
     tile.replaceWith(next);
@@ -780,15 +809,9 @@ export async function renderThemesModal(host, opts) {
     };
   }
   customGrid.addEventListener("click", onGridClick);
-  customGrid.addEventListener("keydown", (e) => {
-    if (e.key !== "Enter" && e.key !== " ") return;
-    const t = /** @type {HTMLElement} */ (e.target);
-    const tile = t.closest("[data-edit]");
-    if (!tile) return;
-    e.preventDefault();
-    const id = tile.getAttribute("data-edit");
-    if (id) onEdit(id);
-  });
+  customGrid.addEventListener("keydown", onGridKeydown);
+  builtinGrid.addEventListener("click", onGridClick);
+  builtinGrid.addEventListener("keydown", onGridKeydown);
 
   searchInput.addEventListener("input", onSearchInput);
   searchBar.tabIndex = 0;
@@ -823,9 +846,9 @@ export async function renderThemesModal(host, opts) {
 /**
  * @param {import("../themes-data.js").LegoTheme} theme
  * @param {number} count
- * @param {boolean} editable
+ * @param {"edit"|"view"|""} action
  */
-function themeTileMarkup(theme, count, editable) {
+function themeTileMarkup(theme, count, action) {
   const accent = resolveCardAccent(theme);
   const fg = resolveCardAccentFg(theme, accent);
   const countLabel =
@@ -842,15 +865,20 @@ function themeTileMarkup(theme, count, editable) {
     ? `<img class="theme-tile-logo" src="${escapeAttr(theme.logoDataUrl)}" alt="" />`
     : brandLogoMarkup("theme-tile-logo is-brand");
   const logo = `<div class="${wrapClass}"${cropAttrs}>${logoInner}</div>`;
-  const label = editable
-    ? `Modifier « ${escapeAttr(theme.name)} »${count > 0 ? `, ${countLabel}` : ""}`
+  const verb = action === "edit" ? "Modifier" : action === "view" ? "Voir" : "";
+  const label = verb
+    ? `${verb} « ${escapeAttr(theme.name)} »${count > 0 ? `, ${countLabel}` : ""}`
     : `${escapeAttr(theme.name)}${count > 0 ? `, ${countLabel}` : ""}`;
-  const attrs = editable
-    ? `role="button" tabindex="0" data-edit="${escapeAttr(theme.id)}"`
-    : "";
+  const dataAttr =
+    action === "edit"
+      ? `data-edit="${escapeAttr(theme.id)}"`
+      : action === "view"
+        ? `data-view="${escapeAttr(theme.id)}"`
+        : "";
+  const attrs = dataAttr ? `role="button" tabindex="0" ${dataAttr}` : "";
 
   return `
-    <article class="theme-tile${editable ? " is-editable" : ""}" style="--theme-accent:${escapeAttr(accent)};--theme-accent-fg:${escapeAttr(fg)}" ${attrs} aria-label="${label}">
+    <article class="theme-tile${action ? " is-editable" : ""}" style="--theme-accent:${escapeAttr(accent)};--theme-accent-fg:${escapeAttr(fg)}" ${attrs} aria-label="${label}">
       <div class="theme-tile-face">
         <p class="theme-tile-name">${name}</p>
         ${logo}

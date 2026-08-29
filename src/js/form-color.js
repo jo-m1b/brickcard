@@ -51,6 +51,7 @@ export function completeHex(value) {
  *   required?: boolean,
  *   sm?: boolean,
  *   withClear?: boolean,
+ *   disabled?: boolean,
  *   name?: string,
  * }} opts
  * @returns {string}
@@ -63,7 +64,8 @@ export function formColorMarkup(opts) {
   const describedBy = opts.describedBy || "";
   const required = Boolean(opts.required);
   const sm = Boolean(opts.sm);
-  const withClear = opts.withClear !== false;
+  const disabled = Boolean(opts.disabled);
+  const withClear = opts.withClear !== false && !disabled;
   const name = opts.name || id;
   const stored = normalizeHex(value);
   const swatchColor = stored || fallback;
@@ -71,6 +73,7 @@ export function formColorMarkup(opts) {
   const ariaDesc = describedBy ? ` aria-describedby="${escapeAttr(describedBy)}"` : "";
   const swatchClass = swatchColor ? "form-color-swatch" : "form-color-swatch is-empty";
   const swatchStyle = swatchColor ? ` style="--swatch:${escapeAttr(swatchColor)}"` : "";
+  const disabledAttr = disabled ? " disabled" : "";
 
   return `
     <div class="form-color" data-form-color>
@@ -85,11 +88,11 @@ export function formColorMarkup(opts) {
         spellcheck="false"
         autocomplete="off"
         ${required ? "required" : ""}
-        ${ariaDesc}
+        ${ariaDesc}${disabledAttr}
       />
       <label class="${swatchClass}" title="Choisir une couleur"${swatchStyle}>
         <span class="visually-hidden">Ouvrir le sélecteur de couleur</span>
-        <input type="color" class="form-color-native" value="${escapeAttr(nativeVal)}" tabindex="-1" />
+        <input type="color" class="form-color-native" value="${escapeAttr(nativeVal)}" tabindex="-1"${disabledAttr} />
       </label>
       ${
         withClear

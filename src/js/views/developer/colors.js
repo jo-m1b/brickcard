@@ -1,4 +1,4 @@
-import { bindFormColor } from "../../form-color.js";
+import { bindFormColor, formColorMarkup } from "../../form-color.js";
 import { ICON_CLOSE_CIRCLE } from "../../icons.js";
 import { linkMarkup } from "../../link.js";
 
@@ -144,16 +144,12 @@ export function renderDeveloperColors(host) {
         <div class="styleguide-fields">
           <div class="form-field">
             <label class="form-label" for="demo-color-disabled-hex">Disabled</label>
-            <div class="form-color" data-form-color data-fallback="#ffffff">
-              <input class="form-control form-color-hex" type="text" id="demo-color-disabled-hex" name="demo-color-disabled-hex" value="#141414" maxlength="7" disabled spellcheck="false" autocomplete="off" />
-              <label class="form-color-swatch" title="Choisir une couleur" style="--swatch:#141414">
-                <span class="visually-hidden">Ouvrir le sélecteur de couleur</span>
-                <input type="color" class="form-color-native" value="#141414" tabindex="-1" disabled />
-              </label>
-              <button type="button" class="form-color-clear" tabindex="-1" disabled aria-label="Effacer la couleur">
-                ${ICON_CLOSE_CIRCLE}
-              </button>
-            </div>
+            ${formColorMarkup({
+              id: "demo-color-disabled-hex",
+              value: "#141414",
+              fallback: "#ffffff",
+              disabled: true,
+            })}
           </div>
           <div class="form-field">
             <label class="form-label" for="demo-color-invalid-hex">Erreur / saisie invalide</label>

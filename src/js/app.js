@@ -1,4 +1,4 @@
-import { loadCards, loadThemes, wipeAllLocalData, deleteAllCards, isResetReloadQuery, isBootRetryQuery } from "./storage.js";
+import { loadCards, loadThemes, getTheme, wipeAllLocalData, deleteAllCards, isResetReloadQuery, isBootRetryQuery } from "./storage.js";
 import { initTheme } from "./theme.js";
 import { initTelemetry, trackTelemetryPage } from "./telemetry.js";
 import { initCardDesign } from "./card-design.js";
@@ -115,8 +115,9 @@ function parsePath(path) {
   }
   if (path === "themes") return { name: "themes", page: "list" };
   if (path === "themes/new") return { name: "themes", page: "new" };
-  if (path.startsWith("themes/edit/")) {
-    const raw = path.slice("themes/edit/".length);
+  if (path.startsWith("themes/edit/") || path.startsWith("themes/view/")) {
+    const page = path.startsWith("themes/edit/") ? "edit" : "view";
+    const raw = path.slice(page === "edit" ? "themes/edit/".length : "themes/view/".length);
     if (!raw) return { name: "unknown" };
     let themeId = raw;
     try {
@@ -125,7 +126,7 @@ function parsePath(path) {
       /* id tel quel */
     }
     if (!themeId) return { name: "unknown" };
-    return { name: "themes", page: "edit", themeId };
+    return { name: "themes", page, themeId };
   }
   if (path === "settings") return { name: "settings" };
   if (path === "print") return { name: "print" };
@@ -244,7 +245,7 @@ function overlayOnClose(name) {
 /** Éditeur avec brouillon : Ctrl/Cmd+S n’ouvre pas `#backup` (évite de perdre la saisie). */
 function isDraftEditorRoute(info) {
   if (info.name === "editor") return true;
-  if (info.name === "themes" && info.page !== "list") return true;
+  if (info.name === "themes" && (info.page === "new" || info.page === "edit")) return true;
   if (info.name === "developer" && info.presetPage) return true;
   return false;
 }
@@ -390,6 +391,7 @@ async function showOverlay(routeInfo) {
           onClose: overlayOnClose("themes"),
           onCreate: () => navigate("#themes/new"),
           onEdit: (id) => navigate(`#themes/edit/${encodeURIComponent(id)}`),
+          onView: (id) => navigate(`#themes/view/${encodeURIComponent(id)}`),
           onClearedCustomThemes: () => {
             toast({
               type: "success",
@@ -409,6 +411,22 @@ async function showOverlay(routeInfo) {
       return;
     }
 
+    if (routeInfo.page === "edit" || routeInfo.page === "view") {
+      const theme = await getTheme(routeInfo.themeId);
+      if (!theme) {
+        navigate("#themes", { replace: true });
+        return;
+      }
+      if (routeInfo.page === "edit" && theme.isBuiltin) {
+        navigate(`#themes/view/${encodeURIComponent(theme.id)}`, { replace: true });
+        return;
+      }
+      if (routeInfo.page === "view" && !theme.isBuiltin) {
+        navigate(`#themes/edit/${encodeURIComponent(theme.id)}`, { replace: true });
+        return;
+      }
+    }
+
     const themeEditor = await loadOverlay(() => import("./views/theme-editor.js"));
     if (!themeEditor) return;
     if (cleanupThemeEditor) {
@@ -418,10 +436,12 @@ async function showOverlay(routeInfo) {
     if (!cleanupThemes) {
       modalRoot.innerHTML = "";
     }
+    const editorThemeId = routeInfo.page === "new" ? null : routeInfo.themeId;
     cleanupThemeEditor = await themeEditor.renderThemeEditor(modalRoot, {
-      themeId: routeInfo.page === "edit" ? routeInfo.themeId : null,
+      themeId: editorThemeId,
+      readOnly: routeInfo.page === "view",
       onClose: () => {
-        const id = routeInfo.page === "edit" ? routeInfo.themeId : null;
+        const id = editorThemeId;
         if (parseRoute().name === "themes") {
           navigate("#themes", { replace: true });
         }
