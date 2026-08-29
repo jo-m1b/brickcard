@@ -46,6 +46,16 @@ function resolveIcon(icon) {
 }
 
 /**
+ * Libellé HTML qui n’est qu’une image (badge Markdown `[![alt](src)](url)`).
+ * @param {string} html
+ */
+function isImageOnlyHtml(html) {
+  const t = String(html || "").trim();
+  if (!/<img\b/i.test(t)) return false;
+  return !t.replace(/<img\b[^>]*>/gi, "").trim();
+}
+
+/**
  * Markup `<a class="link">`.
  *
  * @param {string} text
@@ -75,7 +85,7 @@ export function linkMarkup(text, opts = {}) {
     iconHtml = "";
   } else if (opts.icon != null && opts.icon !== "") {
     iconHtml = resolveIcon(opts.icon);
-  } else if (external) {
+  } else if (external && !(opts.html && isImageOnlyHtml(text))) {
     iconHtml = ICON_EXTERNAL_LINK;
   }
 

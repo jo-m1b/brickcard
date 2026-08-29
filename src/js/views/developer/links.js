@@ -98,7 +98,7 @@ export function renderDeveloperLinks(host) {
         </div>
         <p class="styleguide-hint">
           Défaut&nbsp;: <code>target="_blank"</code>, <code>rel="noopener noreferrer"</code>,
-          icône <code>ri-external-link-fill</code> à droite.
+          icône <code>ri-external-link-fill</code> à droite (sauf si le libellé est une image).
         </p>
       </div>
     </section>
