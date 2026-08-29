@@ -61,8 +61,39 @@ function applyTelemetry(on) {
   injectScript();
 }
 
+function telemetryPath(hash) {
+  return (hash || "").replace(/^#/, "").split("?")[0];
+}
+
+/**
+ * Hash envoyé à Umami : sans id dynamique (éditeur de carte / thème perso).
+ * @param {string} hash
+ * @returns {string}
+ */
+function telemetryHash(hash) {
+  const raw = telemetryPath(hash);
+  if (raw.startsWith("edit-card/")) return "#edit-card";
+  if (raw.startsWith("themes/edit/")) return "#themes/edit";
+  return hash || "";
+}
+
+/**
+ * Titre envoyé à Umami (pas `document.title`) : libellé court, sans suffixe SEO.
+ * @param {string} hash
+ * @returns {string}
+ */
+function telemetryTitle(hash) {
+  const raw = telemetryPath(hash);
+  if (!raw || raw === "/") return "Accueil";
+  if (raw.startsWith("edit-card/")) return "Modifier la carte";
+  if (raw.startsWith("themes/edit/")) return "Modifier le thème";
+  const title = String(document.title || "");
+  const pipe = title.indexOf("|");
+  return (pipe === -1 ? title : title.slice(0, pipe)).trim();
+}
+
 function currentViewUrl() {
-  return `${location.pathname}${location.hash || ""}`;
+  return `${location.pathname}${telemetryHash(location.hash)}`;
 }
 
 function getTracker() {
@@ -82,7 +113,7 @@ function trackCurrentView() {
   const url = currentViewUrl();
   if (url === lastTrackedUrl) return;
   lastTrackedUrl = url;
-  tracker.track((props) => ({ ...props, url, title: document.title }));
+  tracker.track((props) => ({ ...props, url, title: telemetryTitle(location.hash) }));
 }
 
 function onHashChange() {
