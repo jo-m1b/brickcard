@@ -246,7 +246,7 @@ textarea {
 }
 
 .topbar:not(:has(#topbar-search:not([hidden]))) {
-  grid-template-columns: max-content 1fr;
+  grid-template-columns: minmax(0, max-content) 1fr;
 }
 
 .topbar:not(:has(#topbar-search:not([hidden]))) .topbar-actions {
@@ -395,7 +395,7 @@ textarea {
   }
 
   .topbar:not(:has(#topbar-search:not([hidden]))) {
-    grid-template-columns: max-content 1fr;
+    grid-template-columns: minmax(0, max-content) 1fr;
   }
 
   .topbar-search {
@@ -408,7 +408,7 @@ textarea {
   }
 }
 
-/* Nouvelle carte : icône seule sous 540px (nom d’app plus court, le libellé tient plus longtemps) */
+/* Nouvelle carte : icône seule sous 540px (le nom Brickcard reste visible) */
 @media (max-width: 539px) {
   #btn-new-card {
     width: 2.4rem;
@@ -442,6 +442,8 @@ textarea {
   text-decoration: none;
   color: var(--ink);
   justify-self: start;
+  min-width: 0;
+  max-width: 100%;
   width: max-content;
   padding: 0.2rem 0.45rem;
   margin: -0.2rem -0.45rem;
@@ -503,6 +505,7 @@ textarea {
 .brand-text {
   display: grid;
   gap: 0.1rem;
+  min-width: 0;
 }
 
 .brand-name {
@@ -514,6 +517,8 @@ textarea {
   letter-spacing: 0;
   text-transform: none;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .brand-version {
@@ -522,24 +527,9 @@ textarea {
   color: var(--ink-soft);
   font-weight: 500;
   font-variant-numeric: tabular-nums;
-}
-
-@media (max-width: 420px) {
-  .topbar-brand {
-    gap: 0;
-  }
-
-  .brand-text {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-  }
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .topbar-actions {
@@ -3054,15 +3044,13 @@ button.form-select-trigger.sm {
 }
 
 .modal-header .view-title:has(> svg),
-.modal-header .view-title:has(> a),
-.modal-header .view-title:has(> .modal-title-lead) {
+.modal-header .view-title:has(> a) {
   display: flex;
   align-items: center;
   gap: 0.4rem;
 }
 
-.modal-header .view-title:has(> a),
-.modal-header .view-title:has(> .modal-title-lead) {
+.modal-header .view-title:has(> a) {
   --title-crumb-gap: 0.25rem;
   gap: var(--title-crumb-gap);
   flex-wrap: wrap;
@@ -3114,28 +3102,10 @@ button.form-select-trigger.sm {
 
 /* Titre à côté de l’icône (plusieurs lignes si besoin), comme `.toast-header` */
 .modal-header .view-title:has(> svg:first-child) > span,
-.modal-header .view-title:has(> a:first-child) > span:not(.modal-title-lead) {
+.modal-header .view-title:has(> a:first-child) > span {
   flex: 1 1 auto;
   min-width: 0;
   align-self: center;
-}
-
-.modal-header .view-title > .modal-title-lead {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  flex-shrink: 0;
-}
-
-.modal-header .view-title .modal-title-brand {
-  display: inline-block;
-  width: 1.15em;
-  height: 1.15em;
-  flex-shrink: 0;
-  background-color: currentColor;
-  /* Le brick remplit le viewBox (contrairement aux glyphes Remix) : inset optique */
-  -webkit-mask: url("../img/brickcard-logo.svg") center / 80% 80% no-repeat;
-  mask: url("../img/brickcard-logo.svg") center / 80% 80% no-repeat;
 }
 
 .modal-header > div {
