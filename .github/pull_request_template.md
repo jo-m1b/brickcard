@@ -4,7 +4,7 @@ A short description of the pull request changes should go here and the sections 
 
 ## 🪵 Changelog
 
-Same categories as `CHANGELOG.md` (`## [Unreleased]`).
+App source only (`src/`). Same categories as `CHANGELOG.md` (`## [Unreleased]`).
 
 ### ➕ Added
 
