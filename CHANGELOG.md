@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ### ✏️ Changed
 
 - Telemetry: card and custom-theme editor views are sent as `#edit-card` / **Modifier la carte** and `#themes/edit` / **Modifier le thème** (no UUID); home title is **Accueil**; `#developer/…` titles keep `page | section` (cut after the 2nd `|`); other titles drop the SEO suffix after `|`
+- About (`#page/about`): disclaimer wording **une marque de LEGO Group** / **par LEGO Group** (no article **du** / **le**); intro uses **petite application** and **de bien jolies cartes pour vos briques LEGO®**
 
 ## [0.8.6] — 2026-08-29
 

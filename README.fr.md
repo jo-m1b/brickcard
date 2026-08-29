@@ -10,9 +10,9 @@
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/I5P825YXAH)
 
-> LEGO® est une marque du LEGO Group. Cette application est un projet personnel, non affilié ni sponsorisé par le LEGO Group.
+> LEGO® est une marque de LEGO Group. Cette application est un projet personnel, non affilié ni sponsorisé par LEGO Group.
 
-Brickcard est une petite appli pour créer et imprimer des cartes format carte à jouer qui décrivent des sets LEGO® (référence, photo, titre, thème, année et nombre de pièces).
+Brickcard est une petite application pour créer et imprimer de bien jolies cartes pour vos briques LEGO® au format carte à jouer qui décrivent vos sets LEGO® (référence, photo, titre, thème, année et nombre de pièces).
 
 Créez des cartes, imprimez-les, plastifiez-les et glissez-les dans une pochette transparente avec un set dont la boîte a disparu. Mes enfants les adorent — et ça évite de déballer le mauvais set par erreur :P
 
