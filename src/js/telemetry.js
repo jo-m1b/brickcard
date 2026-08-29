@@ -79,6 +79,7 @@ function telemetryHash(hash) {
 
 /**
  * Titre envoyé à Umami (pas `document.title`) : libellé court, sans suffixe SEO.
+ * Espace développeur : garder `page | section` (2ᵉ `|`), sinon le 1ᵉʳ.
  * @param {string} hash
  * @returns {string}
  */
@@ -87,9 +88,28 @@ function telemetryTitle(hash) {
   if (!raw || raw === "/") return "Accueil";
   if (raw.startsWith("edit-card/")) return "Modifier la carte";
   if (raw.startsWith("themes/edit/")) return "Modifier le thème";
-  const title = String(document.title || "");
-  const pipe = title.indexOf("|");
-  return (pipe === -1 ? title : title.slice(0, pipe)).trim();
+  const keepPipes = raw === "developer" || raw.startsWith("developer/") ? 2 : 1;
+  return titleBeforeNthPipe(document.title, keepPipes);
+}
+
+/**
+ * @param {string} title
+ * @param {number} n
+ * @returns {string}
+ */
+function titleBeforeNthPipe(title, n) {
+  const s = String(title || "");
+  let seen = 0;
+  for (let i = 0; i < s.length; i++) {
+    if (s[i] !== "|") continue;
+    seen++;
+    if (seen === n) return s.slice(0, i).trim();
+  }
+  if (n > 1) {
+    const first = s.indexOf("|");
+    if (first !== -1) return s.slice(0, first).trim();
+  }
+  return s.trim();
 }
 
 function currentViewUrl() {

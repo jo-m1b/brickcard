@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### ✏️ Changed
 
-- Telemetry: card and custom-theme editor views are sent as `#edit-card` / **Modifier la carte** and `#themes/edit` / **Modifier le thème** (no UUID); home title is **Accueil**; other titles drop the SEO suffix after `|`
+- Telemetry: card and custom-theme editor views are sent as `#edit-card` / **Modifier la carte** and `#themes/edit` / **Modifier le thème** (no UUID); home title is **Accueil**; `#developer/…` titles keep `page | section` (cut after the 2nd `|`); other titles drop the SEO suffix after `|`
 
 ## [0.8.6] — 2026-08-29
 
