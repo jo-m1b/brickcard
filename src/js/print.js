@@ -43,12 +43,37 @@ export function mirrorIndex(index, cols = PRINT_COLS) {
 }
 
 /**
+ * @param {number} sheetIndex 1-based
+ * @param {number} sheetTotal
+ */
+function sheetFolioLabel(sheetIndex, sheetTotal) {
+  return `Brickcard · ${sheetIndex} / ${sheetTotal}`;
+}
+
+/**
+ * @param {HTMLElement} sheet
+ * @param {number} sheetIndex
+ * @param {number} sheetTotal
+ */
+function appendSheetFolio(sheet, sheetIndex, sheetTotal) {
+  const label = sheetFolioLabel(sheetIndex, sheetTotal);
+  for (const place of ["top", "bottom"]) {
+    const line = document.createElement("p");
+    line.className = `print-sheet-folio print-sheet-folio--${place}`;
+    line.textContent = label;
+    sheet.appendChild(line);
+  }
+}
+
+/**
  * @param {import("./storage.js").Card[]} pageCards
  * @param {"front"|"back"} side
  * @param {Map<string, import("./themes-data.js").LegoTheme>} themeMap
  * @param {import("./print-settings.js").PrintLayout} layout
+ * @param {number} sheetIndex
+ * @param {number} sheetTotal
  */
-function buildSheet(pageCards, side, themeMap, layout) {
+function buildSheet(pageCards, side, themeMap, layout, sheetIndex, sheetTotal) {
   const { cols, rows, scale, cardsPerPage } = layout;
   const sheet = document.createElement("section");
   sheet.className = `print-sheet print-sheet--${side}`;
@@ -92,6 +117,7 @@ function buildSheet(pageCards, side, themeMap, layout) {
     sheet.appendChild(slot);
   }
 
+  appendSheetFolio(sheet, sheetIndex, sheetTotal);
   return sheet;
 }
 
@@ -110,11 +136,27 @@ function buildPrintDocument(cards, themeMap, layout, settings) {
   if (bleed.face) root.classList.add("print-bleed-face");
   if (bleed.back) root.classList.add("print-bleed-back");
   const pages = chunk(cards, layout.cardsPerPage);
+  const sheetTotal =
+    settings.printSide === "faceOnly" || settings.printSide === "backOnly"
+      ? pages.length
+      : pages.length * 2;
+  let sheetIndex = 0;
+
+  /**
+   * @param {import("./storage.js").Card[]} pageCards
+   * @param {"front"|"back"} side
+   */
+  function appendSheet(pageCards, side) {
+    sheetIndex += 1;
+    root.appendChild(
+      buildSheet(pageCards, side, themeMap, layout, sheetIndex, sheetTotal)
+    );
+  }
 
   /** @param {"front"|"back"} side */
   function appendSide(side) {
     for (const pageCards of pages) {
-      root.appendChild(buildSheet(pageCards, side, themeMap, layout));
+      appendSheet(pageCards, side);
     }
   }
 
@@ -127,8 +169,8 @@ function buildPrintDocument(cards, themeMap, layout, settings) {
     appendSide("back");
   } else {
     for (const pageCards of pages) {
-      root.appendChild(buildSheet(pageCards, "front", themeMap, layout));
-      root.appendChild(buildSheet(pageCards, "back", themeMap, layout));
+      appendSheet(pageCards, "front");
+      appendSheet(pageCards, "back");
     }
   }
   return root;
