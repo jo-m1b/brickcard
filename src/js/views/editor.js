@@ -101,7 +101,7 @@ export async function renderEditor(host, opts) {
         </div>
         <div class="modal-body" tabindex="-1">
           <div class="editor-layout">
-            <aside class="preview-wrap preview-wrap--pair">
+            <aside class="preview-wrap preview-wrap--pair" id="preview-wrap">
               <div class="card-preview" id="preview-host" aria-label="Aperçu de la face"></div>
               <div class="card-preview" id="preview-back-host" aria-label="Aperçu du dos"></div>
             </aside>
@@ -201,6 +201,7 @@ export async function renderEditor(host, opts) {
     figurineCount: host.querySelector("#figurine-count"),
     brickcardThemeId: host.querySelector("#brickcard-theme-id"),
     error: host.querySelector("#error"),
+    previewWrap: host.querySelector("#preview-wrap"),
     previewHost: host.querySelector("#preview-host"),
     previewBackHost: host.querySelector("#preview-back-host"),
     save: host.querySelector("#btn-card-save"),
@@ -321,6 +322,50 @@ export async function renderEditor(host, opts) {
 
   window.addEventListener("resize", syncPreview);
 
+  const previewFlipMq = window.matchMedia("(max-width: 549px)");
+  const previewWrap = /** @type {HTMLElement|null} */ (refs.previewWrap);
+
+  function previewFlipAria() {
+    if (!previewWrap) return;
+    if (!previewFlipMq.matches) {
+      previewWrap.removeAttribute("role");
+      previewWrap.removeAttribute("tabindex");
+      previewWrap.removeAttribute("aria-label");
+      return;
+    }
+    previewWrap.setAttribute("role", "button");
+    previewWrap.setAttribute("tabindex", "0");
+    previewWrap.setAttribute(
+      "aria-label",
+      previewWrap.classList.contains("is-showing-back")
+        ? "Aperçu du dos, cliquer pour voir la face"
+        : "Aperçu de la face, cliquer pour voir le dos"
+    );
+  }
+
+  function togglePreviewSide() {
+    if (!previewWrap || !previewFlipMq.matches) return;
+    previewWrap.classList.toggle("is-showing-back");
+    previewFlipAria();
+  }
+
+  function onPreviewWrapClick() {
+    togglePreviewSide();
+  }
+
+  function onPreviewWrapKeydown(e) {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    e.preventDefault();
+    togglePreviewSide();
+  }
+
+  if (previewWrap) {
+    previewWrap.addEventListener("click", onPreviewWrapClick);
+    previewWrap.addEventListener("keydown", onPreviewWrapKeydown);
+    previewFlipMq.addEventListener("change", previewFlipAria);
+    previewFlipAria();
+  }
+
   function requestClose() {
     opts.onCancel();
   }
@@ -401,6 +446,11 @@ export async function renderEditor(host, opts) {
     imageField?.destroy();
     window.removeEventListener("resize", syncPreview);
     window.removeEventListener("keydown", onKeydown);
+    if (previewWrap) {
+      previewWrap.removeEventListener("click", onPreviewWrapClick);
+      previewWrap.removeEventListener("keydown", onPreviewWrapKeydown);
+      previewFlipMq.removeEventListener("change", previewFlipAria);
+    }
   };
 }
 
