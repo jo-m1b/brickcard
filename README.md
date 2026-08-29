@@ -1,5 +1,11 @@
 # Brickcard
 
+<picture>
+    <source media="(prefers-color-scheme: dark)" srcset="src/img/brickcard-logo-white.svg">
+    <source media="(prefers-color-scheme: light)" srcset="src/img/brickcard-logo.svg">
+    <img width="100" alt="Brickcard Logo" src="src/img/brickcard-logo.svg">
+</picture>
+
 [![MIT license](https://img.shields.io/github/license/jo-m1b/brickcard?style=flat-square&color=ffffff)](https://github.com/jo-m1b/brickcard/blob/main/LICENSE) [![Try it live](https://img.shields.io/badge/Try%20it%20live-brickcard.org-ff6699?style=flat-square)](https://brickcard.org)
 
 > LEGO® is a trademark of the LEGO Group. This is a personal project that is not affiliated with or sponsored by the LEGO Group.
