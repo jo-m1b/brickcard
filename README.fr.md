@@ -41,7 +41,7 @@ Puis ouvrez http://127.0.0.1:3615/
 
 ## Aide et discussion
 
-Merci de chercher d’abord dans les issues et discussions existantes. Je fais de mon mieux pour répondre, mais je n’ai pas toujours le temps.
+Merci de chercher d’abord dans les issues et discussions existantes. Je fais de mon mieux pour répondre, mais je n’ai pas toujours le temps. Comment contribuer : [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ### Bugs et demandes de fonctionnalités
 

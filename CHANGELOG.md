@@ -11,11 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Repo: `.github/CODEOWNERS` (`@jo-m1b` on the whole tree)
 - Repo: **Bug report** and **Feature request** issue forms (`.github/ISSUE_TEMPLATE/`); pull request template (`.github/pull_request_template.md`)
+- Repo: issue chooser sends questions to Discussions (`.github/ISSUE_TEMPLATE/config.yml`)
+- Repo: Ko-fi ([ko-fi.com/jom1b](https://ko-fi.com/jom1b)) — Sponsor button and README badge
 
 ### ✏️ Changed
 
 - Settings: **Télémétrie** checkbox hidden locally (the script is not loaded there)
-- README: English GitHub landing plus `README.fr.md` (French, shields.io badges), light/dark logo, screenshots in `screenshots/` (no `docs/` folder)
+- README: English GitHub landing plus `README.fr.md` (French, shields.io badges), light/dark logo, screenshots in `screenshots/` (no `docs/` folder); link to `CONTRIBUTING.md`
 - `CONTRIBUTING.md`: short English conventions (issues, PRs); theme tutorial and credits removed (already in the README)
 - `CHANGELOG.md`: English only from now on
 
