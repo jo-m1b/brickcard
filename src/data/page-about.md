@@ -1,9 +1,5 @@
 # À propos
 
-<p class="about-logo"><img src="img/brickcard-logo.svg" width="100" alt="Logo Brickcard" /></p>
-
-<p class="about-kofi"><a href="https://ko-fi.com/I5P825YXAH" target="_blank" rel="noopener noreferrer"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Ko-fi" /></a></p>
-
 > LEGO® est une marque du LEGO Group. Ceci est un projet personnel, non affilié ni sponsorisé par le LEGO Group.
 
 Brickcard est une petite appli pour créer et imprimer des cartes format carte à jouer qui décrivent des sets LEGO® (référence, photo, titre, thème, année et nombre de pièces).

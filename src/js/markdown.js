@@ -168,6 +168,7 @@ export function parseMarkdown(md) {
       !/^\d+[.)]\s+/.test(lines[i]) &&
       !/^>\s?/.test(lines[i]) &&
       !/^```/.test(lines[i]) &&
+      !/^<[a-z]/i.test(lines[i].trim()) &&
       !/^(-{3,}|\*{3,}|_{3,})\s*$/.test(lines[i])
     ) {
       buf.push(lines[i]);
@@ -203,7 +204,7 @@ export async function loadMarkdownPage(slug) {
   if (!safe) throw new Error("Slug de page invalide");
 
   const url = `data/page-${safe}.md`;
-  const res = await fetch(url);
+  const res = await fetch(url, { cache: "reload" });
   if (!res.ok) {
     throw new Error(`Page introuvable : ${url} (${res.status})`);
   }

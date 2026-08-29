@@ -2,6 +2,11 @@ import { ICON_CLOSE } from "../icons.js";
 import { loadMarkdownPage } from "../markdown.js";
 import { setAppDocumentTitle } from "../document-title.js";
 
+const ABOUT_LEAD_HTML = `
+    <p class="about-logo"><img src="img/brickcard-logo.svg" width="100" alt="Logo Brickcard" /></p>
+    <p class="about-kofi"><a href="https://ko-fi.com/I5P825YXAH" target="_blank" rel="noopener noreferrer"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Ko-fi" /></a></p>
+  `;
+
 /**
  * Texte brut du titre Markdown (déjà échappé en HTML) pour `document.title`.
  * @param {{ title: string }} page
@@ -60,6 +65,10 @@ export async function renderPageModal(host, opts) {
   // Le # du markdown = titre du dialog (h1). ## / ### restent h2 / h3.
   const firstH1 = body?.querySelector("h1");
   if (firstH1) firstH1.remove();
+
+  if (slug === "about" && body) {
+    body.insertAdjacentHTML("afterbegin", ABOUT_LEAD_HTML);
+  }
 
   const backdrop = host.querySelector("#page-modal-backdrop");
   const btnClose = host.querySelector("#btn-page-close");
