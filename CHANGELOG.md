@@ -11,6 +11,7 @@ Les versions antérieures à 0.8 sont regroupées par mineure ; le détail patch
 ### Added
 
 - Dépôt : `.github/CODEOWNERS` (`@jo-m1b` sur tout le dépôt)
+- Dépôt : formulaire d’issue **Bug report** (`.github/ISSUE_TEMPLATE/bug_report.yml`)
 
 ### Changed
 

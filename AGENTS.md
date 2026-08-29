@@ -84,6 +84,7 @@ Tout le code applicatif est dans **`src/`**.
 | `screenshots/` | Captures README (WebP) ; pas de dossier `docs/` (pas de site de doc) |
 | `CHANGELOG.md` | Historique des versions (Keep a Changelog) |
 | `.github/CODEOWNERS` | Owners GitHub : `* @jo-m1b` (review auto des PR si le projet grossit) |
+| `.github/ISSUE_TEMPLATE/bug_report.yml` | Formulaire d’issue bug (What happened / expected / reproduce, version, environment, device, browser) |
 
 ## Modèle carte (`Card`)
 
