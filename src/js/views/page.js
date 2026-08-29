@@ -1,11 +1,19 @@
 import { ICON_CLOSE } from "../icons.js";
 import { loadMarkdownPage } from "../markdown.js";
 import { setAppDocumentTitle } from "../document-title.js";
+import { APP_NAME, APP_VERSION } from "../version.js";
 
-const ABOUT_LEAD_HTML = `
-    <p class="about-logo"><img src="img/brickcard-logo.svg" width="100" alt="Logo Brickcard" /></p>
-    <p class="about-kofi"><a href="https://ko-fi.com/I5P825YXAH" target="_blank" rel="noopener noreferrer"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Ko-fi" /></a></p>
+function aboutBrandHtml() {
+  return `
+    <p class="about-brand">
+      <img class="brand-logo" src="img/brickcard-logo.svg" width="40" height="55" alt="" />
+      <span class="brand-text">
+        <span class="brand-name">${APP_NAME}</span>
+        <span class="brand-version">v${APP_VERSION}</span>
+      </span>
+    </p>
   `;
+}
 
 /**
  * Texte brut du titre Markdown (déjà échappé en HTML) pour `document.title`.
@@ -67,7 +75,7 @@ export async function renderPageModal(host, opts) {
   if (firstH1) firstH1.remove();
 
   if (slug === "about" && body) {
-    body.insertAdjacentHTML("afterbegin", ABOUT_LEAD_HTML);
+    body.insertAdjacentHTML("afterbegin", aboutBrandHtml());
   }
 
   const backdrop = host.querySelector("#page-modal-backdrop");

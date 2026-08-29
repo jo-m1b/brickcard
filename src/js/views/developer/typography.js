@@ -220,7 +220,7 @@ export function renderDeveloperTypography(host) {
                 <li>Étape deux</li>
               </ol>
               <blockquote>
-                Citation (blockquote) — bordure gauche ink, texte ink-soft.
+                <p>Citation (blockquote) — bordure gauche ink, texte ink-soft.</p>
               </blockquote>
               <pre><code>// Bloc de code (Open Sans)
 const APP_ID = "brickcard";</code></pre>

@@ -56,6 +56,51 @@ function inline(text) {
 }
 
 /**
+ * Ligne qui ouvre un bloc HTML (GFM miniature, pages `data/` de confiance).
+ * @param {string} line
+ */
+function isHtmlBlockStart(line) {
+  const t = String(line || "").trim();
+  return /^<[a-z]/i.test(t) || /^<!--/.test(t);
+}
+
+/**
+ * Lit un bloc HTML jusqu’à la balise fermante, `-->` (commentaire), ou une ligne vide.
+ * @param {string[]} lines
+ * @param {number} start
+ * @returns {{ html: string, next: number }}
+ */
+function readHtmlBlock(lines, start) {
+  const line = lines[start];
+  const trimmed = line.trim();
+  const buf = [line];
+  let i = start + 1;
+  if (/^<!--/.test(trimmed)) {
+    if (!/-->/.test(line)) {
+      while (i < lines.length) {
+        buf.push(lines[i]);
+        i += 1;
+        if (/-->/.test(buf[buf.length - 1])) break;
+      }
+    }
+    return { html: buf.join("\n"), next: i };
+  }
+  const tagMatch = trimmed.match(/^<([a-z][a-z0-9]*)/i);
+  const tag = tagMatch ? tagMatch[1].toLowerCase() : "";
+  const voidTag = /^(img|br|hr|source|input)$/i.test(tag);
+  const closedSameLine = Boolean(tag && new RegExp(`</${tag}\\s*>`, "i").test(line));
+  if (tag && !voidTag && !closedSameLine) {
+    const closeRe = new RegExp(`</${tag}\\s*>`, "i");
+    while (i < lines.length && lines[i].trim()) {
+      buf.push(lines[i]);
+      i += 1;
+      if (closeRe.test(buf[buf.length - 1])) break;
+    }
+  }
+  return { html: buf.join("\n"), next: i };
+}
+
+/**
  * Convertit du Markdown en HTML.
  * @param {string} md
  * @returns {string}
@@ -96,22 +141,11 @@ export function parseMarkdown(md) {
       continue;
     }
 
-    // HTML brut (pages `data/` de confiance)
-    if (/^<[a-z]/i.test(line.trim())) {
-      const buf = [line];
-      const tagMatch = line.trim().match(/^<([a-z][a-z0-9]*)/i);
-      const tag = tagMatch ? tagMatch[1].toLowerCase() : "";
-      const voidTag = /^(img|br|hr|source|input)$/i.test(tag);
-      const closedSameLine = Boolean(tag && new RegExp(`</${tag}\\s*>`, "i").test(line));
-      i += 1;
-      if (tag && !voidTag && !closedSameLine) {
-        while (i < lines.length) {
-          buf.push(lines[i]);
-          i += 1;
-          if (new RegExp(`</${tag}\\s*>`, "i").test(buf[buf.length - 1])) break;
-        }
-      }
-      out.push(buf.join("\n"));
+    // HTML brut (pages `data/` de confiance ; comme GitHub : pas d’échappement)
+    if (isHtmlBlockStart(line)) {
+      const block = readHtmlBlock(lines, i);
+      out.push(block.html);
+      i = block.next;
       continue;
     }
 
@@ -168,7 +202,7 @@ export function parseMarkdown(md) {
       !/^\d+[.)]\s+/.test(lines[i]) &&
       !/^>\s?/.test(lines[i]) &&
       !/^```/.test(lines[i]) &&
-      !/^<[a-z]/i.test(lines[i].trim()) &&
+      !isHtmlBlockStart(lines[i]) &&
       !/^(-{3,}|\*{3,}|_{3,})\s*$/.test(lines[i])
     ) {
       buf.push(lines[i]);
