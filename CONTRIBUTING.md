@@ -13,7 +13,6 @@ Please search [issues](https://github.com/jo-m1b/brickcard/issues) and [discussi
 
 Keep the change small and focused.
 
-- UI copy stays in French
 - No bundler, framework, or Node — `src/` is the app
 - Default themes live in `src/data/themes-presets.json` (logos in `src/data/`)
 
