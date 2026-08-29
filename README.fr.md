@@ -6,7 +6,7 @@
     <img width="100" alt="Logo Brickcard" src="src/img/brickcard-logo.svg">
 </picture>
 
-[![README](https://img.shields.io/badge/EN-README-f9f9f9?style=flat-square)](README.md) [![MIT license](https://img.shields.io/github/license/jo-m1b/brickcard?style=flat-square&color=f9f9f9)](https://github.com/jo-m1b/brickcard/blob/main/LICENSE) [![Try it live](https://img.shields.io/badge/Try%20it%20live-brickcard.org-ff6699?style=flat-square)](https://brickcard.org)
+[![README](https://img.shields.io/badge/EN-README-f9f9f9?style=flat-square)](README.md) [![MIT license](https://img.shields.io/github/license/jo-m1b/brickcard?style=flat-square&color=f9f9f9)](https://github.com/jo-m1b/brickcard/blob/main/LICENSE) [![Try it live](https://img.shields.io/badge/Try%20it%20live-brickcard.org-ff6699?style=flat-square)](https://brickcard.org) [![Ko-fi](https://img.shields.io/badge/Ko--fi-Soutenir-ff5e5b?style=flat-square)](https://ko-fi.com/jom1b)
 
 > LEGO® est une marque du LEGO Group. Ceci est un projet personnel, non affilié ni sponsorisé par le LEGO Group.
 
