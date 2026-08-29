@@ -83,6 +83,7 @@ Tout le code applicatif est dans **`src/`**.
 | `README.fr.md` | Même landing en français ; badge shields.io **EN / README** vers `README.md` (GitHub n’auto-sélectionne pas la langue) |
 | `screenshots/` | Captures README (WebP) ; pas de dossier `docs/` (pas de site de doc) |
 | `CHANGELOG.md` | Historique des versions (Keep a Changelog) |
+| `.github/CODEOWNERS` | Owners GitHub : `* @jo-m1b` (review auto des PR si le projet grossit) |
 
 ## Modèle carte (`Card`)
 

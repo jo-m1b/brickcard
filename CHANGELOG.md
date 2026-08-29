@@ -8,6 +8,10 @@ Les versions antérieures à 0.8 sont regroupées par mineure ; le détail patch
 
 ## [Unreleased]
 
+### Added
+
+- Dépôt : `.github/CODEOWNERS` (`@jo-m1b` sur tout le dépôt)
+
 ### Changed
 
 - Paramètres : case **Télémétrie** masquée en local (le script n’y est pas chargé)
