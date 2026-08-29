@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.8.6] — 2026-08-29
+
 ### ➕ Added
 
 - Themes (`#themes`): default tiles are focusable / clickable and open a read-only viewer (`#themes/view/:id`) — identifier, name, colors, logo download
