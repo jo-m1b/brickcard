@@ -7,15 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### ➕ Added
+
+- Themes (`#themes`): default tiles are focusable / clickable and open a read-only viewer (`#themes/view/:id`) — identifier, name, colors, logo download
+- Color field: `disabled` option (`form-color`)
+- Image field: `readOnly` option (`form-image`; download stays)
+- Print: folio `Brickcard · n / total` at the top and bottom of each A4 sheet (small, centered, under the cards)
+
 ### ✏️ Changed
 
 - Settings: **Télémétrie** checkbox hidden locally (the script is not loaded there)
-- About (`#page/about`): title is **À propos** only (no logo / version in the header); body follows the French README (logo, Ko-fi, no badges, screenshots, or getting-started)
+- About (`#page/about`): title is **À propos** only; body follows the French README (brand like the header, Ko-fi markdown at the bottom; no badges, screenshots, or getting-started)
+- About (`#page/about`): disclaimer wording **Cette application est un projet personnel** (instead of **Ceci est…**)
+- Markdown pages: raw HTML blocks in trusted `data/` files (GitHub-style, not escaped)
 - Header: brand name and version stay visible on small screens (ellipsis if the bar is extremely narrow)
+- Card editor: below 550px, the preview shows one side at a time (face first); click toggles face / back
 
 ### 🔧 Fixed
 
+- Links: no external-link icon when the label is an image (Markdown `[![alt](src)](url)`)
 - Telemetry: page views send the full payload (no more 400 / CORS error on the collector)
+- Markdown: `blockquote` keeps the same 0.9rem bottom gap as other blocks; last inner child’s margin is dropped so the quote has no extra space at the bottom
 
 ## [0.8.5] — 2026-08-27
 
