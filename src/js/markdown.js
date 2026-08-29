@@ -1,6 +1,6 @@
 /**
  * Parser Markdown léger (sous-ensemble GFM) + chargement des pages `data/page-{{slug}}.md`.
- * Gère : titres, paragraphes, listes, citations, code, liens, images, gras/italique, HR.
+ * Gère : titres, paragraphes, listes, citations, code, liens, images, gras/italique, HR, blocs HTML.
  * Placeholder : `{{APP_VERSION}}` → version SemVer.
  * Titre de page : `# Titre` (retiré du corps de la modale).
  */
@@ -93,6 +93,25 @@ export function parseMarkdown(md) {
     if (/^(-{3,}|\*{3,}|_{3,})\s*$/.test(line)) {
       out.push("<hr />");
       i += 1;
+      continue;
+    }
+
+    // HTML brut (pages `data/` de confiance)
+    if (/^<[a-z]/i.test(line.trim())) {
+      const buf = [line];
+      const tagMatch = line.trim().match(/^<([a-z][a-z0-9]*)/i);
+      const tag = tagMatch ? tagMatch[1].toLowerCase() : "";
+      const voidTag = /^(img|br|hr|source|input)$/i.test(tag);
+      const closedSameLine = Boolean(tag && new RegExp(`</${tag}\\s*>`, "i").test(line));
+      i += 1;
+      if (tag && !voidTag && !closedSameLine) {
+        while (i < lines.length) {
+          buf.push(lines[i]);
+          i += 1;
+          if (new RegExp(`</${tag}\\s*>`, "i").test(buf[buf.length - 1])) break;
+        }
+      }
+      out.push(buf.join("\n"));
       continue;
     }
 

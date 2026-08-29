@@ -246,7 +246,7 @@ textarea {
 }
 
 .topbar:not(:has(#topbar-search:not([hidden]))) {
-  grid-template-columns: minmax(0, max-content) 1fr;
+  grid-template-columns: max-content 1fr;
 }
 
 .topbar:not(:has(#topbar-search:not([hidden]))) .topbar-actions {
@@ -395,7 +395,7 @@ textarea {
   }
 
   .topbar:not(:has(#topbar-search:not([hidden]))) {
-    grid-template-columns: minmax(0, max-content) 1fr;
+    grid-template-columns: max-content 1fr;
   }
 
   .topbar-search {
@@ -442,8 +442,6 @@ textarea {
   text-decoration: none;
   color: var(--ink);
   justify-self: start;
-  min-width: 0;
-  max-width: 100%;
   width: max-content;
   padding: 0.2rem 0.45rem;
   margin: -0.2rem -0.45rem;
@@ -505,7 +503,6 @@ textarea {
 .brand-text {
   display: grid;
   gap: 0.1rem;
-  min-width: 0;
 }
 
 .brand-name {
@@ -517,8 +514,6 @@ textarea {
   letter-spacing: 0;
   text-transform: none;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .brand-version {
@@ -527,9 +522,28 @@ textarea {
   color: var(--ink-soft);
   font-weight: 500;
   font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+/* Dernier recours : barre trop étroite (le nom tient dès que Nouvelle carte est en icône) */
+@media (max-width: 300px) {
+  .topbar:not(:has(#topbar-search:not([hidden]))) {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .topbar-brand {
+    max-width: 100%;
+  }
+
+  .topbar-brand .brand-text {
+    min-width: 0;
+  }
+
+  .topbar-brand .brand-name,
+  .topbar-brand .brand-version {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 .topbar-actions {
@@ -3464,6 +3478,42 @@ body.modal-open {
 
 .md-content img {
   max-width: 100%;
+  height: auto;
+}
+
+.md-content .about-logo {
+  margin: 0 0 0.9rem;
+}
+
+.md-content .about-logo img {
+  width: 100px;
+  height: auto;
+  display: block;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .md-content .about-logo img {
+    filter: invert(1);
+  }
+}
+
+:root[data-theme="dark"] .md-content .about-logo img {
+  filter: invert(1);
+}
+
+.md-content .about-kofi {
+  margin: 0 0 0.9rem;
+}
+
+.md-content .about-kofi a,
+.md-content .about-kofi a:hover,
+.md-content .about-kofi a:focus-visible,
+.md-content .about-kofi a:visited {
+  text-decoration: none;
+}
+
+.md-content .about-kofi img {
+  display: block;
   height: auto;
 }
 

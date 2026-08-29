@@ -37,7 +37,7 @@ Tout le code applicatif est dans **`src/`**.
 | `src/js/app.js` | Hash routing (vues + historique) ; overlays et `#developer/…` chargés par `import()` |
 | `src/js/hotkeys.js` | Raccourcis Ctrl/Cmd+P (impression) et Ctrl/Cmd+S (sauvegarde) |
 | `src/js/modal-focus.js` | Focus initial + piège Tab des modales |
-| `src/js/markdown.js` | Parser Markdown léger + `loadMarkdownPage(slug)` |
+| `src/js/markdown.js` | Parser Markdown léger + `loadMarkdownPage(slug)` ; blocs HTML (pages `data/` de confiance) |
 | `src/js/theme.js` | Thème **UI** system / light / dark |
 | `src/js/card-design.js` | Design cartes (bordure face, arrondi coins / images, CSS vars) — localStorage |
 | `src/js/list-layout.js` | Densité liste (cartes/ligne max) — localStorage |

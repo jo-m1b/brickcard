@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ### ✏️ Changed
 
 - Settings: **Télémétrie** checkbox hidden locally (the script is not loaded there)
-- About (`#page/about`): title is **À propos** only (no logo / version); body follows the French README (no badges, screenshots, or getting-started)
+- About (`#page/about`): title is **À propos** only (no logo / version in the header); body follows the French README (logo, Ko-fi, no badges, screenshots, or getting-started)
 - Header: brand name and version stay visible on small screens (ellipsis if the bar is extremely narrow)
 
 ### 🔧 Fixed
