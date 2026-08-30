@@ -40,7 +40,7 @@ function demoBtn(variant, label, opts = {}) {
 }
 
 /**
- * Galerie des boutons du design system.
+ * Button gallery of the design system.
  * @param {HTMLElement} host
  * @returns {() => void}
  */
@@ -56,30 +56,30 @@ export function renderDeveloperButtons(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#developer" })} / Bouton (Button)</p>
-        <h1 class="view-title">Bouton (Button)</h1>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#developer" })} / Button</p>
+        <h1 class="view-title">Button</h1>
       </header>
 
       <p class="styleguide-intro">
-        Quatre variantes, texte et icônes.
-        Icône à droite&nbsp;: <code>icon-right</code>.
+        Four variants, text and icons.
+        Icon on the right&nbsp;: <code>icon-right</code>.
         Compact&nbsp;: <code>sm</code>.
         Badge&nbsp;: <code>btn-badge</code>.
-        Icônes&nbsp;: ${linkMarkup("Remix Icon", { href: "https://remixicon.com/" })}.
-        Hover et focus clavier partagent le même style.
+        Icons&nbsp;: ${linkMarkup("Remix Icon", { href: "https://remixicon.com/" })}.
+        Hover and keyboard focus share the same style.
       </p>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Texte seul</h2>
+        <h2 class="styleguide-section-title">Text only</h2>
         <div class="styleguide-row">
           ${variants.map((v) => demoBtn(v, labels[v])).join("\n          ")}
         </div>
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Texte + icône (gauche)</h2>
+        <h2 class="styleguide-section-title">Text + icon (left)</h2>
         <div class="styleguide-row">
-          ${demoBtn("primary", "Nouvelle carte", { icon: ICON_ADD })}
+          ${demoBtn("primary", "New card", { icon: ICON_ADD })}
           ${demoBtn("secondary", "Secondary", { icon: ICON_ADD })}
           ${demoBtn("ghost", "Ghost", { icon: ICON_ADD })}
           ${demoBtn("danger", "Danger", { icon: ICON_ADD })}
@@ -87,27 +87,27 @@ export function renderDeveloperButtons(host) {
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Texte + icône (droite)</h2>
+        <h2 class="styleguide-section-title">Text + icon (right)</h2>
         <div class="styleguide-row">
-          ${demoBtn("primary", "Continuer", { icon: ICON_ARROW_RIGHT, iconRight: true })}
-          ${demoBtn("secondary", "Continuer", { icon: ICON_ARROW_RIGHT, iconRight: true })}
-          ${demoBtn("ghost", "Continuer", { icon: ICON_ARROW_RIGHT, iconRight: true })}
-          ${demoBtn("danger", "Continuer", { icon: ICON_ARROW_RIGHT, iconRight: true })}
+          ${demoBtn("primary", "Continue", { icon: ICON_ARROW_RIGHT, iconRight: true })}
+          ${demoBtn("secondary", "Continue", { icon: ICON_ARROW_RIGHT, iconRight: true })}
+          ${demoBtn("ghost", "Continue", { icon: ICON_ARROW_RIGHT, iconRight: true })}
+          ${demoBtn("danger", "Continue", { icon: ICON_ARROW_RIGHT, iconRight: true })}
         </div>
-        <p class="styleguide-hint">Classe <code>icon-right</code> (SVG en premier dans le DOM, disposition inversée).</p>
+        <p class="styleguide-hint">Class <code>icon-right</code> (SVG first in the DOM, layout reversed).</p>
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Icône seule</h2>
+        <h2 class="styleguide-section-title">Icon only</h2>
         <div class="styleguide-row">
-          ${demoBtn("primary", "Ajouter", { icon: ICON_ADD, iconOnly: true })}
-          ${demoBtn("secondary", "Paramètres", { icon: ICON_SETTINGS, iconOnly: true })}
-          ${demoBtn("ghost", "Paramètres", { icon: ICON_SETTINGS, iconOnly: true })}
-          ${demoBtn("danger", "Fermer", { icon: ICON_CLOSE, iconOnly: true })}
+          ${demoBtn("primary", "Add", { icon: ICON_ADD, iconOnly: true })}
+          ${demoBtn("secondary", "Settings", { icon: ICON_SETTINGS, iconOnly: true })}
+          ${demoBtn("ghost", "Settings", { icon: ICON_SETTINGS, iconOnly: true })}
+          ${demoBtn("danger", "Close", { icon: ICON_CLOSE, iconOnly: true })}
         </div>
         <p class="styleguide-hint">
-          Classe <code>icon-only</code> + label dans
-          <code>span.visually-hidden</code> (nom accessible, icône en
+          Class <code>icon-only</code> + label in
+          <code>span.visually-hidden</code> (accessible name, icon
           <code>aria-hidden</code>).
         </p>
       </div>
@@ -115,54 +115,54 @@ export function renderDeveloperButtons(host) {
       <div class="styleguide-section">
         <h2 class="styleguide-section-title">Badge <code>btn-badge</code></h2>
         <p class="styleguide-hint" style="margin-top: 0; margin-bottom: 0.75rem">
-          Overlay coin haut-droit. Le bouton garde son type (texte / texte+icône / icon-only).
-          Badge en <code>aria-hidden</code> — le libellé accessible reste sur le bouton
-          (ex. <code>aria-label</code> ou <code>visually-hidden</code> avec le total).
+          Overlay, top-right corner. The button keeps its type (text / text+icon / icon-only).
+          Badge is <code>aria-hidden</code> — the accessible name stays on the button
+          (e.g. <code>aria-label</code> or <code>visually-hidden</code> with the total).
         </p>
-        <h3 class="styleguide-section-title" style="font-size: 0.9rem">Texte seul</h3>
+        <h3 class="styleguide-section-title" style="font-size: 0.9rem">Text only</h3>
         <div class="styleguide-row">
           ${variants.map((v) => demoBtn(v, labels[v], { badge: 3 })).join("\n          ")}
         </div>
-        <h3 class="styleguide-section-title" style="font-size: 0.9rem; margin-top: 1rem">Texte + icône</h3>
+        <h3 class="styleguide-section-title" style="font-size: 0.9rem; margin-top: 1rem">Text + icon</h3>
         <div class="styleguide-row">
-          ${demoBtn("primary", "Nouvelle carte", { icon: ICON_ADD, badge: 2 })}
+          ${demoBtn("primary", "New card", { icon: ICON_ADD, badge: 2 })}
           ${demoBtn("secondary", "Secondary", { icon: ICON_ADD, badge: 2 })}
           ${demoBtn("ghost", "Ghost", { icon: ICON_ADD, badge: 2 })}
           ${demoBtn("danger", "Danger", { icon: ICON_ADD, badge: 2 })}
         </div>
-        <h3 class="styleguide-section-title" style="font-size: 0.9rem; margin-top: 1rem">Icône seule</h3>
+        <h3 class="styleguide-section-title" style="font-size: 0.9rem; margin-top: 1rem">Icon only</h3>
         <div class="styleguide-row">
-          ${demoBtn("primary", "Ajouter (3)", { icon: ICON_ADD, iconOnly: true, badge: 3 })}
-          ${demoBtn("secondary", "Paramètres (3)", { icon: ICON_SETTINGS, iconOnly: true, badge: 3 })}
-          ${demoBtn("ghost", "Impression (3)", { icon: ICON_PRINTER, iconOnly: true, badge: 3 })}
-          ${demoBtn("danger", "Alertes (3)", { icon: ICON_CLOSE, iconOnly: true, badge: 3 })}
+          ${demoBtn("primary", "Add (3)", { icon: ICON_ADD, iconOnly: true, badge: 3 })}
+          ${demoBtn("secondary", "Settings (3)", { icon: ICON_SETTINGS, iconOnly: true, badge: 3 })}
+          ${demoBtn("ghost", "Print (3)", { icon: ICON_PRINTER, iconOnly: true, badge: 3 })}
+          ${demoBtn("danger", "Alerts (3)", { icon: ICON_CLOSE, iconOnly: true, badge: 3 })}
         </div>
-        <h3 class="styleguide-section-title" style="font-size: 0.9rem; margin-top: 1rem">Taille <code>sm</code></h3>
+        <h3 class="styleguide-section-title" style="font-size: 0.9rem; margin-top: 1rem">Size <code>sm</code></h3>
         <div class="styleguide-row">
           ${variants.map((v) => demoBtn(v, labels[v], { sm: true, badge: 9 })).join("\n          ")}
         </div>
         <div class="styleguide-row" style="margin-top: 0.65rem">
-          ${demoBtn("primary", "Avec icône", { icon: ICON_ADD, sm: true, badge: 9 })}
-          ${demoBtn("secondary", "Continuer", { icon: ICON_ARROW_RIGHT, iconRight: true, sm: true, badge: 9 })}
-          ${demoBtn("primary", "Ajouter (9)", { icon: ICON_ADD, iconOnly: true, sm: true, badge: 9 })}
-          ${demoBtn("secondary", "Paramètres (9)", { icon: ICON_SETTINGS, iconOnly: true, sm: true, badge: 9 })}
-          ${demoBtn("ghost", "Impression (9)", { icon: ICON_PRINTER, iconOnly: true, sm: true, badge: 9 })}
-          ${demoBtn("danger", "Alertes (9)", { icon: ICON_CLOSE, iconOnly: true, sm: true, badge: 9 })}
+          ${demoBtn("primary", "With icon", { icon: ICON_ADD, sm: true, badge: 9 })}
+          ${demoBtn("secondary", "Continue", { icon: ICON_ARROW_RIGHT, iconRight: true, sm: true, badge: 9 })}
+          ${demoBtn("primary", "Add (9)", { icon: ICON_ADD, iconOnly: true, sm: true, badge: 9 })}
+          ${demoBtn("secondary", "Settings (9)", { icon: ICON_SETTINGS, iconOnly: true, sm: true, badge: 9 })}
+          ${demoBtn("ghost", "Print (9)", { icon: ICON_PRINTER, iconOnly: true, sm: true, badge: 9 })}
+          ${demoBtn("danger", "Alerts (9)", { icon: ICON_CLOSE, iconOnly: true, sm: true, badge: 9 })}
         </div>
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Taille <code>sm</code></h2>
+        <h2 class="styleguide-section-title">Size <code>sm</code></h2>
         <div class="styleguide-row">
           ${variants.map((v) => demoBtn(v, labels[v], { sm: true })).join("\n          ")}
         </div>
         <div class="styleguide-row" style="margin-top: 0.65rem">
-          ${demoBtn("primary", "Avec icône", { icon: ICON_ADD, sm: true })}
-          ${demoBtn("secondary", "Continuer", { icon: ICON_ARROW_RIGHT, iconRight: true, sm: true })}
-          ${demoBtn("primary", "Ajouter", { icon: ICON_ADD, iconOnly: true, sm: true })}
-          ${demoBtn("secondary", "Paramètres", { icon: ICON_SETTINGS, iconOnly: true, sm: true })}
-          ${demoBtn("ghost", "Paramètres", { icon: ICON_SETTINGS, iconOnly: true, sm: true })}
-          ${demoBtn("danger", "Fermer", { icon: ICON_CLOSE, iconOnly: true, sm: true })}
+          ${demoBtn("primary", "With icon", { icon: ICON_ADD, sm: true })}
+          ${demoBtn("secondary", "Continue", { icon: ICON_ARROW_RIGHT, iconRight: true, sm: true })}
+          ${demoBtn("primary", "Add", { icon: ICON_ADD, iconOnly: true, sm: true })}
+          ${demoBtn("secondary", "Settings", { icon: ICON_SETTINGS, iconOnly: true, sm: true })}
+          ${demoBtn("ghost", "Settings", { icon: ICON_SETTINGS, iconOnly: true, sm: true })}
+          ${demoBtn("danger", "Close", { icon: ICON_CLOSE, iconOnly: true, sm: true })}
         </div>
       </div>
 
@@ -172,11 +172,11 @@ export function renderDeveloperButtons(host) {
           ${variants.map((v) => demoBtn(v, labels[v], { disabled: true })).join("\n          ")}
         </div>
         <div class="styleguide-row" style="margin-top: 0.65rem">
-          ${demoBtn("primary", "Nouvelle carte", { icon: ICON_ADD, disabled: true })}
-          ${demoBtn("secondary", "Continuer", { icon: ICON_ARROW_RIGHT, iconRight: true, disabled: true })}
-          ${demoBtn("primary", "Ajouter", { icon: ICON_ADD, iconOnly: true, disabled: true })}
-          ${demoBtn("ghost", "Paramètres", { icon: ICON_SETTINGS, iconOnly: true, disabled: true })}
-          ${demoBtn("danger", "Fermer", { icon: ICON_CLOSE, iconOnly: true, disabled: true })}
+          ${demoBtn("primary", "New card", { icon: ICON_ADD, disabled: true })}
+          ${demoBtn("secondary", "Continue", { icon: ICON_ARROW_RIGHT, iconRight: true, disabled: true })}
+          ${demoBtn("primary", "Add", { icon: ICON_ADD, iconOnly: true, disabled: true })}
+          ${demoBtn("ghost", "Settings", { icon: ICON_SETTINGS, iconOnly: true, disabled: true })}
+          ${demoBtn("danger", "Close", { icon: ICON_CLOSE, iconOnly: true, disabled: true })}
         </div>
       </div>
     </section>

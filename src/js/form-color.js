@@ -9,6 +9,7 @@
 
 import { ICON_CLOSE_CIRCLE } from "./icons.js";
 import { parseHexColor } from "./themes-data.js";
+import { _t } from "./i18n.js";
 
 /** Valeur technique pour `<input type="color">` quand aucun défaut d’affichage. */
 const PICKER_SEED = "#ffffff";
@@ -90,13 +91,13 @@ export function formColorMarkup(opts) {
         ${required ? "required" : ""}
         ${ariaDesc}${disabledAttr}
       />
-      <label class="${swatchClass}" title="Choisir une couleur"${swatchStyle}>
-        <span class="visually-hidden">Ouvrir le sélecteur de couleur</span>
+      <label class="${swatchClass}" title="${_t("Choose a color")}"${swatchStyle}>
+        <span class="visually-hidden">${_t("Open the color picker")}</span>
         <input type="color" class="form-color-native" value="${escapeAttr(nativeVal)}" tabindex="-1"${disabledAttr} />
       </label>
       ${
         withClear
-          ? `<button type="button" class="form-color-clear" tabindex="-1" ${stored ? "" : "hidden"} aria-label="Effacer la couleur">${ICON_CLOSE_CIRCLE}</button>`
+          ? `<button type="button" class="form-color-clear" tabindex="-1" ${stored ? "" : "hidden"} aria-label="${_t("Clear color")}">${ICON_CLOSE_CIRCLE}</button>`
           : ""
       }
     </div>

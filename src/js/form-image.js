@@ -33,6 +33,7 @@ import {
   IMAGE_URL_INVALID,
 } from "./storage.js";
 import { toastImageSaved } from "./toast.js";
+import { _t } from "./i18n.js";
 
 const ZOOM_MIN = 25;
 const ZOOM_MAX = 400;
@@ -146,12 +147,12 @@ export function formImageMarkup(opts) {
     ? ` aria-describedby="${escapeAttr(opts.describedBy)}"`
     : "";
   const cropLabel = readOnly
-    ? "Aperçu de l’image"
-    : "Aperçu de cadrage. Clic ou Tab pour activer, glisser ou flèches pour déplacer, molette ou plus/moins pour zoomer.";
+    ? _t("Image preview")
+    : _t("Crop preview. Click or Tab to activate, drag or arrow keys to move, mouse wheel or plus/minus to zoom.");
 
   const colorFieldHtml = withBackgroundColor
     ? `<div class="form-field">
-          <label class="form-label" for="${escapeAttr(colorId)}">Fond de l’image</label>
+          <label class="form-label" for="${escapeAttr(colorId)}">${_t("Image background")}</label>
           ${formColorMarkup({
             id: colorId,
             value: backgroundColor,
@@ -179,15 +180,15 @@ export function formImageMarkup(opts) {
       <div class="form-image-empty" ${hasImage ? "hidden" : ""}>
         <p class="form-hint form-image-empty-text">${
           readOnly
-            ? "Aucun logo"
-            : "Charger une nouvelle image pour la prévisualiser et la recadrer"
+            ? _t("No logo")
+            : _t("Load a new image to preview and crop it")
         }</p>
         ${
           readOnly
             ? ""
             : `<div class="form-image-empty-actions">
-          <button type="button" class="btn primary" data-form-image-file>${ICON_FILE_LINE}<span>Depuis mes fichiers</span></button>
-          <button type="button" class="btn secondary sm" data-form-image-url>${ICON_LINK}<span>Depuis une URL</span></button>
+          <button type="button" class="btn primary" data-form-image-file>${ICON_FILE_LINE}<span>${_t("From my files")}</span></button>
+          <button type="button" class="btn secondary sm" data-form-image-url>${ICON_LINK}<span>${_t("From a URL")}</span></button>
         </div>
         <p class="form-error" id="${escapeAttr(errorId)}" role="alert"></p>`
         }
@@ -217,15 +218,15 @@ export function formImageMarkup(opts) {
                   dirty ? "" : "hidden"
                 }>
             ${ICON_CLOSE_CIRCLE}
-            <span class="visually-hidden">Réinitialiser le cadrage</span>
+            <span class="visually-hidden">${_t("Reset crop")}</span>
           </button>`
           }
           <div class="form-image-crop-bar">
-            <button type="button" class="btn primary sm" data-form-image-download>${ICON_DOWNLOAD}<span>Sauvegarder</span></button>
+            <button type="button" class="btn primary sm" data-form-image-download>${ICON_DOWNLOAD}<span>${_t("Download")}</span></button>
             ${
               readOnly
                 ? ""
-                : `<button type="button" class="btn primary sm" data-form-image-delete>${ICON_DELETE_BIN_2}<span>Supprimer</span></button>`
+                : `<button type="button" class="btn primary sm" data-form-image-delete>${ICON_DELETE_BIN_2}<span>${_t("Delete")}</span></button>`
             }
           </div>
         </div>
@@ -261,16 +262,16 @@ function openImageUrlDialog(host, opts) {
       <div class="modal modal--sm" role="dialog" aria-modal="true" aria-labelledby="${uid}-title">
         <div class="modal-header">
           <div>
-            <h1 class="view-title" id="${uid}-title">${modalTitleMarkup("Charger depuis une URL", ICON_LINK)}</h1>
+            <h1 class="view-title" id="${uid}-title">${modalTitleMarkup(_t("Load from a URL"), ICON_LINK)}</h1>
           </div>
           <button type="button" class="btn primary icon-only modal-close" tabindex="-1" data-url-dismiss>
             ${ICON_CLOSE}
-            <span class="visually-hidden">Fermer</span>
+            <span class="visually-hidden">${_t("Close")}</span>
           </button>
         </div>
         <div class="modal-body" tabindex="-1">
           <div class="form-field">
-            <label class="form-label" for="${inputId}">URL</label>
+            <label class="form-label" for="${inputId}">${_t("URL")}</label>
             <div class="form-control-wrap">
               <span class="form-control-icon" aria-hidden="true">${ICON_CLOUD}</span>
               <input
@@ -278,7 +279,7 @@ function openImageUrlDialog(host, opts) {
                 type="text"
                 id="${inputId}"
                 inputmode="url"
-                placeholder="https://…/image.png"
+                placeholder="${_t("https://…/image.png")}"
                 autocomplete="off"
                 spellcheck="false"
                 aria-describedby="${errorId}"
@@ -292,8 +293,8 @@ function openImageUrlDialog(host, opts) {
         </div>
         <div class="modal-footer">
           <div class="modal-footer-end">
-            <button type="button" class="btn secondary sm" data-url-dismiss>Annuler</button>
-            <button type="button" class="btn primary" data-url-load>${ICON_UPLOAD}<span>Charger</span></button>
+            <button type="button" class="btn secondary sm" data-url-dismiss>${_t("Cancel")}</button>
+            <button type="button" class="btn primary" data-url-load>${ICON_UPLOAD}<span>${_t("Load")}</span></button>
           </div>
         </div>
       </div>
@@ -348,7 +349,7 @@ function openImageUrlDialog(host, opts) {
       if (loading) return;
       const url = String(input?.value || "").trim();
       if (!url) {
-        setError(IMAGE_URL_INVALID);
+        setError(_t(IMAGE_URL_INVALID));
         input?.focus();
         return;
       }
@@ -357,13 +358,13 @@ function openImageUrlDialog(host, opts) {
       try {
         const file = await fetchImageAsFile(url);
         const dataUrl = await processFile(file);
-        if (!dataUrl) throw new Error(IMAGE_LOAD_ERROR);
+        if (!dataUrl) throw new Error(_t(IMAGE_LOAD_ERROR));
         finish(dataUrl);
       } catch (err) {
         const message =
           err && typeof err === "object" && "message" in err && err.message
             ? String(err.message)
-            : IMAGE_LOAD_ERROR;
+            : _t(IMAGE_LOAD_ERROR);
         setError(message);
         setLoading(false);
         input?.focus();
@@ -403,7 +404,7 @@ function openImageUrlDialog(host, opts) {
 
     document.addEventListener("keydown", onKey, true);
     host.appendChild(backdrop);
-    pushModalDocumentTitle("Charger depuis une URL");
+    pushModalDocumentTitle(_t("Load from a URL"));
     mo.observe(host, { childList: true });
     queueMicrotask(() => focusTopModal());
   });
@@ -602,7 +603,7 @@ export function bindFormImage(root, opts = {}) {
           resolve();
         });
       };
-      img.onerror = () => reject(new Error(IMAGE_LOAD_ERROR));
+      img.onerror = () => reject(new Error(_t(IMAGE_LOAD_ERROR)));
       img.src = dataUrl;
     });
   }
@@ -648,25 +649,25 @@ export function bindFormImage(root, opts = {}) {
   async function applyFile(file) {
     if (!file) return;
     if (typeof processFile !== "function") {
-      setEmptyError(IMAGE_LOAD_ERROR);
+      setEmptyError(_t(IMAGE_LOAD_ERROR));
       return;
     }
     const type = file.type || "";
     if (type && !type.startsWith("image/")) {
-      setEmptyError(IMAGE_LOAD_ERROR_FORMAT);
+      setEmptyError(_t(IMAGE_LOAD_ERROR_FORMAT));
       return;
     }
     setEmptyError("");
     setBusy(true);
     try {
       const dataUrl = await processFile(file);
-      if (!dataUrl) throw new Error(IMAGE_LOAD_ERROR);
+      if (!dataUrl) throw new Error(_t(IMAGE_LOAD_ERROR));
       await loadDataUrl(dataUrl, { resetCrop: true, emitChange: true });
     } catch (err) {
       const message =
         err && typeof err === "object" && "message" in err && err.message
           ? String(err.message)
-          : IMAGE_LOAD_ERROR;
+          : _t(IMAGE_LOAD_ERROR);
       setEmptyError(message);
     } finally {
       setBusy(false);
@@ -690,7 +691,7 @@ export function bindFormImage(root, opts = {}) {
 
   async function onUrlBtnClick() {
     if (typeof processFile !== "function") {
-      setEmptyError(IMAGE_LOAD_ERROR);
+      setEmptyError(_t(IMAGE_LOAD_ERROR));
       return;
     }
     setEmptyError("");
@@ -703,7 +704,7 @@ export function bindFormImage(root, opts = {}) {
       const message =
         err && typeof err === "object" && "message" in err && err.message
           ? String(err.message)
-          : IMAGE_LOAD_ERROR;
+          : _t(IMAGE_LOAD_ERROR);
       setEmptyError(message);
     } finally {
       setBusy(false);
@@ -722,11 +723,11 @@ export function bindFormImage(root, opts = {}) {
     e.preventDefault();
     e.stopPropagation();
     const ok = await confirmDialog(dialogHost, {
-      title: "Supprimer l’image ?",
+      title: _t("Delete the image?"),
       icon: "delete-bin-2",
       message:
-        "Attention, la suppression est définitive et ne pourra pas être annulée ! Souhaitez-vous continuer ?",
-      okLabel: "Supprimer",
+        _t("Warning, deletion is permanent and cannot be undone! Do you want to continue?"),
+      okLabel: _t("Delete"),
       danger: true,
     });
     if (!ok || destroyed) return;

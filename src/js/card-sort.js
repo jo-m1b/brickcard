@@ -2,6 +2,8 @@
  * Comparaison ASC des cartes (liste d’accueil et impression).
  */
 
+import { getLocale } from "./i18n.js";
+
 /** @typedef {"updatedAt"|"legoSetRef"|"title"|"releaseYear"|"pieceCount"|"figurineCount"} CardSortKey */
 
 /** @type {CardSortKey[]} */
@@ -25,13 +27,13 @@ export function compareCardsAsc(a, b, key) {
     return String(a.updatedAt || "").localeCompare(String(b.updatedAt || ""));
   }
   if (key === "legoSetRef") {
-    return String(a.legoSetRef || "").localeCompare(String(b.legoSetRef || ""), undefined, {
+    return String(a.legoSetRef || "").localeCompare(String(b.legoSetRef || ""), getLocale(), {
       numeric: true,
       sensitivity: "base",
     });
   }
   if (key === "title") {
-    return String(a.title || "").localeCompare(String(b.title || ""), undefined, {
+    return String(a.title || "").localeCompare(String(b.title || ""), getLocale(), {
       sensitivity: "base",
     });
   }

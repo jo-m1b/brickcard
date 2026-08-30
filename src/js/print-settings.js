@@ -3,9 +3,11 @@
  * N’impacte que le document imprimé et le libellé de feuilles du menu.
  */
 
+import { filenameSlug } from "./card-export.js";
 import { formCheckboxMarkup } from "./form-checkbox.js";
 import { formRadioMarkup } from "./form-radio.js";
 import { CARD_SORT_KEYS } from "./card-sort.js";
+import { _t } from "./i18n.js";
 
 const SETTINGS_KEY = "brickcard:print-settings";
 
@@ -27,12 +29,12 @@ export const DEFAULT_BLEED_BACK = true;
 
 /** @type {{ value: CardSortKey, label: string }[]} */
 export const PRINT_CARD_ORDER_OPTIONS = [
-  { value: "legoSetRef", label: "Référence" },
-  { value: "title", label: "Titre" },
-  { value: "releaseYear", label: "Année de sortie" },
-  { value: "pieceCount", label: "Nombre de pièces" },
-  { value: "figurineCount", label: "Nombre de figurines" },
-  { value: "updatedAt", label: "Date de modification" },
+  { value: "legoSetRef", label: "Reference" },
+  { value: "title", label: "Title" },
+  { value: "releaseYear", label: "Release year" },
+  { value: "pieceCount", label: "Number of pieces" },
+  { value: "figurineCount", label: "Number of figurines" },
+  { value: "updatedAt", label: "Date modified" },
 ];
 
 const PAGE_W_MM = 210;
@@ -131,7 +133,7 @@ export function printCardOrderRadiosMarkup(opts) {
       id: `${opts.idPrefix}-${opt.value}`,
       name: opts.name,
       value: opt.value,
-      label: opt.label,
+      label: _t(opt.label),
       checked: opts.selected === opt.value,
     })
   ).join("");
@@ -145,21 +147,21 @@ export function printCardOrderRadiosMarkup(opts) {
 export function printCutMarksGroupMarkup(opts) {
   const hintId = `${opts.idPrefix}-hint`;
   return `<fieldset class="form-check-group" aria-describedby="${hintId}">
-    <legend class="form-label">Tracé de découpe</legend>
-    <p class="form-hint" id="${hintId}">Imprimer un tracé technique pour faciliter la découpe des cartes</p>
+    <legend class="form-label">${_t("Cut marks")}</legend>
+    <p class="form-hint" id="${hintId}">${_t("Print a technical outline to make cutting the cards easier")}</p>
     <div class="form-check-list form-check-list--row">
       ${formCheckboxMarkup({
         id: `${opts.idPrefix}-face`,
         name: opts.name,
         value: "face",
-        label: "Sur la face avant",
+        label: _t("On the front"),
         checked: opts.face,
       })}
       ${formCheckboxMarkup({
         id: `${opts.idPrefix}-back`,
         name: opts.name,
         value: "back",
-        label: "Sur le dos (arrière)",
+        label: _t("On the back"),
         checked: opts.back,
       })}
     </div>
@@ -199,14 +201,14 @@ export function cutMarksFromCheckboxes(inputs) {
 export function printBleedGroupMarkup(opts) {
   const hintId = `${opts.idPrefix}-hint`;
   return `<fieldset class="form-check-group" aria-describedby="${hintId}">
-    <legend class="form-label">Fond perdu</legend>
-    <p class="form-hint" id="${hintId}">Étendre la couleur de fond des cartes au-delà de la zone de coupe pour éviter des bords avec du blanc lors de la découpe</p>
+    <legend class="form-label">${_t("Bleed")}</legend>
+    <p class="form-hint" id="${hintId}">${_t("Extend the card background color beyond the cut area to avoid white edges when cutting")}</p>
     <div class="form-check-list form-check-list--row">
       ${formCheckboxMarkup({
         id: `${opts.idPrefix}-face`,
         name: opts.name,
         value: "face",
-        label: "Sur la face avant",
+        label: _t("On the front"),
         checked: opts.face,
         disabled: opts.cutMarkFace,
       })}
@@ -214,7 +216,7 @@ export function printBleedGroupMarkup(opts) {
         id: `${opts.idPrefix}-back`,
         name: opts.name,
         value: "back",
-        label: "Sur le dos (arrière)",
+        label: _t("On the back"),
         checked: opts.back,
         disabled: opts.cutMarkBack,
       })}
@@ -395,22 +397,29 @@ export function countPrintSheets(
 export function formatPrintSheetsLabel(cardCount, settings = getPrintSettings()) {
   const sheets = countPrintSheets(cardCount, settings.printGrid);
   if (!sheets) return "";
-  const s = sheets > 1 ? "s" : "";
   if (settings.printSide === "faceOnly") {
-    return `${sheets} feuille${s} A4 (faces)`;
+    return sheets === 1
+      ? _t("%(count)s A4 sheet (fronts)", { count: sheets })
+      : _t("%(count)s A4 sheets (fronts)", { count: sheets });
   }
   if (settings.printSide === "backOnly") {
-    return `${sheets} feuille${s} A4 (dos)`;
+    return sheets === 1
+      ? _t("%(count)s A4 sheet (backs)", { count: sheets })
+      : _t("%(count)s A4 sheets (backs)", { count: sheets });
   }
   if (settings.sheetAssembly === "grouped") {
-    return `${sheets} feuille${s} A4 · rectos puis versos`;
+    return sheets === 1
+      ? _t("%(count)s A4 sheet · fronts then backs", { count: sheets })
+      : _t("%(count)s A4 sheets · fronts then backs", { count: sheets });
   }
-  return `${sheets} feuille${s} A4 recto-verso`;
+  return sheets === 1
+    ? _t("%(count)s A4 sheet duplex", { count: sheets })
+    : _t("%(count)s A4 sheets duplex", { count: sheets });
 }
 
 /** @param {PrintLayout} layout @returns {string} */
 export function formatPrintGridLabel(layout) {
-  return `Grille ${layout.cols}×${layout.rows}`;
+  return _t("Grid %(cols)s×%(rows)s", { cols: layout.cols, rows: layout.rows });
 }
 
 /** @param {PrintLayout} [layout] @returns {string} */
@@ -435,7 +444,9 @@ export function formatPrintMenuDesc(cardCount, settings = getPrintSettings()) {
 /** @param {number} cardCount @returns {string} */
 export function formatPrintCountLabel(cardCount) {
   const n = Math.max(0, Math.round(Number(cardCount) || 0));
-  return `${n} carte${n > 1 ? "s" : ""} à imprimer`;
+  return n === 1
+    ? _t("%(count)s card to print", { count: n })
+    : _t("%(count)s cards to print", { count: n });
 }
 
 /**
@@ -457,17 +468,25 @@ export function formatPrintPdfBasename(
   const grid = `${layout.cols}x${layout.rows}`;
   const sides =
     settings.printSide === "faceOnly"
-      ? "face"
+      ? _t("front")
       : settings.printSide === "backOnly"
-        ? "dos"
-        : "face-et-dos";
-  const parts = ["brickcard", date, "grille", grid, sides];
+        ? _t("back")
+        : _t("front and back");
+  const cardsLabel =
+    n === 1 ? _t("%(count)s card", { count: n }) : _t("%(count)s cards", { count: n });
+  const parts = [
+    "brickcard",
+    date,
+    filenameSlug(_t("grid")),
+    grid,
+    filenameSlug(sides),
+  ];
   if (settings.printSide === "both") {
     parts.push(
-      "recto-verso",
-      settings.sheetAssembly === "grouped" ? "regrouper" : "alterner"
+      filenameSlug(_t("duplex")),
+      filenameSlug(settings.sheetAssembly === "grouped" ? _t("Group") : _t("Alternate"))
     );
   }
-  parts.push(`${n}-carte${n > 1 ? "s" : ""}`);
+  parts.push(filenameSlug(cardsLabel));
   return parts.join("-");
 }

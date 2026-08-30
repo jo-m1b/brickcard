@@ -6,12 +6,14 @@
 import { downloadBlob } from "./card-export.js";
 import { getCardAppearanceSettings } from "./card-design.js";
 import { APP_ID, APP_VERSION } from "./version.js";
+import { _t, getLocale } from "./i18n.js";
 
 export const BACKUP_EXT = ".brickcard";
-export const BACKUP_INVALID = "La sauvegarde chargée est invalide !";
-export const BACKUP_URL_INVALID = "L’URL de la sauvegarde est invalide.";
-export const BACKUP_LOAD_ERROR = "Erreur de chargement de la sauvegarde !";
-export const BACKUP_LOAD_ERROR_CORS = `${BACKUP_LOAD_ERROR} Réseau ou CORS - le site source refuse le chargement.`;
+export const BACKUP_INVALID = "The loaded backup is invalid!";
+export const BACKUP_URL_INVALID = "The backup URL is invalid.";
+export const BACKUP_LOAD_ERROR = "Backup loading error!";
+export const BACKUP_LOAD_ERROR_CORS =
+  "Backup loading error! Network or CORS - the source site refuses the load.";
 
 /** Sauvegarde de démo livrée avec l’app (`src/data/`), chemin relatif à `src/`. */
 export const DEMO_BACKUP_SRC = "data/backup-demo-jo.brickcard";
@@ -215,7 +217,7 @@ export function listBackupThemeChoices(cards, themes) {
     if (!theme) continue;
     const themeName =
       String(theme.name || /** @type {{ themeName?: unknown }} */ (theme).themeName || "").trim() ||
-      "THÈME";
+      _t("THEME");
     choices.push({
       id,
       name: themeName,
@@ -227,12 +229,12 @@ export function listBackupThemeChoices(cards, themes) {
   if (unthemed?.length) {
     choices.push({
       id: UNTHEMED_BACKUP_THEME_ID,
-      name: "Sans thème",
+      name: _t("No theme"),
       cardCount: unthemed.length,
       isCustom: false,
     });
   }
-  choices.sort((a, b) => a.name.localeCompare(b.name, "fr"));
+  choices.sort((a, b) => a.name.localeCompare(b.name, getLocale()));
   return choices;
 }
 
@@ -323,12 +325,12 @@ export function listImportThemeChoices(cards, themes, customThemes) {
     if (!theme || !theme.id || chosen.has(theme.id)) continue;
     empty.push({
       id: theme.id,
-      name: String(theme.name || "").trim() || "THÈME",
+      name: String(theme.name || "").trim() || _t("THEME"),
       cardCount: 0,
       isCustom: true,
     });
   }
-  empty.sort((a, b) => a.name.localeCompare(b.name, "fr"));
+  empty.sort((a, b) => a.name.localeCompare(b.name, getLocale()));
   return [...choices, ...empty];
 }
 
@@ -393,16 +395,16 @@ export function isImportPayloadEmpty(payload) {
  */
 export async function fetchBackupAsText(urlString, opts = {}) {
   const raw = String(urlString || "").trim();
-  if (!raw) throw new Error(BACKUP_URL_INVALID);
+  if (!raw) throw new Error(_t(BACKUP_URL_INVALID));
 
   let url;
   try {
     url = new URL(raw, document.baseURI);
   } catch {
-    throw new Error(BACKUP_URL_INVALID);
+    throw new Error(_t(BACKUP_URL_INVALID));
   }
   if (url.protocol !== "http:" && url.protocol !== "https:") {
-    throw new Error(BACKUP_URL_INVALID);
+    throw new Error(_t(BACKUP_URL_INVALID));
   }
 
   let res;
@@ -417,11 +419,11 @@ export async function fetchBackupAsText(urlString, opts = {}) {
     if (err && typeof err === "object" && "name" in err && err.name === "AbortError") {
       throw err;
     }
-    throw new Error(BACKUP_LOAD_ERROR_CORS);
+    throw new Error(_t(BACKUP_LOAD_ERROR_CORS));
   }
 
   if (!res.ok) {
-    throw new Error(`${BACKUP_LOAD_ERROR} HTTP ${res.status}.`);
+    throw new Error(_t("Backup loading error! HTTP %(status)s.", { status: res.status }));
   }
 
   return res.text();
@@ -449,7 +451,9 @@ export function estimateThemeCardsBytes(cards, includeImages) {
  */
 export function formatBackupThemeChoiceHint(cardCount, bytes) {
   const n = Math.max(0, Math.round(Number(cardCount) || 0));
-  return `${n} carte${n > 1 ? "s" : ""} · ${formatBackupSize(bytes)}`;
+  const cards =
+    n === 1 ? _t("%(count)s card", { count: n }) : _t("%(count)s cards", { count: n });
+  return `${cards} · ${formatBackupSize(bytes)}`;
 }
 
 /**
@@ -458,26 +462,38 @@ export function formatBackupThemeChoiceHint(cardCount, bytes) {
  */
 export function formatBackupSize(bytes) {
   const n = Math.max(0, Math.round(Number(bytes) || 0));
-  if (n < 1000) return `${n} octet${n > 1 ? "s" : ""}`;
+  if (n < 1000) {
+    return n === 1 ? _t("%(n)s byte", { n }) : _t("%(n)s bytes", { n });
+  }
+  const localeNum = (value) =>
+    value.toLocaleString(getLocale(), { maximumFractionDigits: 1 });
   if (n < 1_000_000) {
     const ko = n / 1000;
     const rounded = ko >= 10 ? Math.round(ko) : Math.round(ko * 10) / 10;
-    return `${String(rounded).replace(".", ",")} Ko`;
+    return _t("%(n)s kB", { n: localeNum(rounded) });
   }
   if (n < 1_000_000_000) {
     const mo = n / 1_000_000;
     const rounded = mo >= 10 ? Math.round(mo) : Math.round(mo * 10) / 10;
-    return `${String(rounded).replace(".", ",")} Mo`;
+    return _t("%(n)s MB", { n: localeNum(rounded) });
   }
   const go = n / 1_000_000_000;
   const rounded = go >= 10 ? Math.round(go) : Math.round(go * 10) / 10;
-  return `${String(rounded).replace(".", ",")} Go`;
+  return _t("%(n)s GB", { n: localeNum(rounded) });
 }
 
-/** @param {number} n @param {string} word */
-function formatFrCount(n, word) {
+/** @param {number} n @param {"card"|"theme"|"setting"} kind */
+function formatCountItem(n, kind) {
   const v = Math.max(0, Math.round(Number(n) || 0));
-  return `${v} ${word}${v > 1 ? "s" : ""}`;
+  if (kind === "card") {
+    return v === 1 ? _t("%(count)s card", { count: v }) : _t("%(count)s cards", { count: v });
+  }
+  if (kind === "theme") {
+    return v === 1 ? _t("%(count)s theme", { count: v }) : _t("%(count)s themes", { count: v });
+  }
+  return v === 1
+    ? _t("%(count)s setting", { count: v })
+    : _t("%(count)s settings", { count: v });
 }
 
 /**
@@ -491,9 +507,9 @@ export function formatBackupFooterRecap(recap) {
   const settings = Math.max(0, Math.round(Number(recap.settingCount) || 0));
   /** @type {string[]} */
   const items = [];
-  if (cards > 0) items.push(formatFrCount(cards, "carte"));
-  if (themes > 0) items.push(formatFrCount(themes, "thème"));
-  if (settings > 0) items.push(formatFrCount(settings, "paramètre"));
+  if (cards > 0) items.push(formatCountItem(cards, "card"));
+  if (themes > 0) items.push(formatCountItem(themes, "theme"));
+  if (settings > 0) items.push(formatCountItem(settings, "setting"));
   return { items, size: formatBackupSize(recap.bytes) };
 }
 
@@ -617,16 +633,16 @@ export function migrateBackup(raw) {
 
   if (typeof raw.version === "number") {
     if (!Number.isInteger(raw.version) || raw.version < 1 || raw.version > 3) {
-      throw new Error(BACKUP_INVALID);
+      throw new Error(_t(BACKUP_INVALID));
     }
     data = migrateLegacyIntegerBackup(data);
   }
 
   const ver = normalizeSemverString(data.version);
-  if (!ver) throw new Error(BACKUP_INVALID);
+  if (!ver) throw new Error(_t(BACKUP_INVALID));
   if (semverGt(ver, APP_VERSION)) {
     throw new Error(
-      `La version (v${ver}) de la sauvegarde chargée est incompatible !`
+      _t("The version (v%(version)s) of the loaded backup is incompatible!", { version: ver })
     );
   }
 
@@ -640,7 +656,7 @@ export function migrateBackup(raw) {
 
   if (data.settings != null) {
     if (typeof data.settings !== "object" || Array.isArray(data.settings)) {
-      throw new Error(BACKUP_INVALID);
+      throw new Error(_t(BACKUP_INVALID));
     }
     const appearance = readCardAppearance(
       /** @type {{ cardAppearance?: unknown }} */ (data.settings).cardAppearance
@@ -662,20 +678,20 @@ export function parseBrickcardBackup(input) {
     try {
       data = JSON.parse(input);
     } catch {
-      throw new Error(BACKUP_INVALID);
+      throw new Error(_t(BACKUP_INVALID));
     }
   } else {
     data = input;
   }
   if (!data || typeof data !== "object" || Array.isArray(data)) {
-    throw new Error(BACKUP_INVALID);
+    throw new Error(_t(BACKUP_INVALID));
   }
   const backup = /** @type {Record<string, unknown>} */ (data);
   if (backup.app !== APP_ID) {
-    throw new Error(BACKUP_INVALID);
+    throw new Error(_t(BACKUP_INVALID));
   }
   if (!Array.isArray(backup.cards) || !Array.isArray(backup.themes)) {
-    throw new Error(BACKUP_INVALID);
+    throw new Error(_t(BACKUP_INVALID));
   }
 
   const migrated = migrateBackup(/** @type {BackupData} */ (backup));
@@ -683,7 +699,7 @@ export function parseBrickcardBackup(input) {
   const hasTheme = migrated.themes.some(isValidThemeLike);
   const hasSettings = Boolean(migrated.settings?.cardAppearance);
   if (!hasCard && !hasTheme && !hasSettings) {
-    throw new Error(BACKUP_INVALID);
+    throw new Error(_t(BACKUP_INVALID));
   }
   return migrated;
 }

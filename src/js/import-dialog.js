@@ -16,6 +16,7 @@ import {
   modalTitleMarkup,
 } from "./icons.js";
 import { popModalDocumentTitle, pushModalDocumentTitle, setAppDocumentTitle } from "./document-title.js";
+import { _t } from "./i18n.js";
 import { formCheckboxMarkup } from "./form-checkbox.js";
 import { focusTopModal } from "./modal-focus.js";
 import { getPresetThemes } from "./themes-data.js";
@@ -69,7 +70,7 @@ function toastImportedBackup(toast, payload, opts = {}) {
   });
   toast?.({
     type: "success",
-    title: opts.title || "Sauvegarde importée",
+    title: opts.title || _t("Backup imported"),
     ...(opts.icon ? { icon: opts.icon } : {}),
     message: recap.message,
     messageHtml: recap.messageHtml,
@@ -113,16 +114,16 @@ function openBackupUrlDialog(host) {
       <div class="modal modal--sm" role="dialog" aria-modal="true" aria-labelledby="${uid}-title">
         <div class="modal-header">
           <div>
-            <h1 class="view-title" id="${uid}-title">${modalTitleMarkup("Charger depuis une URL", ICON_LINK)}</h1>
+            <h1 class="view-title" id="${uid}-title">${modalTitleMarkup(_t("Load from a URL"), ICON_LINK)}</h1>
           </div>
           <button type="button" class="btn primary icon-only modal-close" tabindex="-1" data-url-dismiss>
             ${ICON_CLOSE}
-            <span class="visually-hidden">Fermer</span>
+            <span class="visually-hidden">${_t("Close")}</span>
           </button>
         </div>
         <div class="modal-body" tabindex="-1">
           <div class="form-field">
-            <label class="form-label" for="${inputId}">URL</label>
+            <label class="form-label" for="${inputId}">${_t("URL")}</label>
             <div class="form-control-wrap">
               <span class="form-control-icon" aria-hidden="true">${ICON_CLOUD}</span>
               <input
@@ -130,7 +131,7 @@ function openBackupUrlDialog(host) {
                 type="text"
                 id="${inputId}"
                 inputmode="url"
-                placeholder="https://…/sauvegarde.brickcard"
+                placeholder="${_t("https://…/backup.brickcard")}"
                 autocomplete="off"
                 spellcheck="false"
                 aria-describedby="${errorId}"
@@ -144,8 +145,8 @@ function openBackupUrlDialog(host) {
         </div>
         <div class="modal-footer">
           <div class="modal-footer-end">
-            <button type="button" class="btn secondary sm" data-url-dismiss>Annuler</button>
-            <button type="button" class="btn primary" data-url-load>${ICON_UPLOAD}<span>Charger</span></button>
+            <button type="button" class="btn secondary sm" data-url-dismiss>${_t("Cancel")}</button>
+            <button type="button" class="btn primary" data-url-load>${ICON_UPLOAD}<span>${_t("Load")}</span></button>
           </div>
         </div>
       </div>
@@ -200,7 +201,7 @@ function openBackupUrlDialog(host) {
       if (loading) return;
       const url = String(input?.value || "").trim();
       if (!url) {
-        setError(BACKUP_URL_INVALID);
+        setError(_t(BACKUP_URL_INVALID));
         input?.focus();
         return;
       }
@@ -214,7 +215,7 @@ function openBackupUrlDialog(host) {
         const message =
           err && typeof err === "object" && "message" in err && err.message
             ? String(err.message)
-            : BACKUP_URL_INVALID;
+            : _t(BACKUP_URL_INVALID);
         setError(message);
         setLoading(false);
         input?.focus();
@@ -254,13 +255,13 @@ function openBackupUrlDialog(host) {
 
     document.addEventListener("keydown", onKey, true);
     host.appendChild(backdrop);
-    pushModalDocumentTitle("Charger depuis une URL");
+    pushModalDocumentTitle(_t("Load from a URL"));
     mo.observe(host, { childList: true });
     queueMicrotask(() => focusTopModal());
   });
 }
 
-const DEMO_BACKUP_TITLE = "Sauvegarde de démonstration";
+const DEMO_BACKUP_TITLE = () => _t("Demo backup");
 
 /**
  * Charge `data/backup-demo-jo.brickcard` et fusionne toute la sauvegarde (sans étape de choix).
@@ -275,7 +276,7 @@ const DEMO_BACKUP_TITLE = "Sauvegarde de démonstration";
 export function openDemoBackupDialog(host, opts = {}) {
   const { toast, onImported } = opts;
   if (!host) {
-    toast?.("Modale indisponible", "error");
+    toast?.(_t("Modal unavailable"), "error");
     return Promise.resolve(false);
   }
   if (host.querySelector("#demo-backup-dialog-backdrop")) {
@@ -295,11 +296,11 @@ export function openDemoBackupDialog(host, opts = {}) {
       <div class="modal modal--sm" role="dialog" aria-modal="true" aria-labelledby="demo-backup-dialog-title" aria-busy="true" tabindex="-1">
         <div class="modal-header">
           <div>
-            <h1 class="view-title" id="demo-backup-dialog-title">${modalTitleMarkup(DEMO_BACKUP_TITLE, ICON_EMOTION)}</h1>
+            <h1 class="view-title" id="demo-backup-dialog-title">${modalTitleMarkup(DEMO_BACKUP_TITLE(), ICON_EMOTION)}</h1>
           </div>
           <button type="button" class="btn primary icon-only modal-close" tabindex="-1" data-demo-dismiss>
             ${ICON_CLOSE}
-            <span class="visually-hidden">Fermer</span>
+            <span class="visually-hidden">${_t("Close")}</span>
           </button>
         </div>
         <div class="modal-body" tabindex="-1">
@@ -365,7 +366,7 @@ export function openDemoBackupDialog(host, opts = {}) {
         await importBackup(backup, { mode: "merge" });
         if (settled) return;
         toastImportedBackup(toast, backup, {
-          title: "Démonstration chargée",
+          title: _t("Demo loaded"),
           icon: "emotion",
         });
         await onImported?.();
@@ -375,7 +376,7 @@ export function openDemoBackupDialog(host, opts = {}) {
         if (err && typeof err === "object" && "name" in err && err.name === "AbortError") {
           return;
         }
-        const message = err instanceof Error && err.message ? err.message : "Import impossible";
+        const message = err instanceof Error && err.message ? err.message : _t("Unable to import");
         showError(message);
         toast?.(message, "error");
       }
@@ -402,7 +403,7 @@ export function openDemoBackupDialog(host, opts = {}) {
 
     document.addEventListener("keydown", onKey, true);
     host.appendChild(backdrop);
-    pushModalDocumentTitle(DEMO_BACKUP_TITLE);
+    pushModalDocumentTitle(DEMO_BACKUP_TITLE());
     mo.observe(host, { childList: true });
     queueMicrotask(() => focusTopModal());
     run();
@@ -449,11 +450,11 @@ export async function renderImportDialog(host, opts) {
       <div class="modal modal--md" role="dialog" aria-modal="true" aria-labelledby="import-dialog-title" aria-describedby="import-dialog-recap">
         <div class="modal-header">
           <div>
-            <h1 class="view-title" id="import-dialog-title">${modalTitleMarkup("Importer une sauvegarde", ICON_UPLOAD)}</h1>
+            <h1 class="view-title" id="import-dialog-title">${modalTitleMarkup(_t("Import a backup"), ICON_UPLOAD)}</h1>
           </div>
           <button type="button" class="btn primary icon-only modal-close" tabindex="-1" id="btn-import-dialog-close">
             ${ICON_CLOSE}
-            <span class="visually-hidden">Fermer</span>
+            <span class="visually-hidden">${_t("Close")}</span>
           </button>
         </div>
         <div class="modal-body" tabindex="-1" id="import-dialog-body"></div>
@@ -464,10 +465,10 @@ export async function renderImportDialog(host, opts) {
           <div class="modal-footer-end">
             <button type="button" class="btn primary" id="btn-import-dialog-run" disabled>
               ${ICON_UPLOAD}
-              <span>Importer</span>
+              <span>${_t("Import")}</span>
             </button>
             <button type="button" class="btn secondary sm" id="btn-import-dialog-cancel">
-              Annuler
+              ${_t("Cancel")}
             </button>
           </div>
         </div>
@@ -475,7 +476,7 @@ export async function renderImportDialog(host, opts) {
     </div>
   `;
 
-  setAppDocumentTitle("Importer une sauvegarde");
+  setAppDocumentTitle(_t("Import a backup"));
 
   const backdrop = host.querySelector("#import-dialog-backdrop");
   const modalEl = backdrop?.querySelector(".modal");
@@ -519,7 +520,7 @@ export async function renderImportDialog(host, opts) {
 
   function refreshRecap() {
     if (importing) {
-      setRecapEmpty("Importation en cours…");
+      setRecapEmpty(_t("Import in progress…"));
       return;
     }
     if (!backup) {
@@ -534,7 +535,7 @@ export async function renderImportDialog(host, opts) {
     const empty = isImportPayloadEmpty(payload);
     if (recapEl instanceof HTMLElement) {
       if (empty) {
-        setRecapEmpty("Rien à importer !");
+        setRecapEmpty(_t("Nothing to import!"));
       } else {
         const recap = formatBackupFooterRecap({
           cardCount: payload.cards.length,
@@ -610,7 +611,7 @@ export async function renderImportDialog(host, opts) {
         return {
           ...theme,
           id: String(theme.id || ""),
-          name: String(theme.name ?? theme.themeName ?? "").trim() || "THÈME",
+          name: String(theme.name ?? theme.themeName ?? "").trim() || _t("THEME"),
         };
       })
     );
@@ -648,14 +649,14 @@ export async function renderImportDialog(host, opts) {
       <div class="settings-sections">
         <section class="settings-panel">
           <div class="form-image-empty">
-            <p class="import-load-lead">Charger une sauvegarde pour ajouter ou fusionner un lot de cartes, des thèmes ou des paramètres à votre collection.</p>
+            <p class="import-load-lead">${_t("Load a backup to add or merge a batch of cards, themes, or settings into your collection.")}</p>
             <div class="form-image-empty-actions import-load-actions">
               <input type="file" id="import-dialog-file" accept=".brickcard" hidden />
               <button type="button" class="btn primary" id="btn-import-from-file">
-                ${ICON_FILE_LINE}<span>Depuis mes fichiers</span>
+                ${ICON_FILE_LINE}<span>${_t("From my files")}</span>
               </button>
               <button type="button" class="btn secondary sm" id="btn-import-from-url">
-                ${ICON_LINK}<span>Depuis une URL</span>
+                ${ICON_LINK}<span>${_t("From a URL")}</span>
               </button>
             </div>
             <p class="form-error" id="import-load-error" role="alert"></p>
@@ -673,7 +674,7 @@ export async function renderImportDialog(host, opts) {
       fileInput.value = "";
       if (!file || loading || importing) return;
       if (!isBrickcardBackupFilename(file.name)) {
-        setLoadError(BACKUP_INVALID);
+        setLoadError(_t(BACKUP_INVALID));
         return;
       }
       setLoadError("");
@@ -682,7 +683,7 @@ export async function renderImportDialog(host, opts) {
         const data = parseBrickcardBackup(await file.text());
         acceptBackup(data, { label: file.name });
       } catch (err) {
-        setLoadError(err instanceof Error ? err.message : "Import impossible");
+        setLoadError(err instanceof Error ? err.message : _t("Unable to import"));
       } finally {
         setLoading(false);
       }
@@ -705,7 +706,7 @@ export async function renderImportDialog(host, opts) {
     const imagesSection =
       hasCardImages || hasThemeLogos
         ? `<section class="settings-panel">
-              <h2 class="section-title" id="import-images-title">Images &amp; logos</h2>
+              <h2 class="section-title" id="import-images-title">${_t("Images & logos")}</h2>
               <fieldset class="form-check-group" aria-labelledby="import-images-title">
                 <div class="form-check-list">
                   ${
@@ -713,8 +714,8 @@ export async function renderImportDialog(host, opts) {
                       ? formCheckboxMarkup({
                           id: "import-include-images",
                           name: "import-include-images",
-                          label: "Images des cartes",
-                          hint: "Importer les images des cartes de la sauvegarde",
+                          label: _t("Card images"),
+                          hint: _t("Import the card images from the backup"),
                           checked: includeImages,
                         })
                       : ""
@@ -724,8 +725,8 @@ export async function renderImportDialog(host, opts) {
                       ? formCheckboxMarkup({
                           id: "import-include-theme-logos",
                           name: "import-include-theme-logos",
-                          label: "Logos des thèmes personnalisés",
-                          hint: "Importer les logos des thèmes personnalisés",
+                          label: _t("Custom theme logos"),
+                          hint: _t("Import the custom theme logos"),
                           checked: includeThemeLogos,
                         })
                       : ""
@@ -737,14 +738,14 @@ export async function renderImportDialog(host, opts) {
 
     const settingsSection = hasSettings
       ? `<section class="settings-panel">
-              <h2 class="section-title" id="import-settings-title">Paramètres</h2>
+              <h2 class="section-title" id="import-settings-title">${_t("Settings")}</h2>
               <fieldset class="form-check-group" aria-labelledby="import-settings-title">
                 <div class="form-check-list">
                   ${formCheckboxMarkup({
                     id: "import-include-settings",
                     name: "import-include-settings",
-                    label: "Apparence des cartes",
-                    hint: "Importer les paramètres de bordure, arrondis et couleur par défaut des cartes",
+                    label: _t("Card appearance"),
+                    hint: _t("Import the border, corner radius, and default card color settings"),
                     checked: includeSettings,
                   })}
                 </div>
@@ -767,9 +768,9 @@ export async function renderImportDialog(host, opts) {
 
     const cardsSection = themeChoices.length
       ? `<section class="settings-panel">
-              <h2 class="section-title" id="import-cards-title">Cartes</h2>
+              <h2 class="section-title" id="import-cards-title">${_t("Cards")}</h2>
               <fieldset class="form-check-group" aria-labelledby="import-cards-title">
-                <p class="form-hint">Importer uniquement les cartes des thèmes sélectionnés</p>
+                <p class="form-hint">${_t("Import only the cards of the selected themes")}</p>
                 <div class="form-check-list form-check-list--row">
                   ${themeChecksHtml}
                 </div>
@@ -783,9 +784,9 @@ export async function renderImportDialog(host, opts) {
           <p class="import-source-name">${
             sourceHref
               ? linkMarkup(sourceLabel || sourceHref, { href: sourceHref, target: "_blank" })
-              : escapeHtml(sourceLabel || "sauvegarde.brickcard")
+              : escapeHtml(sourceLabel || "backup.brickcard")
           }</p>
-          <button type="button" class="btn secondary sm" id="btn-import-change-source">Charger une autre sauvegarde</button>
+          <button type="button" class="btn secondary sm" id="btn-import-change-source">${_t("Load another backup")}</button>
         </section>
         ${imagesSection}
         ${settingsSection}
@@ -880,7 +881,7 @@ export async function renderImportDialog(host, opts) {
     if (importing || !backup) return;
     const payload = currentPayload();
     if (isImportPayloadEmpty(payload)) {
-      toast?.("Rien à importer", "error");
+      toast?.(_t("Nothing to import"), "error");
       return;
     }
     setImporting(true);
@@ -894,7 +895,7 @@ export async function renderImportDialog(host, opts) {
       onImported?.();
       onClose();
     } catch (err) {
-      toast?.(err instanceof Error ? err.message : "Import impossible", "error");
+      toast?.(err instanceof Error ? err.message : _t("Unable to import"), "error");
       setImporting(false);
     }
   });

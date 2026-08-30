@@ -7,6 +7,7 @@
  */
 
 import { ICON_ARROW_DOWN_S_LINE, ICON_CLOSE_CIRCLE, remixIconByName } from "./icons.js";
+import { _t } from "./i18n.js";
 
 /**
  * Améliore tous les `select.form-control` dans un conteneur.
@@ -83,7 +84,7 @@ export function enhanceFormSelect(select) {
     clearBtn.type = "button";
     clearBtn.className = "form-select-clear";
     clearBtn.tabIndex = -1;
-    clearBtn.setAttribute("aria-label", "Effacer la sélection");
+    clearBtn.setAttribute("aria-label", _t("Clear selection"));
     clearBtn.innerHTML = ICON_CLOSE_CIRCLE;
     clearBtn.hidden = true;
     clearBtn.disabled = select.disabled;

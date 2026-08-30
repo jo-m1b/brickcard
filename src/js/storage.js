@@ -8,6 +8,7 @@ import { getPresetThemes, getPresetTheme, parseHexColor, clearPresetCache, clamp
 import { applyCardAppearanceSettings } from "./card-design.js";
 import { getOptimizeImages } from "./image-optimize.js";
 import { APP_ID } from "./version.js";
+import { _t, getLocale } from "./i18n.js";
 
 const DB_NAME_BASE = APP_ID;
 const DB_GEN_KEY = `${APP_ID}:db-gen`;
@@ -36,10 +37,12 @@ const STORE_THEMES = "themes";
 export const DEFAULT_IMAGE_BACKGROUND = "#ffffff";
 
 /** Erreur générique de chargement d’image (fichier ou URL). */
-export const IMAGE_LOAD_ERROR = "Erreur de chargement de l’image !";
-export const IMAGE_LOAD_ERROR_FORMAT = `${IMAGE_LOAD_ERROR} Format invalide (SVG, PNG, WebP, JPG…).`;
-export const IMAGE_LOAD_ERROR_CORS = `${IMAGE_LOAD_ERROR} Réseau ou CORS - le site source refuse le chargement.`;
-export const IMAGE_URL_INVALID = "L’URL de l’image est invalide.";
+export const IMAGE_LOAD_ERROR = "Image loading error!";
+export const IMAGE_LOAD_ERROR_FORMAT =
+  "Image loading error! Invalid format (SVG, PNG, WebP, JPG…).";
+export const IMAGE_LOAD_ERROR_CORS =
+  "Image loading error! Network or CORS - the source site refuses the load.";
+export const IMAGE_URL_INVALID = "The image URL is invalid.";
 
 /** Côté max des rasters importés (cartes et logos). */
 export const IMAGE_MAX_SIDE = 2000;
@@ -196,7 +199,7 @@ function openDb() {
     };
     req.onerror = () => {
       dbPromise = null;
-      reject(req.error || new Error("Impossible d'ouvrir IndexedDB"));
+      reject(req.error || new Error(_t("Unable to open IndexedDB")));
     };
   });
 
@@ -220,7 +223,7 @@ function txDone(tx) {
   return new Promise((resolve, reject) => {
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
-    tx.onabort = () => reject(tx.error || new Error("Transaction annulée"));
+    tx.onabort = () => reject(tx.error || new Error(_t("Transaction cancelled")));
   });
 }
 
@@ -299,6 +302,7 @@ export async function wipeAllLocalData() {
 
   try {
     localStorage.removeItem("brickcard:ui-theme");
+    localStorage.removeItem("brickcard:ui-locale");
     localStorage.removeItem("brickcard:card-face-border-mm");
     localStorage.removeItem("brickcard:card-radius-mm");
     localStorage.removeItem("brickcard:card-image-radius-mm");
@@ -340,7 +344,7 @@ export async function wipeAllLocalData() {
 
 /** @param {LegoTheme[]} list */
 function sortThemesByName(list) {
-  return list.sort((a, b) => a.name.localeCompare(b.name, "fr"));
+  return list.sort((a, b) => a.name.localeCompare(b.name, getLocale()));
 }
 
 /** @returns {Promise<Set<string>>} */
@@ -433,7 +437,7 @@ function normalizeCard(c) {
 function normalizeTheme(t) {
   return {
     id: typeof t.id === "string" && t.id ? t.id : createId(),
-    name: String(t.name ?? t.themeName ?? "").trim() || "THÈME",
+    name: String(t.name ?? t.themeName ?? "").trim() || _t("THEME"),
     color: parseHexColor(t.color ?? t.accentColor),
     secondaryColor: parseHexColor(t.secondaryColor),
     logoDataUrl: sanitizeSvgDataUrl(String(t.logoDataUrl ?? t.image ?? "")),
@@ -504,8 +508,8 @@ export async function saveCards(cards) {
   } catch (err) {
     const msg =
       err && err.name === "QuotaExceededError"
-        ? "Espace disque navigateur insuffisant pour enregistrer les cartes."
-        : "Impossible d'enregistrer les cartes.";
+        ? _t("Not enough browser storage space to save the cards.")
+        : _t("Unable to save the cards.");
     throw new Error(msg);
   }
 }
@@ -533,8 +537,8 @@ export async function upsertCard(input) {
   } catch (err) {
     const msg =
       err && err.name === "QuotaExceededError"
-        ? "Espace disque navigateur insuffisant pour enregistrer cette carte."
-        : "Impossible d'enregistrer la carte.";
+        ? _t("Not enough browser storage space to save this card.")
+        : _t("Unable to save the card.");
     throw new Error(msg);
   }
   return card;
@@ -620,7 +624,7 @@ export async function upsertTheme(input) {
   const presetIds = await presetIdSet();
   const id = input.id || createId();
   if (presetIds.has(id)) {
-    throw new Error("Les thèmes par défaut ne peuvent pas être modifiés.");
+    throw new Error(_t("Default themes cannot be modified."));
   }
 
   const db = await openDb();
@@ -628,7 +632,7 @@ export async function upsertTheme(input) {
     db.transaction(STORE_THEMES, "readonly").objectStore(STORE_THEMES).get(id)
   );
   if (existing && (existing.isBuiltin || existing.builtin)) {
-    throw new Error("Les thèmes par défaut ne peuvent pas être modifiés.");
+    throw new Error(_t("Default themes cannot be modified."));
   }
 
   const logoDataUrl = String(input.logoDataUrl ?? input.image ?? "");
@@ -647,7 +651,7 @@ export async function upsertTheme(input) {
   });
 
   if (!theme.name) {
-    throw new Error("Le nom du thème est obligatoire.");
+    throw new Error(_t("The theme name is required."));
   }
 
   const tx = db.transaction(STORE_THEMES, "readwrite");
@@ -680,7 +684,7 @@ async function clearCardsThemeAssociation(themeIds) {
 export async function deleteTheme(id) {
   await ready();
   if (await getPresetTheme(id)) {
-    throw new Error("Les thèmes par défaut ne peuvent pas être supprimés.");
+    throw new Error(_t("Default themes cannot be deleted."));
   }
   const db = await openDb();
   const existing = await reqToPromise(
@@ -688,7 +692,7 @@ export async function deleteTheme(id) {
   );
   if (!existing) return;
   if (existing.isBuiltin || existing.builtin) {
-    throw new Error("Les thèmes par défaut ne peuvent pas être supprimés.");
+    throw new Error(_t("Default themes cannot be deleted."));
   }
   const tx = db.transaction(STORE_THEMES, "readwrite");
   tx.objectStore(STORE_THEMES).delete(id);
@@ -877,7 +881,7 @@ function sanitizeSvgMarkup(text) {
 function encodeSvgMarkup(text) {
   const sanitized = sanitizeSvgMarkup(text);
   if (!sanitized.trim() || !textLooksLikeSvg(sanitized)) {
-    throw new Error(IMAGE_LOAD_ERROR);
+    throw new Error(_t(IMAGE_LOAD_ERROR));
   }
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(sanitized)}`;
 }
@@ -928,10 +932,10 @@ function encodeSvgFile(file) {
       try {
         resolve(encodeSvgMarkup(String(reader.result || "")));
       } catch (err) {
-        reject(err instanceof Error ? err : new Error(IMAGE_LOAD_ERROR));
+        reject(err instanceof Error ? err : new Error(_t(IMAGE_LOAD_ERROR)));
       }
     };
-    reader.onerror = () => reject(new Error(IMAGE_LOAD_ERROR));
+    reader.onerror = () => reject(new Error(_t(IMAGE_LOAD_ERROR)));
     reader.readAsText(file);
   });
 }
@@ -944,16 +948,16 @@ function encodeSvgFile(file) {
  */
 export async function fetchImageAsFile(urlString) {
   const raw = String(urlString || "").trim();
-  if (!raw) throw new Error(IMAGE_URL_INVALID);
+  if (!raw) throw new Error(_t(IMAGE_URL_INVALID));
 
   let url;
   try {
     url = new URL(raw);
   } catch {
-    throw new Error(IMAGE_URL_INVALID);
+    throw new Error(_t(IMAGE_URL_INVALID));
   }
   if (url.protocol !== "http:" && url.protocol !== "https:") {
-    throw new Error(IMAGE_URL_INVALID);
+    throw new Error(_t(IMAGE_URL_INVALID));
   }
 
   let res;
@@ -964,11 +968,11 @@ export async function fetchImageAsFile(urlString) {
       cache: "no-cache",
     });
   } catch {
-    throw new Error(IMAGE_LOAD_ERROR_CORS);
+    throw new Error(_t(IMAGE_LOAD_ERROR_CORS));
   }
 
   if (!res.ok) {
-    throw new Error(`${IMAGE_LOAD_ERROR} HTTP ${res.status}.`);
+    throw new Error(_t("Image loading error! HTTP %(status)s.", { status: res.status }));
   }
 
   const blob = await res.blob();
@@ -989,7 +993,7 @@ export async function fetchImageAsFile(urlString) {
   }
 
   if (!type.startsWith("image/") && type !== "image/svg+xml") {
-    throw new Error(IMAGE_LOAD_ERROR_FORMAT);
+    throw new Error(_t(IMAGE_LOAD_ERROR_FORMAT));
   }
 
   const name = pathName.includes(".") ? pathName : `image.${type.split("/")[1] || "png"}`;
@@ -1030,7 +1034,7 @@ function fileToDataUrl(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result || ""));
-    reader.onerror = () => reject(new Error(IMAGE_LOAD_ERROR));
+    reader.onerror = () => reject(new Error(_t(IMAGE_LOAD_ERROR)));
     reader.readAsDataURL(file);
   });
 }
@@ -1056,14 +1060,14 @@ function loadImageFromFile(file) {
       let height = img.naturalHeight || img.height;
       if (!width || !height) {
         cleanup();
-        reject(new Error(IMAGE_LOAD_ERROR));
+        reject(new Error(_t(IMAGE_LOAD_ERROR)));
         return;
       }
       resolve({ img, width, height, cleanup });
     };
     img.onerror = () => {
       cleanup();
-      reject(new Error(IMAGE_LOAD_ERROR));
+      reject(new Error(_t(IMAGE_LOAD_ERROR)));
     };
     img.src = url;
   });
@@ -1082,7 +1086,7 @@ function encodeRasterCanvas(img, width, height, outputType, quality) {
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error(IMAGE_LOAD_ERROR);
+  if (!ctx) throw new Error(_t(IMAGE_LOAD_ERROR));
   if (outputType === "image/jpeg") {
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, width, height);
@@ -1137,6 +1141,6 @@ export async function compressImage(file, opts = {}) {
     return dataUrl;
   } catch (err) {
     cleanup();
-    throw err instanceof Error ? err : new Error(IMAGE_LOAD_ERROR);
+    throw err instanceof Error ? err : new Error(_t(IMAGE_LOAD_ERROR));
   }
 }

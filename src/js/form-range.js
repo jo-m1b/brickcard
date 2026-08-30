@@ -5,13 +5,14 @@
  */
 
 import { ICON_CLOSE_CIRCLE } from "./icons.js";
+import { _t } from "./i18n.js";
 
 /**
  * Markup du bouton restaurer (à placer après input / output).
  * @returns {string}
  */
 export function formRangeResetMarkup() {
-  return `<button type="button" class="form-range-reset" tabindex="-1" aria-hidden="true" aria-label="Restaurer la valeur par défaut">${ICON_CLOSE_CIRCLE}</button>`;
+  return `<button type="button" class="form-range-reset" tabindex="-1" aria-hidden="true" aria-label="${_t("Restore default value")}">${ICON_CLOSE_CIRCLE}</button>`;
 }
 
 /**

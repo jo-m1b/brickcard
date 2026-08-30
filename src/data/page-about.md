@@ -1,42 +1,42 @@
-# À propos
+# About
 
-> LEGO® est une marque de LEGO Group. Cette application est un projet personnel, non affilié ni sponsorisé par LEGO Group.
+> LEGO® is a trademark of the LEGO Group. This is a personal project that is not affiliated with or sponsored by the LEGO Group.
 
-Brickcard est une petite application pour créer et imprimer de bien jolies cartes pour vos briques LEGO® au format carte à jouer qui décrivent vos sets LEGO® (référence, photo, titre, thème, année et nombre de pièces).
+Brickcard is a tiny app for creating and printing lovely playing-card sized cards for your LEGO® bricks that describe your LEGO® sets (reference, photo, title, theme, year, and piece count).
 
-Créez des cartes, imprimez-les, plastifiez-les et glissez-les dans une pochette transparente avec un set dont la boîte a disparu. Mes enfants les adorent — et ça évite de déballer le mauvais set par erreur :P
+Create cards, print them, laminate them, and slip them into a clear sleeve with a set whose box has gone missing. My kids love them — and it helps avoid unpacking the wrong set by mistake :P
 
-## Fonctionnalités
+## Features
 
-- **Créer et modifier des cartes** : référence, photo, titre, thème, année, nombre de pièces…
-- **Prêt à imprimer** : grilles A4 de 1×1 à 10×10, face + dos alignés pour le recto-verso
-- **Thèmes** : thèmes par défaut (nom, logo, couleur) + vos thèmes personnalisés
-- **Sauvegarde automatique** : tout est stocké dans le navigateur (IndexedDB)
-- **Export / import** : fichiers `.brickcard` (cartes + thèmes perso) pour sauvegarder et partager votre collection
-- **Liste filtrable** : retrouvez vite une carte et sélectionnez-la pour l’impression
-- **Installable** : fonctionne comme PWA sur téléphone ou ordinateur
+- **Create and edit cards**: reference, photo, title, theme, year, piece count…
+- **Print-ready**: A4 grids from 1×1 to 10×10, front + back aligned for duplex printing
+- **Themes**: default themes (name, logo, color) + your own custom themes
+- **Auto-save**: everything is stored in the browser (IndexedDB)
+- **Export / import**: `.brickcard` files (cards + custom themes) to back up and share your collection
+- **Searchable list**: quickly find a card and select it for printing
+- **Installable**: works as a PWA on phone or desktop
 
-## Aide et discussion
+## Help and discussion
 
-Merci de chercher d’abord dans les issues et discussions existantes. Je fais de mon mieux pour répondre, mais je n’ai pas toujours le temps.
+Please search existing issues and discussions first. I do my best to reply, but I may not always have time.
 
-### Bugs et demandes de fonctionnalités
+### Bugs and feature requests
 
-Merci de les poster sur [GitHub Issues](https://github.com/jo-m1b/brickcard/issues).
+Please post them on [GitHub Issues](https://github.com/jo-m1b/brickcard/issues).
 
-### Support et discussion générale
+### Support and general discussion
 
-Merci d’utiliser [GitHub Discussions](https://github.com/jo-m1b/brickcard/discussions).
+Please use [GitHub Discussions](https://github.com/jo-m1b/brickcard/discussions).
 
-## Crédits
+## Credits
 
-- **Logo de l’app Brickcard** : icône brick outline par [Joko Sutrisno](https://www.vecteezy.com/members/108458460840346680378) sur [Vecteezy](https://www.vecteezy.com/vector-art/12802525-brick-outline-icon).
-- **Certains logos de thèmes par défaut** : issus de [Brickipedia](https://brickipedia.fandom.com/wiki/List_of_themes) et [Logopedia](https://logos.fandom.com/fr/wiki/Logopedia).
-- **Police Open Sans** : conçue par [Steve Matteson](https://mattesontypographics.com), maintenue par [The Open Sans Project Authors](https://github.com/googlefonts/opensans).
-- **Police Inter** : (texte des cartes) conçue par [Rasmus Andersson](https://rsms.me), dépôt [github.com/rsms/inter](https://github.com/rsms/inter)
+- **Brickcard app logo**: brick outline icon by [Joko Sutrisno](https://www.vecteezy.com/members/108458460840346680378) on [Vecteezy](https://www.vecteezy.com/vector-art/12802525-brick-outline-icon).
+- **Some default theme logos**: from [Brickipedia](https://brickipedia.fandom.com/wiki/List_of_themes) and [Logopedia](https://logos.fandom.com/fr/wiki/Logopedia).
+- **Open Sans font**: designed by [Steve Matteson](https://mattesontypographics.com), maintained by [The Open Sans Project Authors](https://github.com/googlefonts/opensans).
+- **Inter font**: (card text) designed by [Rasmus Andersson](https://rsms.me), repository [github.com/rsms/inter](https://github.com/rsms/inter)
 
-## Licence
+## License
 
-Brickcard est sous licence MIT. Voir le fichier [LICENSE](https://github.com/jo-m1b/brickcard/blob/main/LICENSE) pour le détail.
+Brickcard is licensed under the MIT License. See the [LICENSE](https://github.com/jo-m1b/brickcard/blob/main/LICENSE) file for details.
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/I5P825YXAH)

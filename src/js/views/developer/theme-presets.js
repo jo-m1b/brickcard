@@ -21,6 +21,7 @@ import {
   resetPresetDraft,
 } from "../../preset-draft.js";
 import { includesCI } from "../../includes-ci.js";
+import { _t, getLocale } from "../../i18n.js";
 
 let rememberedQuery = "";
 
@@ -115,7 +116,7 @@ export function renderDeveloperThemePresets(host, opts) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <h1 class="view-title">Thèmes par défaut</h1>
+        <h1 class="view-title">${_t("Default themes")}</h1>
       </header>
       <div class="themes-toolbar">
         <div class="search-bar" id="preset-draft-search-bar">
@@ -124,9 +125,9 @@ export function renderDeveloperThemePresets(host, opts) {
             class="form-control"
             type="search"
             id="preset-draft-search"
-            placeholder="Rechercher un thème…"
+            placeholder="${_t("Search for a theme…")}"
             autocomplete="off"
-            aria-label="Rechercher un thème"
+            aria-label="${_t("Search for a theme")}"
             aria-describedby="preset-draft-search-count"
           />
           <div class="search-bar-trail" id="preset-draft-search-trail">
@@ -134,39 +135,39 @@ export function renderDeveloperThemePresets(host, opts) {
           </div>
         </div>
       </div>
-      <p class="view-desc">Copie locale de <code>themes-presets.json</code> — n’affecte pas la collection. Téléchargez le JSON et les logos pour les placer dans <code>data/</code>.</p>
+      <p class="view-desc">Local copy of <code>themes-presets.json</code> — does not affect the collection. Download the JSON and logos and place them in <code>data/</code>.</p>
       <div class="themes-grid" id="preset-draft-grid" hidden></div>
       ${emptyViewMarkup({
         id: "preset-draft-empty-filter",
         hidden: true,
         titleTag: "p",
-        title: "Oups !",
-        text: "Aucun thème ne correspond à la recherche.",
+        title: _t("Oops!"),
+        text: _t("No themes match the search."),
       })}
       ${emptyViewMarkup({
         id: "preset-draft-loading",
         titleTag: "p",
-        title: "Chargement...",
+        title: _t("Loading"),
       })}
       <div class="modal-footer">
         <div class="modal-footer-start">
           <button type="button" class="btn danger" id="preset-draft-reset">
             ${ICON_CLOSE_CIRCLE}
-            <span>Réinitialiser</span>
+            <span>${_t("Reset")}</span>
           </button>
         </div>
         <div class="modal-footer-end">
           <button type="button" class="btn secondary" id="preset-draft-json">
             ${ICON_DOWNLOAD}
-            <span>Sauvegarder themes-presets.json</span>
+            <span>Save themes-presets.json</span>
           </button>
           <button type="button" class="btn secondary" id="preset-draft-logos">
             ${ICON_DOWNLOAD}
-            <span>Sauvegarder les logos</span>
+            <span>Save logos</span>
           </button>
           <button type="button" class="btn primary" id="preset-draft-new">
             ${ICON_ADD}
-            <span>Nouveau thème</span>
+            <span>${_t("New theme")}</span>
           </button>
         </div>
       </div>
@@ -216,12 +217,12 @@ export function renderDeveloperThemePresets(host, opts) {
     const query = searchQuery();
     if (!searchCount) return;
     if (!total) {
-      searchCount.textContent = "0 thèmes";
+      searchCount.textContent = _t("0 themes");
       return;
     }
     searchCount.textContent = query
-      ? `${shown} / ${total} thèmes`
-      : `${total} thèmes`;
+      ? _t("%(shown)s / %(total)s themes", { shown, total })
+      : _t("%(total)s themes", { total });
   }
 
   /**
@@ -235,7 +236,7 @@ export function renderDeveloperThemePresets(host, opts) {
         const cmp = String(b.updatedAt || "").localeCompare(String(a.updatedAt || ""));
         if (cmp !== 0) return cmp;
       }
-      const cmp = String(a.name || "").localeCompare(String(b.name || ""), "fr", {
+      const cmp = String(a.name || "").localeCompare(String(b.name || ""), getLocale(), {
         sensitivity: "base",
       });
       if (cmp !== 0) return cmp;
@@ -284,15 +285,15 @@ export function renderDeveloperThemePresets(host, opts) {
       const titleEl = emptyFilter.querySelector(".view-title");
       const textEl = emptyFilter.querySelector(".empty-view-body > p:not(.view-title)");
       if (!themes.length) {
-        if (titleEl) titleEl.textContent = "Aucun thème";
+        if (titleEl) titleEl.textContent = "No themes";
         if (textEl) {
           textEl.textContent =
-            "Le brouillon est vide. Créez un thème ou réinitialisez depuis themes-presets.json.";
+            "The draft is empty. Create a theme or reset from themes-presets.json.";
         }
         emptyFilter.hidden = false;
       } else if (!visible) {
-        if (titleEl) titleEl.textContent = "Oups !";
-        if (textEl) textEl.textContent = "Aucun thème ne correspond à la recherche.";
+        if (titleEl) titleEl.textContent = _t("Oops!");
+        if (textEl) textEl.textContent = _t("No themes match the search.");
         emptyFilter.hidden = false;
       } else {
         emptyFilter.hidden = true;
@@ -325,7 +326,7 @@ export function renderDeveloperThemePresets(host, opts) {
       if (cancelled) return;
       if (loadingEl) loadingEl.hidden = true;
       if (emptyFilter) emptyFilter.hidden = true;
-      toast(err.message || "Impossible de charger le brouillon", "error");
+      toast(err.message || "Unable to load the draft", "error");
     }
   }
 
@@ -378,11 +379,11 @@ export function renderDeveloperThemePresets(host, opts) {
       if (cancelled) return;
       toast({
         type: "success",
-        message: `${count} thème(s) — fichier themes-presets.json téléchargé`,
-        messageHtml: `${count} thème(s) — fichier <code>themes-presets.json</code> téléchargé`,
+        message: `${count} theme(s) — themes-presets.json downloaded`,
+        messageHtml: `${count} theme(s) — <code>themes-presets.json</code> downloaded`,
       });
     } catch (err) {
-      if (!cancelled) toast(err.message || "Téléchargement du JSON impossible", "error");
+      if (!cancelled) toast(err.message || "Unable to download the JSON", "error");
     } finally {
       setBusy(false);
     }
@@ -395,21 +396,21 @@ export function renderDeveloperThemePresets(host, opts) {
       const { ok, skipped } = await downloadPresetDraftLogos();
       if (cancelled) return;
       if (!ok && skipped) {
-        toast("Aucun logo n’a pu être téléchargé", "error");
+        toast("No logos could be downloaded", "error");
       } else if (skipped) {
         toast({
           type: "success",
-          message: `${ok} logo(s) téléchargé(s), ${skipped} ignoré(s)`,
+          message: `${ok} logo(s) downloaded, ${skipped} skipped`,
         });
       } else {
         toast({
           type: "success",
-          message: `${ok} logo(s) téléchargé(s) (theme-logo-{id}.{ext})`,
-          messageHtml: `${ok} logo(s) téléchargé(s) (<code>theme-logo-{id}.{ext}</code>)`,
+          message: `${ok} logo(s) downloaded (theme-logo-{id}.{ext})`,
+          messageHtml: `${ok} logo(s) downloaded (<code>theme-logo-{id}.{ext}</code>)`,
         });
       }
     } catch (err) {
-      if (!cancelled) toast(err.message || "Téléchargement des logos impossible", "error");
+      if (!cancelled) toast(err.message || "Unable to download the logos", "error");
     } finally {
       setBusy(false);
     }
@@ -420,11 +421,11 @@ export function renderDeveloperThemePresets(host, opts) {
     const wrap = dialogHost();
     if (!wrap) return;
     const ok = await confirmDialog(wrap, {
-      title: "Réinitialiser le brouillon des thèmes par défaut ?",
+      title: "Reset the default themes draft?",
       icon: "close-circle",
       message:
-        "Le brouillon local sera effacé et rechargé depuis themes-presets.json. La collection (cartes, thèmes personnalisés, réglages) n’est pas touchée.",
-      okLabel: "Réinitialiser",
+        "The local draft will be cleared and reloaded from themes-presets.json. The collection (cards, custom themes, settings) is not touched.",
+      okLabel: _t("Reset"),
       danger: true,
     });
     if (!ok || cancelled) return;
@@ -437,13 +438,13 @@ export function renderDeveloperThemePresets(host, opts) {
       paint();
       toast({
         type: "success",
-        message: "Brouillon rechargé depuis le fichier /data/themes-presets.json",
+        message: "Draft reloaded from /data/themes-presets.json",
         messageHtml:
-          "Brouillon rechargé depuis le fichier <code>/data/themes-presets.json</code>",
+          "Draft reloaded from <code>/data/themes-presets.json</code>",
       });
     } catch (err) {
       if (cancelled) return;
-      toast(err.message || "Impossible de réinitialiser le brouillon", "error");
+      toast(err.message || "Unable to reset the draft", "error");
     } finally {
       setBusy(false);
     }
@@ -533,7 +534,7 @@ function themeTileMarkup(theme) {
     ? `<img class="theme-tile-logo" src="${escapeAttr(theme.logoDataUrl)}" alt="" />`
     : brandLogoMarkup("theme-tile-logo is-brand");
   const logo = `<div class="${wrapClass}"${cropAttrs}>${logoInner}</div>`;
-  const label = `Modifier « ${escapeAttr(theme.name)} » (${escapeAttr(theme.id)})`;
+  const label = `Edit “${escapeAttr(theme.name)}” (${escapeAttr(theme.id)})`;
 
   return `
     <article class="theme-tile is-editable" style="--theme-accent:${escapeAttr(accent)};--theme-accent-fg:${escapeAttr(fg)}" role="button" tabindex="0" data-edit="${escapeAttr(theme.id)}" aria-label="${label}">

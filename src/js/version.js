@@ -11,4 +11,4 @@ export const APP_NAME = "Brickcard";
  *  Aligner le `<title>` de `src/index.html`.
  */
 export const APP_DOCUMENT_TITLE =
-  "Brickcard - Imprimez de bien jolies cartes pour vos briques LEGO®";
+  "Brickcard - Print lovely cards for your LEGO® bricks";

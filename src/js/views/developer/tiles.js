@@ -3,7 +3,7 @@ import { linkMarkup } from "../../link.js";
 import { tileListMarkup } from "../../tile.js";
 
 /**
- * Galerie des tuiles du design system.
+ * Tile gallery of the design system.
  * @param {HTMLElement} host
  * @returns {() => void}
  */
@@ -11,90 +11,90 @@ export function renderDeveloperTiles(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#developer" })} / Tuile (Tile)</p>
-        <h1 class="view-title">Tuile (Tile)</h1>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#developer" })} / Tile</p>
+        <h1 class="view-title">Tile</h1>
       </header>
 
       <p class="styleguide-intro">
-        Classe <code>tile</code> dans <code>ul.tile-list</code>
-        (<code>a</code> ou <code>button</code>).
-        Titre, description et icône Remix à gauche (centrée) sont optionnels.
-        Disabled&nbsp;: <code>disabled</code> / <code>aria-disabled</code>, non cliquable.
-        Trait bas inset 2&nbsp;px (<code>--ink-soft</code>, comme les champs).
-        Hover / focus&nbsp;: inversion, trait bas masqué.
-        Variante <code>danger</code>&nbsp;: couleurs des boutons danger.
+        Class <code>tile</code> in <code>ul.tile-list</code>
+        (<code>a</code> or <code>button</code>).
+        Title, description and Remix icon on the left (centered) are optional.
+        Disabled&nbsp;: <code>disabled</code> / <code>aria-disabled</code>, not clickable.
+        Inset bottom rule 2&nbsp;px (<code>--ink-soft</code>, like fields).
+        Hover / focus&nbsp;: invert, bottom rule hidden.
+        <code>danger</code> variant&nbsp;: danger button colors.
         Helper&nbsp;: <code>tileMarkup()</code> / <code>tileListMarkup()</code> (<code>tile.js</code>).
       </p>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Vocabulaire</h2>
+        <h2 class="styleguide-section-title">Vocabulary</h2>
         <div class="styleguide-table-wrap">
           <table class="styleguide-table">
             <thead>
-              <tr><th>Axe</th><th>Options</th></tr>
+              <tr><th>Axis</th><th>Options</th></tr>
             </thead>
             <tbody>
-              <tr><td>Liste</td><td><code>ul.tile-list</code></td></tr>
-              <tr><td>Tuile</td><td><code>a.tile</code> · <code>button.tile</code></td></tr>
-              <tr><td>Titre</td><td><code>strong.tile-title</code> (optionnel)</td></tr>
-              <tr><td>Description</td><td><code>span.tile-desc</code> (optionnel)</td></tr>
-              <tr><td>Icône</td><td>Remix à gauche, centrée verticalement (optionnel)</td></tr>
-              <tr><td>Variante</td><td>(défaut) · <code>danger</code></td></tr>
-              <tr><td>État</td><td>(actif) · <code>disabled</code> / <code>aria-disabled</code></td></tr>
-              <tr><td><code>href</code></td><td>adresse (liens)</td></tr>
-              <tr><td><code>tag</code></td><td><code>a</code> (défaut) · <code>button</code> (action)</td></tr>
+              <tr><td>List</td><td><code>ul.tile-list</code></td></tr>
+              <tr><td>Tile</td><td><code>a.tile</code> · <code>button.tile</code></td></tr>
+              <tr><td>Title</td><td><code>strong.tile-title</code> (optional)</td></tr>
+              <tr><td>Description</td><td><code>span.tile-desc</code> (optional)</td></tr>
+              <tr><td>Icon</td><td>Remix on the left, vertically centered (optional)</td></tr>
+              <tr><td>Variant</td><td>(default) · <code>danger</code></td></tr>
+              <tr><td>State</td><td>(active) · <code>disabled</code> / <code>aria-disabled</code></td></tr>
+              <tr><td><code>href</code></td><td>address (links)</td></tr>
+              <tr><td><code>tag</code></td><td><code>a</code> (default) · <code>button</code> (action)</td></tr>
             </tbody>
           </table>
         </div>
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Titre + description</h2>
+        <h2 class="styleguide-section-title">Title + description</h2>
         ${tileListMarkup([
           {
-            title: "Typographie",
-            desc: "polices, titres, Markdown en modale",
+            title: "Typography",
+            desc: "typefaces, headings, Markdown in a modal",
             href: "#developer/typography",
           },
         ])}
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Titre seul</h2>
-        ${tileListMarkup([{ title: "Liens", href: "#developer/links" }])}
+        <h2 class="styleguide-section-title">Title only</h2>
+        ${tileListMarkup([{ title: "Links", href: "#developer/links" }])}
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Avec icône</h2>
+        <h2 class="styleguide-section-title">With icon</h2>
         ${tileListMarkup([
           {
-            title: "Recherche",
-            desc: "search-bar — champ, compteur, tri",
+            title: "Search",
+            desc: "search-bar — field, count, sort",
             href: "#developer/search",
             icon: ICON_SEARCH_LINE,
           },
           {
-            title: "Typographie",
+            title: "Typography",
             desc: "Open Sans / Inter",
             href: "#developer/typography",
             icon: ICON_TEXT,
           },
         ])}
-        <p class="styleguide-hint">Icône à gauche, alignée au milieu du bloc titre + description.</p>
+        <p class="styleguide-hint">Icon on the left, aligned to the middle of the title + description block.</p>
       </div>
 
       <div class="styleguide-section">
         <h2 class="styleguide-section-title">Disabled</h2>
         ${tileListMarkup([
           {
-            title: "Bientôt",
-            desc: "tuile non cliquable",
+            title: "Coming soon",
+            desc: "tile not clickable",
             href: "#developer",
             disabled: true,
           },
           {
-            title: "Tuiles",
-            desc: "avec icône, désactivée",
+            title: "Tiles",
+            desc: "with icon, disabled",
             href: "#developer/tiles",
             icon: ICON_LAYOUT_GRID,
             disabled: true,
@@ -103,38 +103,38 @@ export function renderDeveloperTiles(host) {
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Bouton (action)</h2>
+        <h2 class="styleguide-section-title">Button (action)</h2>
         ${tileListMarkup([
           {
-            title: "Importer des cartes",
-            desc: "Action sans navigation (pas de href)",
+            title: "Import cards",
+            desc: "Action without navigation (no href)",
             icon: "upload",
             tag: "button",
           },
         ])}
-        <p class="styleguide-hint">Pour une action (import, etc.) : <code>tag: "button"</code>, pas de <code>href</code>.</p>
+        <p class="styleguide-hint">For an action (import, etc.): <code>tag: "button"</code>, no <code>href</code>.</p>
       </div>
 
       <div class="styleguide-section">
         <h2 class="styleguide-section-title">Danger</h2>
         ${tileListMarkup([
           {
-            title: "Réinitialiser les données locales",
-            desc: "Supprime cartes, thèmes et réglages",
+            title: "Reset local data",
+            desc: "Deletes cards, themes, and settings",
             icon: "close-circle",
             tag: "button",
             danger: true,
           },
           {
-            title: "Supprimer",
-            desc: "Tuile danger désactivée",
+            title: "Delete",
+            desc: "Disabled danger tile",
             icon: "close-circle",
             tag: "button",
             danger: true,
             disabled: true,
           },
         ])}
-        <p class="styleguide-hint">Classe <code>danger</code> : <code>--danger-line</code> ; hover / focus fond <code>--danger-bg</code>, cadre et trait bas rouges.</p>
+        <p class="styleguide-hint">Class <code>danger</code>: <code>--danger-line</code>; hover / focus background <code>--danger-bg</code>, red frame and bottom rule.</p>
       </div>
     </section>
   `;

@@ -9,39 +9,39 @@ import { TOAST_DELAY_DEFAULT, toast } from "../../toast.js";
 
 /** @type {Record<string, ToastOptions | ToastOptions[]>} */
 const PRESETS = {
-  normal: { message: "Collection à jour." },
-  success: { type: "success", message: "Carte enregistrée" },
-  error: { type: "error", message: "Page introuvable" },
+  normal: { message: "Collection up to date." },
+  success: { type: "success", message: "Card saved" },
+  error: { type: "error", message: "Page not found" },
   "no-title-icon": {
     title: false,
     icon: "notification-line",
-    message: "Nouvelle version disponible.",
+    message: "A new version is available.",
   },
   "icon-override": {
     type: "success",
     icon: "save",
-    message: "Sauvegarde enregistrée.",
+    message: "Backup saved.",
   },
   secondary: {
     type: "success",
-    message: "Thème CITY enregistré.",
-    secondary: "à l’instant",
+    message: "CITY theme saved.",
+    secondary: "just now",
   },
-  delay: { message: "Fermeture dans 2 secondes.", delay: 2000 },
+  delay: { message: "Closes in 2 seconds.", delay: 2000 },
   sticky: {
     type: "error",
-    message: "Cette notification reste affichée jusqu’à fermeture.",
+    message: "This notification stays until you dismiss it.",
     delay: false,
   },
   stack: [
-    { message: "Première notification" },
-    { type: "success", message: "Deuxième notification" },
-    { type: "error", message: "Troisième notification" },
+    { message: "First notification" },
+    { type: "success", message: "Second notification" },
+    { type: "error", message: "Third notification" },
   ],
 };
 
 /**
- * Galerie / banc d’essai des notifications toast (design system).
+ * Toast notification gallery / playground (design system).
  * @param {HTMLElement} host
  * @returns {() => void}
  */
@@ -49,44 +49,44 @@ export function renderDeveloperNotifications(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#developer" })} / Notification (Toast)</p>
-        <h1 class="view-title">Notification (Toast)</h1>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#developer" })} / Toast</p>
+        <h1 class="view-title">Toast</h1>
       </header>
 
       <p class="styleguide-intro">
-        Retour d’action non bloquant, empilable, au-dessus des modales.
+        Non-blocking action feedback, stackable, above modals.
         Module&nbsp;: <code>toast.js</code>.
-        Pas d’animation (affichage / suppression).
-        Icônes&nbsp;: ${linkMarkup("Remix Icon", { href: "https://remixicon.com/" })}.
+        No animation (show / dismiss).
+        Icons&nbsp;: ${linkMarkup("Remix Icon", { href: "https://remixicon.com/" })}.
       </p>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Vocabulaire</h2>
+        <h2 class="styleguide-section-title">Vocabulary</h2>
         <div class="styleguide-table-wrap">
           <table class="styleguide-table">
             <thead>
-              <tr><th>Axe</th><th>Options</th></tr>
+              <tr><th>Axis</th><th>Options</th></tr>
             </thead>
             <tbody>
               <tr>
                 <td>Type</td>
-                <td><code>normal</code> (défaut, pas d’icône ni de titre) · <code>success</code> (vert, «&nbsp;Succès&nbsp;», <code>checkbox-circle-fill</code>) · <code>error</code> (rouge, «&nbsp;Erreur&nbsp;», <code>error-warning-fill</code>)</td>
+                <td><code>normal</code> (default, no icon or title) · <code>success</code> (green, “&nbsp;Success&nbsp;”, <code>checkbox-circle-fill</code>) · <code>error</code> (red, “&nbsp;Error&nbsp;”, <code>error-warning-fill</code>)</td>
               </tr>
               <tr>
                 <td>Header</td>
-                <td>si titre ou texte secondaire&nbsp;: icône + titre à gauche, <code>small</code> + croix à droite</td>
+                <td>if title or secondary text&nbsp;: icon + title on the left, <code>small</code> + close on the right</td>
               </tr>
               <tr>
                 <td>Body</td>
-                <td>message (obligatoire). Sans titre&nbsp;: icône à gauche du message, croix en haut à droite</td>
+                <td>message (required). Without title&nbsp;: icon to the left of the message, close at the top right</td>
               </tr>
               <tr>
-                <td>Fermeture</td>
-                <td>croix (défaut) · auto <code>delay</code> ${TOAST_DELAY_DEFAULT}&nbsp;ms · import/sauvegarde collection 15&nbsp;s · <code>delay: false</code> force la croix</td>
+                <td>Dismiss</td>
+                <td>close (default) · auto <code>delay</code> ${TOAST_DELAY_DEFAULT}&nbsp;ms · collection import/backup 15&nbsp;s · <code>delay: false</code> forces the close button</td>
               </tr>
               <tr>
-                <td>Pile</td>
-                <td>nouvelles en bas à droite · les précédentes remontent · ≤&nbsp;640px&nbsp;: pleine largeur centrée (marge 1,25rem)</td>
+                <td>Stack</td>
+                <td>new items at the bottom right · previous ones move up · ≤&nbsp;640px&nbsp;: full width centered (1.25rem margin)</td>
               </tr>
             </tbody>
           </table>
@@ -95,34 +95,34 @@ export function renderDeveloperNotifications(host) {
 
       <div class="styleguide-section">
         <h2 class="styleguide-section-title">Types</h2>
-        <p class="form-hint" style="margin-bottom: 0.65rem">Les toasts s’empilent en bas à droite (au-dessus de cette modale)</p>
+        <p class="form-hint" style="margin-bottom: 0.65rem">Toasts stack at the bottom right (above this modal)</p>
         <div class="styleguide-row">
           <button type="button" class="btn secondary" data-demo-toast="normal">Normal</button>
-          <button type="button" class="btn secondary" data-demo-toast="success">Succès</button>
-          <button type="button" class="btn secondary" data-demo-toast="error">Erreur</button>
+          <button type="button" class="btn secondary" data-demo-toast="success">Success</button>
+          <button type="button" class="btn secondary" data-demo-toast="error">Error</button>
         </div>
       </div>
 
       <div class="styleguide-section">
         <h2 class="styleguide-section-title">Header / body</h2>
         <div class="styleguide-row">
-          <button type="button" class="btn secondary" data-demo-toast="no-title-icon">Sans titre + icône</button>
-          <button type="button" class="btn secondary" data-demo-toast="icon-override">Icône surchargée</button>
-          <button type="button" class="btn secondary" data-demo-toast="secondary">Texte secondaire</button>
+          <button type="button" class="btn secondary" data-demo-toast="no-title-icon">No title + icon</button>
+          <button type="button" class="btn secondary" data-demo-toast="icon-override">Icon override</button>
+          <button type="button" class="btn secondary" data-demo-toast="secondary">Secondary text</button>
         </div>
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Fermeture</h2>
+        <h2 class="styleguide-section-title">Dismiss</h2>
         <div class="styleguide-row">
-          <button type="button" class="btn secondary" data-demo-toast="delay">Délai 2&nbsp;s</button>
-          <button type="button" class="btn secondary" data-demo-toast="sticky">Sans auto-fermeture</button>
-          <button type="button" class="btn secondary" data-demo-toast="stack">Empiler 3</button>
+          <button type="button" class="btn secondary" data-demo-toast="delay">2&nbsp;s delay</button>
+          <button type="button" class="btn secondary" data-demo-toast="sticky">No auto-dismiss</button>
+          <button type="button" class="btn secondary" data-demo-toast="stack">Stack 3</button>
         </div>
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Banc d’essai</h2>
+        <h2 class="styleguide-section-title">Playground</h2>
         <form id="toast-playground" class="styleguide-fields">
           <fieldset class="form-check-group">
             <legend class="form-label">Type</legend>
@@ -138,67 +138,67 @@ export function renderDeveloperNotifications(host) {
                 id: "toast-type-success",
                 name: "toast-type",
                 value: "success",
-                label: "Succès",
+                label: "Success",
               })}
               ${formRadioMarkup({
                 id: "toast-type-error",
                 name: "toast-type",
                 value: "error",
-                label: "Erreur",
+                label: "Error",
               })}
             </div>
           </fieldset>
           <div class="form-field">
             <label class="form-label form-label--required" for="toast-message">Message</label>
-            <textarea class="form-control" id="toast-message" name="toast-message" rows="2" required>Carte enregistrée</textarea>
-            <p class="form-error" id="toast-message-error" hidden>Le message est obligatoire.</p>
+            <textarea class="form-control" id="toast-message" name="toast-message" rows="2" required>Card saved</textarea>
+            <p class="form-error" id="toast-message-error" hidden>The message is required.</p>
           </div>
           <div class="form-field">
-            <label class="form-label" for="toast-title">Titre</label>
-            <p class="form-hint" id="toast-title-hint">Vide = défaut du type (Succès / Erreur). Cocher «&nbsp;Sans titre&nbsp;» pour le masquer.</p>
+            <label class="form-label" for="toast-title">Title</label>
+            <p class="form-hint" id="toast-title-hint">Empty = type default (Success / Error). Check “&nbsp;No title&nbsp;” to hide it.</p>
             <input class="form-control" type="text" id="toast-title" name="toast-title" autocomplete="off" aria-describedby="toast-title-hint" />
           </div>
           <div class="form-field">
-            <label class="form-label" for="toast-secondary">Texte secondaire</label>
-            <p class="form-hint" id="toast-secondary-hint">Affiché à droite du header (<code>small</code>)</p>
-            <input class="form-control" type="text" id="toast-secondary" name="toast-secondary" placeholder="à l’instant" autocomplete="off" aria-describedby="toast-secondary-hint" />
+            <label class="form-label" for="toast-secondary">Secondary text</label>
+            <p class="form-hint" id="toast-secondary-hint">Shown on the right of the header (<code>small</code>)</p>
+            <input class="form-control" type="text" id="toast-secondary" name="toast-secondary" placeholder="just now" autocomplete="off" aria-describedby="toast-secondary-hint" />
           </div>
           <div class="form-field">
-            <label class="form-label" for="toast-icon">Icône</label>
-            <p class="form-hint" id="toast-icon-hint">Clé Remix (ex. <code>save</code>, <code>notification-line</code>). Vide = défaut du type.</p>
+            <label class="form-label" for="toast-icon">Icon</label>
+            <p class="form-hint" id="toast-icon-hint">Remix key (e.g. <code>save</code>, <code>notification-line</code>). Empty = type default.</p>
             <input class="form-control" type="text" id="toast-icon" name="toast-icon" placeholder="checkbox-circle-fill" autocomplete="off" aria-describedby="toast-icon-hint" />
           </div>
           <div class="form-field">
-            <label class="form-label" for="toast-delay">Délai auto (secondes)</label>
+            <label class="form-label" for="toast-delay">Auto delay (seconds)</label>
             <input class="form-control" type="number" id="toast-delay" name="toast-delay" min="1" step="1" value="${TOAST_DELAY_DEFAULT / 1000}" inputmode="numeric" />
           </div>
           <div class="form-check-list">
             ${formCheckboxMarkup({
               id: "toast-hide-title",
               name: "toast-hide-title",
-              label: "Sans titre",
-              hint: "Icône et croix passent dans le body",
+              label: "No title",
+              hint: "Icon and close move into the body",
             })}
             ${formCheckboxMarkup({
               id: "toast-hide-icon",
               name: "toast-hide-icon",
-              label: "Sans icône",
+              label: "No icon",
             })}
             ${formCheckboxMarkup({
               id: "toast-close",
               name: "toast-close",
-              label: "Bouton fermer",
+              label: "Close button",
               checked: true,
             })}
             ${formCheckboxMarkup({
               id: "toast-autohide",
               name: "toast-autohide",
-              label: "Fermeture automatique",
+              label: "Auto-dismiss",
               checked: true,
             })}
           </div>
           <div class="styleguide-row">
-            <button type="submit" class="btn primary">${ICON_NOTIFICATION_LINE}<span>Afficher</span></button>
+            <button type="submit" class="btn primary">${ICON_NOTIFICATION_LINE}<span>Show</span></button>
           </div>
         </form>
       </div>

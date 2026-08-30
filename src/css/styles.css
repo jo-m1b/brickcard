@@ -3344,6 +3344,12 @@ body.modal-open {
   background: var(--bg);
 }
 
+.settings-panel:has(#settings-locale) .form-select,
+.settings-panel #settings-locale.form-control {
+  width: 40%;
+  min-width: 10.5rem;
+}
+
 .collection-xfer-dialog .settings-panel {
   padding-bottom: 0;
 }

@@ -14,7 +14,7 @@ function controlIconMarkup(svg) {
   return `<span class="form-control-icon" aria-hidden="true">${svg}</span>`;
 }
 /**
- * Galerie de la barre de recherche (design system — test uniquement).
+ * Search bar gallery (design system — test only).
  * @param {HTMLElement} host
  * @returns {() => void}
  */
@@ -22,42 +22,42 @@ export function renderDeveloperSearch(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#developer" })} / Barre de recherche (Search)</p>
-        <h1 class="view-title">Barre de recherche (Search)</h1>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#developer" })} / Search</p>
+        <h1 class="view-title">Search</h1>
       </header>
 
       <p class="styleguide-intro">
-        Bloc <code>search-bar</code>&nbsp;: <code>input.form-control</code>
-        (<code>type="search"</code>) + trail optionnel (<code>search-count</code>,
-        menu <code>search-sort</code>).
-        Icône&nbsp;: <code>form-control-icon</code> <strong>optionnelle</strong>
-        (défaut recherche&nbsp;: <code>ri-search-line</code>).
-        Même look qu’un champ texte (fond <code>--form-control-bg</code>,
-        trait bas inset, focus cadre <code>ink</code>).
-        Slot topbar&nbsp;: <code>topbar-search</code> centre le bloc.
-        Compteur + tri&nbsp;: visibles seulement s’il y a <strong>au moins 2</strong>
-        éléments. Libellé toujours «&nbsp;cartes&nbsp;».
-        Appliqué : liste des cartes (topbar) · modale thèmes (compteur + tri) ·
-        accueil espace développeur et paramètres (<code>search-bar--input-only</code>).
+        <code>search-bar</code> block&nbsp;: <code>input.form-control</code>
+        (<code>type="search"</code>) + optional trail (<code>search-count</code>,
+        <code>search-sort</code> menu).
+        Icon&nbsp;: <code>form-control-icon</code> <strong>optional</strong>
+        (search default&nbsp;: <code>ri-search-line</code>).
+        Same look as a text field (<code>--form-control-bg</code> background,
+        inset bottom rule, focus frame <code>ink</code>).
+        Topbar slot&nbsp;: <code>topbar-search</code> centers the block.
+        Count + sort&nbsp;: visible only when there are <strong>at least 2</strong>
+        items. Label is always “&nbsp;cards&nbsp;”.
+        Used: card list (topbar) · themes modal (count + sort) ·
+        developer home and settings (<code>search-bar--input-only</code>).
       </p>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Champ seul</h2>
+        <h2 class="styleguide-section-title">Input only</h2>
         <div class="styleguide-fields" style="max-width: 36rem">
           <div>
-            <p class="form-hint" style="margin-bottom: 0.5rem">Avec icône (défaut recherche)</p>
+            <p class="form-hint" style="margin-bottom: 0.5rem">With icon (search default)</p>
             <div class="styleguide-search-demo">
               <div class="search-bar search-bar--input-only">
                 ${controlIconMarkup(ICON_SEARCH_LINE)}
-                <input class="form-control" type="search" id="demo-search-plain" placeholder="Rechercher…" autocomplete="off" aria-label="Recherche avec icône" />
+                <input class="form-control" type="search" id="demo-search-plain" placeholder="Search…" autocomplete="off" aria-label="Search with icon" />
               </div>
             </div>
           </div>
           <div>
-            <p class="form-hint" style="margin-bottom: 0.5rem">Sans icône</p>
+            <p class="form-hint" style="margin-bottom: 0.5rem">Without icon</p>
             <div class="styleguide-search-demo">
               <div class="search-bar search-bar--input-only">
-                <input class="form-control" type="search" id="demo-search-plain-noicon" placeholder="Rechercher…" autocomplete="off" aria-label="Recherche sans icône" />
+                <input class="form-control" type="search" id="demo-search-plain-noicon" placeholder="Search…" autocomplete="off" aria-label="Search without icon" />
               </div>
             </div>
           </div>
@@ -65,28 +65,28 @@ export function renderDeveloperSearch(host) {
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Avec compteur</h2>
-        <p class="form-hint" style="margin-bottom: 0.65rem">Tape pour voir le compteur se mettre à jour (démo locale)</p>
+        <h2 class="styleguide-section-title">With count</h2>
+        <p class="form-hint" style="margin-bottom: 0.65rem">Type to see the count update (local demo)</p>
         <div class="styleguide-search-demo">
           <div class="search-bar">
             ${controlIconMarkup(ICON_SEARCH_LINE)}
-            <input class="form-control" type="search" id="demo-search-count" placeholder="Rechercher une carte…" autocomplete="off" aria-label="Recherche avec compteur" aria-describedby="demo-search-count-out" />
+            <input class="form-control" type="search" id="demo-search-count" placeholder="Search for a card…" autocomplete="off" aria-label="Search with count" aria-describedby="demo-search-count-out" />
             <div class="search-bar-trail">
-              <span class="search-count" id="demo-search-count-out" aria-live="polite">12 cartes</span>
+              <span class="search-count" id="demo-search-count-out" aria-live="polite">12 cards</span>
             </div>
           </div>
         </div>
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Complet (compteur + tri)</h2>
-        <p class="form-hint" style="margin-bottom: 0.65rem">Même composition que le topbar liste. Menu style <code>form-select</code> ; ↑↓ / Entrée / Échap ; recliquer l’option active inverse le sens (<code>ri-sort-asc</code> / <code>ri-sort-desc</code>).</p>
+        <h2 class="styleguide-section-title">Full (count + sort)</h2>
+        <p class="form-hint" style="margin-bottom: 0.65rem">Same composition as the list topbar. Menu styled like <code>form-select</code>; ↑↓ / Enter / Escape; clicking the active option again reverses direction (<code>ri-sort-asc</code> / <code>ri-sort-desc</code>).</p>
         <div class="styleguide-search-demo">
           <div class="search-bar" data-demo-sort>
             ${controlIconMarkup(ICON_SEARCH_LINE)}
-            <input class="form-control" type="search" id="demo-search-full" placeholder="Rechercher une carte…" autocomplete="off" aria-label="Recherche complète" />
+            <input class="form-control" type="search" id="demo-search-full" placeholder="Search for a card…" autocomplete="off" aria-label="Full search" />
             <div class="search-bar-trail">
-              <span class="search-count" id="demo-search-full-count" aria-live="polite">3 / 12 cartes</span>
+              <span class="search-count" id="demo-search-full-count" aria-live="polite">3 / 12 cards</span>
               <div class="search-sort">
                 <button
                   type="button"
@@ -97,25 +97,25 @@ export function renderDeveloperSearch(host) {
                   aria-controls="demo-search-sort-menu"
                 >
                   ${ICON_FILTER_3}
-                  <span class="visually-hidden">Trier les cartes</span>
+                  <span class="visually-hidden">Sort cards</span>
                 </button>
               </div>
             </div>
             <div class="search-sort-menu form-select-list" id="demo-search-sort-menu" role="listbox" hidden>
               <div class="form-select-option" role="option" id="demo-search-sort-opt-updatedAt" data-sort="updatedAt" aria-selected="true">
-                <span class="form-select-option-label">Date de modification</span>
+                <span class="form-select-option-label">Date modified</span>
                 <span class="form-select-icon form-select-icon--right"></span>
               </div>
               <div class="form-select-option" role="option" id="demo-search-sort-opt-legoSetRef" data-sort="legoSetRef" aria-selected="false">
-                <span class="form-select-option-label">Référence</span>
+                <span class="form-select-option-label">Reference</span>
                 <span class="form-select-icon form-select-icon--right" hidden></span>
               </div>
               <div class="form-select-option" role="option" id="demo-search-sort-opt-title" data-sort="title" aria-selected="false">
-                <span class="form-select-option-label">Titre</span>
+                <span class="form-select-option-label">Title</span>
                 <span class="form-select-icon form-select-icon--right" hidden></span>
               </div>
               <div class="form-select-option" role="option" id="demo-search-sort-opt-releaseYear" data-sort="releaseYear" aria-selected="false">
-                <span class="form-select-option-label">Année de sortie</span>
+                <span class="form-select-option-label">Release year</span>
                 <span class="form-select-icon form-select-icon--right" hidden></span>
               </div>
             </div>
@@ -124,28 +124,28 @@ export function renderDeveloperSearch(host) {
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Moins de 2 éléments</h2>
-        <p class="form-hint" style="margin-bottom: 0.65rem">Trail masqué (<code>hidden</code>) — même rendu qu’un champ texte seul</p>
+        <h2 class="styleguide-section-title">Fewer than 2 items</h2>
+        <p class="form-hint" style="margin-bottom: 0.65rem">Trail hidden (<code>hidden</code>) — same look as a text field alone</p>
         <div class="styleguide-search-demo">
           <div class="search-bar">
             ${controlIconMarkup(ICON_SEARCH_LINE)}
-            <input class="form-control" type="search" placeholder="Rechercher une carte…" autocomplete="off" aria-label="Recherche sans trail" />
+            <input class="form-control" type="search" placeholder="Search for a card…" autocomplete="off" aria-label="Search without trail" />
             <div class="search-bar-trail" hidden>
-              <span class="search-count">12 cartes</span>
+              <span class="search-count">12 cards</span>
             </div>
           </div>
         </div>
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">États</h2>
+        <h2 class="styleguide-section-title">States</h2>
         <div class="styleguide-fields">
           <div>
-            <p class="form-hint" style="margin-bottom: 0.5rem">Compteur vide (masqué)</p>
+            <p class="form-hint" style="margin-bottom: 0.5rem">Empty count (hidden)</p>
             <div class="styleguide-search-demo">
               <div class="search-bar">
                 ${controlIconMarkup(ICON_SEARCH_LINE)}
-                <input class="form-control" type="search" placeholder="Rechercher…" autocomplete="off" aria-label="Recherche sans compteur" disabled />
+                <input class="form-control" type="search" placeholder="Search…" autocomplete="off" aria-label="Search without count" disabled />
                 <div class="search-bar-trail">
                   <span class="search-count"></span>
                 </div>
@@ -153,11 +153,11 @@ export function renderDeveloperSearch(host) {
             </div>
           </div>
           <div>
-            <p class="form-hint" style="margin-bottom: 0.5rem">Désactivé</p>
+            <p class="form-hint" style="margin-bottom: 0.5rem">Disabled</p>
             <div class="styleguide-search-demo">
               <div class="search-bar search-bar--input-only">
                 ${controlIconMarkup(ICON_SEARCH_LINE)}
-                <input class="form-control" type="search" placeholder="Indisponible" value="City" autocomplete="off" aria-label="Recherche désactivée" disabled />
+                <input class="form-control" type="search" placeholder="Unavailable" value="City" autocomplete="off" aria-label="Disabled search" disabled />
               </div>
             </div>
           </div>
@@ -180,11 +180,11 @@ export function renderDeveloperSearch(host) {
     if (!input || !out) return;
     const q = input.value.trim();
     if (!q) {
-      out.textContent = `${TOTAL} cartes`;
+      out.textContent = `${TOTAL} cards`;
       return;
     }
     const shown = Math.max(0, TOTAL - Math.min(TOTAL, q.length));
-    out.textContent = `${shown} / ${TOTAL} cartes`;
+    out.textContent = `${shown} / ${TOTAL} cards`;
   }
 
   const onCountInput = () => syncDemoCount(countInput, countOut);
@@ -247,7 +247,7 @@ export function renderDeveloperSearch(host) {
       if (on) {
         iconSlot.hidden = false;
         iconSlot.innerHTML = sortDir === "asc" ? ICON_SORT_ASC : ICON_SORT_DESC;
-        iconSlot.title = sortDir === "asc" ? "Croissant" : "Décroissant";
+        iconSlot.title = sortDir === "asc" ? "Ascending" : "Descending";
       } else {
         iconSlot.hidden = true;
         iconSlot.innerHTML = "";

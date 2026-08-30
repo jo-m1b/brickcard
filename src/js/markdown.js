@@ -1,5 +1,6 @@
 /**
- * Parser Markdown léger (sous-ensemble GFM) + chargement des pages `data/page-{{slug}}.md`.
+ * Parser Markdown léger (sous-ensemble GFM) + chargement des pages
+ * `data/page-{{slug}}.md` (anglais) / `data/page-{{slug}}.{{locale}}.md`.
  * Gère : titres, paragraphes, listes, citations, code, liens, images, gras/italique, HR, blocs HTML.
  * Placeholder : `{{APP_VERSION}}` → version SemVer.
  * Titre de page : `# Titre` (retiré du corps de la modale).
@@ -7,6 +8,7 @@
 
 import { linkMarkup } from "./link.js";
 import { APP_VERSION } from "./version.js";
+import { _t, getDefaultLocale, getLocale } from "./i18n.js";
 
 /**
  * Échappe le HTML brut.
@@ -225,7 +227,20 @@ function parsePageHeading(raw) {
 }
 
 /**
- * Charge et parse `data/page-{{slug}}.md`.
+ * URL d’une page Markdown : `data/page-{{slug}}.md` (anglais source),
+ * ou `data/page-{{slug}}.{{locale}}.md` pour une traduction.
+ * @param {string} slug
+ * @param {string} [locale]
+ */
+export function pageMarkdownUrl(slug, locale) {
+  const loc = String(locale || "").trim();
+  if (loc && loc !== getDefaultLocale()) return `data/page-${slug}.${loc}.md`;
+  return `data/page-${slug}.md`;
+}
+
+/**
+ * Charge et parse `data/page-{{slug}}.md` (ou `page-{{slug}}.{{locale}}.md`).
+ * Locale absente / 404 → fichier anglais source.
  * @param {string} slug
  * @returns {Promise<{ slug: string, title: string, html: string }>}
  */
@@ -235,12 +250,18 @@ export async function loadMarkdownPage(slug) {
     .toLowerCase()
     .replace(/[^a-z0-9-]+/g, "-")
     .replace(/^-+|-+$/g, "");
-  if (!safe) throw new Error("Slug de page invalide");
+  if (!safe) throw new Error(_t("Invalid page slug"));
 
-  const url = `data/page-${safe}.md`;
-  const res = await fetch(url, { cache: "reload" });
+  const localized = pageMarkdownUrl(safe, getLocale());
+  const fallback = pageMarkdownUrl(safe);
+  let url = localized;
+  let res = await fetch(localized, { cache: "reload" });
+  if (!res.ok && localized !== fallback) {
+    url = fallback;
+    res = await fetch(fallback, { cache: "reload" });
+  }
   if (!res.ok) {
-    throw new Error(`Page introuvable : ${url} (${res.status})`);
+    throw new Error(_t("Page not found: %(url)s (%(status)s)", { url, status: res.status }));
   }
   const md = (await res.text()).replace(/\{\{APP_VERSION\}\}/g, APP_VERSION);
   const titleMatch = md.match(/^#\s+(.+)$/m);

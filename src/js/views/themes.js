@@ -21,6 +21,7 @@ import {
 } from "../card-render.js";
 import { emptyViewMarkup } from "../empty-view.js";
 import { setAppDocumentTitle } from "../document-title.js";
+import { _t, getLocale } from "../i18n.js";
 import { includesCI } from "../includes-ci.js";
 
 const SORT_KEY = "brickcard:themes-sort";
@@ -170,7 +171,7 @@ function compareThemesAsc(a, b, key, usage) {
   if (key === "cardCount") {
     return (usage.get(a.id) || 0) - (usage.get(b.id) || 0);
   }
-  return String(a.name || "").localeCompare(String(b.name || ""), "fr", {
+  return String(a.name || "").localeCompare(String(b.name || ""), getLocale(), {
     sensitivity: "base",
   });
 }
@@ -235,11 +236,11 @@ export async function renderThemesModal(host, opts) {
       <div class="modal modal--lg" role="dialog" aria-modal="true" aria-labelledby="themes-modal-title">
         <div class="modal-header">
           <div>
-            <h1 class="view-title" id="themes-modal-title">${modalTitleMarkup("Thèmes", ICON_PALETTE)}</h1>
+            <h1 class="view-title" id="themes-modal-title">${modalTitleMarkup(_t("Themes"), ICON_PALETTE)}</h1>
           </div>
           <button type="button" class="btn primary icon-only modal-close" tabindex="-1" id="btn-themes-close">
             ${ICON_CLOSE}
-            <span class="visually-hidden">Fermer</span>
+            <span class="visually-hidden">${_t("Close")}</span>
           </button>
         </div>
         <div class="themes-toolbar">
@@ -249,9 +250,9 @@ export async function renderThemesModal(host, opts) {
               class="form-control"
               type="search"
               id="themes-search"
-              placeholder="Rechercher un thème…"
+              placeholder="${_t("Search for a theme…")}"
               autocomplete="off"
-              aria-label="Rechercher un thème"
+              aria-label="${_t("Search for a theme")}"
               aria-describedby="themes-search-count"
             />
             <div class="search-bar-trail" id="themes-search-trail">
@@ -266,21 +267,21 @@ export async function renderThemesModal(host, opts) {
                   aria-controls="themes-sort-menu"
                 >
                   ${ICON_FILTER_3}
-                  <span class="visually-hidden">Trier les thèmes</span>
+                  <span class="visually-hidden">${_t("Sort themes")}</span>
                 </button>
               </div>
             </div>
             <div class="search-sort-menu form-select-list" id="themes-sort-menu" role="listbox" hidden>
               <div class="form-select-option" role="option" id="themes-sort-opt-cardCount" data-sort="cardCount" aria-selected="false">
-                <span class="form-select-option-label">Nombre de cartes</span>
+                <span class="form-select-option-label">${_t("Number of cards")}</span>
                 <span class="form-select-icon form-select-icon--right" hidden></span>
               </div>
               <div class="form-select-option" role="option" id="themes-sort-opt-name" data-sort="name" aria-selected="false">
-                <span class="form-select-option-label">Titre</span>
+                <span class="form-select-option-label">${_t("Title")}</span>
                 <span class="form-select-icon form-select-icon--right" hidden></span>
               </div>
               <div class="form-select-option" role="option" id="themes-sort-opt-updatedAt" data-sort="updatedAt" aria-selected="false">
-                <span class="form-select-option-label">Date de modification</span>
+                <span class="form-select-option-label">${_t("Date modified")}</span>
                 <span class="form-select-icon form-select-icon--right" hidden></span>
               </div>
             </div>
@@ -288,32 +289,32 @@ export async function renderThemesModal(host, opts) {
         </div>
         <div class="modal-body" tabindex="-1">
           <section class="themes-section" id="themes-section-custom" hidden>
-            <h2 class="section-title">Thèmes personnalisés</h2>
+            <h2 class="section-title">${_t("Custom themes")}</h2>
             <div class="themes-grid" id="themes-grid-custom"></div>
           </section>
           <section class="themes-section" id="themes-section-builtin" hidden>
-            <h2 class="section-title">Thèmes par défaut</h2>
+            <h2 class="section-title">${_t("Default themes")}</h2>
             <div class="themes-grid" id="themes-grid-builtin"></div>
           </section>
           ${emptyViewMarkup({
             id: "themes-empty-filter",
             hidden: true,
             titleTag: "p",
-            title: "Oups !",
-            text: "Aucun thème ne correspond à la recherche.",
+            title: _t("Oops!"),
+            text: _t("No themes match the search."),
           })}
         </div>
         <div class="modal-footer">
           <div class="modal-footer-start is-hidden" id="themes-footer-danger" hidden>
             <button type="button" class="btn danger" id="btn-delete-all-custom-themes">
               ${ICON_DELETE_BIN_2}
-              <span>Supprimer tous les thèmes personnalisés</span>
+              <span>${_t("Delete all custom themes")}</span>
             </button>
           </div>
           <div class="modal-footer-end">
             <button type="button" class="btn primary" id="btn-add-theme">
               ${ICON_ADD}
-              <span>Nouveau thème</span>
+              <span>${_t("New theme")}</span>
             </button>
           </div>
         </div>
@@ -321,7 +322,7 @@ export async function renderThemesModal(host, opts) {
     </div>
   `;
 
-  setAppDocumentTitle("Thèmes");
+  setAppDocumentTitle(_t("Themes"));
 
   const q = (sel) => host.querySelector(sel);
   const backdrop = q("#themes-modal-backdrop");
@@ -374,7 +375,7 @@ export async function renderThemesModal(host, opts) {
         const cmp = compareThemesAsc(a, b, key, usage) * dir;
         if (cmp !== 0) return cmp;
       }
-      return String(a.name || "").localeCompare(String(b.name || ""), "fr", {
+      return String(a.name || "").localeCompare(String(b.name || ""), getLocale(), {
         sensitivity: "base",
       });
     });
@@ -384,12 +385,12 @@ export async function renderThemesModal(host, opts) {
     const total = custom.length + builtin.length;
     const query = searchQuery();
     if (!total) {
-      searchCount.textContent = "0 thèmes";
+      searchCount.textContent = _t("0 themes");
       return;
     }
     searchCount.textContent = query
-      ? `${shown} / ${total} thèmes`
-      : `${total} thèmes`;
+      ? _t("%(shown)s / %(total)s themes", { shown, total })
+      : _t("%(total)s themes", { total });
   }
 
   /** @returns {HTMLElement[]} */
@@ -446,7 +447,7 @@ export async function renderThemesModal(host, opts) {
       if (on) {
         iconSlot.hidden = false;
         iconSlot.innerHTML = sortDir === "asc" ? ICON_SORT_ASC : ICON_SORT_DESC;
-        iconSlot.title = sortDir === "asc" ? "Croissant" : "Décroissant";
+        iconSlot.title = sortDir === "asc" ? _t("Ascending") : _t("Descending");
       } else {
         iconSlot.hidden = true;
         iconSlot.innerHTML = "";
@@ -785,11 +786,12 @@ export async function renderThemesModal(host, opts) {
     deleteAllBtn.onclick = async () => {
       if (!canDeleteAllCustom()) return;
       const ok = await confirmDialog(host, {
-        title: "Supprimer tous les thèmes personnalisés ?",
+        title: _t("Delete all custom themes?"),
         icon: "delete-bin-2",
-        message:
-          "Tous les thèmes personnalisés seront supprimés définitivement. Les cartes des thèmes supprimés sont conservées mais ne seront plus associées à un thème.",
-        okLabel: "Supprimer",
+        message: _t(
+          "All custom themes will be permanently deleted. Cards from the deleted themes are kept but will no longer be associated with a theme."
+        ),
+        okLabel: _t("Delete"),
         danger: true,
       });
       if (!ok) return;
@@ -802,7 +804,7 @@ export async function renderThemesModal(host, opts) {
         onClearedCustomThemes?.();
         btnAddTheme?.focus();
       } catch (ex) {
-        toast(ex.message || "Impossible de supprimer les thèmes personnalisés", "error");
+        toast(ex.message || _t("Unable to delete the custom themes"), "error");
       } finally {
         deleteAllBtn.removeAttribute("disabled");
       }
@@ -852,7 +854,9 @@ function themeTileMarkup(theme, count, action) {
   const accent = resolveCardAccent(theme);
   const fg = resolveCardAccentFg(theme, accent);
   const countLabel =
-    count <= 1 ? `${count} carte` : `${count} cartes`;
+    count === 1
+      ? _t("%(count)s card", { count })
+      : _t("%(count)s cards", { count });
   const name = escapeHtml(theme.name);
   const hasThemeLogo = Boolean(theme.logoDataUrl);
   const wrapClass = hasThemeLogo
@@ -865,10 +869,10 @@ function themeTileMarkup(theme, count, action) {
     ? `<img class="theme-tile-logo" src="${escapeAttr(theme.logoDataUrl)}" alt="" />`
     : brandLogoMarkup("theme-tile-logo is-brand");
   const logo = `<div class="${wrapClass}"${cropAttrs}>${logoInner}</div>`;
-  const verb = action === "edit" ? "Modifier" : action === "view" ? "Voir" : "";
-  const label = verb
-    ? `${verb} « ${escapeAttr(theme.name)} »${count > 0 ? `, ${countLabel}` : ""}`
-    : `${escapeAttr(theme.name)}${count > 0 ? `, ${countLabel}` : ""}`;
+  let named = theme.name;
+  if (action === "edit") named = _t("Edit “%(name)s”", { name: theme.name });
+  else if (action === "view") named = _t("View “%(name)s”", { name: theme.name });
+  const label = escapeAttr(count > 0 ? `${named}, ${countLabel}` : named);
   const dataAttr =
     action === "edit"
       ? `data-edit="${escapeAttr(theme.id)}"`

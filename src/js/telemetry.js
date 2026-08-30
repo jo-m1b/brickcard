@@ -4,6 +4,7 @@
  */
 
 import { isLocalDevHost } from "./themes-data.js";
+import { _t, getLocale } from "./i18n.js";
 
 const TELEMETRY_KEY = "brickcard:telemetry";
 const SCRIPT_ID = "brickcard-telemetry";
@@ -15,7 +16,8 @@ export const DEFAULT_TELEMETRY = true;
 
 /** @type {string} */
 let lastTrackedUrl = "";
-let hashBound = false;
+/** Premier `trackTelemetryPage()` (fin de `route()`) — évite un track script trop tôt. */
+let routeHasTracked = false;
 
 /** @returns {boolean} */
 export function getTelemetry() {
@@ -49,6 +51,7 @@ export function initTelemetry() {
 
 /** Page vue courante (pathname + hash), si la télémétrie est active. */
 export function trackTelemetryPage() {
+  routeHasTracked = true;
   trackCurrentView();
 }
 
@@ -78,18 +81,22 @@ function telemetryHash(hash) {
 }
 
 /**
- * Titre envoyé à Umami (pas `document.title`) : libellé court, sans suffixe SEO.
- * Espace développeur : garder `page | section` (2ᵉ `|`), sinon le 1ᵉʳ.
+ * Titre envoyé à Umami : `{locale} · ` + libellé UI (sans suffixe SEO).
+ * Accueil / éditeurs : `_t` générique. `#developer/…` : 2ᵉ `|` (`page | section`).
  * @param {string} hash
  * @returns {string}
  */
 function telemetryTitle(hash) {
   const raw = telemetryPath(hash);
-  if (!raw || raw === "/") return "Accueil";
-  if (raw.startsWith("edit-card/")) return "Modifier la carte";
-  if (raw.startsWith("themes/edit/")) return "Modifier le thème";
-  const keepPipes = raw === "developer" || raw.startsWith("developer/") ? 2 : 1;
-  return titleBeforeNthPipe(document.title, keepPipes);
+  let base;
+  if (!raw || raw === "/") base = _t("Home");
+  else if (raw.startsWith("edit-card/")) base = _t("Edit card");
+  else if (raw.startsWith("themes/edit/")) base = _t("Edit theme");
+  else {
+    const keepPipes = raw === "developer" || raw.startsWith("developer/") ? 2 : 1;
+    base = titleBeforeNthPipe(document.title, keepPipes);
+  }
+  return `${getLocale()} · ${base}`;
 }
 
 /**
@@ -136,26 +143,9 @@ function trackCurrentView() {
   tracker.track((props) => ({ ...props, url, title: telemetryTitle(location.hash) }));
 }
 
-function onHashChange() {
-  trackCurrentView();
-}
-
-function bindHash() {
-  if (hashBound) return;
-  window.addEventListener("hashchange", onHashChange);
-  hashBound = true;
-}
-
-function unbindHash() {
-  if (!hashBound) return;
-  window.removeEventListener("hashchange", onHashChange);
-  hashBound = false;
-}
-
 function injectScript() {
-  bindHash();
   if (getTracker()) {
-    trackCurrentView();
+    if (routeHasTracked) trackCurrentView();
     return;
   }
   if (document.getElementById(SCRIPT_ID)) return;
@@ -166,13 +156,12 @@ function injectScript() {
   script.dataset.websiteId = WEBSITE_ID;
   script.dataset.autoTrack = "false";
   script.addEventListener("load", () => {
-    trackCurrentView();
+    if (routeHasTracked) trackCurrentView();
   });
   document.head.appendChild(script);
 }
 
 function removeScript() {
-  unbindHash();
   lastTrackedUrl = "";
   document.getElementById(SCRIPT_ID)?.remove();
 }

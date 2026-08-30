@@ -3,7 +3,7 @@ import { compressImage } from "../../storage.js";
 import { linkMarkup } from "../../link.js";
 
 /**
- * Galerie du champ image (design system — test uniquement).
+ * Image field gallery (design system — test only).
  * @param {HTMLElement} host
  * @returns {() => void}
  */
@@ -11,23 +11,23 @@ export function renderDeveloperImages(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#developer" })} / Sélecteur d’image (Image)</p>
-        <h1 class="view-title">Sélecteur d’image (Image)</h1>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#developer" })} / Image</p>
+        <h1 class="view-title">Image</h1>
       </header>
 
       <p class="styleguide-intro">
-        Contrôle&nbsp;: wrapper <code>form-image</code>.
-        Sans image&nbsp;: texte + boutons fichier / URL.
-        Avec image&nbsp;: couleur de fond (sans hint) puis aperçu de cadrage
-        (badges zoom / alignement, reset, supprimer, sauvegarder).
-        Cadrage&nbsp;: focus ou clic, puis glisser / molette / flèches / <code>+</code> <code>−</code>.
-        Lecture seule (<code>readOnly</code>)&nbsp;: aperçu figé, <strong>Sauvegarder</strong> conservé (pas de chargement / cadrage / suppression).
+        Control&nbsp;: <code>form-image</code> wrapper.
+        Empty&nbsp;: text + file / URL buttons.
+        With image&nbsp;: background color (no hint) then crop preview
+        (zoom / alignment badges, reset, delete, save).
+        Crop&nbsp;: focus or click, then drag / wheel / arrows / <code>+</code> <code>−</code>.
+        Read-only (<code>readOnly</code>)&nbsp;: frozen preview, <strong>Save</strong> kept (no load / crop / delete).
         Module&nbsp;: <code>form-image.js</code>.
-        Appliqué&nbsp;: éditeur de carte ; logos de thèmes (<code>withBackgroundColor: false</code>, fond = couleur du thème) ; vue thème par défaut.
+        Used&nbsp;: card editor; theme logos (<code>withBackgroundColor: false</code>, background = theme color); default theme view.
       </p>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Vide</h2>
+        <h2 class="styleguide-section-title">Empty</h2>
         <div class="styleguide-fields">
           <div class="form-field">
             <label class="form-label" id="demo-image-empty-label">Image</label>
@@ -37,8 +37,8 @@ export function renderDeveloperImages(host) {
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Avec image</h2>
-        <p class="form-hint">Logo app en data URL, cadrage volontairement décalé (reset visible). Fond <code>#e8f4ff</code>.</p>
+        <h2 class="styleguide-section-title">With image</h2>
+        <p class="form-hint">App logo as a data URL, crop intentionally offset (reset visible). Background <code>#e8f4ff</code>.</p>
         <div class="styleguide-fields">
           <div class="form-field">
             <label class="form-label" id="demo-image-filled-label">Image</label>
@@ -54,8 +54,8 @@ export function renderDeveloperImages(host) {
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Lecture seule</h2>
-        <p class="form-hint">Aperçu et badges figés ; seul <strong>Sauvegarder</strong> reste actif. Vide&nbsp;: «&nbsp;Aucun logo&nbsp;».</p>
+        <h2 class="styleguide-section-title">Read-only</h2>
+        <p class="form-hint">Frozen preview and badges; only <strong>Save</strong> stays active. Empty&nbsp;: “&nbsp;No logo&nbsp;”.</p>
         <div class="styleguide-fields">
           <div class="form-field">
             <label class="form-label" id="demo-image-readonly-label">Image</label>
@@ -70,7 +70,7 @@ export function renderDeveloperImages(host) {
             })}
           </div>
           <div class="form-field">
-            <label class="form-label" id="demo-image-readonly-empty-label">Sans image</label>
+            <label class="form-label" id="demo-image-readonly-empty-label">No image</label>
             ${formImageMarkup({
               id: "demo-image-readonly-empty",
               labelledBy: "demo-image-readonly-empty-label",
@@ -81,8 +81,8 @@ export function renderDeveloperImages(host) {
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Sans champ fond (thème)</h2>
-        <p class="form-hint">Même contrôle, sans « Fond de l’image ». L’aperçu prend une couleur externe (ici <code>#e3000b</code>). Zoom = largeur du logo (100&nbsp;% = 50&nbsp;% de la boîte).</p>
+        <h2 class="styleguide-section-title">Without background field (theme)</h2>
+        <p class="form-hint">Same control, without “Image background”. The preview uses an external color (here <code>#e3000b</code>). Zoom = logo width (100&nbsp;% = 50&nbsp;% of the box).</p>
         <div class="styleguide-fields">
           <div class="form-field" style="--form-image-aspect: 63 / 44">
             <label class="form-label" id="demo-image-theme-label">Logo</label>
@@ -173,7 +173,7 @@ export function renderDeveloperImages(host) {
   if (filledCtl || themeCtl || readonlyCtl) {
     fetch("img/brickcard-logo.svg")
       .then((res) => {
-        if (!res.ok) throw new Error("Démo : logo introuvable.");
+        if (!res.ok) throw new Error("Demo: logo not found.");
         return res.blob();
       })
       .then((blob) =>
@@ -197,7 +197,7 @@ export function renderDeveloperImages(host) {
         });
       })
       .catch(() => {
-        /* galerie : laisser le contrôle vide si le logo ne charge pas */
+        /* gallery: leave the control empty if the logo fails to load */
       });
   }
 

@@ -4,6 +4,7 @@
  */
 
 import { ICON_CLOSE, remixIconByName } from "./icons.js";
+import { _t } from "./i18n.js";
 
 export const TOAST_DELAY_DEFAULT = 7000;
 /** Recap import / sauvegarde de collection (plus long à lire). */
@@ -43,8 +44,8 @@ export const TOAST_DELAY_BACKUP = 15000;
 
 const TYPE_DEFAULTS = {
   normal: { title: "", icon: "" },
-  success: { title: "Succès", icon: "checkbox-circle-fill" },
-  error: { title: "Erreur", icon: "error-warning-fill" },
+  success: { title: "Success", icon: "checkbox-circle-fill" },
+  error: { title: "Error", icon: "error-warning-fill" },
 };
 
 let nextId = 1;
@@ -90,8 +91,8 @@ export function toast(messageOrOpts, typeOrOpts) {
 export function toastImageSaved() {
   return toast({
     type: "success",
-    title: "Image sauvegardée",
-    message: "L'image a été enregistrée dans vos fichiers",
+    title: _t("Image saved"),
+    message: _t("The image has been saved to your files"),
     icon: "save",
   });
 }
@@ -137,7 +138,7 @@ function normalizeToast(raw) {
 
   let title = "";
   if (raw.title === false || raw.title === "") title = "";
-  else if (raw.title == null) title = defaults.title;
+  else if (raw.title == null) title = defaults.title ? _t(defaults.title) : "";
   else title = String(raw.title).trim();
 
   let icon = "";
@@ -208,7 +209,7 @@ function iconMarkup(name) {
 }
 
 function closeButtonMarkup() {
-  return `<button type="button" class="btn primary icon-only sm toast-close" data-toast-dismiss>${ICON_CLOSE}<span class="visually-hidden">Fermer</span></button>`;
+  return `<button type="button" class="btn primary icon-only sm toast-close" data-toast-dismiss>${ICON_CLOSE}<span class="visually-hidden">${_t("Close")}</span></button>`;
 }
 
 function getToastRoot() {

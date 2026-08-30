@@ -25,6 +25,7 @@ import {
 import { mountCardPreview, refreshCardPreview, mountCardBackPreview, refreshCardBackPreview } from "../card-render.js";
 import { formatCardImageBasename } from "../card-export.js";
 import { confirmDialog } from "../confirm-dialog.js";
+import { _t } from "../i18n.js";
 import { partitionThemes } from "../themes-data.js";
 import { setAppDocumentTitle } from "../document-title.js";
 
@@ -78,8 +79,8 @@ export async function renderEditor(host, opts) {
   const { custom: customThemes, builtin: builtinThemes } =
     partitionThemes(themes);
   const themeOptions = customThemes.length
-    ? `<optgroup label="Thèmes personnalisés">${customThemes.map(themeOption).join("")}</optgroup>
-                  <optgroup label="Thèmes par défaut">${builtinThemes.map(themeOption).join("")}</optgroup>`
+    ? `<optgroup label="${escapeAttr(_t("Custom themes"))}">${customThemes.map(themeOption).join("")}</optgroup>
+                  <optgroup label="${escapeAttr(_t("Default themes"))}">${builtinThemes.map(themeOption).join("")}</optgroup>`
     : builtinThemes.map(themeOption).join("");
 
   document.body.classList.add("modal-open");
@@ -96,19 +97,19 @@ export async function renderEditor(host, opts) {
           </div>
           <button type="button" class="btn primary icon-only modal-close" tabindex="-1" id="btn-modal-close">
             ${ICON_CLOSE}
-            <span class="visually-hidden">Fermer</span>
+            <span class="visually-hidden">${_t("Close")}</span>
           </button>
         </div>
         <div class="modal-body" tabindex="-1">
           <div class="editor-layout">
             <aside class="preview-wrap preview-wrap--pair" id="preview-wrap">
-              <div class="card-preview" id="preview-host" aria-label="Aperçu de la face"></div>
-              <div class="card-preview" id="preview-back-host" aria-label="Aperçu du dos"></div>
+              <div class="card-preview" id="preview-host" aria-label="${escapeAttr(_t("Front preview"))}"></div>
+              <div class="card-preview" id="preview-back-host" aria-label="${escapeAttr(_t("Back preview"))}"></div>
             </aside>
 
             <div>
               <div class="form-field">
-                <label class="form-label" for="lego-set-ref">Numéro de l'ensemble</label>
+                <label class="form-label" for="lego-set-ref">${_t("Set number")}</label>
                 <div class="form-control-wrap">
                   <span class="form-control-icon" aria-hidden="true">${ICON_HASHTAG}</span>
                   <input class="form-control" type="text" id="lego-set-ref" autocomplete="off" />
@@ -116,28 +117,28 @@ export async function renderEditor(host, opts) {
               </div>
 
               <div class="form-field">
-                <label class="form-label" for="card-title">Titre</label>
-                <p class="form-hint" id="card-title-hint">Maximum 3 lignes affichées sur la carte (Entrée pour un saut de ligne)</p>
+                <label class="form-label" for="card-title">${_t("Title")}</label>
+                <p class="form-hint" id="card-title-hint">${_t("Maximum 3 lines shown on the card (Enter for a line break)")}</p>
                 <textarea class="form-control" id="card-title" rows="3" autocomplete="off" aria-describedby="card-title-hint"></textarea>
               </div>
 
               <div class="field-row field-row-3">
                 <div class="form-field">
-                  <label class="form-label" for="release-year">Année de sortie</label>
+                  <label class="form-label" for="release-year">${_t("Release year")}</label>
                   <div class="form-control-wrap">
                     <span class="form-control-icon" aria-hidden="true">${ICON_CALENDAR_TODO}</span>
                     <input class="form-control" type="number" id="release-year" min="1900" max="2100" step="1" inputmode="numeric" />
                   </div>
                 </div>
                 <div class="form-field">
-                  <label class="form-label" for="piece-count">Nombre de pièces</label>
+                  <label class="form-label" for="piece-count">${_t("Number of pieces")}</label>
                   <div class="form-control-wrap">
                     <span class="form-control-icon" aria-hidden="true">${ICON_APPS_2}</span>
                     <input class="form-control" type="number" id="piece-count" min="0" step="1" inputmode="numeric" />
                   </div>
                 </div>
                 <div class="form-field">
-                  <label class="form-label" for="figurine-count">Nombre de figurines</label>
+                  <label class="form-label" for="figurine-count">${_t("Number of figurines")}</label>
                   <div class="form-control-wrap">
                     <span class="form-control-icon" aria-hidden="true">${ICON_USER_3}</span>
                     <input class="form-control" type="number" id="figurine-count" min="0" step="1" inputmode="numeric" />
@@ -146,18 +147,18 @@ export async function renderEditor(host, opts) {
               </div>
 
               <div class="form-field">
-                <label class="form-label" for="brickcard-theme-id">Thème</label>
+                <label class="form-label" for="brickcard-theme-id">${_t("Theme")}</label>
                 <div class="form-control-wrap">
                   <span class="form-control-icon" aria-hidden="true">${ICON_PALETTE}</span>
                   <select id="brickcard-theme-id" class="form-control">
-                    <option value="">Aucun thème</option>
+                    <option value="">${_t("No theme")}</option>
                     ${themeOptions}
                   </select>
                 </div>
               </div>
 
               <div class="form-field">
-                <label class="form-label" id="card-photo-label">Image</label>
+                <label class="form-label" id="card-photo-label">${_t("Image")}</label>
                 ${formImageMarkup({
                   id: "card-image",
                   labelledBy: "card-photo-label",
@@ -175,13 +176,13 @@ export async function renderEditor(host, opts) {
         </div>
         <div class="modal-footer modal-footer--primary-first">
           <div class="modal-footer-end">
-            <button type="button" class="btn primary" id="btn-card-save">${ICON_SAVE}<span>Enregistrer</span></button>
-            <button type="button" class="btn secondary sm" id="btn-card-cancel">Annuler</button>
+            <button type="button" class="btn primary" id="btn-card-save">${ICON_SAVE}<span>${_t("Save")}</span></button>
+            <button type="button" class="btn secondary sm" id="btn-card-cancel">${_t("Cancel")}</button>
           </div>
           ${
             isEdit
               ? `<div class="modal-footer-start">
-            <button type="button" class="btn danger" id="btn-card-delete">${ICON_DELETE_BIN_2}<span>Supprimer</span></button>
+            <button type="button" class="btn danger" id="btn-card-delete">${ICON_DELETE_BIN_2}<span>${_t("Delete")}</span></button>
           </div>`
               : ""
           }
@@ -338,8 +339,8 @@ export async function renderEditor(host, opts) {
     previewWrap.setAttribute(
       "aria-label",
       previewWrap.classList.contains("is-showing-back")
-        ? "Aperçu du dos, cliquer pour voir la face"
-        : "Aperçu de la face, cliquer pour voir le dos"
+        ? _t("Back preview, click to see the front")
+        : _t("Front preview, click to see the back")
     );
   }
 
@@ -389,8 +390,8 @@ export async function renderEditor(host, opts) {
 
   function cardDeleteTitle() {
     const subject = cardToastSubject();
-    if (subject) return `Supprimer la carte « ${subject} » ?`;
-    return "Supprimer cette carte ?";
+    if (subject) return _t("Delete the card “%(subject)s”?", { subject });
+    return _t("Delete this card?");
   }
 
   function onKeydown(e) {
@@ -411,7 +412,7 @@ export async function renderEditor(host, opts) {
       });
       opts.onSaved(cardToastSubject(), { isNew: !isEdit, card: saved });
     } catch (err) {
-      refs.error.textContent = err.message || "Enregistrement impossible.";
+      refs.error.textContent = err.message || _t("Unable to save.");
       refs.save.disabled = false;
     }
   });
@@ -421,9 +422,10 @@ export async function renderEditor(host, opts) {
       const ok = await confirmDialog(host, {
         title: cardDeleteTitle(),
         icon: "delete-bin-2",
-        message:
-          "Attention, la suppression est définitive et ne pourra pas être annulée ! Souhaitez-vous continuer ?",
-        okLabel: "Supprimer",
+        message: _t(
+          "Warning, deletion is permanent and cannot be undone! Do you want to continue?"
+        ),
+        okLabel: _t("Delete"),
         danger: true,
       });
       if (!ok) return;
@@ -434,7 +436,7 @@ export async function renderEditor(host, opts) {
         if (opts.onDeleted) opts.onDeleted(cardToastSubject(), existing.id);
         else opts.onCancel();
       } catch (err) {
-        refs.error.textContent = err.message || "Suppression impossible.";
+        refs.error.textContent = err.message || _t("Unable to delete.");
         refs.deleteBtn.disabled = false;
         refs.save.disabled = false;
       }
@@ -459,13 +461,13 @@ export async function renderEditor(host, opts) {
  * @param {{ title?: string, legoSetRef?: string }|null} existing
  */
 function editorDialogTitle(existing) {
-  if (!existing) return "Nouvelle carte";
+  if (!existing) return _t("New card");
   const title = String(existing.title || "").replace(/\s*\n\s*/g, " ").trim();
   const refRaw = String(existing.legoSetRef || "").replace(/^#+\s*/, "").trim();
-  if (title && refRaw) return `Modifier « ${title} (#${refRaw}) »`;
-  if (title) return `Modifier « ${title} »`;
-  if (refRaw) return `Modifier « #${refRaw} »`;
-  return "Modifier la carte";
+  if (title && refRaw) return _t("Edit “%(title)s” (#%(ref)s)", { title, ref: refRaw });
+  if (title) return _t("Edit “%(title)s”", { title });
+  if (refRaw) return _t("Edit “#%(ref)s”", { ref: refRaw });
+  return _t("Edit card");
 }
 
 function escapeHtml(str) {

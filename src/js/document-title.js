@@ -3,8 +3,13 @@
  */
 
 import { APP_DOCUMENT_TITLE } from "./version.js";
+import { _t } from "./i18n.js";
 
 export { APP_DOCUMENT_TITLE };
+
+function defaultDocumentTitle() {
+  return _t(APP_DOCUMENT_TITLE);
+}
 
 /** @type {boolean} */
 let printTitleLocked = false;
@@ -23,9 +28,9 @@ function formatDocumentTitle(parts) {
   const segments = [];
   for (const part of parts) {
     const s = String(part || "").trim();
-    if (s && s !== APP_DOCUMENT_TITLE) segments.push(s);
+    if (s && s !== APP_DOCUMENT_TITLE && s !== defaultDocumentTitle()) segments.push(s);
   }
-  segments.push(APP_DOCUMENT_TITLE);
+  segments.push(defaultDocumentTitle());
   return segments.join(" | ");
 }
 

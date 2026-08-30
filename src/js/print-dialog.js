@@ -7,6 +7,7 @@
  */
 
 import { ICON_CLOSE, ICON_PRINTER, modalTitleMarkup } from "./icons.js";
+import { _t } from "./i18n.js";
 import { setAppDocumentTitle } from "./document-title.js";
 import { emptyViewMarkup } from "./empty-view.js";
 import { bindFormRange, formRangeResetMarkup } from "./form-range.js";
@@ -58,11 +59,11 @@ export function renderPrintDialog(host, opts) {
       <div class="modal modal--md" role="dialog" aria-modal="true" aria-labelledby="print-dialog-title"${empty ? ` aria-describedby="print-dialog-empty"` : ` aria-describedby="print-dialog-count print-dialog-desc"`}>
         <div class="modal-header">
           <div>
-            <h1 class="view-title" id="print-dialog-title">${modalTitleMarkup("Paramètres d’impression", ICON_PRINTER)}</h1>
+            <h1 class="view-title" id="print-dialog-title">${modalTitleMarkup(_t("Print settings"), ICON_PRINTER)}</h1>
           </div>
           <button type="button" class="btn primary icon-only modal-close" tabindex="-1" id="btn-print-dialog-close">
             ${ICON_CLOSE}
-            <span class="visually-hidden">Fermer</span>
+            <span class="visually-hidden">${_t("Close")}</span>
           </button>
         </div>
         <div class="modal-body" tabindex="-1">
@@ -71,8 +72,8 @@ export function renderPrintDialog(host, opts) {
               ? emptyViewMarkup({
                   id: "print-dialog-empty",
                   titleTag: "p",
-                  title: "Aucune carte à imprimer !",
-                  text: "Sélectionnez au moins une carte à imprimer parmi celles de votre collection.",
+                  title: _t("No cards to print!"),
+                  text: _t("Select at least one card to print from your collection."),
                 })
               : `
           <div class="modal-confirm-msg" id="print-dialog-recap">
@@ -80,7 +81,7 @@ export function renderPrintDialog(host, opts) {
             <p class="view-desc" id="print-dialog-desc"></p>
           </div>
           <div class="form-field">
-            <label class="form-label" for="print-dialog-grid">Grille d’impression</label>
+            <label class="form-label" for="print-dialog-grid">${_t("Print grid")}</label>
             <div class="form-range-row">
               <input
                 type="range"
@@ -114,7 +115,7 @@ export function renderPrintDialog(host, opts) {
             cutMarkBack: settings.cutMarkBack,
           })}
           <fieldset class="form-check-group">
-            <legend class="form-label">Ordre d’impression des cartes</legend>
+            <legend class="form-label">${_t("Card print order")}</legend>
             <div class="form-check-list form-check-list--row">
               ${printCardOrderRadiosMarkup({
                 idPrefix: "print-dialog-card-print-order",
@@ -124,48 +125,48 @@ export function renderPrintDialog(host, opts) {
             </div>
           </fieldset>
           <fieldset class="form-check-group">
-            <legend class="form-label">Côté d’impression</legend>
+            <legend class="form-label">${_t("Print side")}</legend>
             <div class="form-check-list form-check-list--row">
               ${formRadioMarkup({
                 id: "print-dialog-print-side-both",
                 name: "print-dialog-print-side",
                 value: "both",
-                label: "Les deux faces",
+                label: _t("Both sides"),
                 checked: settings.printSide === "both",
               })}
               ${formRadioMarkup({
                 id: "print-dialog-print-side-face-only",
                 name: "print-dialog-print-side",
                 value: "faceOnly",
-                label: "Face uniquement",
+                label: _t("Front only"),
                 checked: settings.printSide === "faceOnly",
               })}
               ${formRadioMarkup({
                 id: "print-dialog-print-side-back-only",
                 name: "print-dialog-print-side",
                 value: "backOnly",
-                label: "Dos uniquement",
+                label: _t("Back only"),
                 checked: settings.printSide === "backOnly",
               })}
             </div>
           </fieldset>
           <fieldset class="form-check-group" id="print-dialog-sheet-assembly-field">
-            <legend class="form-label">Assemblage des feuilles</legend>
+            <legend class="form-label">${_t("Sheet assembly")}</legend>
             <div class="form-check-list">
               ${formRadioMarkup({
                 id: "print-dialog-sheet-assembly-alternate",
                 name: "print-dialog-sheet-assembly",
                 value: "alternate",
-                label: "Alterner",
-                hint: "Une feuille à la fois (imprimante recto-verso)",
+                label: _t("Alternate"),
+                hint: _t("One sheet at a time (duplex printer)"),
                 checked: settings.sheetAssembly === "alternate",
               })}
               ${formRadioMarkup({
                 id: "print-dialog-sheet-assembly-grouped",
                 name: "print-dialog-sheet-assembly",
                 value: "grouped",
-                label: "Regrouper",
-                hint: "Tous les rectos d’abord, puis retourner la pile pour ensuite imprimer tous les versos",
+                label: _t("Group"),
+                hint: _t("All fronts first, then flip the stack to print all the backs"),
                 checked: settings.sheetAssembly === "grouped",
               })}
             </div>
@@ -179,10 +180,10 @@ export function renderPrintDialog(host, opts) {
           <div class="modal-footer-end">
             <button type="button" class="btn primary" id="btn-print-dialog-run">
               ${ICON_PRINTER}
-              <span>Lancer l’impression</span>
+              <span>${_t("Start printing")}</span>
             </button>
             <button type="button" class="btn secondary sm" id="btn-print-dialog-cancel">
-              Annuler
+              ${_t("Cancel")}
             </button>
           </div>
         </div>`
@@ -191,7 +192,7 @@ export function renderPrintDialog(host, opts) {
     </div>
   `;
 
-  setAppDocumentTitle("Paramètres d’impression");
+  setAppDocumentTitle(_t("Print settings"));
 
   const backdrop = host.querySelector("#print-dialog-backdrop");
   const btnClose = host.querySelector("#btn-print-dialog-close");
@@ -299,13 +300,13 @@ export function renderPrintDialog(host, opts) {
           for (let i = 0; i < qty; i++) toPrint.push(card);
         }
         if (!toPrint.length) {
-          toast?.("Aucune carte à imprimer", "error");
+          toast?.(_t("No cards to print"), "error");
           return;
         }
         const { printCards } = await import("./print.js");
         await printCards(toPrint);
       } catch (err) {
-        toast?.(err.message || "Erreur d'impression", "error");
+        toast?.(err.message || _t("Print error"), "error");
       } finally {
         if (runBtn instanceof HTMLButtonElement && runBtn.isConnected) {
           runBtn.disabled = false;

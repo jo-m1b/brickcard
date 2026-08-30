@@ -1,7 +1,7 @@
 {
   "name": "Brickcard",
   "short_name": "Brickcard",
-  "lang": "fr",
+  "lang": "en",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

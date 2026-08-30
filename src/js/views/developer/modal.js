@@ -2,6 +2,7 @@ import { ICON_ARROW_RIGHT_WIDE, ICON_CLOSE, modalTitleMarkup } from "../../icons
 import { linkMarkup } from "../../link.js";
 import { setAppDocumentTitle } from "../../document-title.js";
 import { toast } from "../../toast.js";
+import { _t } from "../../i18n.js";
 
 /** @type {Record<string, () => Promise<(host: HTMLElement) => (() => void)|void>>} */
 const PAGE_LOADERS = {
@@ -27,11 +28,11 @@ const PAGE_LOADERS = {
 /** @typedef {{ name: string, icon?: string }} DeveloperSection */
 
 /** @type {DeveloperSection} */
-const SECTION_DESIGN = { name: "Système de design", icon: "collage" };
+const SECTION_DESIGN = { name: "Design system", icon: "collage" };
 /** @type {DeveloperSection} */
-const SECTION_TOOLS = { name: "Aide au développement", icon: "pencil-ruler-2" };
+const SECTION_TOOLS = { name: "Development help", icon: "pencil-ruler-2" };
 /** @type {DeveloperSection} */
-const SECTION_MODELS = { name: "Modèles", icon: "pages" };
+const SECTION_MODELS = { name: "Templates", icon: "pages" };
 
 /** Section d’index pour les pages ouvertes par une tuile (`#developer`). */
 const PAGE_SECTIONS = {
@@ -163,11 +164,11 @@ export async function renderDeveloperModal(host, opts) {
       <div class="modal ${page === "theme-presets" ? "modal--lg" : "modal--md"}" role="dialog" aria-modal="true" aria-labelledby="developer-modal-title">
         <div class="modal-header">
           <div>
-            <h1 class="view-title" id="developer-modal-title">${modalTitleMarkup("Espace développeur", "tools")}</h1>
+            <h1 class="view-title" id="developer-modal-title">${modalTitleMarkup("Developer space", "tools")}</h1>
           </div>
           <button type="button" class="btn primary icon-only modal-close" tabindex="-1" id="btn-developer-close">
             ${ICON_CLOSE}
-            <span class="visually-hidden">Fermer</span>
+            <span class="visually-hidden">${_t("Close")}</span>
           </button>
         </div>
         <div class="modal-body" id="developer-modal-body" tabindex="-1"></div>
@@ -245,7 +246,7 @@ export async function renderDeveloperModal(host, opts) {
       editor = await import("./theme-presets-editor.js");
     } catch (err) {
       console.error(err);
-      const msg = err && err.message ? err.message : String(err || "Erreur de chargement");
+      const msg = err && err.message ? err.message : String(err || _t("Loading error"));
       toast(msg, "error");
       goToPresetList();
       return;
@@ -311,12 +312,12 @@ export async function renderDeveloperModal(host, opts) {
       } catch (err) {
         console.error(err);
         if (renderedPage) {
-          const msg = err && err.message ? err.message : String(err || "Erreur de chargement");
+          const msg = err && err.message ? err.message : String(err || _t("Loading error"));
           toast(msg, "error");
           return;
         }
         if (pageToRender !== "index") {
-          const msg = err && err.message ? err.message : String(err || "Erreur de chargement");
+          const msg = err && err.message ? err.message : String(err || _t("Loading error"));
           toast(msg, "error");
           pageToRender = "index";
           renderFn = await PAGE_LOADERS.index();

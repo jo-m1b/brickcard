@@ -6,7 +6,7 @@ import { tileListMarkup } from "../../tile.js";
 let rememberedQuery = "";
 
 /**
- * Index du styleguide / pages de test UI.
+ * Styleguide index / UI test pages.
  * @param {HTMLElement} host
  * @returns {() => void}
  */
@@ -15,7 +15,7 @@ export function renderDeveloperIndex(host) {
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
         <p class="styleguide-kicker">Styleguide</p>
-        <h1 class="view-title">Espace développeur</h1>
+        <h1 class="view-title">Developer space</h1>
       </header>
       <div class="themes-toolbar">
         <div class="search-bar search-bar--input-only" id="developer-index-search-bar">
@@ -24,124 +24,124 @@ export function renderDeveloperIndex(host) {
             class="form-control"
             type="search"
             id="developer-index-search"
-            placeholder="Rechercher…"
+            placeholder="Search…"
             autocomplete="off"
-            aria-label="Rechercher"
+            aria-label="Search"
           />
         </div>
       </div>
       <section class="styleguide-section">
-        <h2 class="section-title">${ICON_PENCIL_RULER_2} Aide au développement</h2>
+        <h2 class="section-title">${ICON_PENCIL_RULER_2} Development help</h2>
         ${tileListMarkup([
         {
-          title: "Thèmes par défaut",
-          desc: "Paramétrer et exporter themes-presets.json",
+          title: "Default themes",
+          desc: "Configure and export themes-presets.json",
           href: "#developer/theme-presets",
           icon: "palette",
         },
       ])}
       </section>
       <section class="styleguide-section">
-        <h2 class="section-title">${ICON_PAGES} Modèles</h2>
+        <h2 class="section-title">${ICON_PAGES} Templates</h2>
         ${tileListMarkup([
         {
-          title: "Page de chargement",
-          desc: "Modèle de la page de chargement utilisée pendant le démarrage de l’application",
+          title: "Loading page",
+          desc: "Template of the loading page shown while the app starts",
           href: "#developer/loading",
           icon: "loader-4",
         },
         {
-          title: "Page de bienvenue",
-          desc: "Modèle de la page d’accueil lorsque la collection est vide",
+          title: "Welcome page",
+          desc: "Template of the home page when the collection is empty",
           href: "#developer/welcome",
           icon: "home-smile",
         },
       ])}
       </section>
       <section class="styleguide-section">
-        <h2 class="section-title">${ICON_COLLAGE} Système de design</h2>
+        <h2 class="section-title">${ICON_COLLAGE} Design system</h2>
         ${tileListMarkup([
         {
-          title: "Typographie",
-          desc: "Typographies et styles de texte",
+          title: "Typography",
+          desc: "Typefaces and text styles",
           href: "#developer/typography",
           icon: "text",
         },
         {
-          title: "Lien (Link)",
-          desc: "Navigation secondaire vers d’autres contenus",
+          title: "Link",
+          desc: "Secondary navigation to other content",
           href: "#developer/links",
           icon: "links",
         },
         {
-          title: "Tuile (Tile)",
-          desc: "Rediriger vers du contenu via des tuiles",
+          title: "Tile",
+          desc: "Redirect to content with tiles",
           href: "#developer/tiles",
           icon: "layout-grid",
         },
         {
-          title: "Bouton (Button)",
-          desc: "Déclenchement d’une action dans l’interface",
+          title: "Button",
+          desc: "Trigger an action in the interface",
           href: "#developer/buttons",
           icon: "add",
         },
         {
-          title: "Champ de saisie (Input)",
-          desc: "Saisie de données dans l’interface",
+          title: "Input",
+          desc: "Enter data in the interface",
           href: "#developer/fields",
           icon: "file-text-line",
         },
         {
-          title: "Liste déroulante (Select)",
-          desc: "Sélectionner une option dans une liste",
+          title: "Select",
+          desc: "Pick an option from a list",
           href: "#developer/selects",
           icon: "arrow-down-s",
         },
         {
-          title: "Curseur (Range)",
-          desc: "Sélection d’une valeur sur une échelle",
+          title: "Range",
+          desc: "Pick a value on a scale",
           href: "#developer/sliders",
           icon: "equalizer",
         },
         {
-          title: "Case à cocher (Checkbox)",
-          desc: "Sélection multiple dans une liste",
+          title: "Checkbox",
+          desc: "Multiple selection in a list",
           href: "#developer/checkboxes",
           icon: "checkbox",
         },
         {
-          title: "Bouton radio (Radio)",
-          desc: "Sélection d’une option unique",
+          title: "Radio",
+          desc: "Pick a single option",
           href: "#developer/radios",
           icon: "radio-button-line",
         },
         {
-          title: "Sélecteur de couleur (Color)",
-          desc: "Définir une couleur",
+          title: "Color",
+          desc: "Set a color",
           href: "#developer/colors",
           icon: "palette",
         },
         {
-          title: "Sélecteur d’image (Image)",
-          desc: "Charger et paramétrer le cadrage d’une image",
+          title: "Image",
+          desc: "Load an image and adjust its crop",
           href: "#developer/images",
           icon: "upload",
         },
         {
-          title: "Barre de recherche (Search)",
-          desc: "Accès rapide à un contenu par mot clé",
+          title: "Search",
+          desc: "Quick access to content by keyword",
           href: "#developer/search",
           icon: "search-line",
         },
         {
-          title: "Modale (Modal)",
-          desc: "Affichage focalisé d’un contenu",
+          title: "Modal",
+          desc: "Focused display of content",
           href: "#developer/modals",
           icon: "window",
         },
         {
-          title: "Notification (Toast)",
-          desc: "Notifier une information importante",
+          title: "Toast",
+          desc: "Notify important information",
           href: "#developer/notifications",
           icon: "notification-line",
         },
@@ -151,8 +151,8 @@ export function renderDeveloperIndex(host) {
         id: "developer-index-empty-filter",
         hidden: true,
         titleTag: "p",
-        title: "Oups !",
-        text: "Aucune page ne correspond à la recherche.",
+        title: "Oops!",
+        text: "No pages match the search.",
       })}
     </section>
   `;

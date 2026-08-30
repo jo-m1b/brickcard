@@ -14,6 +14,7 @@ import { contrastText, DEFAULT_THEME_COLOR } from "../themes-data.js";
 import { resolveCardAccent } from "../card-design.js";
 import { confirmDialog } from "../confirm-dialog.js";
 import { setAppDocumentTitle } from "../document-title.js";
+import { _t } from "../i18n.js";
 
 /**
  * Modale d’édition d’un thème personnalisé (`#themes/new`, `#themes/edit/:id`)
@@ -64,10 +65,10 @@ export async function renderThemeEditor(host, opts) {
 
   const colorDisplay = draft.color || resolveCardAccent(existing);
   const dialogTitle = readOnly
-    ? `Thème « ${existing.name} »`
+    ? _t("Theme “%(name)s”", { name: existing.name })
     : existing
-      ? `Modifier « ${existing.name} »`
-      : "Nouveau thème";
+      ? _t("Edit “%(name)s”", { name: existing.name })
+      : _t("New theme");
   const dialogIcon = readOnly ? ICON_PALETTE : existing ? ICON_PENCIL : ICON_ADD;
 
   function themeCropBackground() {
@@ -91,25 +92,25 @@ export async function renderThemeEditor(host, opts) {
           </div>
           <button type="button" class="btn primary icon-only modal-close" tabindex="-1" id="theme-modal-close">
             ${ICON_CLOSE}
-            <span class="visually-hidden">Fermer</span>
+            <span class="visually-hidden">${_t("Close")}</span>
           </button>
         </div>
         <div class="modal-body" tabindex="-1">
           <div class="editor-layout">
             <aside class="preview-wrap">
-              <div class="card-preview" id="theme-preview-back-host" aria-label="Aperçu du dos"></div>
+              <div class="card-preview" id="theme-preview-back-host" aria-label="${_t("Back preview")}"></div>
             </aside>
             <div>
               ${
                 readOnly
                   ? `<div class="form-field">
-                <label class="form-label" for="theme-id">Identifiant</label>
+                <label class="form-label" for="theme-id">${_t("Identifier")}</label>
                 <input class="form-control" type="text" id="theme-id" autocomplete="off" spellcheck="false" readonly />
               </div>`
                   : ""
               }
               <div class="form-field">
-                <label class="form-label${readOnly ? "" : " form-label--required"}" for="theme-name">Nom</label>
+                <label class="form-label${readOnly ? "" : " form-label--required"}" for="theme-name">${_t("Name")}</label>
                 <input class="form-control" type="text" id="theme-name" placeholder="CITY" autocomplete="off"${
                   readOnly ? " readonly" : ""
                 } />
@@ -120,8 +121,8 @@ export async function renderThemeEditor(host, opts) {
                 }
               </div>
               <div class="form-field">
-                <label class="form-label" for="theme-color-hex">Couleur</label>
-                <p class="form-hint" id="theme-color-hint">Couleur principale des cartes du thème</p>
+                <label class="form-label" for="theme-color-hex">${_t("Color")}</label>
+                <p class="form-hint" id="theme-color-hint">${_t("Main color of the theme’s cards")}</p>
                 ${formColorMarkup({
                   id: "theme-color-hex",
                   value: draft.color,
@@ -132,8 +133,8 @@ export async function renderThemeEditor(host, opts) {
                 })}
               </div>
               <div class="form-field">
-                <label class="form-label" for="theme-secondary-color-hex">Couleur secondaire</label>
-                <p class="form-hint" id="theme-secondary-color-hint">Couleur utilisée pour les textes, icônes et le logo Brickcard. Par défaut cette couleur est déterminée automatiquement (noir ou blanc) en fonction de la couleur principale.</p>
+                <label class="form-label" for="theme-secondary-color-hex">${_t("Secondary color")}</label>
+                <p class="form-hint" id="theme-secondary-color-hint">${_t("Color used for the texts, icons, and the Brickcard logo. By default this color is determined automatically (black or white) from the main color.")}</p>
                 ${formColorMarkup({
                   id: "theme-secondary-color-hex",
                   value: draft.secondaryColor,
@@ -144,7 +145,7 @@ export async function renderThemeEditor(host, opts) {
                 })}
               </div>
               <div class="form-field" style="--form-image-aspect: 63 / 44">
-                <label class="form-label" id="theme-logo-label">Logo</label>
+                <label class="form-label" id="theme-logo-label">${_t("Logo")}</label>
                 ${formImageMarkup({
                   id: "theme-logo",
                   labelledBy: "theme-logo-label",
@@ -166,18 +167,18 @@ export async function renderThemeEditor(host, opts) {
           readOnly
             ? `<div class="modal-footer">
           <div class="modal-footer-end">
-            <button type="button" class="btn secondary" id="theme-cancel">Fermer</button>
+            <button type="button" class="btn secondary" id="theme-cancel">${_t("Close")}</button>
           </div>
         </div>`
             : `<div class="modal-footer modal-footer--primary-first">
           <div class="modal-footer-end">
-            <button type="button" class="btn primary" id="theme-save">${ICON_SAVE}<span>Enregistrer</span></button>
-            <button type="button" class="btn secondary sm" id="theme-cancel">Annuler</button>
+            <button type="button" class="btn primary" id="theme-save">${ICON_SAVE}<span>${_t("Save")}</span></button>
+            <button type="button" class="btn secondary sm" id="theme-cancel">${_t("Cancel")}</button>
           </div>
           ${
             existing
               ? `<div class="modal-footer-start">
-            <button type="button" class="btn danger" id="theme-delete">${ICON_DELETE_BIN_2}<span>Supprimer</span></button>
+            <button type="button" class="btn danger" id="theme-delete">${ICON_DELETE_BIN_2}<span>${_t("Delete")}</span></button>
           </div>`
               : ""
           }
@@ -347,7 +348,7 @@ export async function renderThemeEditor(host, opts) {
       const name = nameInput.value.trim();
       if (!name) {
         if (errEl) errEl.textContent = "";
-        setNameError("Le nom est obligatoire.");
+        setNameError(_t("The name is required."));
         nameInput.focus();
         return;
       }
@@ -367,7 +368,7 @@ export async function renderThemeEditor(host, opts) {
         });
         onSaved(name, { isNew: !isEdit, theme: saved });
       } catch (ex) {
-        if (errEl) errEl.textContent = ex.message || "Enregistrement impossible.";
+        if (errEl) errEl.textContent = ex.message || _t("Unable to save.");
       }
     };
   }
@@ -376,11 +377,12 @@ export async function renderThemeEditor(host, opts) {
   if (deleteBtn) {
     deleteBtn.onclick = async () => {
       const ok = await confirmDialog(host, {
-        title: `Supprimer le thème « ${existing.name} » ?`,
+        title: _t("Delete the theme “%(name)s”?", { name: existing.name }),
         icon: "delete-bin-2",
-        message:
-          "Attention, la suppression est définitive et ne pourra pas être annulée ! Souhaitez-vous continuer ?",
-        okLabel: "Supprimer",
+        message: _t(
+          "Warning, deletion is permanent and cannot be undone! Do you want to continue?"
+        ),
+        okLabel: _t("Delete"),
         danger: true,
       });
       if (!ok) return;
@@ -388,7 +390,7 @@ export async function renderThemeEditor(host, opts) {
         await deleteTheme(existing.id);
         onDeleted?.(existing.name, existing.id);
       } catch (ex) {
-        if (errEl) errEl.textContent = ex.message || "Suppression impossible.";
+        if (errEl) errEl.textContent = ex.message || _t("Unable to delete.");
       }
     };
   }

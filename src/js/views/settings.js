@@ -3,6 +3,8 @@ import { bindFormColor, formColorMarkup } from "../form-color.js";
 import { bindFormRange, formRangeResetMarkup } from "../form-range.js";
 import { formCheckboxMarkup } from "../form-checkbox.js";
 import { formRadioMarkup } from "../form-radio.js";
+import { enhanceFormSelect } from "../form-select.js";
+import { _t, getLocale, listLocales, localeDisplayName, setLocale } from "../i18n.js";
 import { getOptimizeImages, setOptimizeImages } from "../image-optimize.js";
 import { getTelemetry, isTelemetryAvailable, setTelemetry } from "../telemetry.js";
 import { getTheme, setTheme } from "../theme.js";
@@ -94,11 +96,11 @@ export function renderSettingsModal(host, opts) {
       <div class="modal modal--md" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
         <div class="modal-header">
           <div>
-            <h1 class="view-title" id="settings-modal-title">${modalTitleMarkup("Paramètres", ICON_TOOLS)}</h1>
+            <h1 class="view-title" id="settings-modal-title">${modalTitleMarkup(_t("Settings"), ICON_TOOLS)}</h1>
           </div>
           <button type="button" class="btn primary icon-only modal-close" tabindex="-1" id="btn-settings-close">
             ${ICON_CLOSE}
-            <span class="visually-hidden">Fermer</span>
+            <span class="visually-hidden">${_t("Close")}</span>
           </button>
         </div>
         <div class="themes-toolbar">
@@ -108,45 +110,56 @@ export function renderSettingsModal(host, opts) {
               class="form-control"
               type="search"
               id="settings-search"
-              placeholder="Rechercher…"
+              placeholder="${_t("Search…")}"
               autocomplete="off"
-              aria-label="Rechercher un paramètre"
+              aria-label="${_t("Search for a setting")}"
             />
           </div>
         </div>
         <div class="modal-body" tabindex="-1">
           <div class="settings-sections">
             <section class="settings-panel">
-              <h2 class="section-title">Application</h2>
+              <h2 class="section-title">${_t("Application")}</h2>
+              <div class="form-field">
+                <label class="form-label" for="settings-locale">${_t("Language")}</label>
+                <select class="form-control" id="settings-locale">
+                  ${listLocales()
+                    .map(
+                      (loc) =>
+                        `<option value="${escapeAttr(loc.code)}"${loc.code === getLocale() ? " selected" : ""}>${escapeHtml(localeDisplayName(loc))}</option>`
+                    )
+                    .join("")}
+                </select>
+              </div>
               <fieldset class="form-check-group">
-                <legend class="form-label">Mode d’affichage</legend>
+                <legend class="form-label">${_t("Display mode")}</legend>
                 <div class="form-check-list">
                   ${formRadioMarkup({
                     id: "settings-theme-light",
                     name: "settings-theme",
                     value: "light",
-                    label: "Thème clair",
+                    label: _t("Light theme"),
                     checked: currentTheme === "light",
                   })}
                   ${formRadioMarkup({
                     id: "settings-theme-dark",
                     name: "settings-theme",
                     value: "dark",
-                    label: "Thème sombre",
+                    label: _t("Dark theme"),
                     checked: currentTheme === "dark",
                   })}
                   ${formRadioMarkup({
                     id: "settings-theme-system",
                     name: "settings-theme",
                     value: "system",
-                    label: "Système",
-                    hint: "Utilise les paramètres système",
+                    label: _t("System"),
+                    hint: _t("Use system settings"),
                     checked: currentTheme === "system",
                   })}
                 </div>
               </fieldset>
               <div class="form-field">
-                <label class="form-label" for="settings-list-cols">Nombre de cartes par ligne maximum</label>
+                <label class="form-label" for="settings-list-cols">${_t("Maximum number of cards per row")}</label>
                 <div class="form-range-row">
                   <input
                     type="range"
@@ -168,8 +181,8 @@ export function renderSettingsModal(host, opts) {
               <div class="form-field">
                 ${formCheckboxMarkup({
                   id: "settings-optimize-images",
-                  label: "Optimiser les images",
-                  hint: "Convertir automatiquement les nouvelles images ajoutées à la collection dans un format optimisé",
+                  label: _t("Optimize images"),
+                  hint: _t("Automatically convert new images added to the collection to an optimized format"),
                   checked: getOptimizeImages(),
                 })}
               </div>
@@ -178,8 +191,8 @@ export function renderSettingsModal(host, opts) {
                   ? `<div class="form-field">
                 ${formCheckboxMarkup({
                   id: "settings-telemetry",
-                  label: "Télémétrie",
-                  hint: "Envoyer des données de télémétrie d’utilisation anonyme",
+                  label: _t("Telemetry"),
+                  hint: _t("Send anonymous usage telemetry data"),
                   checked: getTelemetry(),
                 })}
               </div>`
@@ -188,10 +201,10 @@ export function renderSettingsModal(host, opts) {
             </section>
 
             <section class="settings-panel">
-              <h2 class="section-title">Apparence des cartes</h2>
+              <h2 class="section-title">${_t("Card appearance")}</h2>
               <div class="form-field">
-                <label class="form-label" for="settings-default-color-hex">Couleur par défaut</label>
-                <p class="form-hint" id="settings-default-color-hint">Couleur appliquée par défaut aux cartes sans thème ou sans couleur personnalisée</p>
+                <label class="form-label" for="settings-default-color-hex">${_t("Default color")}</label>
+                <p class="form-hint" id="settings-default-color-hint">${_t("Color applied by default to cards without a theme or without a custom color")}</p>
                 ${formColorMarkup({
                   id: "settings-default-color-hex",
                   value: configuredColor,
@@ -201,7 +214,7 @@ export function renderSettingsModal(host, opts) {
                 })}
               </div>
               <div class="form-field">
-                <label class="form-label" for="settings-face-border">Taille de la bordure (côté face)</label>
+                <label class="form-label" for="settings-face-border">${_t("Border size (front)")}</label>
                 <div class="form-range-row">
                   <input
                     type="range"
@@ -220,7 +233,7 @@ export function renderSettingsModal(host, opts) {
                 </div>
               </div>
               <div class="form-field">
-                <label class="form-label" for="settings-card-radius">Arrondi des coins</label>
+                <label class="form-label" for="settings-card-radius">${_t("Corner radius")}</label>
                 <div class="form-range-row">
                   <input
                     type="range"
@@ -239,7 +252,7 @@ export function renderSettingsModal(host, opts) {
                 </div>
               </div>
               <div class="form-field">
-                <label class="form-label" for="settings-card-image-radius">Arrondi des images</label>
+                <label class="form-label" for="settings-card-image-radius">${_t("Image radius")}</label>
                 <div class="form-range-row">
                   <input
                     type="range"
@@ -260,9 +273,9 @@ export function renderSettingsModal(host, opts) {
             </section>
 
             <section class="settings-panel">
-              <h2 class="section-title">Impression</h2>
+              <h2 class="section-title">${_t("Print")}</h2>
               <div class="form-field">
-                <label class="form-label" for="settings-print-grid">Grille d’impression</label>
+                <label class="form-label" for="settings-print-grid">${_t("Print grid")}</label>
                 <div class="form-range-row">
                   <input
                     type="range"
@@ -296,7 +309,7 @@ export function renderSettingsModal(host, opts) {
                 cutMarkBack: printSettings.cutMarkBack,
               })}
               <fieldset class="form-check-group">
-                <legend class="form-label">Ordre d’impression des cartes</legend>
+                <legend class="form-label">${_t("Card print order")}</legend>
                 <div class="form-check-list form-check-list--row">
                   ${printCardOrderRadiosMarkup({
                     idPrefix: "settings-card-print-order",
@@ -306,48 +319,48 @@ export function renderSettingsModal(host, opts) {
                 </div>
               </fieldset>
               <fieldset class="form-check-group">
-                <legend class="form-label">Côté d’impression</legend>
+                <legend class="form-label">${_t("Print side")}</legend>
                 <div class="form-check-list form-check-list--row">
                   ${formRadioMarkup({
                     id: "settings-print-side-both",
                     name: "settings-print-side",
                     value: "both",
-                    label: "Les deux faces",
+                    label: _t("Both sides"),
                     checked: printSettings.printSide === "both",
                   })}
                   ${formRadioMarkup({
                     id: "settings-print-side-face-only",
                     name: "settings-print-side",
                     value: "faceOnly",
-                    label: "Face uniquement",
+                    label: _t("Front only"),
                     checked: printSettings.printSide === "faceOnly",
                   })}
                   ${formRadioMarkup({
                     id: "settings-print-side-back-only",
                     name: "settings-print-side",
                     value: "backOnly",
-                    label: "Dos uniquement",
+                    label: _t("Back only"),
                     checked: printSettings.printSide === "backOnly",
                   })}
                 </div>
               </fieldset>
               <fieldset class="form-check-group" id="settings-sheet-assembly-field">
-                <legend class="form-label">Assemblage des feuilles</legend>
+                <legend class="form-label">${_t("Sheet assembly")}</legend>
                 <div class="form-check-list">
                   ${formRadioMarkup({
                     id: "settings-sheet-assembly-alternate",
                     name: "settings-sheet-assembly",
                     value: "alternate",
-                    label: "Alterner",
-                    hint: "Une feuille à la fois (imprimante recto-verso)",
+                    label: _t("Alternate"),
+                    hint: _t("One sheet at a time (duplex printer)"),
                     checked: printSettings.sheetAssembly === "alternate",
                   })}
                   ${formRadioMarkup({
                     id: "settings-sheet-assembly-grouped",
                     name: "settings-sheet-assembly",
                     value: "grouped",
-                    label: "Regrouper",
-                    hint: "Tous les rectos d’abord, puis retourner la pile pour ensuite imprimer tous les versos",
+                    label: _t("Group"),
+                    hint: _t("All fronts first, then flip the stack to print all the backs"),
                     checked: printSettings.sheetAssembly === "grouped",
                   })}
                 </div>
@@ -355,29 +368,29 @@ export function renderSettingsModal(host, opts) {
             </section>
 
             <section class="settings-panel">
-              <h2 class="section-title">Gestion de votre collection</h2>
+              <h2 class="section-title">${_t("Manage your collection")}</h2>
               ${tileListMarkup([
                 {
-                  title: "Importer",
-                  desc: "Charger une sauvegarde pour ajouter ou fusionner un lot de cartes, thèmes ou paramètres à votre collection",
+                  title: _t("Import"),
+                  desc: _t("Load a backup to add or merge a batch of cards, themes, or settings into your collection"),
                   icon: "upload",
                   href: "#import",
                 },
                 {
-                  title: "Sauvegarder",
-                  desc: "Enregistrer une sauvegarde de votre collection de cartes, thèmes et paramètres",
+                  title: _t("Save the collection"),
+                  desc: _t("Save a backup of your collection of cards, themes, and settings"),
                   icon: "download",
                   href: "#backup",
                 },
                 {
-                  title: "Thèmes",
-                  desc: "Gérer les thèmes disponibles pour votre collection",
+                  title: _t("Themes"),
+                  desc: _t("Manage the themes available for your collection"),
                   href: "#themes",
                   icon: "palette",
                 },
                 {
-                  title: "Supprimer toutes les cartes",
-                  desc: "Retirer toutes les cartes de votre collection (conserve les thèmes et les paramètres enregistrés)",
+                  title: _t("Delete all cards"),
+                  desc: _t("Remove all cards from your collection (keeps the themes and saved settings)"),
                   icon: "delete-bin-2",
                   tag: "button",
                   id: "settings-clear-cards",
@@ -390,17 +403,17 @@ export function renderSettingsModal(host, opts) {
             ${
               showDevReset
                 ? `<section class="settings-panel">
-              <h2 class="section-title">Options pour les développeurs</h2>
+              <h2 class="section-title">${_t("Developer options")}</h2>
               ${tileListMarkup([
                 {
-                  title: "Espace développeur",
-                  desc: "Aide au développement, système de design et documentation",
+                  title: _t("Developer space"),
+                  desc: _t("Development help, design system, and documentation"),
                   href: "#developer",
                   icon: "tools",
                 },
                 {
-                  title: "Réinitialiser",
-                  desc: "Supprimer toutes les données locales enregistrées (cartes, thèmes et paramètres)",
+                  title: _t("Reset"),
+                  desc: _t("Delete all locally saved data (cards, themes, and settings)"),
                   icon: "close-circle",
                   tag: "button",
                   id: "settings-dev-reset",
@@ -415,15 +428,15 @@ export function renderSettingsModal(host, opts) {
             id: "settings-empty-filter",
             hidden: true,
             titleTag: "p",
-            title: "Oups !",
-            text: "Aucun paramètre ne correspond à la recherche.",
+            title: _t("Oops!"),
+            text: _t("No settings match the search."),
           })}
         </div>
       </div>
     </div>
   `;
 
-  setAppDocumentTitle("Paramètres");
+  setAppDocumentTitle(_t("Settings"));
 
   const backdrop = host.querySelector("#settings-modal-backdrop");
   const btnClose = host.querySelector("#btn-settings-close");
@@ -527,7 +540,7 @@ export function renderSettingsModal(host, opts) {
   /** @param {ParentNode} root @param {string} needle */
   function matchesLabels(root, needle) {
     if (!needle) return true;
-    for (const el of root.querySelectorAll(".form-label, .form-hint")) {
+    for (const el of root.querySelectorAll(".form-label, .form-hint, option, .form-select-option")) {
       if (includesCI(el.textContent || "", needle)) return true;
     }
     return false;
@@ -638,11 +651,12 @@ export function renderSettingsModal(host, opts) {
   if (clearCardsBtn && onClearCards) {
     clearCardsBtn.addEventListener("click", async () => {
       const ok = await confirmDialog(host, {
-        title: "Supprimer toutes les cartes ?",
+        title: _t("Delete all cards?"),
         icon: "delete-bin-2",
-        message:
-          "Toutes les cartes seront supprimées définitivement. Les thèmes et les réglages sont conservés.",
-        okLabel: "Supprimer",
+        message: _t(
+          "All cards will be permanently deleted. Themes and settings are kept."
+        ),
+        okLabel: _t("Delete"),
         danger: true,
       });
       if (!ok) return;
@@ -659,11 +673,12 @@ export function renderSettingsModal(host, opts) {
   if (resetBtn && onDevReset) {
     resetBtn.addEventListener("click", async () => {
       const ok = await confirmDialog(host, {
-        title: "Réinitialiser toutes les données locales ?",
+        title: _t("Reset all local data?"),
         icon: "close-circle",
-        message:
-          "Toutes les cartes, thèmes et réglages de la collection seront supprimés définitivement.",
-        okLabel: "Réinitialiser",
+        message: _t(
+          "All cards, themes, and collection settings will be permanently deleted."
+        ),
+        okLabel: _t("Reset"),
         danger: true,
       });
       if (!ok) return;
@@ -693,7 +708,25 @@ export function renderSettingsModal(host, opts) {
   btnClose?.addEventListener("click", close);
   document.addEventListener("keydown", onKey);
 
+  const localeSelect = host.querySelector("#settings-locale");
+  /** @type {() => void} */
+  let destroyLocaleSelect = () => {};
+  /** @type {(() => void)|null} */
+  let unbindLocaleSelect = null;
+  if (localeSelect instanceof HTMLSelectElement) {
+    destroyLocaleSelect = enhanceFormSelect(localeSelect);
+    const onLocaleChange = () => {
+      setLocale(localeSelect.value);
+    };
+    localeSelect.addEventListener("change", onLocaleChange);
+    unbindLocaleSelect = () => {
+      localeSelect.removeEventListener("change", onLocaleChange);
+    };
+  }
+
   function cleanup() {
+    unbindLocaleSelect?.();
+    destroyLocaleSelect();
     defaultColorField?.destroy();
     rangeFields.forEach((field) => field.destroy());
     themeInputs.forEach((input) => input.removeEventListener("change", onThemeChange));
@@ -711,4 +744,16 @@ export function renderSettingsModal(host, opts) {
   }
 
   return cleanup;
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function escapeAttr(str) {
+  return escapeHtml(str).replace(/'/g, "&#39;");
 }

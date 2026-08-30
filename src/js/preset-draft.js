@@ -119,7 +119,7 @@ function openDb() {
 
     req.onerror = () => {
       dbPromise = null;
-      reject(req.error || new Error("Impossible d'ouvrir le brouillon des thèmes"));
+      reject(req.error || new Error("Unable to open the theme draft"));
     };
   });
 
@@ -259,10 +259,10 @@ export async function upsertPresetDraftTheme(theme, opts = {}) {
     updatedAt: new Date().toISOString(),
   });
   if (!next.id || !isValidPresetId(next.id)) {
-    throw new Error("Identifiant invalide (slug kebab-case, ex. city).");
+    throw new Error("Invalid identifier (kebab-case slug, e.g. city).");
   }
   if (!next.name) {
-    throw new Error("Le nom est obligatoire.");
+    throw new Error("The name is required.");
   }
 
   const db = await openDb();
@@ -271,7 +271,7 @@ export async function upsertPresetDraftTheme(theme, opts = {}) {
     db.transaction(STORE_THEMES, "readonly").objectStore(STORE_THEMES).get(next.id)
   );
   if (colliding && colliding.id !== previousId) {
-    throw new Error(`L’identifiant « ${next.id} » existe déjà.`);
+    throw new Error(`The identifier “${next.id}” already exists.`);
   }
 
   const tx = db.transaction(STORE_THEMES, "readwrite");

@@ -9,8 +9,8 @@ import { popModalDocumentTitle, pushModalDocumentTitle } from "../../document-ti
  */
 
 /**
- * Galerie / banc d’essai des modales (design system).
- * Ouvre des démos dans `#modal-root` sans modifier les modales métier.
+ * Modal gallery / playground (design system).
+ * Opens demos in `#modal-root` without changing production modals.
  * @param {HTMLElement} host
  * @returns {() => void}
  */
@@ -22,138 +22,138 @@ export function renderDeveloperModals(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#developer" })} / Modale (Modal)</p>
-        <h1 class="view-title">Modale (Modal)</h1>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#developer" })} / Modal</p>
+        <h1 class="view-title">Modal</h1>
       </header>
 
       <p class="styleguide-intro">
-        Banc d’essai pour uniformiser les dialogues.
-        <strong>3 tailles</strong> (<code>modal--sm</code> / <code>modal--md</code> / <code>modal--lg</code>).
-        Sous <code>640px</code> de largeur&nbsp;: plein écran (plus d’overlay visible).
-        Largeur / hauteur toujours plafonnées au <strong>viewport</strong> (<code>100vw</code> / <code>100dvh</code>), pas au scroll de la page.
-        Les démos s’empilent au-dessus de cette galerie (sans la remplacer).
+        Playground to standardize dialogs.
+        <strong>3 sizes</strong> (<code>modal--sm</code> / <code>modal--md</code> / <code>modal--lg</code>).
+        Below <code>640px</code> width&nbsp;: full screen (no visible overlay).
+        Width / height always capped to the <strong>viewport</strong> (<code>100vw</code> / <code>100dvh</code>), not the page scroll.
+        Demos stack on top of this gallery (without replacing it).
       </p>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Vocabulaire</h2>
+        <h2 class="styleguide-section-title">Vocabulary</h2>
         <div class="styleguide-table-wrap">
           <table class="styleguide-table">
             <thead>
-              <tr><th>Axe</th><th>Options</th></tr>
+              <tr><th>Axis</th><th>Options</th></tr>
             </thead>
             <tbody>
               <tr>
-                <td>Coquille</td>
+                <td>Shell</td>
                 <td><code>modal-backdrop</code> + <code>modal</code> (<code>role="dialog"</code> <code>aria-modal</code>)</td>
               </tr>
               <tr>
-                <td>Taille</td>
-                <td><code>modal--sm</code> (petite, ~640) · <code>modal--md</code> (moyenne, ~896, défaut) · <code>modal--lg</code> (grande, ~1152)</td>
+                <td>Size</td>
+                <td><code>modal--sm</code> (small, ~640) · <code>modal--md</code> (medium, ~896, default) · <code>modal--lg</code> (large, ~1152)</td>
               </tr>
               <tr>
-                <td>Alignement vertical</td>
-                <td><code>modal-backdrop--top</code> · <code>modal-backdrop--middle</code> (défaut) · <code>modal-backdrop--bottom</code></td>
+                <td>Vertical alignment</td>
+                <td><code>modal-backdrop--top</code> · <code>modal-backdrop--middle</code> (default) · <code>modal-backdrop--bottom</code></td>
               </tr>
               <tr>
                 <td>Responsive</td>
-                <td>≤&nbsp;640px&nbsp;: plein écran viewport ; sinon <code>max-width: calc(100vw - 2rem)</code> / <code>max-height: calc(100dvh - 2.5rem)</code></td>
+                <td>≤&nbsp;640px&nbsp;: full-screen viewport; otherwise <code>max-width: calc(100vw - 2rem)</code> / <code>max-height: calc(100dvh - 2.5rem)</code></td>
               </tr>
               <tr>
                 <td>Header</td>
-                <td><code>modal-header</code> : <code>h1.view-title</code> (icône Remix optionnelle à gauche, centrée ; titre à côté, plusieurs lignes possibles) + <code>btn primary icon-only modal-close</code> (couleurs inversées, <code>tabindex="-1"</code>)</td>
+                <td><code>modal-header</code>: <code>h1.view-title</code> (optional Remix icon on the left, centered; title beside it, wrapping if needed) + <code>btn primary icon-only modal-close</code> (inverted colors, <code>tabindex="-1"</code>)</td>
               </tr>
               <tr>
-                <td>Corps</td>
-                <td><code>modal-body</code> (défile si besoin)</td>
+                <td>Body</td>
+                <td><code>modal-body</code> (scrolls if needed)</td>
               </tr>
               <tr>
-                <td>Pied</td>
-                <td><code>modal-footer</code> + <code>modal-footer-start</code> (validation) + <code>modal-footer-end</code> (danger) — boutons centrés verticalement</td>
+                <td>Footer</td>
+                <td><code>modal-footer</code> + <code>modal-footer-start</code> (save / confirm) + <code>modal-footer-end</code> (danger) — buttons vertically centered</td>
               </tr>
             </tbody>
           </table>
         </div>
         <p class="form-hint" style="margin-top: 0.75rem">
-          Appliqué dans l’app&nbsp;: paramètres / page MD / espace développeur / impression (<code>modal--md</code>),
-          thèmes + éditeur carte + éditeur de thème + thèmes par défaut (<code>modal--lg</code>)
+          Used in the app&nbsp;: settings / MD page / developer space / print (<code>modal--md</code>),
+          themes + card editor + theme editor + default themes (<code>modal--lg</code>)
         </p>
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Correspondance app</h2>
+        <h2 class="styleguide-section-title">App mapping</h2>
         <div class="styleguide-table-wrap">
           <table class="styleguide-table">
             <thead>
-              <tr><th>Usage</th><th>Taille</th></tr>
+              <tr><th>Usage</th><th>Size</th></tr>
             </thead>
             <tbody>
-              <tr><td>Paramètres / page MD / espace développeur / impression</td><td><code>modal--md</code></td></tr>
-              <tr><td>Thèmes LEGO / éditeur carte / éditeur de thème / thèmes par défaut</td><td><code>modal--lg</code></td></tr>
+              <tr><td>Settings / MD page / developer space / print</td><td><code>modal--md</code></td></tr>
+              <tr><td>LEGO themes / card editor / theme editor / default themes</td><td><code>modal--lg</code></td></tr>
             </tbody>
           </table>
         </div>
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Tailles</h2>
-        <p class="form-hint" style="margin-bottom: 0.65rem">Sur desktop&nbsp;: largeurs distinctes. Réduis la fenêtre (&lt;&nbsp;640px) pour voir le plein écran.</p>
+        <h2 class="styleguide-section-title">Sizes</h2>
+        <p class="form-hint" style="margin-bottom: 0.65rem">On desktop&nbsp;: distinct widths. Shrink the window (&lt;&nbsp;640px) to see full screen.</p>
         <div class="styleguide-row">
-          <button type="button" class="btn secondary" data-demo-modal="size" data-size="sm">Petite — sm</button>
-          <button type="button" class="btn secondary" data-demo-modal="size" data-size="md">Moyenne — md</button>
-          <button type="button" class="btn secondary" data-demo-modal="size" data-size="lg">Grande — lg</button>
+          <button type="button" class="btn secondary" data-demo-modal="size" data-size="sm">Small — sm</button>
+          <button type="button" class="btn secondary" data-demo-modal="size" data-size="md">Medium — md</button>
+          <button type="button" class="btn secondary" data-demo-modal="size" data-size="lg">Large — lg</button>
         </div>
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Alignement vertical</h2>
-        <p class="form-hint" style="margin-bottom: 0.65rem">Sur le <code>modal-backdrop</code>. Défaut&nbsp;: milieu. Sans effet en plein écran (&lt;&nbsp;640px).</p>
+        <h2 class="styleguide-section-title">Vertical alignment</h2>
+        <p class="form-hint" style="margin-bottom: 0.65rem">On the <code>modal-backdrop</code>. Default&nbsp;: middle. No effect in full screen (&lt;&nbsp;640px).</p>
         <div class="styleguide-row">
-          <button type="button" class="btn secondary" data-demo-modal="align" data-align="top">Haut</button>
-          <button type="button" class="btn secondary" data-demo-modal="align" data-align="middle">Milieu (défaut)</button>
-          <button type="button" class="btn secondary" data-demo-modal="align" data-align="bottom">Bas</button>
+          <button type="button" class="btn secondary" data-demo-modal="align" data-align="top">Top</button>
+          <button type="button" class="btn secondary" data-demo-modal="align" data-align="middle">Middle (default)</button>
+          <button type="button" class="btn secondary" data-demo-modal="align" data-align="bottom">Bottom</button>
         </div>
       </div>
 
       <div class="styleguide-section">
         <h2 class="styleguide-section-title">Header</h2>
         <p class="form-hint" style="margin-bottom: 0.65rem">
-          Titre court + bouton fermer (<code>btn primary icon-only</code>, couleurs inversées).
-          Icône à gauche (centrée) ; le titre à côté, plusieurs lignes si besoin (comme les toasts).
+          Short title + close button (<code>btn primary icon-only</code>, inverted colors).
+          Icon on the left (centered); title beside it, wrapping if needed (like toasts).
         </p>
         <div class="styleguide-row">
-          <button type="button" class="btn secondary" data-demo-modal="header-plain">Titre court</button>
-          <button type="button" class="btn secondary" data-demo-modal="header-confirm">Titre de confirmation</button>
+          <button type="button" class="btn secondary" data-demo-modal="header-plain">Short title</button>
+          <button type="button" class="btn secondary" data-demo-modal="header-confirm">Confirmation title</button>
         </div>
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Corps long</h2>
-        <p class="form-hint" style="margin-bottom: 0.65rem">Grande modale avec beaucoup de contenu (scroll dans le body)</p>
+        <h2 class="styleguide-section-title">Long body</h2>
+        <p class="form-hint" style="margin-bottom: 0.65rem">Large modal with lots of content (scroll in the body)</p>
         <div class="styleguide-row">
-          <button type="button" class="btn secondary" data-demo-modal="scroll">Ouvrir (contenu long)</button>
+          <button type="button" class="btn secondary" data-demo-modal="scroll">Open (long content)</button>
         </div>
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Footer d’actions</h2>
+        <h2 class="styleguide-section-title">Action footer</h2>
         <p class="form-hint" style="margin-bottom: 0.65rem">
-          <code>modal-footer-start</code> (gauche&nbsp;: sauvegarde / validation) ·
-          <code>modal-footer-end</code> (droite&nbsp;: danger). Boutons centrés verticalement (normal + <code>sm</code>).
-          <strong>Annuler</strong>&nbsp;: <code>sm</code> s’il y a d’autres actions dans le pied ; taille normale s’il est seul.
+          <code>modal-footer-start</code> (left&nbsp;: save / confirm) ·
+          <code>modal-footer-end</code> (right&nbsp;: danger). Buttons vertically centered (normal + <code>sm</code>).
+          <strong>Cancel</strong>&nbsp;: <code>sm</code> if there are other actions in the footer; normal size if it is alone.
         </p>
         <div class="styleguide-row">
-          <button type="button" class="btn secondary" data-demo-modal="footer">Zones gauche / droite</button>
-          <button type="button" class="btn secondary" data-demo-modal="footer-danger">Confirm suppression (sm)</button>
+          <button type="button" class="btn secondary" data-demo-modal="footer">Left / right slots</button>
+          <button type="button" class="btn secondary" data-demo-modal="footer-danger">Delete confirm (sm)</button>
         </div>
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Comportement</h2>
+        <h2 class="styleguide-section-title">Behavior</h2>
         <ul class="styleguide-notes">
-          <li>Clic backdrop → ferme (desktop uniquement — en plein écran le backdrop n’est plus visible)</li>
-          <li>Échap → ferme (le bouton Fermer n’est pas tabulable)</li>
-          <li>Bouton close → ferme</li>
-          <li><code>body.modal-open</code> bloque le scroll de fond</li>
+          <li>Backdrop click → closes (desktop only — in full screen the backdrop is no longer visible)</li>
+          <li>Escape → closes (the Close button is not tabbable)</li>
+          <li>Close button → closes</li>
+          <li><code>body.modal-open</code> blocks background scroll</li>
         </ul>
       </div>
     </section>
@@ -209,7 +209,7 @@ export function renderDeveloperModals(host) {
             </div>
             <button type="button" class="btn primary icon-only modal-close" tabindex="-1" id="demo-modal-close">
               ${ICON_CLOSE}
-              <span class="visually-hidden">Fermer</span>
+              <span class="visually-hidden">Close</span>
             </button>
           </div>
           <div class="modal-body" tabindex="-1">
@@ -241,7 +241,7 @@ export function renderDeveloperModals(host) {
     });
     document.addEventListener("keydown", onKey, true);
     queueMicrotask(() => focusTopModal());
-    pushModalDocumentTitle(spec.title, "Système de design");
+    pushModalDocumentTitle(spec.title, "Design system");
 
     demoCleanup = () => {
       backdrop?.removeEventListener("click", onBackdrop);
@@ -254,12 +254,12 @@ export function renderDeveloperModals(host) {
 
   function longBodyHtml() {
     const paras = Array.from({ length: 12 }, (_, i) => {
-      return `<p>Paragraphe de démonstration n°${i + 1}. Contenu volontairement long pour tester le défilement interne du <code>modal-body</code>.</p>`;
+      return `<p>Demo paragraph ${i + 1}. Intentionally long content to test internal scrolling of <code>modal-body</code>.</p>`;
     }).join("\n");
     return `<div class="md-content">${paras}</div>`;
   }
 
-  const sizeLabels = { sm: "petite", md: "moyenne", lg: "grande" };
+  const sizeLabels = { sm: "small", md: "medium", lg: "large" };
 
   /** @param {MouseEvent} e */
   const onClick = (e) => {
@@ -271,41 +271,41 @@ export function renderDeveloperModals(host) {
       const size = /** @type {ModalSize} */ (btn.getAttribute("data-size") || "md");
       openDemo({
         size,
-        title: `Modale ${sizeLabels[size] || size}`,
-        bodyHtml: `<p>Classe <code>modal--${size}</code>. Sous 640px&nbsp;: plein écran.</p><p>Corps de démo. Sur grand écran, la largeur suit la taille. Sur smartphone, la modale occupe tout l’écran.</p>`,
+        title: `Modal ${sizeLabels[size] || size}`,
+        bodyHtml: `<p>Class <code>modal--${size}</code>. Below 640px&nbsp;: full screen.</p><p>Demo body. On a large screen, width follows the size. On a phone, the modal fills the screen.</p>`,
       });
       return;
     }
     if (kind === "align") {
       const align = /** @type {ModalAlign} */ (btn.getAttribute("data-align") || "middle");
-      const alignLabels = { top: "haut", middle: "milieu", bottom: "bas" };
+      const alignLabels = { top: "top", middle: "middle", bottom: "bottom" };
       openDemo({
         size: "sm",
         align,
-        title: `Alignée en ${alignLabels[align] || align}`,
-        bodyHtml: `<p>Classe <code>modal-backdrop--${align}</code> sur le backdrop.</p><p>Petite modale pour bien voir le positionnement vertical. Le défaut sans classe (ou <code>--middle</code>) centre verticalement.</p>`,
+        title: `Aligned ${alignLabels[align] || align}`,
+        bodyHtml: `<p>Class <code>modal-backdrop--${align}</code> on the backdrop.</p><p>Small modal so the vertical position is easy to see. The default with no class (or <code>--middle</code>) centers vertically.</p>`,
       });
       return;
     }
     if (kind === "header-plain") {
       openDemo({
         size: "md",
-        title: "Paramètres",
+        title: "Settings",
         icon: "tools",
-        bodyHtml: `<p>Header&nbsp;: titre court + <code>btn primary icon-only modal-close</code> (couleurs inversées sur le header ink).</p>`,
+        bodyHtml: `<p>Header&nbsp;: short title + <code>btn primary icon-only modal-close</code> (inverted colors on the ink header).</p>`,
       });
       return;
     }
     if (kind === "header-confirm") {
       openDemo({
         size: "sm",
-        title: "Supprimer la carte « Saucer Centurien (#6939) » ?",
+        title: "Delete the card “Saucer Centurien (#6939)”?",
         icon: "delete-bin-2",
-        bodyHtml: `<p class="modal-confirm-msg">Attention, la suppression est définitive et ne pourra pas être annulée&nbsp;! Souhaitez-vous continuer&nbsp;?</p>`,
+        bodyHtml: `<p class="modal-confirm-msg">Warning, deletion is permanent and cannot be undone! Do you want to continue?</p>`,
         footerHtml: `
           <div class="modal-footer-end">
-            <button type="button" class="btn secondary sm" data-demo-close>Annuler</button>
-            <button type="button" class="btn danger" data-demo-close>${ICON_DELETE_BIN_2}<span>Supprimer</span></button>
+            <button type="button" class="btn secondary sm" data-demo-close>Cancel</button>
+            <button type="button" class="btn danger" data-demo-close>${ICON_DELETE_BIN_2}<span>Delete</span></button>
           </div>
         `,
       });
@@ -314,23 +314,23 @@ export function renderDeveloperModals(host) {
     if (kind === "scroll") {
       openDemo({
         size: "lg",
-        title: "Contenu long",
-        bodyHtml: `<p><code>modal--lg</code> — le body défile.</p>${longBodyHtml()}`,
+        title: "Long content",
+        bodyHtml: `<p><code>modal--lg</code> — the body scrolls.</p>${longBodyHtml()}`,
       });
       return;
     }
     if (kind === "footer") {
       openDemo({
         size: "md",
-        title: "Footer à deux zones",
-        bodyHtml: `<p>Gauche&nbsp;: validation · Droite&nbsp;: danger. Tailles mixte (normal + <code>sm</code>).</p><p>Les boutons restent alignés verticalement au centre du footer, quelle que soit leur taille.</p>`,
+        title: "Two-slot footer",
+        bodyHtml: `<p>Left&nbsp;: save / confirm · Right&nbsp;: danger. Mixed sizes (normal + <code>sm</code>).</p><p>Buttons stay vertically centered in the footer, regardless of their size.</p>`,
         footerHtml: `
           <div class="modal-footer-start">
-            <button type="button" class="btn primary" data-demo-close>${ICON_SAVE}<span>Sauvegarder</span></button>
-            <button type="button" class="btn secondary sm" data-demo-close>Annuler</button>
+            <button type="button" class="btn primary" data-demo-close>${ICON_SAVE}<span>Save</span></button>
+            <button type="button" class="btn secondary sm" data-demo-close>Cancel</button>
           </div>
           <div class="modal-footer-end">
-            <button type="button" class="btn danger" data-demo-close>${ICON_DELETE_BIN_2}<span>Supprimer</span></button>
+            <button type="button" class="btn danger" data-demo-close>${ICON_DELETE_BIN_2}<span>Delete</span></button>
           </div>
         `,
       });
@@ -339,15 +339,15 @@ export function renderDeveloperModals(host) {
     if (kind === "footer-danger") {
       openDemo({
         size: "sm",
-        title: "Supprimer le thème « Star Wars » ?",
+        title: "Delete the theme “Star Wars”?",
         icon: "delete-bin-2",
-        bodyHtml: `<p class="modal-confirm-msg">Cette action est irréversible (démo).</p>`,
+        bodyHtml: `<p class="modal-confirm-msg">This action is irreversible (demo).</p>`,
         footerHtml: `
           <div class="modal-footer-start">
-            <button type="button" class="btn secondary sm" data-demo-close>Annuler</button>
+            <button type="button" class="btn secondary sm" data-demo-close>Cancel</button>
           </div>
           <div class="modal-footer-end">
-            <button type="button" class="btn danger" data-demo-close>${ICON_DELETE_BIN_2}<span>Supprimer</span></button>
+            <button type="button" class="btn danger" data-demo-close>${ICON_DELETE_BIN_2}<span>Delete</span></button>
           </div>
         `,
       });

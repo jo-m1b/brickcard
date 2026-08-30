@@ -18,6 +18,7 @@ import {
   syncPrintMenu,
 } from "./print-menu.js";
 import { clearPrintQty } from "./print-qty.js";
+import { _t, applyChromeI18n, initI18n } from "./i18n.js";
 
 const main = document.getElementById("main");
 const modalRoot = document.getElementById("modal-root");
@@ -292,7 +293,7 @@ async function loadOverlay(loader) {
     return await loader();
   } catch (err) {
     console.error(err);
-    const msg = err && err.message ? err.message : String(err || "Erreur de chargement");
+    const msg = err && err.message ? err.message : String(err || _t("Loading error"));
     toast(msg, "error");
     dismissOverlay();
     return null;
@@ -307,7 +308,7 @@ async function ensureUnderlay() {
   } catch (err) {
     console.error(err);
     underlayReady = false;
-    main.innerHTML = `<section class="panel"><p class="error">Erreur de stockage : ${err.message || err}</p></section>`;
+    main.innerHTML = `<section class="panel"><p class="error">${_t("Storage error: %(message)s", { message: err.message || err })}</p></section>`;
     return;
   }
   await renderHomeUnderlay(cards);
@@ -317,7 +318,7 @@ async function ensureUnderlay() {
 
 async function showOverlay(routeInfo) {
   if (!modalRoot) {
-    toast("Modale indisponible", "error");
+    toast(_t("Modal unavailable"), "error");
     dismissOverlay();
     return;
   }
@@ -395,7 +396,7 @@ async function showOverlay(routeInfo) {
           onClearedCustomThemes: () => {
             toast({
               type: "success",
-              message: "Tous les thèmes personnalisés ont été supprimés",
+              message: _t("All custom themes have been deleted"),
               icon: "delete-bin-2",
             });
             underlayStale = true;
@@ -404,7 +405,7 @@ async function showOverlay(routeInfo) {
         focusTopModal();
         themes.applyPendingThemeFocus();
       } else {
-        setAppDocumentTitle("Thèmes");
+        setAppDocumentTitle(_t("Themes"));
         focusTopModal({ resetScroll: false });
         themes.applyPendingThemeFocus();
       }
@@ -450,7 +451,7 @@ async function showOverlay(routeInfo) {
       onSaved: (name, meta) => {
         toast({
           type: "success",
-          title: "Thème enregistré",
+          title: _t("Theme saved"),
           message: name,
           icon: "palette",
         });
@@ -470,7 +471,7 @@ async function showOverlay(routeInfo) {
       onDeleted: (name, themeId) => {
         toast({
           type: "success",
-          title: "Thème supprimé",
+          title: _t("Theme deleted"),
           message: name,
           icon: "delete-bin-2",
         });
@@ -506,13 +507,13 @@ async function showOverlay(routeInfo) {
     if (!isDeveloperEnabled()) {
       setAppDocumentTitle();
       const choice = await openConfirmDialog(modalRoot, {
-        title: "Activer l’espace développeur ?",
+        title: _t("Enable the developer space?"),
         icon: "tools",
         message:
-          "L’espace développeur donne accès à l’aide au développement, le système de design, la documentation et certaines options comme la réinitialisation des données locales enregistrées.",
+          _t("The developer space gives access to development help, the design system, documentation, and some options such as resetting locally saved data."),
         actions: [
-          { id: "cancel", label: "Annuler", variant: "secondary", size: "sm", slot: "end" },
-          { id: "ok", label: "Activer", variant: "primary", slot: "end" },
+          { id: "cancel", label: _t("Cancel"), variant: "secondary", size: "sm", slot: "end" },
+          { id: "ok", label: _t("Enable"), variant: "primary", slot: "end" },
         ],
       });
       const ok = choice === "ok";
@@ -536,7 +537,7 @@ async function showOverlay(routeInfo) {
       });
     } catch (err) {
       console.error(err);
-      const msg = err && err.message ? err.message : String(err || "Erreur de chargement");
+      const msg = err && err.message ? err.message : String(err || _t("Loading error"));
       toast(msg, "error");
       dismissOverlay();
       return;
@@ -590,7 +591,7 @@ function renderEmpty() {
   main.innerHTML = welcomeViewMarkup();
   main.querySelector("#empty-import-demo")?.addEventListener("click", async () => {
     if (!modalRoot) {
-      toast("Modale indisponible", "error");
+      toast(_t("Modal unavailable"), "error");
       return;
     }
     try {
@@ -604,7 +605,7 @@ function renderEmpty() {
       });
     } catch (err) {
       console.error(err);
-      const msg = err && err.message ? err.message : String(err || "Erreur de chargement");
+      const msg = err && err.message ? err.message : String(err || _t("Loading error"));
       toast(msg, "error");
     }
   });
@@ -651,8 +652,6 @@ async function route() {
     }
   }
 
-  trackTelemetryPage();
-
   const prev = shownRoute;
   const nextIsOverlay = isOverlayRoute(routeInfo);
   const prevIsOverlay = isOverlayRoute(prev);
@@ -662,6 +661,7 @@ async function route() {
     shownRoute = routeInfo;
     setAppDocumentTitle();
     await ensureUnderlay();
+    trackTelemetryPage();
     return;
   }
 
@@ -670,6 +670,7 @@ async function route() {
     await showOverlay(routeInfo);
     if (token !== routeToken) return;
     shownRoute = routeInfo;
+    trackTelemetryPage();
     return;
   }
 
@@ -678,6 +679,7 @@ async function route() {
     await showOverlay(routeInfo);
     if (token !== routeToken) return;
     shownRoute = routeInfo;
+    trackTelemetryPage();
     return;
   }
 
@@ -694,6 +696,7 @@ async function route() {
   await showOverlay(routeInfo);
   if (token !== routeToken) return;
   shownRoute = routeInfo;
+  trackTelemetryPage();
 }
 
 /**
@@ -701,7 +704,7 @@ async function route() {
  * @param {string} [subject]
  */
 function toastCardSavedOrDeleted(kind, subject) {
-  const label = kind === "saved" ? "Carte enregistrée" : "Carte supprimée";
+  const label = kind === "saved" ? _t("Card saved") : _t("Card deleted");
   const trimmed = String(subject || "").trim();
   toast({
     type: "success",
@@ -717,13 +720,13 @@ async function handleClearCards() {
     clearPrintQty();
     toast({
       type: "success",
-      message: "Toutes les cartes ont été supprimées, votre collection est vide",
+      message: _t("All cards have been deleted, your collection is empty"),
       icon: "delete-bin-2",
     });
     underlayStale = true;
     navigate("#", { replace: true });
   } catch (err) {
-    toast(err.message || "Impossible de supprimer les cartes", "error");
+    toast(err.message || _t("Unable to delete the cards"), "error");
   }
 }
 
@@ -737,7 +740,7 @@ async function handleDevReset() {
     await wipeAllLocalData();
     location.replace(`${location.pathname}?${Date.now()}`);
   } catch (err) {
-    toast(err.message || "Reset impossible", "error");
+    toast(err.message || _t("Reset failed"), "error");
   }
 }
 
@@ -811,8 +814,10 @@ window.addEventListener("hashchange", () => {
 
 async function boot() {
   try {
+    await initI18n();
+    applyChromeI18n();
     if (!main || !btnNew) {
-      throw new Error("Structure HTML incomplète (#main / #btn-new-card).");
+      throw new Error(_t("Incomplete HTML structure (#main / #btn-new-card)."));
     }
     if (appVersionEl) {
       appVersionEl.textContent = `v${APP_VERSION}`;
@@ -841,7 +846,7 @@ async function boot() {
     if (typeof window.showBootError === "function") {
       window.showBootError(err);
     } else if (main) {
-      const msg = err && err.message ? err.message : String(err || "Erreur inconnue");
+      const msg = err && err.message ? err.message : String(err || _t("Unknown error"));
       main.removeAttribute("aria-busy");
       main.innerHTML = loadingViewMarkup({ error: msg, busy: false, retry: true });
       main.querySelector("#boot-retry")?.addEventListener("click", () => {

@@ -1,5 +1,6 @@
 import { loadCards } from "./storage.js";
-import { formatPrintMenuDesc } from "./print-settings.js";
+import { _t } from "./i18n.js";
+import { formatPrintCountLabel, formatPrintMenuDesc } from "./print-settings.js";
 import {
   getPrintQty,
   setPrintQty,
@@ -93,8 +94,10 @@ export function syncPrintMenu(state = {}) {
   btn.setAttribute(
     "aria-label",
     count > 0
-      ? `Impression — ${count} carte${count > 1 ? "s" : ""}`
-      : "Impression"
+      ? count === 1
+        ? _t("Print — %(count)s card", { count })
+        : _t("Print — %(count)s cards", { count })
+      : _t("Print")
   );
 
   if (countEl) {
@@ -108,16 +111,17 @@ export function syncPrintMenu(state = {}) {
 
   if (title) {
     if (!count) {
-      title.textContent = "Aucune carte à imprimer !";
+      title.textContent = _t("No cards to print!");
     } else {
-      title.textContent = `${count} carte${count > 1 ? "s" : ""} à imprimer`;
+      title.textContent = formatPrintCountLabel(count);
     }
   }
 
   if (desc) {
     if (!count) {
-      desc.textContent =
-        "Sélectionnez au moins une carte à imprimer parmi celles de votre collection.";
+      desc.textContent = _t(
+        "Select at least one card to print from your collection."
+      );
     } else {
       desc.textContent = formatPrintMenuDesc(count);
     }
@@ -130,18 +134,27 @@ export function syncPrintMenu(state = {}) {
       const oneMissing = missing && addableCount === 1;
       if (searching) {
         if (oneMissing) {
-          selectAllLabel.textContent = "Ajouter la carte manquante de la recherche";
+          selectAllLabel.textContent = _t("Add the missing card from the search");
         } else if (missing) {
-          selectAllLabel.textContent = `Ajouter les ${addableCount} cartes manquantes de la recherche`;
+          selectAllLabel.textContent = _t(
+            "Add the %(count)s missing cards from the search",
+            { count: addableCount }
+          );
         } else {
-          selectAllLabel.textContent = `Ajouter les ${addableCount} cartes de la recherche`;
+          selectAllLabel.textContent = _t("Add the %(count)s cards from the search", {
+            count: addableCount,
+          });
         }
       } else if (oneMissing) {
-        selectAllLabel.textContent = "Ajouter la carte manquante";
+        selectAllLabel.textContent = _t("Add the missing card");
       } else if (missing) {
-        selectAllLabel.textContent = `Ajouter les ${addableCount} cartes manquantes`;
+        selectAllLabel.textContent = _t("Add the %(count)s missing cards", {
+          count: addableCount,
+        });
       } else {
-        selectAllLabel.textContent = `Ajouter les ${addableCount} cartes`;
+        selectAllLabel.textContent = _t("Add the %(count)s cards", {
+          count: addableCount,
+        });
       }
     }
   }
@@ -215,7 +228,7 @@ export function initPrintMenu(options) {
         ? await hooks.getSelectAllCards()
         : await loadCards();
     } catch (err) {
-      opts?.toast(err.message || "Impossible de sélectionner les cartes", "error");
+      opts?.toast(err.message || _t("Unable to select the cards"), "error");
       return;
     }
     for (const c of cards) {

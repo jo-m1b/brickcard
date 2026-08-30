@@ -2,7 +2,7 @@ import { bindFormRange, formRangeResetMarkup } from "../../form-range.js";
 import { linkMarkup } from "../../link.js";
 
 /**
- * Galerie des curseurs (range) — design system / test uniquement.
+ * Range slider gallery — design system / test only.
  * @param {HTMLElement} host
  * @returns {() => void}
  */
@@ -10,24 +10,24 @@ export function renderDeveloperSliders(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#developer" })} / Curseur (Range)</p>
-        <h1 class="view-title">Curseur (Range)</h1>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#developer" })} / Range</p>
+        <h1 class="view-title">Range</h1>
       </header>
 
       <p class="styleguide-intro">
-        Contrôle&nbsp;: <code>form-range-row</code> avec
-        <code>input[type=range]</code> (+ <code>output</code> optionnel).
-        Reset optionnel (<code>ri-close-circle-fill</code>, non focusable) :
-        emplacement toujours réservé, icône visible seulement si la valeur
-        diffère du défaut ; l’<code>output</code> passe alors en gras.
+        Control&nbsp;: <code>form-range-row</code> with
+        <code>input[type=range]</code> (+ optional <code>output</code>).
+        Optional reset (<code>ri-close-circle-fill</code>, not focusable):
+        slot always reserved, icon visible only when the value
+        differs from the default; the <code>output</code> then goes bold.
         Module&nbsp;: <code>form-range.js</code>.
-        Même vocabulaire de champ (<code>form-field</code> / <code>form-label</code> /
+        Same field vocabulary (<code>form-field</code> / <code>form-label</code> /
         <code>form-hint</code> / <code>form-error</code>).
-        Appliqué dans les paramètres.
+        Used in Settings.
       </p>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Défaut</h2>
+        <h2 class="styleguide-section-title">Default</h2>
         <div class="styleguide-fields">
           <div class="form-field">
             <label class="form-label" for="demo-range">Zoom</label>
@@ -37,15 +37,15 @@ export function renderDeveloperSliders(host) {
             </div>
           </div>
           <div class="form-field">
-            <label class="form-label" for="demo-range-hinted">Bordure (face)</label>
-            <p class="form-hint" id="demo-range-hinted-desc">Épaisseur de la bordure colorée sur la face de la carte</p>
+            <label class="form-label" for="demo-range-hinted">Face border</label>
+            <p class="form-hint" id="demo-range-hinted-desc">Thickness of the colored border on the card face</p>
             <div class="form-range-row">
               <input type="range" id="demo-range-hinted" name="demo-range-hinted" min="0" max="8" step="0.5" value="3" aria-valuemin="0" aria-valuemax="8" aria-valuenow="3" aria-describedby="demo-range-hinted-desc demo-range-hinted-out" />
               <output id="demo-range-hinted-out" for="demo-range-hinted">3&nbsp;mm</output>
             </div>
           </div>
           <div class="form-field">
-            <label class="form-label form-label--required" for="demo-range-required">Cartes par ligne</label>
+            <label class="form-label form-label--required" for="demo-range-required">Cards per row</label>
             <div class="form-range-row">
               <input type="range" id="demo-range-required" name="demo-range-required" min="2" max="10" step="1" value="4" required aria-valuemin="2" aria-valuemax="10" aria-valuenow="4" aria-describedby="demo-range-required-out" />
               <output id="demo-range-required-out" for="demo-range-required">4</output>
@@ -55,11 +55,11 @@ export function renderDeveloperSliders(host) {
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Reset (valeur par défaut)</h2>
+        <h2 class="styleguide-section-title">Reset (default value)</h2>
         <div class="styleguide-fields">
           <div class="form-field">
             <label class="form-label" for="demo-range-reset-default">Zoom</label>
-            <p class="form-hint" id="demo-range-reset-default-desc">Icône masquée tant que la valeur est le défaut (100&nbsp;%)</p>
+            <p class="form-hint" id="demo-range-reset-default-desc">Icon hidden while the value is the default (100&nbsp;%)</p>
             <div class="form-range-row">
               <input type="range" id="demo-range-reset-default" name="demo-range-reset-default" min="25" max="400" step="1" value="100" aria-valuemin="25" aria-valuemax="400" aria-valuenow="100" aria-describedby="demo-range-reset-default-desc demo-range-reset-default-out" />
               <output id="demo-range-reset-default-out" for="demo-range-reset-default">100&nbsp;%</output>
@@ -67,8 +67,8 @@ export function renderDeveloperSliders(host) {
             </div>
           </div>
           <div class="form-field">
-            <label class="form-label" for="demo-range-reset-custom">Bordure (face)</label>
-            <p class="form-hint" id="demo-range-reset-custom-desc">Défaut 3&nbsp;mm ; ici 6&nbsp;mm → output gras et reset visible</p>
+            <label class="form-label" for="demo-range-reset-custom">Face border</label>
+            <p class="form-hint" id="demo-range-reset-custom-desc">Default 3&nbsp;mm; here 6&nbsp;mm → bold output and visible reset</p>
             <div class="form-range-row">
               <input type="range" id="demo-range-reset-custom" name="demo-range-reset-custom" min="0" max="8" step="0.5" value="6" aria-valuemin="0" aria-valuemax="8" aria-valuenow="6" aria-describedby="demo-range-reset-custom-desc demo-range-reset-custom-out" />
               <output id="demo-range-reset-custom-out" for="demo-range-reset-custom">6&nbsp;mm</output>
@@ -76,7 +76,7 @@ export function renderDeveloperSliders(host) {
             </div>
           </div>
           <div class="form-field">
-            <label class="form-label" for="demo-range-reset-sm">Coins arrondis</label>
+            <label class="form-label" for="demo-range-reset-sm">Rounded corners</label>
             <div class="form-range-row sm">
               <input type="range" id="demo-range-reset-sm" name="demo-range-reset-sm" min="0" max="6" step="0.5" value="3" aria-valuemin="0" aria-valuemax="6" aria-valuenow="3" aria-describedby="demo-range-reset-sm-out" />
               <output id="demo-range-reset-sm-out" for="demo-range-reset-sm">3&nbsp;mm</output>
@@ -84,8 +84,8 @@ export function renderDeveloperSliders(host) {
             </div>
           </div>
           <div class="form-field">
-            <label class="form-label" for="demo-range-reset-bare">Opacité</label>
-            <p class="form-hint" id="demo-range-reset-bare-desc">Sans <code>output</code> : le reset se place après la piste</p>
+            <label class="form-label" for="demo-range-reset-bare">Opacity</label>
+            <p class="form-hint" id="demo-range-reset-bare-desc">Without <code>output</code>: the reset sits after the track</p>
             <div class="form-range-row">
               <input type="range" id="demo-range-reset-bare" name="demo-range-reset-bare" min="0" max="100" step="1" value="80" aria-describedby="demo-range-reset-bare-desc" />
               ${formRangeResetMarkup()}
@@ -95,11 +95,11 @@ export function renderDeveloperSliders(host) {
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Sans valeur affichée</h2>
+        <h2 class="styleguide-section-title">Without displayed value</h2>
         <div class="styleguide-fields">
           <div class="form-field">
-            <label class="form-label" for="demo-range-bare">Opacité</label>
-            <p class="form-hint" id="demo-range-bare-desc">Le <code>output</code> est optionnel</p>
+            <label class="form-label" for="demo-range-bare">Opacity</label>
+            <p class="form-hint" id="demo-range-bare-desc">The <code>output</code> is optional</p>
             <div class="form-range-row">
               <input type="range" id="demo-range-bare" name="demo-range-bare" min="0" max="100" step="1" value="80" aria-describedby="demo-range-bare-desc" />
             </div>
@@ -108,20 +108,20 @@ export function renderDeveloperSliders(host) {
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Taille <code>sm</code></h2>
+        <h2 class="styleguide-section-title">Size <code>sm</code></h2>
         <div class="styleguide-fields">
           <div class="form-field">
-            <label class="form-label" for="demo-range-sm">Coins arrondis</label>
+            <label class="form-label" for="demo-range-sm">Rounded corners</label>
             <div class="form-range-row sm">
               <input type="range" id="demo-range-sm" name="demo-range-sm" min="0" max="6" step="0.5" value="1.5" aria-valuemin="0" aria-valuemax="6" aria-valuenow="1.5" aria-describedby="demo-range-sm-out" />
-              <output id="demo-range-sm-out" for="demo-range-sm">1,5&nbsp;mm</output>
+              <output id="demo-range-sm-out" for="demo-range-sm">1.5&nbsp;mm</output>
             </div>
           </div>
         </div>
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">États</h2>
+        <h2 class="styleguide-section-title">States</h2>
         <div class="styleguide-fields">
           <div class="form-field">
             <label class="form-label" for="demo-range-disabled">Disabled</label>
@@ -131,13 +131,13 @@ export function renderDeveloperSliders(host) {
             </div>
           </div>
           <div class="form-field">
-            <label class="form-label" for="demo-range-invalid">Erreur</label>
-            <p class="form-hint" id="demo-range-invalid-hint">Le hint reste visible au-dessus</p>
+            <label class="form-label" for="demo-range-invalid">Error</label>
+            <p class="form-hint" id="demo-range-invalid-hint">The hint stays visible above</p>
             <div class="form-range-row">
               <input type="range" id="demo-range-invalid" name="demo-range-invalid" min="2" max="10" step="1" value="1" aria-invalid="true" aria-valuemin="2" aria-valuemax="10" aria-valuenow="1" aria-describedby="demo-range-invalid-hint demo-range-invalid-out demo-range-invalid-err" />
               <output id="demo-range-invalid-out" for="demo-range-invalid">1</output>
             </div>
-            <p class="form-error" id="demo-range-invalid-err">Minimum&nbsp;: 2 cartes par ligne.</p>
+            <p class="form-error" id="demo-range-invalid-err">Minimum&nbsp;: 2 cards per row.</p>
           </div>
         </div>
       </div>
@@ -164,7 +164,7 @@ export function renderDeveloperSliders(host) {
     {
       input: /** @type {HTMLInputElement} */ (host.querySelector("#demo-range-sm")),
       output: /** @type {HTMLOutputElement|null} */ (host.querySelector("#demo-range-sm-out")),
-      format: (v) => `${String(v).replace(".", ",")}\u00a0mm`,
+      format: (v) => `${v}\u00a0mm`,
     },
     {
       input: /** @type {HTMLInputElement} */ (host.querySelector("#demo-range-invalid")),
@@ -208,7 +208,7 @@ export function renderDeveloperSliders(host) {
   });
   bindReset("#demo-range-reset-sm", {
     defaultValue: 1.5,
-    format: (v) => `${String(v).replace(".", ",")}\u00a0mm`,
+    format: (v) => `${v}\u00a0mm`,
   });
   bindReset("#demo-range-reset-bare", {
     defaultValue: 50,

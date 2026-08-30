@@ -4,6 +4,7 @@ import { parseHexColor } from "./themes-data.js";
 import { resolveCardAccent, resolveCardAccentFg } from "./card-design.js";
 import { resolveImageBackground } from "./storage.js";
 import { ICON_APPS_2, ICON_CALENDAR_TODO, ICON_USER_3 } from "./icons.js";
+import { _t } from "./i18n.js";
 
 /** Path du logo Brickcard (`brickcard-logo.svg`, viewBox 2000²). */
 const BRAND_LOGO_PATH =
@@ -210,13 +211,13 @@ export function cardFaceMarkup() {
     <header class="card-header">
       <p class="card-lego-set-ref"></p>
       <div class="card-meta">
-        <span class="card-badge card-meta-release-year" hidden title="Année de sortie">
+        <span class="card-badge card-meta-release-year" hidden title="${_t("Release year")}">
           ${ICON_YEAR}<span class="card-badge-value"></span>
         </span>
-        <span class="card-badge card-meta-piece-count" hidden title="Pièces">
+        <span class="card-badge card-meta-piece-count" hidden title="${_t("Pieces")}">
           ${ICON_PIECES}<span class="card-badge-value"></span>
         </span>
-        <span class="card-badge card-meta-figurine-count" hidden title="Figurines">
+        <span class="card-badge card-meta-figurine-count" hidden title="${_t("Figurines")}">
           ${ICON_FIGURINES}<span class="card-badge-value"></span>
         </span>
       </div>

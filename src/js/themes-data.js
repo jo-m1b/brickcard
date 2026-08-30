@@ -4,6 +4,8 @@
  * Sans `color` → chaîne vide ; l’affichage carte utilise la couleur configurée puis le gris d’usine.
  */
 
+import { _t } from "./i18n.js";
+
 /**
  * @typedef {Object} LegoTheme
  * @property {string} id
@@ -97,14 +99,14 @@ export async function loadPresetMeta() {
     })
       .then((res) => {
         if (!res.ok) {
-          throw new Error(`Impossible de charger ${PRESETS_URL} (${res.status})`);
+          throw new Error(_t("Unable to load %(url)s (%(status)s)", { url: PRESETS_URL, status: res.status }));
         }
         return res.json();
       })
       .then((data) => {
         const list = Array.isArray(data) ? data : data?.themes;
         if (!Array.isArray(list) || !list.length) {
-          throw new Error("themes-presets.json : tableau « themes » manquant ou vide");
+          throw new Error(_t("themes-presets.json: missing or empty \"themes\" array"));
         }
         return list.filter((t) => t && typeof t.id === "string" && (t.name || t.themeName));
       })

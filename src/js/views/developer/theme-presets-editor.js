@@ -20,9 +20,10 @@ import {
   suggestPresetId,
   upsertPresetDraftTheme,
 } from "../../preset-draft.js";
+import { _t } from "../../i18n.js";
 
 /** Section d’index `#developer` pour l’outil thèmes par défaut. */
-const PRESETS_SECTION = "Aide au développement";
+const PRESETS_SECTION = "Development help";
 
 /**
  * Éditeur d’un thème du brouillon presets (`#developer/theme-presets/new`, `#developer/theme-presets/edit/:slug`).
@@ -70,7 +71,9 @@ export async function renderPresetDraftEditor(host, opts) {
 
   const displayLogo = existing ? presetDraftLogoUrl(existing) : "";
   const colorDisplay = draft.color || resolveCardAccent(null);
-  const dialogTitle = existing ? `Modifier « ${existing.name} »` : "Nouveau thème";
+  const dialogTitle = existing
+    ? _t("Edit “%(name)s”", { name: existing.name })
+    : _t("New theme");
 
   function themeCropBackground() {
     return resolveCardAccent({ color: draft.color });
@@ -92,29 +95,29 @@ export async function renderPresetDraftEditor(host, opts) {
           </div>
           <button type="button" class="btn primary icon-only modal-close" tabindex="-1" id="preset-editor-close">
             ${ICON_CLOSE}
-            <span class="visually-hidden">Fermer</span>
+            <span class="visually-hidden">${_t("Close")}</span>
           </button>
         </div>
         <div class="modal-body" tabindex="-1">
           <div class="editor-layout">
             <aside class="preview-wrap">
-              <div class="card-preview" id="preset-preview-back-host" aria-label="Aperçu du dos"></div>
+              <div class="card-preview" id="preset-preview-back-host" aria-label="${_t("Back preview")}"></div>
             </aside>
             <div>
               <div class="form-field">
-                <label class="form-label form-label--required" for="preset-theme-name">Nom</label>
+                <label class="form-label form-label--required" for="preset-theme-name">${_t("Name")}</label>
                 <input class="form-control" type="text" id="preset-theme-name" placeholder="CITY" autocomplete="off" />
                 <p class="form-error" id="preset-theme-name-error" role="alert" hidden></p>
               </div>
               <div class="form-field">
-                <label class="form-label form-label--required" for="preset-theme-id">Identifiant</label>
-                <p class="form-hint" id="preset-theme-id-hint">Slug kebab-case, unique. Sert au fichier logo (<code>data/theme-logo-{id}.{ext}</code>).</p>
+                <label class="form-label form-label--required" for="preset-theme-id">${_t("Identifier")}</label>
+                <p class="form-hint" id="preset-theme-id-hint">Unique kebab-case slug. Used for the logo file (<code>data/theme-logo-{id}.{ext}</code>).</p>
                 <input class="form-control" type="text" id="preset-theme-id" placeholder="city" autocomplete="off" spellcheck="false" aria-describedby="preset-theme-id-hint" />
                 <p class="form-error" id="preset-theme-id-error" role="alert" hidden></p>
               </div>
               <div class="form-field">
-                <label class="form-label" for="preset-theme-color-hex">Couleur</label>
-                <p class="form-hint" id="preset-theme-color-hint">Couleur principale des cartes du thème</p>
+                <label class="form-label" for="preset-theme-color-hex">${_t("Color")}</label>
+                <p class="form-hint" id="preset-theme-color-hint">${_t("Main color of the theme’s cards")}</p>
                 ${formColorMarkup({
                   id: "preset-theme-color-hex",
                   value: draft.color,
@@ -124,8 +127,8 @@ export async function renderPresetDraftEditor(host, opts) {
                 })}
               </div>
               <div class="form-field">
-                <label class="form-label" for="preset-theme-secondary-color-hex">Couleur secondaire</label>
-                <p class="form-hint" id="preset-theme-secondary-color-hint">Couleur utilisée pour les textes, icônes et le logo Brickcard. Par défaut cette couleur est déterminée automatiquement (noir ou blanc) en fonction de la couleur principale.</p>
+                <label class="form-label" for="preset-theme-secondary-color-hex">${_t("Secondary color")}</label>
+                <p class="form-hint" id="preset-theme-secondary-color-hint">${_t("Color used for the texts, icons, and the Brickcard logo. By default this color is determined automatically (black or white) from the main color.")}</p>
                 ${formColorMarkup({
                   id: "preset-theme-secondary-color-hex",
                   value: draft.secondaryColor,
@@ -135,7 +138,7 @@ export async function renderPresetDraftEditor(host, opts) {
                 })}
               </div>
               <div class="form-field" style="--form-image-aspect: 63 / 44">
-                <label class="form-label" id="preset-theme-logo-label">Logo</label>
+                <label class="form-label" id="preset-theme-logo-label">${_t("Logo")}</label>
                 ${formImageMarkup({
                   id: "preset-theme-logo",
                   labelledBy: "preset-theme-logo-label",
@@ -153,13 +156,13 @@ export async function renderPresetDraftEditor(host, opts) {
         </div>
         <div class="modal-footer modal-footer--primary-first">
           <div class="modal-footer-end">
-            <button type="button" class="btn primary" id="preset-theme-save">${ICON_SAVE}<span>Enregistrer</span></button>
-            <button type="button" class="btn secondary sm" id="preset-theme-cancel">Annuler</button>
+            <button type="button" class="btn primary" id="preset-theme-save">${ICON_SAVE}<span>${_t("Save")}</span></button>
+            <button type="button" class="btn secondary sm" id="preset-theme-cancel">${_t("Cancel")}</button>
           </div>
           ${
             existing
               ? `<div class="modal-footer-start">
-            <button type="button" class="btn danger" id="preset-theme-delete">${ICON_DELETE_BIN_2}<span>Supprimer</span></button>
+            <button type="button" class="btn danger" id="preset-theme-delete">${ICON_DELETE_BIN_2}<span>${_t("Delete")}</span></button>
           </div>`
               : ""
           }
@@ -356,7 +359,7 @@ export async function renderPresetDraftEditor(host, opts) {
     setFieldError(idError, idInput, "", "preset-theme-id-error");
 
     if (!name) {
-      setFieldError(nameError, nameInput, "Le nom est obligatoire.", "preset-theme-name-error");
+      setFieldError(nameError, nameInput, _t("The name is required."), "preset-theme-name-error");
       nameInput.focus();
       return;
     }
@@ -364,7 +367,7 @@ export async function renderPresetDraftEditor(host, opts) {
       setFieldError(
         idError,
         idInput,
-        "Identifiant obligatoire : kebab-case (ex. city, harry-potter).",
+        "Identifier required: kebab-case (e.g. city, harry-potter).",
         "preset-theme-id-error"
       );
       idInput.focus();
@@ -376,7 +379,7 @@ export async function renderPresetDraftEditor(host, opts) {
       setFieldError(
         idError,
         idInput,
-        `L’identifiant « ${id} » existe déjà.`,
+        `The identifier “${id}” already exists.`,
         "preset-theme-id-error"
       );
       idInput.focus();
@@ -401,7 +404,7 @@ export async function renderPresetDraftEditor(host, opts) {
       );
       onSaved({ isNew: !isEdit, theme: saved, previousId: draft.previousId });
     } catch (ex) {
-      toast(ex.message || "Enregistrement impossible", "error");
+      toast(ex.message || _t("Unable to save."), "error");
     }
   };
 
@@ -409,11 +412,11 @@ export async function renderPresetDraftEditor(host, opts) {
   if (deleteBtn) {
     deleteBtn.onclick = async () => {
       const ok = await confirmDialog(host, {
-        title: `Supprimer le thème « ${existing.name} » (${existing.id}) ?`,
+        title: _t("Delete the theme “%(name)s”?", { name: existing.name }),
         icon: "delete-bin-2",
         message:
-          "Ce thème sera retiré du brouillon local uniquement (pas de la collection). Souhaitez-vous continuer ?",
-        okLabel: "Supprimer",
+          "This theme will be removed from the local draft only (not from the collection). Do you want to continue?",
+        okLabel: _t("Delete"),
         danger: true,
       });
       if (!ok) return;
@@ -421,7 +424,7 @@ export async function renderPresetDraftEditor(host, opts) {
         await deletePresetDraftTheme(existing.id);
         onDeleted?.(existing.id);
       } catch (ex) {
-        toast(ex.message || "Suppression impossible", "error");
+        toast(ex.message || _t("Unable to delete."), "error");
       }
     };
   }

@@ -4,6 +4,7 @@
  */
 
 import { ICON_CLOSE, ICON_DOWNLOAD, modalTitleMarkup } from "./icons.js";
+import { _t } from "./i18n.js";
 import { isCollectionSaveShortcut } from "./hotkeys.js";
 import { TOAST_DELAY_BACKUP } from "./toast.js";
 import { setAppDocumentTitle } from "./document-title.js";
@@ -80,67 +81,67 @@ export async function renderBackupDialog(host, opts) {
       <div class="modal modal--md" role="dialog" aria-modal="true" aria-labelledby="backup-dialog-title" aria-describedby="backup-dialog-recap">
         <div class="modal-header">
           <div>
-            <h1 class="view-title" id="backup-dialog-title">${modalTitleMarkup("Sauvegarder", ICON_DOWNLOAD)}</h1>
+            <h1 class="view-title" id="backup-dialog-title">${modalTitleMarkup(_t("Save"), ICON_DOWNLOAD)}</h1>
           </div>
           <button type="button" class="btn primary icon-only modal-close" tabindex="-1" id="btn-backup-dialog-close">
             ${ICON_CLOSE}
-            <span class="visually-hidden">Fermer</span>
+            <span class="visually-hidden">${_t("Close")}</span>
           </button>
         </div>
         <div class="modal-body" tabindex="-1">
           <div class="settings-sections">
             <section class="settings-panel">
-              <h2 class="section-title" id="backup-type-title">Type de sauvegarde</h2>
+              <h2 class="section-title" id="backup-type-title">${_t("Backup type")}</h2>
               <fieldset class="form-check-group" aria-labelledby="backup-type-title">
                 <div class="form-check-list">
                   ${formRadioMarkup({
                     id: "backup-kind-full",
                     name: "backup-kind",
                     value: "full",
-                    label: "Sauvegarde complète",
-                    hint: "Toutes les cartes, thèmes personnalisés et paramètres de votre collection",
+                    label: _t("Full backup"),
+                    hint: _t("All cards, custom themes, and settings of your collection"),
                     checked: true,
                   })}
                   ${formRadioMarkup({
                     id: "backup-kind-custom",
                     name: "backup-kind",
                     value: "custom",
-                    label: "Sauvegarde personnalisée",
-                    hint: "Sauvegarder uniquement les données sélectionnées",
+                    label: _t("Custom backup"),
+                    hint: _t("Save only the selected data"),
                   })}
                 </div>
               </fieldset>
             </section>
             <section class="settings-panel backup-custom-panel" hidden>
-              <h2 class="section-title" id="backup-images-title">Images &amp; logos</h2>
+              <h2 class="section-title" id="backup-images-title">${_t("Images & logos")}</h2>
               <fieldset class="form-check-group" aria-labelledby="backup-images-title">
                 <div class="form-check-list">
                   ${formCheckboxMarkup({
                     id: "backup-include-images",
                     name: "backup-include-images",
-                    label: "Images des cartes",
-                    hint: "Sauvegarder les images des cartes de la collection",
+                    label: _t("Card images"),
+                    hint: _t("Save the card images of the collection"),
                     checked: true,
                   })}
                   ${formCheckboxMarkup({
                     id: "backup-include-theme-logos",
                     name: "backup-include-theme-logos",
-                    label: "Logos des thèmes personnalisés",
-                    hint: "Sauvegarder les logos des thèmes personnalisés",
+                    label: _t("Custom theme logos"),
+                    hint: _t("Save the custom theme logos"),
                     checked: true,
                   })}
                 </div>
               </fieldset>
             </section>
             <section class="settings-panel backup-custom-panel" hidden>
-              <h2 class="section-title" id="backup-settings-title">Paramètres</h2>
+              <h2 class="section-title" id="backup-settings-title">${_t("Settings")}</h2>
               <fieldset class="form-check-group" aria-labelledby="backup-settings-title">
                 <div class="form-check-list">
                   ${formCheckboxMarkup({
                     id: "backup-include-settings",
                     name: "backup-include-settings",
-                    label: "Apparence des cartes",
-                    hint: "Sauvegarder les paramètres de bordure, arrondis et couleur par défaut des cartes",
+                    label: _t("Card appearance"),
+                    hint: _t("Save the border, corner radius, and default card color settings"),
                     checked: true,
                   })}
                 </div>
@@ -149,9 +150,9 @@ export async function renderBackupDialog(host, opts) {
             ${
               themeChoices.length
                 ? `<section class="settings-panel backup-custom-panel" hidden>
-              <h2 class="section-title" id="backup-cards-title">Cartes</h2>
+              <h2 class="section-title" id="backup-cards-title">${_t("Cards")}</h2>
               <fieldset class="form-check-group" aria-labelledby="backup-cards-title">
-                <p class="form-hint">Sauvegarder uniquement les cartes des thèmes sélectionnés</p>
+                <p class="form-hint">${_t("Save only the cards of the selected themes")}</p>
                 <div class="form-check-list form-check-list--row">
                   ${themeChecksHtml}
                 </div>
@@ -168,10 +169,10 @@ export async function renderBackupDialog(host, opts) {
           <div class="modal-footer-end">
             <button type="button" class="btn primary" id="btn-backup-dialog-run">
               ${ICON_DOWNLOAD}
-              <span>Sauvegarder</span>
+              <span>${_t("Save")}</span>
             </button>
             <button type="button" class="btn secondary sm" id="btn-backup-dialog-cancel">
-              Annuler
+              ${_t("Cancel")}
             </button>
           </div>
         </div>
@@ -179,7 +180,7 @@ export async function renderBackupDialog(host, opts) {
     </div>
   `;
 
-  setAppDocumentTitle("Sauvegarder");
+  setAppDocumentTitle(_t("Save"));
 
   const backdrop = host.querySelector("#backup-dialog-backdrop");
   const btnClose = host.querySelector("#btn-backup-dialog-close");
@@ -222,7 +223,7 @@ export async function renderBackupDialog(host, opts) {
     if (recapEl instanceof HTMLElement) {
       if (empty) {
         const strong = document.createElement("strong");
-        strong.textContent = "Aucune carte à sauvegarder !";
+        strong.textContent = _t("No cards to save!");
         recapEl.replaceChildren(strong);
       } else {
         const recap = formatBackupFooterRecap({
@@ -296,7 +297,7 @@ export async function renderBackupDialog(host, opts) {
     try {
       const payload = currentPayload();
       if (isBackupPayloadEmpty(payload)) {
-        toast?.("Rien à sauvegarder", "error");
+        toast?.(_t("Nothing to save"), "error");
         return;
       }
       const result = await exportBackup({
@@ -322,8 +323,8 @@ export async function renderBackupDialog(host, opts) {
         type: "success",
         title:
           kind === "full"
-            ? "Sauvegarde complète enregistrée"
-            : "Sauvegarde personnalisée enregistrée",
+            ? _t("Full backup saved")
+            : _t("Custom backup saved"),
         message: recap.message,
         messageHtml: recap.messageHtml,
         icon: "save",
@@ -331,7 +332,7 @@ export async function renderBackupDialog(host, opts) {
       });
       close();
     } catch (err) {
-      toast?.(err.message || "Sauvegarde impossible", "error");
+      toast?.(err.message || _t("Unable to save the backup"), "error");
     } finally {
       if (runBtn instanceof HTMLButtonElement && runBtn.isConnected) {
         runBtn.disabled = isBackupPayloadEmpty(currentPayload());

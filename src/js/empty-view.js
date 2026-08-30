@@ -6,6 +6,7 @@
 
 import { tileListMarkup } from "./tile.js";
 import { ICON_ERROR_WARNING_LINE, ICON_REFRESH } from "./icons.js";
+import { _t } from "./i18n.js";
 
 /**
  * @param {string} s
@@ -64,28 +65,28 @@ export function welcomeViewMarkup(opts = {}) {
   const importId = opts.importId === false ? "" : opts.importId || "empty-import";
   const demoId = opts.demoId === false ? "" : opts.demoId || "empty-import-demo";
   const importTile = {
-    title: "Importer une sauvegarde",
-    desc: "Ajouter un lot de cartes à votre collection depuis une sauvegarde",
+    title: _t("Import a backup"),
+    desc: _t("Add a batch of cards to your collection from a backup"),
     icon: "upload",
     ...(importId
       ? { href: "#import", id: importId }
       : { tag: /** @type {"button"} */ ("button") }),
   };
   const demoTile = {
-    title: "Charger une démonstration",
-    desc: "Importer une sauvegarde de la collection de cartes des briques de Jo",
+    title: _t("Load a demo"),
+    desc: _t("Import a backup of Jo’s brick card collection"),
     icon: "emotion",
     tag: /** @type {"button"} */ ("button"),
     ...(demoId ? { id: demoId } : {}),
   };
   return emptyViewMarkup({
     titleTag: opts.titleTag,
-    title: "Bienvenue ;)",
-    text: "Aucune carte pour l'instant dans votre collection !",
+    title: _t("Welcome ;)"),
+    text: _t("No cards in your collection yet!"),
     tiles: [
       {
-        title: "Nouvelle carte",
-        desc: "Créer une carte pour commencer votre collection",
+        title: _t("New card"),
+        desc: _t("Create a card to start your collection"),
         href: "#new-card",
         icon: "add",
       },
@@ -126,7 +127,7 @@ export function loadingViewMarkup(opts = {}) {
     const idAttr = retryId ? ` id="${escapeAttr(retryId)}"` : "";
     const hidden = opts.error ? "" : " hidden";
     const hiddenClass = opts.error ? "" : " is-hidden";
-    retry = `<button type="button" class="btn primary${hiddenClass}"${idAttr}${hidden}>${ICON_REFRESH}<span>Réessayer</span></button>`;
+    retry = `<button type="button" class="btn primary${hiddenClass}"${idAttr}${hidden}>${ICON_REFRESH}<span>${_t("Retry")}</span></button>`;
   }
-  return `<section class="empty-view no-print"${busy}><div class="empty-view-body"><div class="brick" aria-hidden="true"><span class="brick-error-icon">${ICON_ERROR_WARNING_LINE}</span></div><${tag} class="view-title">Chargement<span class="visually-hidden">...</span><span class="loading-dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span></${tag}>${error}${retry}</div></section>`;
+  return `<section class="empty-view no-print"${busy}><div class="empty-view-body"><div class="brick" aria-hidden="true"><span class="brick-error-icon">${ICON_ERROR_WARNING_LINE}</span></div><${tag} class="view-title">${escapeHtml(_t("Loading"))}<span class="visually-hidden">...</span><span class="loading-dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span></${tag}>${error}${retry}</div></section>`;
 }

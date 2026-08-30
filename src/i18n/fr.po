@@ -1,0 +1,868 @@
+msgid ""
+msgstr ""
+"Language: fr\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "Brickcard - Print lovely cards for your LEGO® bricks"
+msgstr "Brickcard - Imprimez de bien jolies cartes pour vos briques LEGO®"
+
+msgid "Language"
+msgstr "Langue"
+
+msgid "Search for a card…"
+msgstr "Rechercher une carte…"
+
+msgid "Search (reference, title, theme, year)"
+msgstr "Rechercher (référence, titre, thème, année)"
+
+msgid "Sort cards"
+msgstr "Trier les cartes"
+
+msgid "Date modified"
+msgstr "Date de modification"
+
+msgid "Reference"
+msgstr "Référence"
+
+msgid "Title"
+msgstr "Titre"
+
+msgid "Release year"
+msgstr "Année de sortie"
+
+msgid "Number of pieces"
+msgstr "Nombre de pièces"
+
+msgid "Number of figurines"
+msgstr "Nombre de figurines"
+
+msgid "New card"
+msgstr "Nouvelle carte"
+
+msgid "Print"
+msgstr "Impression"
+
+msgid "No cards to print!"
+msgstr "Aucune carte à imprimer !"
+
+msgid "Select at least one card to print from your collection."
+msgstr "Sélectionnez au moins une carte à imprimer parmi celles de votre collection."
+
+msgid "Add the cards"
+msgstr "Ajouter les cartes"
+
+msgid "Clear print selection"
+msgstr "Vider l’impression"
+
+msgid "Start printing"
+msgstr "Lancer l’impression"
+
+msgid "Settings"
+msgstr "Paramètres"
+
+msgid "Loading"
+msgstr "Chargement"
+
+msgid "Retry"
+msgstr "Réessayer"
+
+msgid "Unknown error"
+msgstr "Erreur inconnue"
+
+msgid "Incomplete HTML structure (#main / #btn-new-card)."
+msgstr "Structure HTML incomplète (#main / #btn-new-card)."
+
+msgid "Loading error"
+msgstr "Erreur de chargement"
+
+msgid "Storage error: %(message)s"
+msgstr "Erreur de stockage : %(message)s"
+
+msgid "Modal unavailable"
+msgstr "Modale indisponible"
+
+msgid "Success"
+msgstr "Succès"
+
+msgid "Error"
+msgstr "Erreur"
+
+msgid "Close"
+msgstr "Fermer"
+
+msgid "Cancel"
+msgstr "Annuler"
+
+msgid "Save"
+msgstr "Enregistrer"
+
+msgid "Delete"
+msgstr "Supprimer"
+
+msgid "Confirm?"
+msgstr "Confirmer ?"
+
+msgid "Welcome ;)"
+msgstr "Bienvenue ;)"
+
+msgid "No cards in your collection yet!"
+msgstr "Aucune carte pour l'instant dans votre collection !"
+
+msgid "Create a card to start your collection"
+msgstr "Créer une carte pour commencer votre collection"
+
+msgid "Import a backup"
+msgstr "Importer une sauvegarde"
+
+msgid "Add a batch of cards to your collection from a backup"
+msgstr "Ajouter un lot de cartes à votre collection depuis une sauvegarde"
+
+msgid "Load a demo"
+msgstr "Charger une démonstration"
+
+msgid "Import a backup of Jo’s brick card collection"
+msgstr "Importer une sauvegarde de la collection de cartes des briques de Jo"
+
+msgid "Image saved"
+msgstr "Image sauvegardée"
+
+msgid "The image has been saved to your files"
+msgstr "L'image a été enregistrée dans vos fichiers"
+
+msgid "Image preview"
+msgstr "Aperçu de l’image"
+
+msgid "Crop preview. Click or Tab to activate, drag or arrow keys to move, mouse wheel or plus/minus to zoom."
+msgstr "Aperçu de cadrage. Clic ou Tab pour activer, glisser ou flèches pour déplacer, molette ou plus/moins pour zoomer."
+
+msgid "Image background"
+msgstr "Fond de l’image"
+
+msgid "No logo"
+msgstr "Aucun logo"
+
+msgid "Load a new image to preview and crop it"
+msgstr "Charger une nouvelle image pour la prévisualiser et la recadrer"
+
+msgid "From my files"
+msgstr "Depuis mes fichiers"
+
+msgid "From a URL"
+msgstr "Depuis une URL"
+
+msgid "Reset crop"
+msgstr "Réinitialiser le cadrage"
+
+msgid "Download"
+msgstr "Sauvegarder"
+
+msgid "Load from a URL"
+msgstr "Charger depuis une URL"
+
+msgid "URL"
+msgstr "URL"
+
+msgid "Load"
+msgstr "Charger"
+
+msgid "https://…/image.png"
+msgstr "https://…/image.png"
+
+msgid "Delete the image?"
+msgstr "Supprimer l’image ?"
+
+msgid "Warning, deletion is permanent and cannot be undone! Do you want to continue?"
+msgstr "Attention, la suppression est définitive et ne pourra pas être annulée ! Souhaitez-vous continuer ?"
+
+msgid "Clear selection"
+msgstr "Effacer la sélection"
+
+msgid "Restore default value"
+msgstr "Restaurer la valeur par défaut"
+
+msgid "Clear color"
+msgstr "Effacer la couleur"
+
+msgid "Choose a color"
+msgstr "Choisir une couleur"
+
+msgid "Open the color picker"
+msgstr "Ouvrir le sélecteur de couleur"
+
+msgid "No photo to download."
+msgstr "Aucune photo à télécharger."
+
+msgid "Download failed."
+msgstr "Téléchargement impossible."
+
+msgid "Pieces"
+msgstr "Pièces"
+
+msgid "Figurines"
+msgstr "Figurines"
+
+msgid "Page not found"
+msgstr "Page introuvable"
+
+msgid "Invalid page slug"
+msgstr "Slug de page invalide"
+
+msgid "Page not found: %(url)s (%(status)s)"
+msgstr "Page introuvable : %(url)s (%(status)s)"
+
+msgid "Image loading error!"
+msgstr "Erreur de chargement de l’image !"
+
+msgid "Image loading error! Invalid format (SVG, PNG, WebP, JPG…)."
+msgstr "Erreur de chargement de l’image ! Format invalide (SVG, PNG, WebP, JPG…)."
+
+msgid "Image loading error! Network or CORS - the source site refuses the load."
+msgstr "Erreur de chargement de l’image ! Réseau ou CORS - le site source refuse le chargement."
+
+msgid "The image URL is invalid."
+msgstr "L’URL de l’image est invalide."
+
+msgid "Image loading error! HTTP %(status)s."
+msgstr "Erreur de chargement de l’image ! HTTP %(status)s."
+
+msgid "Unable to open IndexedDB"
+msgstr "Impossible d'ouvrir IndexedDB"
+
+msgid "Transaction cancelled"
+msgstr "Transaction annulée"
+
+msgid "Not enough browser storage space to save the cards."
+msgstr "Espace disque navigateur insuffisant pour enregistrer les cartes."
+
+msgid "Unable to save the cards."
+msgstr "Impossible d'enregistrer les cartes."
+
+msgid "Not enough browser storage space to save this card."
+msgstr "Espace disque navigateur insuffisant pour enregistrer cette carte."
+
+msgid "Unable to save the card."
+msgstr "Impossible d'enregistrer la carte."
+
+msgid "Default themes cannot be modified."
+msgstr "Les thèmes par défaut ne peuvent pas être modifiés."
+
+msgid "The theme name is required."
+msgstr "Le nom du thème est obligatoire."
+
+msgid "Default themes cannot be deleted."
+msgstr "Les thèmes par défaut ne peuvent pas être supprimés."
+
+msgid "The loaded backup is invalid!"
+msgstr "La sauvegarde chargée est invalide !"
+
+msgid "The backup URL is invalid."
+msgstr "L’URL de la sauvegarde est invalide."
+
+msgid "Backup loading error!"
+msgstr "Erreur de chargement de la sauvegarde !"
+
+msgid "Backup loading error! Network or CORS - the source site refuses the load."
+msgstr "Erreur de chargement de la sauvegarde ! Réseau ou CORS - le site source refuse le chargement."
+
+msgid "Backup loading error! HTTP %(status)s."
+msgstr "Erreur de chargement de la sauvegarde ! HTTP %(status)s."
+
+msgid "The version (v%(version)s) of the loaded backup is incompatible!"
+msgstr "La version (v%(version)s) de la sauvegarde chargée est incompatible !"
+
+msgid "THEME"
+msgstr "THÈME"
+
+msgid "No theme"
+msgstr "Sans thème"
+
+msgid "%(count)s card"
+msgstr "%(count)s carte"
+
+msgid "%(count)s cards"
+msgstr "%(count)s cartes"
+
+msgid "grid"
+msgstr "grille"
+
+msgid "front"
+msgstr "face"
+
+msgid "back"
+msgstr "dos"
+
+msgid "front and back"
+msgstr "face et dos"
+
+msgid "duplex"
+msgstr "recto-verso"
+
+msgid "Unable to load %(url)s (%(status)s)"
+msgstr "Impossible de charger %(url)s (%(status)s)"
+
+msgid "themes-presets.json: missing or empty \"themes\" array"
+msgstr "themes-presets.json : tableau « themes » manquant ou vide"
+
+msgid "%(count)s theme"
+msgstr "%(count)s thème"
+
+msgid "%(count)s themes"
+msgstr "%(count)s thèmes"
+
+msgid "%(count)s setting"
+msgstr "%(count)s paramètre"
+
+msgid "%(count)s settings"
+msgstr "%(count)s paramètres"
+
+msgid "%(n)s byte"
+msgstr "%(n)s octet"
+
+msgid "%(n)s bytes"
+msgstr "%(n)s octets"
+
+msgid "%(n)s kB"
+msgstr "%(n)s Ko"
+
+msgid "%(n)s MB"
+msgstr "%(n)s Mo"
+
+msgid "%(n)s GB"
+msgstr "%(n)s Go"
+
+msgid "Cut marks"
+msgstr "Tracé de découpe"
+
+msgid "Print a technical outline to make cutting the cards easier"
+msgstr "Imprimer un tracé technique pour faciliter la découpe des cartes"
+
+msgid "On the front"
+msgstr "Sur la face avant"
+
+msgid "On the back"
+msgstr "Sur le dos (arrière)"
+
+msgid "Bleed"
+msgstr "Fond perdu"
+
+msgid "Extend the card background color beyond the cut area to avoid white edges when cutting"
+msgstr "Étendre la couleur de fond des cartes au-delà de la zone de coupe pour éviter des bords avec du blanc lors de la découpe"
+
+msgid "%(count)s A4 sheet (fronts)"
+msgstr "%(count)s feuille A4 (faces)"
+
+msgid "%(count)s A4 sheets (fronts)"
+msgstr "%(count)s feuilles A4 (faces)"
+
+msgid "%(count)s A4 sheet (backs)"
+msgstr "%(count)s feuille A4 (dos)"
+
+msgid "%(count)s A4 sheets (backs)"
+msgstr "%(count)s feuilles A4 (dos)"
+
+msgid "%(count)s A4 sheet · fronts then backs"
+msgstr "%(count)s feuille A4 · rectos puis versos"
+
+msgid "%(count)s A4 sheets · fronts then backs"
+msgstr "%(count)s feuilles A4 · rectos puis versos"
+
+msgid "%(count)s A4 sheet duplex"
+msgstr "%(count)s feuille A4 recto-verso"
+
+msgid "%(count)s A4 sheets duplex"
+msgstr "%(count)s feuilles A4 recto-verso"
+
+msgid "Grid %(cols)s×%(rows)s"
+msgstr "Grille %(cols)s×%(rows)s"
+
+msgid "%(count)s card to print"
+msgstr "%(count)s carte à imprimer"
+
+msgid "%(count)s cards to print"
+msgstr "%(count)s cartes à imprimer"
+
+msgid "Themes"
+msgstr "Thèmes"
+
+msgid "All custom themes have been deleted"
+msgstr "Tous les thèmes personnalisés ont été supprimés"
+
+msgid "Theme saved"
+msgstr "Thème enregistré"
+
+msgid "Theme deleted"
+msgstr "Thème supprimé"
+
+msgid "Enable the developer space?"
+msgstr "Activer l’espace développeur ?"
+
+msgid "The developer space gives access to development help, the design system, documentation, and some options such as resetting locally saved data."
+msgstr "L’espace développeur donne accès à l’aide au développement, le système de design, la documentation et certaines options comme la réinitialisation des données locales enregistrées."
+
+msgid "Enable"
+msgstr "Activer"
+
+msgid "Card saved"
+msgstr "Carte enregistrée"
+
+msgid "Card deleted"
+msgstr "Carte supprimée"
+
+msgid "All cards have been deleted, your collection is empty"
+msgstr "Toutes les cartes ont été supprimées, votre collection est vide"
+
+msgid "Unable to delete the cards"
+msgstr "Impossible de supprimer les cartes"
+
+msgid "Reset failed"
+msgstr "Reset impossible"
+
+msgid "Print — %(count)s card"
+msgstr "Impression — %(count)s carte"
+
+msgid "Print — %(count)s cards"
+msgstr "Impression — %(count)s cartes"
+
+msgid "Add the missing card from the search"
+msgstr "Ajouter la carte manquante de la recherche"
+
+msgid "Add the %(count)s missing cards from the search"
+msgstr "Ajouter les %(count)s cartes manquantes de la recherche"
+
+msgid "Add the %(count)s cards from the search"
+msgstr "Ajouter les %(count)s cartes de la recherche"
+
+msgid "Add the missing card"
+msgstr "Ajouter la carte manquante"
+
+msgid "Add the %(count)s missing cards"
+msgstr "Ajouter les %(count)s cartes manquantes"
+
+msgid "Add the %(count)s cards"
+msgstr "Ajouter les %(count)s cartes"
+
+msgid "Unable to select the cards"
+msgstr "Impossible de sélectionner les cartes"
+
+msgid "Print settings"
+msgstr "Paramètres d’impression"
+
+msgid "Print grid"
+msgstr "Grille d’impression"
+
+msgid "Card print order"
+msgstr "Ordre d’impression des cartes"
+
+msgid "Print side"
+msgstr "Côté d’impression"
+
+msgid "Both sides"
+msgstr "Les deux faces"
+
+msgid "Front only"
+msgstr "Face uniquement"
+
+msgid "Back only"
+msgstr "Dos uniquement"
+
+msgid "Sheet assembly"
+msgstr "Assemblage des feuilles"
+
+msgid "Alternate"
+msgstr "Alterner"
+
+msgid "One sheet at a time (duplex printer)"
+msgstr "Une feuille à la fois (imprimante recto-verso)"
+
+msgid "Group"
+msgstr "Regrouper"
+
+msgid "All fronts first, then flip the stack to print all the backs"
+msgstr "Tous les rectos d’abord, puis retourner la pile pour ensuite imprimer tous les versos"
+
+msgid "No cards to print"
+msgstr "Aucune carte à imprimer"
+
+msgid "Print error"
+msgstr "Erreur d'impression"
+
+msgid "Edit “%(title)s” (%(ref)s)"
+msgstr "Modifier « %(title)s » (%(ref)s)"
+
+msgid "Edit “%(title)s”"
+msgstr "Modifier « %(title)s »"
+
+msgid "Edit the card (%(ref)s)"
+msgstr "Modifier la carte (%(ref)s)"
+
+msgid "Edit the card"
+msgstr "Modifier la carte"
+
+msgid "Cards"
+msgstr "Cartes"
+
+msgid "Oops!"
+msgstr "Oups !"
+
+msgid "No cards match the search."
+msgstr "Aucune carte ne correspond à la recherche."
+
+msgid "0 cards"
+msgstr "0 cartes"
+
+msgid "%(shown)s / %(total)s cards"
+msgstr "%(shown)s / %(total)s cartes"
+
+msgid "%(total)s cards"
+msgstr "%(total)s cartes"
+
+msgid "Ascending"
+msgstr "Croissant"
+
+msgid "Descending"
+msgstr "Décroissant"
+
+msgid "Remove a card"
+msgstr "Retirer une carte"
+
+msgid "Add a card"
+msgstr "Ajouter une carte"
+
+msgid "Add to print"
+msgstr "Ajouter à l’impression"
+
+msgid "Custom themes"
+msgstr "Thèmes personnalisés"
+
+msgid "Default themes"
+msgstr "Thèmes par défaut"
+
+msgid "Front preview"
+msgstr "Aperçu de la face"
+
+msgid "Back preview"
+msgstr "Aperçu du dos"
+
+msgid "Set number"
+msgstr "Numéro de l'ensemble"
+
+msgid "Maximum 3 lines shown on the card (Enter for a line break)"
+msgstr "Maximum 3 lignes affichées sur la carte (Entrée pour un saut de ligne)"
+
+msgid "Theme"
+msgstr "Thème"
+
+msgid "Image"
+msgstr "Image"
+
+msgid "Back preview, click to see the front"
+msgstr "Aperçu du dos, cliquer pour voir la face"
+
+msgid "Front preview, click to see the back"
+msgstr "Aperçu de la face, cliquer pour voir le dos"
+
+msgid "Delete the card “%(subject)s”?"
+msgstr "Supprimer la carte « %(subject)s » ?"
+
+msgid "Delete this card?"
+msgstr "Supprimer cette carte ?"
+
+msgid "Unable to save."
+msgstr "Enregistrement impossible."
+
+msgid "Unable to delete."
+msgstr "Suppression impossible."
+
+msgid "Edit “%(title)s” (#%(ref)s)"
+msgstr "Modifier « %(title)s (#%(ref)s) »"
+
+msgid "Edit “#%(ref)s”"
+msgstr "Modifier « #%(ref)s »"
+
+msgid "Edit card"
+msgstr "Modifier la carte"
+
+msgid "Edit theme"
+msgstr "Modifier le thème"
+
+msgid "Home"
+msgstr "Accueil"
+
+msgid "Search for a theme…"
+msgstr "Rechercher un thème…"
+
+msgid "Search for a theme"
+msgstr "Rechercher un thème"
+
+msgid "Sort themes"
+msgstr "Trier les thèmes"
+
+msgid "Number of cards"
+msgstr "Nombre de cartes"
+
+msgid "No themes match the search."
+msgstr "Aucun thème ne correspond à la recherche."
+
+msgid "Delete all custom themes"
+msgstr "Supprimer tous les thèmes personnalisés"
+
+msgid "New theme"
+msgstr "Nouveau thème"
+
+msgid "0 themes"
+msgstr "0 thèmes"
+
+msgid "%(shown)s / %(total)s themes"
+msgstr "%(shown)s / %(total)s thèmes"
+
+msgid "%(total)s themes"
+msgstr "%(total)s thèmes"
+
+msgid "Delete all custom themes?"
+msgstr "Supprimer tous les thèmes personnalisés ?"
+
+msgid "All custom themes will be permanently deleted. Cards from the deleted themes are kept but will no longer be associated with a theme."
+msgstr "Tous les thèmes personnalisés seront supprimés définitivement. Les cartes des thèmes supprimés sont conservées mais ne seront plus associées à un thème."
+
+msgid "Unable to delete the custom themes"
+msgstr "Impossible de supprimer les thèmes personnalisés"
+
+msgid "Edit “%(name)s”"
+msgstr "Modifier « %(name)s »"
+
+msgid "View “%(name)s”"
+msgstr "Voir « %(name)s »"
+
+msgid "Theme “%(name)s”"
+msgstr "Thème « %(name)s »"
+
+msgid "Identifier"
+msgstr "Identifiant"
+
+msgid "Name"
+msgstr "Nom"
+
+msgid "Color"
+msgstr "Couleur"
+
+msgid "Main color of the theme’s cards"
+msgstr "Couleur principale des cartes du thème"
+
+msgid "Secondary color"
+msgstr "Couleur secondaire"
+
+msgid "Color used for the texts, icons, and the Brickcard logo. By default this color is determined automatically (black or white) from the main color."
+msgstr "Couleur utilisée pour les textes, icônes et le logo Brickcard. Par défaut cette couleur est déterminée automatiquement (noir ou blanc) en fonction de la couleur principale."
+
+msgid "Logo"
+msgstr "Logo"
+
+msgid "The name is required."
+msgstr "Le nom est obligatoire."
+
+msgid "Delete the theme “%(name)s”?"
+msgstr "Supprimer le thème « %(name)s » ?"
+
+msgid "Search…"
+msgstr "Rechercher…"
+
+msgid "Search for a setting"
+msgstr "Rechercher un paramètre"
+
+msgid "Application"
+msgstr "Application"
+
+msgid "Display mode"
+msgstr "Mode d’affichage"
+
+msgid "Light theme"
+msgstr "Thème clair"
+
+msgid "Dark theme"
+msgstr "Thème sombre"
+
+msgid "System"
+msgstr "Système"
+
+msgid "Use system settings"
+msgstr "Utilise les paramètres système"
+
+msgid "Maximum number of cards per row"
+msgstr "Nombre de cartes par ligne maximum"
+
+msgid "Optimize images"
+msgstr "Optimiser les images"
+
+msgid "Automatically convert new images added to the collection to an optimized format"
+msgstr "Convertir automatiquement les nouvelles images ajoutées à la collection dans un format optimisé"
+
+msgid "Telemetry"
+msgstr "Télémétrie"
+
+msgid "Send anonymous usage telemetry data"
+msgstr "Envoyer des données de télémétrie d’utilisation anonyme"
+
+msgid "Card appearance"
+msgstr "Apparence des cartes"
+
+msgid "Default color"
+msgstr "Couleur par défaut"
+
+msgid "Color applied by default to cards without a theme or without a custom color"
+msgstr "Couleur appliquée par défaut aux cartes sans thème ou sans couleur personnalisée"
+
+msgid "Border size (front)"
+msgstr "Taille de la bordure (côté face)"
+
+msgid "Corner radius"
+msgstr "Arrondi des coins"
+
+msgid "Image radius"
+msgstr "Arrondi des images"
+
+msgid "Manage your collection"
+msgstr "Gestion de votre collection"
+
+msgid "Import"
+msgstr "Importer"
+
+msgid "Load a backup to add or merge a batch of cards, themes, or settings into your collection"
+msgstr "Charger une sauvegarde pour ajouter ou fusionner un lot de cartes, thèmes ou paramètres à votre collection"
+
+msgid "Save the collection"
+msgstr "Sauvegarder"
+
+msgid "Save a backup of your collection of cards, themes, and settings"
+msgstr "Enregistrer une sauvegarde de votre collection de cartes, thèmes et paramètres"
+
+msgid "Manage the themes available for your collection"
+msgstr "Gérer les thèmes disponibles pour votre collection"
+
+msgid "Delete all cards"
+msgstr "Supprimer toutes les cartes"
+
+msgid "Remove all cards from your collection (keeps the themes and saved settings)"
+msgstr "Retirer toutes les cartes de votre collection (conserve les thèmes et les paramètres enregistrés)"
+
+msgid "Developer options"
+msgstr "Options pour les développeurs"
+
+msgid "Developer space"
+msgstr "Espace développeur"
+
+msgid "Development help, design system, and documentation"
+msgstr "Aide au développement, système de design et documentation"
+
+msgid "Reset"
+msgstr "Réinitialiser"
+
+msgid "Delete all locally saved data (cards, themes, and settings)"
+msgstr "Supprimer toutes les données locales enregistrées (cartes, thèmes et paramètres)"
+
+msgid "No settings match the search."
+msgstr "Aucun paramètre ne correspond à la recherche."
+
+msgid "Delete all cards?"
+msgstr "Supprimer toutes les cartes ?"
+
+msgid "All cards will be permanently deleted. Themes and settings are kept."
+msgstr "Toutes les cartes seront supprimées définitivement. Les thèmes et les réglages sont conservés."
+
+msgid "Reset all local data?"
+msgstr "Réinitialiser toutes les données locales ?"
+
+msgid "All cards, themes, and collection settings will be permanently deleted."
+msgstr "Toutes les cartes, thèmes et réglages de la collection seront supprimés définitivement."
+
+msgid "Backup type"
+msgstr "Type de sauvegarde"
+
+msgid "Full backup"
+msgstr "Sauvegarde complète"
+
+msgid "All cards, custom themes, and settings of your collection"
+msgstr "Toutes les cartes, thèmes personnalisés et paramètres de votre collection"
+
+msgid "Custom backup"
+msgstr "Sauvegarde personnalisée"
+
+msgid "Save only the selected data"
+msgstr "Sauvegarder uniquement les données sélectionnées"
+
+msgid "Images & logos"
+msgstr "Images & logos"
+
+msgid "Card images"
+msgstr "Images des cartes"
+
+msgid "Save the card images of the collection"
+msgstr "Sauvegarder les images des cartes de la collection"
+
+msgid "Custom theme logos"
+msgstr "Logos des thèmes personnalisés"
+
+msgid "Save the custom theme logos"
+msgstr "Sauvegarder les logos des thèmes personnalisés"
+
+msgid "Save the border, corner radius, and default card color settings"
+msgstr "Sauvegarder les paramètres de bordure, arrondis et couleur par défaut des cartes"
+
+msgid "Save only the cards of the selected themes"
+msgstr "Sauvegarder uniquement les cartes des thèmes sélectionnés"
+
+msgid "No cards to save!"
+msgstr "Aucune carte à sauvegarder !"
+
+msgid "Nothing to save"
+msgstr "Rien à sauvegarder"
+
+msgid "Full backup saved"
+msgstr "Sauvegarde complète enregistrée"
+
+msgid "Custom backup saved"
+msgstr "Sauvegarde personnalisée enregistrée"
+
+msgid "Unable to save the backup"
+msgstr "Sauvegarde impossible"
+
+msgid "Backup imported"
+msgstr "Sauvegarde importée"
+
+msgid "https://…/backup.brickcard"
+msgstr "https://…/sauvegarde.brickcard"
+
+msgid "Demo backup"
+msgstr "Sauvegarde de démonstration"
+
+msgid "Demo loaded"
+msgstr "Démonstration chargée"
+
+msgid "Unable to import"
+msgstr "Import impossible"
+
+msgid "Import in progress…"
+msgstr "Importation en cours…"
+
+msgid "Nothing to import!"
+msgstr "Rien à importer !"
+
+msgid "Load a backup to add or merge a batch of cards, themes, or settings into your collection."
+msgstr "Charger une sauvegarde pour ajouter ou fusionner un lot de cartes, des thèmes ou des paramètres à votre collection."
+
+msgid "Import the card images from the backup"
+msgstr "Importer les images des cartes de la sauvegarde"
+
+msgid "Import the custom theme logos"
+msgstr "Importer les logos des thèmes personnalisés"
+
+msgid "Import the border, corner radius, and default card color settings"
+msgstr "Importer les paramètres de bordure, arrondis et couleur par défaut des cartes"
+
+msgid "Import only the cards of the selected themes"
+msgstr "Importer uniquement les cartes des thèmes sélectionnés"
+
+msgid "Load another backup"
+msgstr "Charger une autre sauvegarde"
+
+msgid "Nothing to import"
+msgstr "Rien à importer"

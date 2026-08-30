@@ -14,6 +14,7 @@ import {
   syncPrintMenu,
 } from "../print-menu.js";
 import { emptyViewMarkup } from "../empty-view.js";
+import { _t } from "../i18n.js";
 import { includesCI } from "../includes-ci.js";
 import { registerCardsGrid } from "../list-layout.js";
 import { mountCardPreview } from "../card-render.js";
@@ -140,7 +141,12 @@ export function removeListCard(id) {
 
 /** @param {import("../storage.js").Card} card */
 function cardTileAriaLabel(card) {
-  return `Modifier${card.title ? ` « ${card.title} »` : " la carte"}${card.legoSetRef ? ` (${card.legoSetRef})` : ""}`;
+  const title = card.title || "";
+  const ref = card.legoSetRef || "";
+  if (title && ref) return _t("Edit “%(title)s” (%(ref)s)", { title, ref });
+  if (title) return _t("Edit “%(title)s”", { title });
+  if (ref) return _t("Edit the card (%(ref)s)", { ref });
+  return _t("Edit the card");
 }
 
 /**
@@ -176,14 +182,14 @@ export async function renderList(main, opts) {
 
   main.innerHTML = `
     <section class="panel">
-      <h1 class="visually-hidden">Cartes</h1>
+      <h1 class="visually-hidden">${_t("Cards")}</h1>
       <div class="cards-grid" id="cards-grid"></div>
       ${emptyViewMarkup({
         id: "empty-filter",
         hidden: true,
         titleTag: "p",
-        title: "Oups !",
-        text: "Aucune carte ne correspond à la recherche.",
+        title: _t("Oops!"),
+        text: _t("No cards match the search."),
       })}
     </section>
   `;
@@ -227,13 +233,13 @@ export async function renderList(main, opts) {
     const shown = filtered().length;
     const q = searchQuery();
     if (!total) {
-      searchCount.textContent = "0 cartes";
+      searchCount.textContent = _t("0 cards");
       return;
     }
     if (q) {
-      searchCount.textContent = `${shown} / ${total} cartes`;
+      searchCount.textContent = _t("%(shown)s / %(total)s cards", { shown, total });
     } else {
-      searchCount.textContent = `${total} cartes`;
+      searchCount.textContent = _t("%(total)s cards", { total });
     }
   }
 
@@ -292,7 +298,7 @@ export async function renderList(main, opts) {
       if (on) {
         iconSlot.hidden = false;
         iconSlot.innerHTML = sortDir === "asc" ? ICON_SORT_ASC : ICON_SORT_DESC;
-        iconSlot.title = sortDir === "asc" ? "Croissant" : "Décroissant";
+        iconSlot.title = sortDir === "asc" ? _t("Ascending") : _t("Descending");
       } else {
         iconSlot.hidden = true;
         iconSlot.innerHTML = "";
@@ -349,15 +355,17 @@ export async function renderList(main, opts) {
   function printQtyMarkup(id, qty) {
     const has = qty > 0;
     const safeId = escapeAttr(id);
-    const decLabel = "Retirer une carte";
-    const incLabel = has ? "Ajouter une carte" : "Ajouter à l’impression";
+    const decLabel = _t("Remove a card");
+    const incLabel = has ? _t("Add a card") : _t("Add to print");
+    const qtyLabel =
+      qty === 1 ? _t("%(count)s card", { count: qty }) : _t("%(count)s cards", { count: qty });
     return `
       <div class="print-qty${has ? " is-active" : ""}" data-print-qty="${safeId}">
         <button type="button" class="btn ghost icon-only sm" data-qty-dec="${safeId}" ${has ? "" : "hidden"}>
           ${ICON_MINUS}
           <span class="visually-hidden">${decLabel}</span>
         </button>
-        <span class="print-qty-count" ${has ? "" : "hidden"} aria-label="${qty} carte${qty > 1 ? "s" : ""}">
+        <span class="print-qty-count" ${has ? "" : "hidden"} aria-label="${qtyLabel}">
           ${ICON_PRINT}
           <span class="print-qty-num">${qty}</span>
         </span>

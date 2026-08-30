@@ -2,6 +2,7 @@ import { ICON_CLOSE } from "../icons.js";
 import { loadMarkdownPage } from "../markdown.js";
 import { setAppDocumentTitle } from "../document-title.js";
 import { APP_NAME, APP_VERSION } from "../version.js";
+import { _t } from "../i18n.js";
 
 function aboutBrandHtml() {
   return `
@@ -27,7 +28,7 @@ function pageTitleText(page) {
 }
 
 /**
- * Affiche une page Markdown (`data/page-{{slug}}.md`) en modale overlay.
+ * Affiche une page Markdown (`data/page-{{slug}}.md` ou `.{{locale}}.md`) en modale overlay.
  * @param {HTMLElement} host Conteneur modale (#modal-root)
  * @param {{ slug: string, onClose: () => void, toast?: (msg: string, type?: string) => void }} opts
  * @returns {Promise<(() => void)|null>} cleanup, ou `null` si la page est introuvable
@@ -40,7 +41,7 @@ export async function renderPageModal(host, opts) {
     page = await loadMarkdownPage(slug);
   } catch (err) {
     console.error(err);
-    if (toast) toast(err.message || "Page introuvable", "error");
+    if (toast) toast(err.message || _t("Page not found"), "error");
     return null;
   }
 
@@ -55,7 +56,7 @@ export async function renderPageModal(host, opts) {
           </div>
           <button type="button" class="btn primary icon-only modal-close" tabindex="-1" id="btn-page-close">
             ${ICON_CLOSE}
-            <span class="visually-hidden">Fermer</span>
+            <span class="visually-hidden">${_t("Close")}</span>
           </button>
         </div>
         <div class="modal-body" tabindex="-1">

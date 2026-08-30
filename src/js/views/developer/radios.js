@@ -2,7 +2,7 @@ import { bindFormRadios, formRadioMarkup } from "../../form-radio.js";
 import { linkMarkup } from "../../link.js";
 
 /**
- * Galerie des boutons radio — design system / test uniquement.
+ * Radio gallery — design system / test only.
  * @param {HTMLElement} host
  * @returns {() => void}
  */
@@ -10,35 +10,35 @@ export function renderDeveloperRadios(host) {
   host.innerHTML = `
     <section class="panel styleguide no-print">
       <header class="styleguide-header">
-        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#developer" })} / Bouton radio (Radio)</p>
-        <h1 class="view-title">Bouton radio (Radio)</h1>
+        <p class="styleguide-kicker">${linkMarkup("Styleguide", { href: "#developer" })} / Radio</p>
+        <h1 class="view-title">Radio</h1>
       </header>
 
       <p class="styleguide-intro">
-        Contrôle&nbsp;: <code>form-check form-radio</code> (rond à gauche du
-        libellé / hint, centré sur le bloc texte). Glyphe
-        <code>ri-radio-button-line</code> (masque CSS) ; au repos, le disque
-        interne est retiré.
-        Hint optionnel sous le libellé ; erreur = message
-        <code>form-error</code> seulement (pas de teinte rouge sur le rond).
-        Taille&nbsp;: <code>sm</code> (rond plus petit).
-        Lecture seule&nbsp;: <code>aria-readonly</code> (l’attribut HTML
-        <code>readonly</code> est ignoré par les radios).
+        Control&nbsp;: <code>form-check form-radio</code> (circle to the left of the
+        label / hint, centered on the text block). Glyph
+        <code>ri-radio-button-line</code> (CSS mask); at rest, the inner
+        disk is removed.
+        Optional hint under the label; error = <code>form-error</code>
+        message only (no red tint on the circle).
+        Size&nbsp;: <code>sm</code> (smaller circle).
+        Read-only&nbsp;: <code>aria-readonly</code> (the HTML
+        <code>readonly</code> attribute is ignored by radios).
         Module&nbsp;: <code>form-radio.js</code>.
-        Groupes&nbsp;: même <code>name</code> pour une option unique ;
-        <code>form-check-group</code> + légende optionnelle, liste verticale
-        ou horizontale.
+        Groups&nbsp;: same <code>name</code> for a single choice;
+        <code>form-check-group</code> + optional legend, vertical
+        or horizontal list.
       </p>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Défaut</h2>
+        <h2 class="styleguide-section-title">Default</h2>
         <div class="styleguide-fields">
           <div class="form-field">
             ${formRadioMarkup({
               id: "demo-radio-face",
               name: "demo-radio",
               value: "face",
-              label: "Face",
+              label: "Front",
               checked: true,
             })}
           </div>
@@ -47,23 +47,23 @@ export function renderDeveloperRadios(host) {
               id: "demo-radio-back",
               name: "demo-radio",
               value: "back",
-              label: "Dos",
-              hint: "Miroir horizontal (flip bord long)",
+              label: "Back",
+              hint: "Horizontal mirror (long-edge flip)",
             })}
           </div>
         </div>
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Taille <code>sm</code></h2>
+        <h2 class="styleguide-section-title">Size <code>sm</code></h2>
         <div class="styleguide-fields">
           <div class="form-field">
             ${formRadioMarkup({
               id: "demo-radio-sm-on",
               name: "demo-radio-sm",
               value: "on",
-              label: "Mode compact",
-              hint: "Même libellé ; rond plus petit",
+              label: "Compact mode",
+              hint: "Same label; smaller circle",
               sm: true,
               checked: true,
             })}
@@ -73,7 +73,7 @@ export function renderDeveloperRadios(host) {
               id: "demo-radio-sm-off",
               name: "demo-radio-sm",
               value: "off",
-              label: "Mode étendu",
+              label: "Expanded mode",
               sm: true,
             })}
           </div>
@@ -81,7 +81,7 @@ export function renderDeveloperRadios(host) {
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">États</h2>
+        <h2 class="styleguide-section-title">States</h2>
         <div class="styleguide-fields">
           <div class="form-field">
             ${formRadioMarkup({
@@ -89,7 +89,7 @@ export function renderDeveloperRadios(host) {
               name: "demo-radio-disabled",
               value: "off",
               label: "Disabled",
-              hint: "Non cliquable, non soumise",
+              hint: "Not clickable, not submitted",
               disabled: true,
             })}
           </div>
@@ -98,8 +98,8 @@ export function renderDeveloperRadios(host) {
               id: "demo-radio-readonly-on",
               name: "demo-radio-readonly",
               value: "on",
-              label: "Lecture seule",
-              hint: "Cochée et figée ; la valeur reste soumise",
+              label: "Read-only",
+              hint: "Checked and frozen; the value is still submitted",
               checked: true,
               readonly: true,
             })}
@@ -109,8 +109,8 @@ export function renderDeveloperRadios(host) {
               id: "demo-radio-readonly-off",
               name: "demo-radio-readonly",
               value: "off",
-              label: "Autre option",
-              hint: "Le choix figé empêche de changer de radio",
+              label: "Other option",
+              hint: "The frozen choice prevents switching radios",
             })}
           </div>
           <div class="form-field">
@@ -128,37 +128,37 @@ export function renderDeveloperRadios(host) {
               label: "Option B",
               describedBy: "demo-radio-invalid-err",
             })}
-            <p class="form-error" id="demo-radio-invalid-err">Choisis une option.</p>
+            <p class="form-error" id="demo-radio-invalid-err">Choose an option.</p>
           </div>
         </div>
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Groupe (vertical)</h2>
+        <h2 class="styleguide-section-title">Group (vertical)</h2>
         <div class="styleguide-fields">
         <fieldset class="form-check-group" aria-describedby="demo-radio-group-hint">
-          <legend class="form-label">Côtés à imprimer</legend>
-          <p class="form-hint" id="demo-radio-group-hint">Une seule face</p>
+          <legend class="form-label">Sides to print</legend>
+          <p class="form-hint" id="demo-radio-group-hint">One side only</p>
           <div class="form-check-list">
             ${formRadioMarkup({
               id: "demo-radio-group-face",
               name: "demo-radio-group",
               value: "face",
-              label: "Face",
+              label: "Front",
               checked: true,
             })}
             ${formRadioMarkup({
               id: "demo-radio-group-back",
               name: "demo-radio-group",
               value: "back",
-              label: "Dos",
-              hint: "Miroir horizontal (flip bord long)",
+              label: "Back",
+              hint: "Horizontal mirror (long-edge flip)",
             })}
             ${formRadioMarkup({
               id: "demo-radio-group-both",
               name: "demo-radio-group",
               value: "both",
-              label: "Face et dos",
+              label: "Front and back",
             })}
           </div>
         </fieldset>
@@ -166,7 +166,7 @@ export function renderDeveloperRadios(host) {
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Groupe (horizontal)</h2>
+        <h2 class="styleguide-section-title">Group (horizontal)</h2>
         <div class="styleguide-fields">
         <fieldset class="form-check-group" aria-describedby="demo-radio-row-err">
           <legend class="form-label">Format</legend>
@@ -190,7 +190,7 @@ export function renderDeveloperRadios(host) {
               label: "Poker",
             })}
           </div>
-          <p class="form-error" id="demo-radio-row-err">Choisis un format.</p>
+          <p class="form-error" id="demo-radio-row-err">Choose a format.</p>
         </fieldset>
         </div>
       </div>

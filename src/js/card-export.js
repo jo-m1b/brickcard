@@ -2,6 +2,8 @@
  * Téléchargement de fichiers (photo Brickcard, logos, sauvegardes).
  */
 
+import { _t } from "./i18n.js";
+
 /**
  * Segment kebab-case pour un nom de fichier (vide si rien d’utilisable).
  * @param {string} text
@@ -150,7 +152,7 @@ export function downloadBlob(blob, filename) {
 export async function downloadCardPhoto(src, basename = "brickcard-photo") {
   const raw = String(src || "").trim();
   if (!raw) {
-    throw new Error("Aucune photo à télécharger.");
+    throw new Error(_t("No photo to download."));
   }
 
   const base = slugifyFilename(basename);
@@ -158,7 +160,7 @@ export async function downloadCardPhoto(src, basename = "brickcard-photo") {
   const fetchUrl = isData ? raw : raw.split("?")[0];
   const res = await fetch(fetchUrl, isData ? undefined : { cache: "no-store" });
   if (!res.ok) {
-    throw new Error("Téléchargement impossible.");
+    throw new Error(_t("Download failed."));
   }
   const blob = await res.blob();
   const ext = (isData ? mimeFromDataUrl(raw).ext : "") || extFromMime(blob.type) || extFromSrc(raw) || "png";

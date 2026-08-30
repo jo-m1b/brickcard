@@ -7,9 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### ➕ Added
+
+- Interface language: English is the source language (`_t('…')`); French lives in `i18n/fr.po` (gettext, loaded and parsed in JS, no compiler). Settings → Application starts with a language dropdown (`EN · English`, sorted by ISO code); the choice is stored as `brickcard:ui-locale`. First visit uses the browser language when a catalog exists, otherwise English. HTML and the web manifest stay `lang="en"` for crawlers; the document language is updated in JS.
+- Print PDF filename: localized words (`grid`, `front`, `duplex`…) are translated then slugified (`brickcard-…-grille-3x3-face-et-dos-…` in French).
+- Markdown pages (`#page/:slug`): English file `data/page-{{slug}}.md`, locale file `data/page-{{slug}}.{{locale}}.md` (About: `page-about.fr.md`); missing locale falls back to English.
+
 ### ✏️ Changed
 
-- Telemetry: card and custom-theme editor views are sent as `#edit-card` / **Modifier la carte** and `#themes/edit` / **Modifier le thème** (no UUID); home title is **Accueil**; `#developer/…` titles keep `page | section` (cut after the 2nd `|`); other titles drop the SEO suffix after `|`
+- Card list and print order: title and set-number sort use the UI locale (`localeCompare` + `getLocale()`), like themes and backups
+- Developer space (`#developer/…`): styleguide copy is English (hardcoded, no `_t`). The default-themes tool reuses existing `_t` strings for shared actions (Save, Delete, Close, search, empty states…)
+- Telemetry: URLs stay language-stable (English hashes; `#edit-card/:id` → `#edit-card`, `#themes/edit/:id` → `#themes/edit`); titles use the UI language with an ISO prefix (`fr · Accueil`, `en · Home`, `fr · Modifier la carte`, `en · Edit card`); `#developer/…` titles stay English (`page | section`) but still get the locale prefix; views are tracked after the overlay and document title are set
 - About (`#page/about`): disclaimer wording **une marque de LEGO Group** / **par LEGO Group** (no article **du** / **le**); intro uses **petite application** and **de bien jolies cartes pour vos briques LEGO®**
 - Demo backup (`data/backup-demo-jo.brickcard`): re-exported at 0.8.6; the **jo** card photo is now WebP (pink background, new crop)
 
