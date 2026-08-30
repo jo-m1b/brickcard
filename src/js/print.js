@@ -1,7 +1,7 @@
 /**
- * Impression A4 : grille variable (1×1 à 10×10), faces / dos, miroir colonne.
+ * A4 print: variable grid (1×1 to 10×10), faces / backs, column mirror.
  *
- * Alignement face/dos : miroir horizontal (flip sur le bord long en portrait).
+ * Face/back alignment: horizontal mirror (long-edge flip in portrait).
  */
 
 import { renderCardFace, renderCardBack, applyImageTransform, applyThemeLogoTransform } from "./card-render.js";
@@ -177,8 +177,8 @@ function buildPrintDocument(cards, themeMap, layout, settings) {
 }
 
 /**
- * Attend qu’une image soit décodable. Ne remplace pas `onload` / `onerror`
- * (le dos de carte révèle le logo de thème dans ces handlers).
+ * Wait until an image is decodable. Does not replace `onload` / `onerror`
+ * (the card back reveals the theme logo in those handlers).
  * @param {HTMLImageElement} img
  */
 function waitForImageReady(img) {
@@ -199,8 +199,8 @@ function waitForImageReady(img) {
 }
 
 /**
- * Photos + logos de thème. Les logos restent `hidden` jusqu’à `onload` :
- * ne pas les ignorer, sinon `window.print()` part trop tôt.
+ * Photos + theme logos. Logos stay `hidden` until `onload`:
+ * do not skip them, or `window.print()` fires too early.
  * @param {HTMLElement} root
  */
 async function waitForImages(root) {
@@ -211,7 +211,7 @@ async function waitForImages(root) {
 }
 
 /**
- * Si `onload` n’a pas encore révélé un logo déjà décodé, l’afficher maintenant.
+ * If `onload` has not yet revealed an already-decoded logo, show it now.
  * @param {HTMLElement} root
  */
 function revealLoadedThemeLogos(root) {
@@ -254,7 +254,7 @@ function reapplyTransforms(root) {
   });
 }
 
-/** Attend 2 frames pour laisser le layout se stabiliser. */
+/** Wait 2 frames so the layout can settle. */
 function waitLayout() {
   return new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
 }
@@ -267,12 +267,12 @@ export async function printCards(cards, opts = {}) {
   if (!cards.length) return;
 
   const printRoot = document.getElementById("print-root");
-  if (!printRoot) throw new Error("Zone d'impression introuvable");
+  if (!printRoot) throw new Error("Print root not found");
 
   const settings = getPrintSettings();
   const pdfName = formatPrintPdfBasename(cards.length, settings);
-  // Verrouiller tôt : Gecko met à jour contentTitle en async ; un gros DOM
-  // juste avant print() laisse souvent le titre vide → 127.0.0.1.pdf.
+  // Lock early: Gecko updates contentTitle asynchronously; a large DOM
+  // just before print() often leaves the title empty → 127.0.0.1.pdf.
   beginPrintDocumentTitle(pdfName);
 
   const themes = await loadThemes();
@@ -281,7 +281,7 @@ export async function printCards(cards, opts = {}) {
 
   printRoot.innerHTML = "";
   printRoot.appendChild(buildPrintDocument(cards, themeMap, layout, settings));
-  // display:none → clientWidth/Height à 0 ; forcer un layout hors écran pour le cadrage.
+  // display:none → clientWidth/Height is 0; force an off-screen layout for cropping.
   printRoot.classList.add("is-preparing");
 
   await waitForImages(printRoot);
@@ -309,7 +309,7 @@ export async function printCards(cards, opts = {}) {
     opts.onDone?.();
   };
 
-  /** Firefox : afterprint = clone prêt, dialogue encore ouvert. Chrome : dialogue fermé. */
+  /** Firefox: afterprint = clone ready, dialog still open. Chrome: dialog closed. */
   const onAfterPrint = () => {
     if (inPrintCall) return;
     if (printReturnedAt && performance.now() - printReturnedAt < 1500) return;

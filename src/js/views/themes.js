@@ -81,7 +81,7 @@ function saveSortDir(dir) {
   }
 }
 
-/** Après création d’un thème : recherche vidée, tri par date de modification (récent d’abord). */
+/** After creating a theme: search cleared, sort by date modified (newest first). */
 export function prepareThemesAfterThemeCreate() {
   rememberedQuery = "";
   saveSortKey("updatedAt");
@@ -100,9 +100,9 @@ let mountedFocusThemeInList = null;
 let pendingFocusThemeId = null;
 
 /**
- * Ajoute un thème à la liste montée, reset tri/recherche, repeint et scrolle en haut.
+ * Adds a theme to the mounted list, resets sort/search, repaints and scrolls to top.
  * @param {import("../themes-data.js").LegoTheme} theme
- * @returns {boolean} false si la liste n’est pas montée
+ * @returns {boolean} false if the list is not mounted
  */
 export function refreshThemesListAfterCreate(theme) {
   if (!mountedRefreshThemesAfterCreate || !theme?.id) return false;
@@ -110,9 +110,9 @@ export function refreshThemesListAfterCreate(theme) {
 }
 
 /**
- * Met à jour la mini-carte d’un thème déjà affiché, sans reconstruire la grille.
+ * Updates the mini-card of a theme already shown, without rebuilding the grid.
  * @param {import("../themes-data.js").LegoTheme} theme
- * @returns {boolean} false si la liste n’est pas montée
+ * @returns {boolean} false if the list is not mounted
  */
 export function patchThemeInList(theme) {
   if (!mountedPatchThemeInList || !theme?.id) return false;
@@ -120,8 +120,8 @@ export function patchThemeInList(theme) {
 }
 
 /**
- * Place le focus clavier sur la mini-carte d’un thème (perso ou par défaut).
- * Si la tuile n’est pas encore dans la grille, le focus est appliqué au prochain rendu.
+ * Puts keyboard focus on a theme mini-card (custom or default).
+ * If the tile is not in the grid yet, focus is applied on the next render.
  * @param {string} [id]
  */
 export function focusThemeInList(id) {
@@ -134,7 +134,7 @@ export function focusThemeInList(id) {
   requestAnimationFrame(() => applyPendingThemeFocus());
 }
 
-/** Applique un focus de tuile en attente (après `focusTopModal` au retour liste). */
+/** Applies a pending tile focus (after `focusTopModal` when returning to the list). */
 export function applyPendingThemeFocus() {
   if (!pendingFocusThemeId) return;
   if (mountedFocusThemeInList?.(pendingFocusThemeId)) pendingFocusThemeId = null;
@@ -152,9 +152,9 @@ function applyThemeTileFocus(tile) {
 }
 
 /**
- * Retire un thème de la liste montée (tuile + mémoire + compteurs), sans reconstruire la grille.
+ * Removes a theme from the mounted list (tile + memory + counters), without rebuilding the grid.
  * @param {string} id
- * @returns {boolean} false si la liste n’est pas montée
+ * @returns {boolean} false if the list is not mounted
  */
 export function removeThemeFromList(id) {
   if (!mountedRemoveThemeFromList || !id) return false;
@@ -176,12 +176,12 @@ function compareThemesAsc(a, b, key, usage) {
   });
 }
 
-/** Conserve la requête en swap liste ↔ éditeur. */
+/** Keeps the query across list ↔ editor swap. */
 let rememberedQuery = "";
 
 /**
- * Modale de gestion des thèmes LEGO (`#themes`).
- * @param {HTMLElement} host Conteneur modale (#modal-root)
+ * LEGO theme manager modal (`#themes`).
+ * @param {HTMLElement} host Modal container (#modal-root)
  * @param {{
  *   onClose: () => void,
  *   onCreate: () => void,

@@ -1,6 +1,6 @@
 /**
- * Dialogues de confirmation (`modal--sm`), à la place de `alert()` / `confirm()` / `prompt()`.
- * Enfant du host (`#modal-root`) : second backdrop, sans route.
+ * Confirmation dialogs (`modal--sm`), instead of `alert()` / `confirm()` / `prompt()`.
+ * Child of the host (`#modal-root`): second backdrop, no route.
  */
 
 import { ICON_CLOSE, ICON_DELETE_BIN_2, ICON_SAVE, modalTitleMarkup, remixIconByName } from "./icons.js";
@@ -40,18 +40,18 @@ function escapeAttr(s) {
  */
 
 /**
- * Ouvre une modale de confirmation. Fermeture (X, Échap, backdrop) → `null`.
- * « Annuler » (`id: "cancel"` ou libellé) est en `sm` s’il y a d’autres actions ;
- * taille normale s’il est le seul bouton.
+ * Opens a confirmation modal. Close (X, Escape, backdrop) → `null`.
+ * “Cancel” (`id: "cancel"` or label) is `sm` if there are other actions;
+ * normal size if it is the only button.
  *
- * @param {HTMLElement} host Conteneur (`#modal-root`)
+ * @param {HTMLElement} host Container (`#modal-root`)
  * @param {{
  *   title: string,
  *   message: string,
  *   icon?: string,
  *   actions?: ConfirmAction[],
  * }} opts
- * @returns {Promise<string|null>} `id` de l’action, ou `null` si dismiss
+ * @returns {Promise<string|null>} action `id`, or `null` if dismissed
  */
 export function openConfirmDialog(host, opts) {
   const title = opts.title || _t("Confirm?");
@@ -175,7 +175,7 @@ export function openConfirmDialog(host, opts) {
 }
 
 /**
- * Confirmation OK / Annuler. `true` si OK.
+ * OK / Cancel confirmation. `true` if OK.
  *
  * @param {HTMLElement} host
  * @param {{
@@ -207,7 +207,7 @@ export async function confirmDialog(host, opts) {
 }
 
 /**
- * Alerte : un seul bouton (à la place de `alert()`).
+ * Alert: one button (instead of `alert()`).
  *
  * @param {HTMLElement} host
  * @param {{

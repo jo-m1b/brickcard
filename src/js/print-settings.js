@@ -1,6 +1,6 @@
 /**
- * Réglages d’impression (localStorage) + calcul de grille A4.
- * N’impacte que le document imprimé et le libellé de feuilles du menu.
+ * Print settings (localStorage) + A4 grid math.
+ * Affects only the printed document and the menu sheet label.
  */
 
 import { filenameSlug } from "./card-export.js";
@@ -123,7 +123,7 @@ export function normalizeBleedBack(value) {
 }
 
 /**
- * Radios horizontales « Ordre d’impression des cartes » (Paramètres et `#print`).
+ * Horizontal radios “Card print order” (Settings and `#print`).
  * @param {{ idPrefix: string, name: string, selected: CardSortKey }} opts
  * @returns {string}
  */
@@ -140,7 +140,7 @@ export function printCardOrderRadiosMarkup(opts) {
 }
 
 /**
- * Groupe de cases « Tracé de découpe » (Paramètres et `#print`).
+ * “Cut marks” checkbox group (Settings and `#print`).
  * @param {{ idPrefix: string, name: string, face: boolean, back: boolean }} opts
  * @returns {string}
  */
@@ -169,7 +169,7 @@ export function printCutMarksGroupMarkup(opts) {
 }
 
 /**
- * Lit les cases Face / Dos d’un groupe « Tracé de découpe ».
+ * Read Face / Back checkboxes of a “Cut marks” group.
  * @param {NodeListOf<Element>|Element[]} inputs
  * @returns {{ cutMarkFace: boolean, cutMarkBack: boolean }}
  */
@@ -185,9 +185,9 @@ export function cutMarksFromCheckboxes(inputs) {
 }
 
 /**
- * Groupe de cases « Fond perdu » (Paramètres et `#print`).
- * Les cases d’un côté sont désactivées si le tracé de découpe correspondant
- * est coché (inutile d’imprimer un fond perdu avec un filet de coupe).
+ * “Bleed” checkbox group (Settings and `#print`).
+ * Checkboxes on a side are disabled if the matching cut mark
+ * is checked (no point printing bleed with a cut hairline).
  * @param {{
  *   idPrefix: string,
  *   name: string,
@@ -225,7 +225,7 @@ export function printBleedGroupMarkup(opts) {
 }
 
 /**
- * Lit les cases Face / Dos d’un groupe « Fond perdu ».
+ * Read Face / Back checkboxes of a “Bleed” group.
  * @param {NodeListOf<Element>|Element[]} inputs
  * @returns {{ bleedFace: boolean, bleedBack: boolean }}
  */
@@ -241,7 +241,7 @@ export function bleedFromCheckboxes(inputs) {
 }
 
 /**
- * Grise / désactive les cases Fond perdu selon le tracé de découpe.
+ * Gray out / disable Bleed checkboxes from the cut marks.
  * @param {NodeListOf<Element>|Element[]} inputs
  * @param {{ cutMarkFace: boolean, cutMarkBack: boolean }} cutMarks
  */
@@ -254,8 +254,8 @@ export function syncPrintBleedDisabled(inputs, cutMarks) {
 }
 
 /**
- * Fond perdu effectivement imprimé : jamais si le tracé de découpe du même
- * côté est coché.
+ * Bleed actually printed: never if the cut mark on the same
+ * side is checked.
  * @param {PrintSettings} [settings]
  * @returns {{ face: boolean, back: boolean }}
  */
@@ -267,9 +267,9 @@ export function effectivePrintBleed(settings = getPrintSettings()) {
 }
 
 /**
- * Grille A4 : 3×3 = échelle 1 (taille poker).
- * Sinon l’échelle remplit la largeur utile (agrandir à 1–2 / réduire à 4–10).
- * Les lignes sont des cartes entières (jamais coupées) ; 1…10 → grilles carrées.
+ * A4 grid: 3×3 = scale 1 (poker size).
+ * Otherwise scale fills the usable width (enlarge at 1–2 / shrink at 4–10).
+ * Rows are whole cards (never cut); 1…10 → square grids.
  * @param {unknown} [printGrid]
  * @returns {PrintLayout}
  */
@@ -429,7 +429,7 @@ export function formatPrintGridSize(layout) {
 }
 
 /**
- * Libellé du menu header (`#print-menu-desc`) : grille puis feuilles.
+ * Header menu label (`#print-menu-desc`): grid then sheets.
  * @param {number} cardCount
  * @param {PrintSettings} [settings]
  * @returns {string}
@@ -450,10 +450,10 @@ export function formatPrintCountLabel(cardCount) {
 }
 
 /**
- * Nom de fichier proposé au dialogue « Enregistrer au format PDF »
- * (`document.title` pendant `window.print()`, sans `.pdf`).
- * Verrouillé via `beginPrintDocumentTitle` / `endPrintDocumentTitle` pour ne pas
- * écraser le nom de fichier avec le titre de navigation.
+ * Filename offered to the “Save as PDF” dialog
+ * (`document.title` during `window.print()`, no `.pdf`).
+ * Locked via `beginPrintDocumentTitle` / `endPrintDocumentTitle` so the
+ * navigation title does not overwrite the filename.
  * @param {number} cardCount
  * @param {PrintSettings} [settings]
  * @returns {string}

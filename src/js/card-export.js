@@ -1,11 +1,11 @@
 /**
- * Téléchargement de fichiers (photo Brickcard, logos, sauvegardes).
+ * File download (Brickcard photo, logos, backups).
  */
 
 import { _t } from "./i18n.js";
 
 /**
- * Segment kebab-case pour un nom de fichier (vide si rien d’utilisable).
+ * Kebab-case segment for a filename (empty if nothing usable).
  * @param {string} text
  * @returns {string}
  */
@@ -27,8 +27,8 @@ export function slugifyFilename(text) {
 }
 
 /**
- * Nom de fichier (sans extension) d’une photo de carte.
- * Préfixe `brickcard-card-image-YYYY-MM-DD-` ; suite = ref, titre, les deux, ou id.
+ * Filename (no extension) of a card photo.
+ * Prefix `brickcard-card-image-YYYY-MM-DD-`; rest = ref, title, both, or id.
  * @param {{
  *   legoSetRef?: string,
  *   title?: string,
@@ -55,8 +55,8 @@ export function formatCardImageBasename(opts = {}) {
 }
 
 /**
- * Nom de fichier (sans extension) d’un logo de thème.
- * Préfixe `brickcard-theme-logo-YYYY-MM-DD-` ; suite = slug du nom, ou id.
+ * Filename (no extension) of a theme logo.
+ * Prefix `brickcard-theme-logo-YYYY-MM-DD-`; rest = name slug, or id.
  * @param {{
  *   name?: string,
  *   themeId?: string,
@@ -102,7 +102,7 @@ export function mimeFromDataUrl(dataUrl) {
 }
 
 /**
- * Extension depuis une data URL, un chemin, ou un nom de fichier.
+ * Extension from a data URL, a path, or a filename.
  * @param {string} src
  * @returns {string}
  */
@@ -118,7 +118,7 @@ export function extFromSrc(src) {
 }
 
 /**
- * Déclenche un téléchargement via `<a download>`.
+ * Trigger a download via `<a download>`.
  * @param {string} href
  * @param {string} filename
  */
@@ -143,10 +143,10 @@ export function downloadBlob(blob, filename) {
 }
 
 /**
- * Télécharge une data URL, un chemin same-origin, ou une URL.
- * Toujours via `blob:` : un `href` data URL ignore `download` pour le WebP (nouvel onglet).
+ * Download a data URL, a same-origin path, or a URL.
+ * Always via `blob:`: a data URL `href` ignores `download` for WebP (new tab).
  * @param {string} src
- * @param {string} [basename] Sans extension
+ * @param {string} [basename] No extension
  * @returns {Promise<void>}
  */
 export async function downloadCardPhoto(src, basename = "brickcard-photo") {

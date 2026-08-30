@@ -1,24 +1,24 @@
 /**
- * Layout de la liste de cartes — nombre max de colonnes (localStorage).
- * Largeur de ligne calculée en px (mesure réelle) pour éviter les erreurs de calc CSS.
- * Plage : 2–10, plus un cran « illimité » (pas de plafond).
+ * Card list layout — max column count (localStorage).
+ * Row width computed in px (real measure) to avoid CSS calc errors.
+ * Range: 2–10, plus an “unlimited” step (no cap).
  */
 
 const COLS_KEY = "brickcard:list-cols-max";
 const GAP_X = "1.25rem";
 const UNLIMITED_TOKEN = "infinite";
 
-/** Défaut : 4 cartes max par ligne. */
+/** Default: 4 cards max per row. */
 export const DEFAULT_LIST_COLS_MAX = 4;
 
-/** Minimum de cartes par ligne (réglage fini). */
+/** Minimum cards per row (finite setting). */
 export const LIST_COLS_MIN = 2;
 
-/** Maximum de cartes par ligne (réglage fini). */
+/** Maximum cards per row (finite setting). */
 export const LIST_COLS_MAX = 10;
 
 /**
- * Valeur du curseur pour « illimité » (11ᵉ cran après 2…10).
+ * Slider value for “unlimited” (11th step after 2…10).
  * @type {11}
  */
 export const LIST_COLS_SLIDER_UNLIMITED = 11;
@@ -38,9 +38,9 @@ export function isListColsUnlimited(value) {
 }
 
 /**
- * Normalise une valeur stockée / saisie.
+ * Normalize a stored / entered value.
  * @param {unknown} value
- * @returns {number} 2–10, ou `Infinity` si illimité
+ * @returns {number} 2–10, or `Infinity` if unlimited
  */
 export function normalizeListColsMax(value) {
   if (isListColsUnlimited(value)) return Infinity;
@@ -50,7 +50,7 @@ export function normalizeListColsMax(value) {
   return Math.min(LIST_COLS_MAX, Math.max(LIST_COLS_MIN, n));
 }
 
-/** Valeur du range HTML (2–11). @param {number} cols @returns {number} */
+/** HTML range value (2–11). @param {number} cols @returns {number} */
 export function listColsToSlider(cols) {
   return Number.isFinite(cols) ? cols : LIST_COLS_SLIDER_UNLIMITED;
 }
@@ -60,12 +60,12 @@ export function listColsFromSlider(sliderValue) {
   return normalizeListColsMax(sliderValue);
 }
 
-/** Libellé UI. @param {number} cols @returns {string} */
+/** UI label. @param {number} cols @returns {string} */
 export function formatListColsLabel(cols) {
   return Number.isFinite(cols) ? String(cols) : "∞";
 }
 
-/** @returns {number} 2–10 ou Infinity */
+/** @returns {number} 2–10 or Infinity */
 export function getListColsMax() {
   try {
     const raw = localStorage.getItem(COLS_KEY);
@@ -77,7 +77,7 @@ export function getListColsMax() {
 }
 
 /**
- * Mesure une longueur CSS en pixels (ex. `var(--card-w)`, `1.25rem`).
+ * Measure a CSS length in pixels (e.g. `var(--card-w)`, `1.25rem`).
  * @param {string} cssLength
  * @returns {number}
  */
@@ -91,7 +91,7 @@ function measurePx(cssLength) {
 }
 
 /**
- * Applique le nombre de colonnes effectif via max-width en px (gap fixe, lignes centrées).
+ * Apply the effective column count via max-width in px (fixed gap, centered rows).
  * @param {HTMLElement} grid
  */
 export function layoutCardsGrid(grid) {
@@ -104,13 +104,13 @@ export function layoutCardsGrid(grid) {
     return;
   }
 
-  /* Largeur dispo = parent (pas la grille déjà bornée, sinon boucle N→N-1) */
+  /* Available width = parent (not the already-capped grid, or N→N-1 loop) */
   const parent = grid.parentElement;
   const available = parent?.clientWidth || grid.clientWidth || 0;
   const fit = Math.max(1, Math.floor((available + gapPx) / (cardPx + gapPx)));
 
   if (!Number.isFinite(max)) {
-    /* Illimité : pas de plafond, uniquement la largeur d’écran */
+    /* Unlimited: no cap, screen width only */
     grid.style.removeProperty("max-width");
     grid.dataset.listCols = String(fit);
     return;
@@ -118,7 +118,7 @@ export function layoutCardsGrid(grid) {
 
   const cols = Math.min(max, fit);
   const rowMax = cols * cardPx + Math.max(0, cols - 1) * gapPx;
-  /* +1px : évite qu’un arrondi sous-pixel fasse passer la Nᵉ carte à la ligne */
+  /* +1px: avoid a subpixel round-off wrapping the Nth card */
   grid.style.maxWidth = `${Math.ceil(rowMax) + 1}px`;
   grid.dataset.listCols = String(cols);
 }
@@ -136,7 +136,7 @@ function ensureResizeObserver() {
 }
 
 /**
- * Enregistre une grille de liste (observe le parent pour le resize).
+ * Register a list grid (observe the parent for resize).
  * @param {HTMLElement | null | undefined} grid
  * @returns {() => void} unregister
  */
@@ -155,7 +155,7 @@ export function registerCardsGrid(grid) {
 
 /**
  * @param {unknown} value
- * @returns {number} 2–10 ou Infinity
+ * @returns {number} 2–10 or Infinity
  */
 export function setListColsMax(value) {
   const n = normalizeListColsMax(value);
@@ -181,7 +181,7 @@ export function applyListColsMax(n = getListColsMax()) {
   for (const grid of grids) layoutCardsGrid(grid);
 }
 
-/** Applique la valeur stockée au démarrage. */
+/** Apply the stored value at startup. */
 export function initListLayout() {
   applyListColsMax();
 }

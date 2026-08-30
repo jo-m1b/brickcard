@@ -1,13 +1,13 @@
 /**
- * Notifications empilables (toast) in-app.
- * Pas d’animation : affichage / suppression seulement.
+ * Stackable in-app toast notifications.
+ * No animation: show / remove only.
  */
 
 import { ICON_CLOSE, remixIconByName } from "./icons.js";
 import { _t } from "./i18n.js";
 
 export const TOAST_DELAY_DEFAULT = 7000;
-/** Recap import / sauvegarde de collection (plus long à lire). */
+/** Recap for collection import / backup (longer to read). */
 export const TOAST_DELAY_BACKUP = 15000;
 
 /** @typedef {"normal" | "success" | "error"} ToastType */
@@ -15,7 +15,7 @@ export const TOAST_DELAY_BACKUP = 15000;
 /**
  * @typedef {object} ToastOptions
  * @property {string} message
- * @property {string} [messageHtml] HTML de confiance pour le corps (`message` reste le texte brut)
+ * @property {string} [messageHtml] Trusted HTML for the body (`message` stays the plain text)
  * @property {ToastType | "info"} [type]
  * @property {string | false} [title]
  * @property {string | false} [icon]
@@ -87,7 +87,7 @@ export function toast(messageOrOpts, typeOrOpts) {
   return { id, dismiss };
 }
 
-/** Téléchargement réussi d’une photo de carte ou d’un logo de thème. */
+/** Successful download of a card photo or a theme logo. */
 export function toastImageSaved() {
   return toast({
     type: "success",

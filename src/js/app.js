@@ -57,7 +57,7 @@ let cleanupImport = null;
 /** @type {null | (() => void)} */
 let cleanupList = null;
 
-/** Dernière route effectivement affichée. */
+/** Last route actually shown. */
 let shownRoute = /** @type {ReturnType<typeof parseRoute>|null} */ (null);
 
 let underlayReady = false;
@@ -65,7 +65,7 @@ let underlayStale = false;
 
 let routeToken = 0;
 
-/** Ignore le hashchange qui suit un popstate (Précédent / Suivant). */
+/** Ignore the hashchange that follows a popstate (Back / Forward). */
 let ignoreHashchange = false;
 
 /**
@@ -83,7 +83,7 @@ function normalizeHash(hash) {
   return h;
 }
 
-/** Accueil : URL sans fragment (jeton `#`). Overlays : `#settings` ; `#/settings` nettoyé. */
+/** Home: URL with no fragment (`#` token). Overlays: `#settings`; `#/settings` cleaned. */
 function hashUrl(hash) {
   const h = normalizeHash(hash);
   if (h === "#") return `${location.pathname}${location.search}`;
@@ -124,7 +124,7 @@ function parsePath(path) {
     try {
       themeId = decodeURIComponent(raw);
     } catch {
-      /* id tel quel */
+      /* id as-is */
     }
     if (!themeId) return { name: "unknown" };
     return { name: "themes", page, themeId };
@@ -146,7 +146,7 @@ function parsePath(path) {
 }
 
 /**
- * @param {string} rest chemin après `developer/`
+ * @param {string} rest path after `developer/`
  * @returns {{ name: string, page?: string, presetPage?: string, themeId?: string }}
  */
 function parseDeveloperPage(rest) {
@@ -164,7 +164,7 @@ function parseDeveloperPage(rest) {
     try {
       themeId = decodeURIComponent(raw);
     } catch {
-      /* slug tel quel */
+      /* slug as-is */
     }
     if (!themeId) return { name: "unknown" };
     return { name: "developer", page: "theme-presets", presetPage: "edit", themeId };
@@ -202,7 +202,7 @@ function navigate(hash, opts = {}) {
   route();
 }
 
-/** Croix / Échap / backdrop : ferme l’overlay vers l’accueil (replace). Le Précédent navigateur garde l’historique. */
+/** Close / Escape / backdrop: close the overlay to home (replace). Browser Back keeps history. */
 function dismissOverlay() {
   if (normalizeHash(location.hash) === "#") return;
   navigate("#", { replace: true });
@@ -212,7 +212,7 @@ function setNewButtonVisible(visible) {
   btnNew.classList.toggle("is-hidden", !visible);
 }
 
-/** Barre de recherche : visible sur l’accueil liste (et sous une modale). */
+/** Search bar: visible on the home list (and under a modal). */
 function setSearchVisible(visible) {
   if (topbarSearch) topbarSearch.hidden = !visible;
 }
@@ -243,7 +243,7 @@ function overlayOnClose(name) {
   };
 }
 
-/** Éditeur avec brouillon : Ctrl/Cmd+S n’ouvre pas `#backup` (évite de perdre la saisie). */
+/** Draft editor: Ctrl/Cmd+S does not open `#backup` (avoids losing input). */
 function isDraftEditorRoute(info) {
   if (info.name === "editor") return true;
   if (info.name === "themes" && (info.page === "new" || info.page === "edit")) return true;
@@ -251,7 +251,7 @@ function isDraftEditorRoute(info) {
   return false;
 }
 
-/** Second backdrop (confirm, URL d’image…) au-dessus de l’overlay. */
+/** Second backdrop (confirm, image URL…) above the overlay. */
 function hasChildDialog() {
   if (!modalRoot) return false;
   const n = modalRoot.querySelectorAll(":scope > .modal-backdrop").length;
@@ -260,8 +260,8 @@ function hasChildDialog() {
 }
 
 /**
- * Retire les listeners des overlays. Le DOM n’est vidé que si `clearDom`.
- * `modal-open` n’est retiré que si `dropModalOpen` (destination accueil).
+ * Remove overlay listeners. The DOM is cleared only if `clearDom`.
+ * `modal-open` is removed only if `dropModalOpen` (going to home).
  * @param {{ clearDom?: boolean, dropModalOpen?: boolean }} [opts]
  */
 function teardownOverlays(opts = {}) {
@@ -283,7 +283,7 @@ function teardownOverlays(opts = {}) {
 }
 
 /**
- * Charge un module d’overlay. Échec → toast + accueil (le boot reste utilisable).
+ * Load an overlay module. Failure → toast + home (boot stays usable).
  * @template T
  * @param {() => Promise<T>} loader
  * @returns {Promise<T|null>}
@@ -461,7 +461,7 @@ async function showOverlay(routeInfo) {
             themes.prepareThemesAfterThemeCreate();
           }
         } else if (!themes.patchThemeInList(meta?.theme)) {
-          /* liste absente : #themes la remontera */
+          /* list missing: #themes will rebuild it */
         }
         if (parseRoute().name === "themes") {
           navigate("#themes", { replace: true });
@@ -617,7 +617,7 @@ const listOpts = {
   toast,
 };
 
-/** Accueil sous une modale, ou page d’accueil seule. */
+/** Home under a modal, or the home page alone. */
 async function renderHomeUnderlay(cards) {
   disposeList();
   setNewButtonVisible(true);
@@ -732,7 +732,7 @@ async function handleClearCards() {
 
 async function handleDevReset() {
   try {
-    /* Fermer la modale avant wipe pour éviter un état UI coincé si le reload échoue. */
+    /* Close the modal before wipe to avoid a stuck UI if reload fails. */
     if (cleanupSettings) {
       cleanupSettings();
       cleanupSettings = null;

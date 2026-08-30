@@ -1,7 +1,7 @@
 /**
- * État vide / chargement : brique CSS + titre + texte optionnel + tuiles optionnelles.
- * Accueil vide : `welcomeViewMarkup()`. Page de démarrage : `loadingViewMarkup()`
- * (copie inline dans `index.html` pour le boot).
+ * Empty / loading state: CSS brick + title + optional text + optional tiles.
+ * Empty home: `welcomeViewMarkup()`. Boot page: `loadingViewMarkup()`
+ * (inline copy in `index.html` for boot).
  */
 
 import { tileListMarkup } from "./tile.js";
@@ -30,7 +30,7 @@ function escapeHtml(s) {
 }
 
 /**
- * Markup `section.empty-view` (brique + titre + texte + tuiles).
+ * Markup for `section.empty-view` (brick + title + text + tiles).
  *
  * @param {{
  *   title: string,
@@ -52,7 +52,7 @@ export function emptyViewMarkup(opts) {
 }
 
 /**
- * Markup de la page d’accueil vide (collection sans cartes).
+ * Markup for the empty home page (collection with no cards).
  *
  * @param {{
  *   titleTag?: "h1" | "h2" | "p",
@@ -97,9 +97,9 @@ export function welcomeViewMarkup(opts = {}) {
 }
 
 /**
- * Markup de la page de chargement (brique animée + « Chargement... »).
- * Le boot réel reste inline dans `index.html` (modules pas encore chargés) ; garder les deux alignés.
- * `retry` : bouton **Réessayer** (accueil / boot uniquement ; pas les chargements d’image).
+ * Markup for the loading page (animated brick + “Loading”).
+ * Real boot stays inline in `index.html` (modules not loaded yet); keep both aligned.
+ * `retry`: **Retry** button (home / boot only; not image loads).
  *
  * @param {{
  *   titleTag?: "h1" | "h2" | "p",

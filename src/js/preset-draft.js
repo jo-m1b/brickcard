@@ -1,7 +1,7 @@
 /**
- * Brouillon isolé des thèmes par défaut (outil développeur).
- * IndexedDB `brickcard-preset-draft` — jamais les stores cartes / thèmes
- * de la collection, ni les clés localStorage d’UI.
+ * Isolated default-themes draft (developer tool).
+ * IndexedDB `brickcard-preset-draft` — never the collection cards / themes
+ * stores, nor the UI localStorage keys.
  */
 
 import {
@@ -23,7 +23,7 @@ const DB_VERSION = 1;
 const STORE_THEMES = "themes";
 const STORE_META = "meta";
 
-/** Chemin relatif depuis `src/` pour un logo de thème par défaut. */
+/** Relative path from `src/` for a default theme logo. */
 const PRESET_LOGO_DIR = "data";
 
 /** kebab-case : `city`, `avatar-the-last-airbender` */
@@ -35,12 +35,12 @@ export const PRESET_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
  * @property {string} name
  * @property {string} color
  * @property {string} secondaryColor
- * @property {string} logoSrc Chemin d’origine si le fichier n’a pas été remplacé
- * @property {string} logoDataUrl Data URL si logo ajouté / remplacé ; sinon ""
+ * @property {string} logoSrc Original path if the file was not replaced
+ * @property {string} logoDataUrl Data URL if a logo was added / replaced; else ""
  * @property {number} logoZoom
  * @property {number} logoOffsetX
  * @property {number} logoOffsetY
- * @property {string} updatedAt ISO ; vide tant que non modifié depuis le seed
+ * @property {string} updatedAt ISO; empty until changed since the seed
  */
 
 /** @type {Promise<IDBDatabase>|null} */
@@ -60,7 +60,7 @@ export function suggestPresetId(name) {
 
 /**
  * @param {PresetDraftTheme} theme
- * @returns {string} Chemin ou data URL à afficher
+ * @returns {string} Path or data URL to display
  */
 export function presetDraftLogoUrl(theme) {
   const data = String(theme?.logoDataUrl || "").trim();
@@ -143,7 +143,7 @@ function txDone(tx) {
   return new Promise((resolve, reject) => {
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
-    tx.onabort = () => reject(tx.error || new Error("Transaction annulée"));
+    tx.onabort = () => reject(tx.error || new Error("Transaction cancelled"));
   });
 }
 
@@ -158,7 +158,7 @@ async function closeDb() {
   dbPromise = null;
 }
 
-/** Ancien chemin `img/theme-logo-…` → `data/theme-logo-…`. */
+/** Old path `img/theme-logo-…` → `data/theme-logo-…`. */
 function migratePresetLogoSrc(src) {
   const s = String(src || "").trim().split("?")[0];
   if (s.startsWith("img/theme-logo-")) {
@@ -294,7 +294,7 @@ export async function deletePresetDraftTheme(id) {
   await txDone(tx);
 }
 
-/** Supprime le brouillon puis re-seed depuis `themes-presets.json`. */
+/** Delete the draft then re-seed from `themes-presets.json`. */
 export async function resetPresetDraft() {
   await closeDb();
   await new Promise((resolve, reject) => {
@@ -309,7 +309,7 @@ export async function resetPresetDraft() {
     const req = indexedDB.deleteDatabase(DB_NAME);
     req.onsuccess = () => finish();
     req.onerror = () =>
-      finish(req.error || new Error("Suppression du brouillon impossible"));
+      finish(req.error || new Error("Unable to delete the theme draft"));
     req.onblocked = () => {
       setTimeout(() => finish(), 300);
     };

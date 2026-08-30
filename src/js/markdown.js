@@ -1,9 +1,9 @@
 /**
- * Parser Markdown léger (sous-ensemble GFM) + chargement des pages
- * `data/page-{{slug}}.md` (anglais) / `data/page-{{slug}}.{{locale}}.md`.
- * Gère : titres, paragraphes, listes, citations, code, liens, images, gras/italique, HR, blocs HTML.
- * Placeholder : `{{APP_VERSION}}` → version SemVer.
- * Titre de page : `# Titre` (retiré du corps de la modale).
+ * Light Markdown parser (GFM subset) + page loading
+ * `data/page-{{slug}}.md` (English) / `data/page-{{slug}}.{{locale}}.md`.
+ * Handles: headings, paragraphs, lists, quotes, code, links, images, bold/italic, HR, HTML blocks.
+ * Placeholder: `{{APP_VERSION}}` → SemVer version.
+ * Page title: `# Title` (removed from the modal body).
  */
 
 import { linkMarkup } from "./link.js";
@@ -11,7 +11,7 @@ import { APP_VERSION } from "./version.js";
 import { _t, getDefaultLocale, getLocale } from "./i18n.js";
 
 /**
- * Échappe le HTML brut.
+ * Escape raw HTML.
  * @param {string} s
  */
 function escapeHtml(s) {
@@ -23,9 +23,9 @@ function escapeHtml(s) {
 }
 
 /**
- * Inline : code, liens, images, gras, italique.
- * L’emphase `_…_` / `*…*` ne s’applique qu’hors balises HTML
- * (sinon les underscores d’URL cassent les href, ex. List_of_themes).
+ * Inline: code, links, images, bold, italic.
+ * Emphasis `_…_` / `*…*` applies only outside HTML tags
+ * (otherwise URL underscores break hrefs, e.g. List_of_themes).
  * @param {string} text
  */
 function inline(text) {
@@ -58,7 +58,7 @@ function inline(text) {
 }
 
 /**
- * Ligne qui ouvre un bloc HTML (GFM miniature, pages `data/` de confiance).
+ * Line that opens an HTML block (mini GFM, trusted `data/` pages).
  * @param {string} line
  */
 function isHtmlBlockStart(line) {
@@ -67,7 +67,7 @@ function isHtmlBlockStart(line) {
 }
 
 /**
- * Lit un bloc HTML jusqu’à la balise fermante, `-->` (commentaire), ou une ligne vide.
+ * Read an HTML block until the closing tag, `-->` (comment), or a blank line.
  * @param {string[]} lines
  * @param {number} start
  * @returns {{ html: string, next: number }}
@@ -103,7 +103,7 @@ function readHtmlBlock(lines, start) {
 }
 
 /**
- * Convertit du Markdown en HTML.
+ * Convert Markdown to HTML.
  * @param {string} md
  * @returns {string}
  */
@@ -143,7 +143,7 @@ export function parseMarkdown(md) {
       continue;
     }
 
-    // HTML brut (pages `data/` de confiance ; comme GitHub : pas d’échappement)
+    // Raw HTML (trusted `data/` pages; like GitHub: no escaping)
     if (isHtmlBlockStart(line)) {
       const block = readHtmlBlock(lines, i);
       out.push(block.html);
@@ -217,9 +217,9 @@ export function parseMarkdown(md) {
 }
 
 /**
- * Titre de page : `# Titre`.
- * @param {string} raw Ligne sans le `#`
- * @returns {string} HTML inline (échappé)
+ * Page title: `# Title`.
+ * @param {string} raw Line without the `#`
+ * @returns {string} inline HTML (escaped)
  */
 function parsePageHeading(raw) {
   const titleRaw = String(raw || "").trim();
@@ -227,8 +227,8 @@ function parsePageHeading(raw) {
 }
 
 /**
- * URL d’une page Markdown : `data/page-{{slug}}.md` (anglais source),
- * ou `data/page-{{slug}}.{{locale}}.md` pour une traduction.
+ * Markdown page URL: `data/page-{{slug}}.md` (English source),
+ * or `data/page-{{slug}}.{{locale}}.md` for a translation.
  * @param {string} slug
  * @param {string} [locale]
  */
@@ -239,8 +239,8 @@ export function pageMarkdownUrl(slug, locale) {
 }
 
 /**
- * Charge et parse `data/page-{{slug}}.md` (ou `page-{{slug}}.{{locale}}.md`).
- * Locale absente / 404 → fichier anglais source.
+ * Load and parse `data/page-{{slug}}.md` (or `page-{{slug}}.{{locale}}.md`).
+ * Missing locale / 404 → English source file.
  * @param {string} slug
  * @returns {Promise<{ slug: string, title: string, html: string }>}
  */

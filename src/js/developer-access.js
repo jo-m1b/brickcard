@@ -1,6 +1,6 @@
 /**
- * Accès à l’espace développeur : toujours actif en local ;
- * hors local, activé via `#developer` (confirmation) et persisté.
+ * Developer space access: always on locally;
+ * off-local, enabled via `#developer` (confirmation) and persisted.
  */
 
 import { isLocalDevHost } from "./themes-data.js";
@@ -19,7 +19,7 @@ export function isDeveloperEnabled() {
   }
 }
 
-/** Persiste l’activation (hors local). No-op si le stockage est indisponible. */
+/** Persist the activation (off-local). No-op if storage is unavailable. */
 export function enableDeveloper() {
   try {
     localStorage.setItem(DEVELOPER_ENABLED_KEY, "1");

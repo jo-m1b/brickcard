@@ -1,7 +1,7 @@
 /**
- * Tuiles du design system (`a.tile` / `button.tile` dans `ul.tile-list`).
- * Titre, description, icône gauche optionnelle ; disabled non cliquable.
- * Variante `danger` : mêmes couleurs que `btn danger`.
+ * Design-system tiles (`a.tile` / `button.tile` in `ul.tile-list`).
+ * Title, description, optional left icon; disabled not clickable.
+ * `danger` variant: same colors as `btn danger`.
  */
 
 import { remixIconByName } from "./icons.js";
@@ -28,7 +28,7 @@ function escapeHtml(s) {
 }
 
 /**
- * @param {string|false|null|undefined} icon Clé Remix ou markup SVG
+ * @param {string|false|null|undefined} icon Remix key or SVG markup
  * @returns {string}
  */
 function resolveIcon(icon) {
@@ -39,7 +39,7 @@ function resolveIcon(icon) {
 }
 
 /**
- * Markup `a.tile` (défaut) ou `button.tile`.
+ * Markup for `a.tile` (default) or `button.tile`.
  *
  * @param {{
  *   title?: string,
@@ -85,7 +85,7 @@ export function tileMarkup(opts = {}) {
 }
 
 /**
- * Liste de tuiles (`ul.tile-list`).
+ * Tile list (`ul.tile-list`).
  *
  * @param {Parameters<typeof tileMarkup>[0][]} items
  * @returns {string}

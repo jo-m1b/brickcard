@@ -1,12 +1,12 @@
 /**
- * Bouton radio design system : `form-check form-radio` (rond à gauche du
- * libellé / hint). Même principe que la case à cocher ; sélection exclusive
- * via `name`. Lecture seule via `aria-readonly` (l’attribut HTML `readonly`
- * est ignoré par les radios natives) — `bindFormRadios()` bloque le choix.
+ * Radio (design system): `form-check form-radio` (circle to the left of the
+ * label / hint). Same idea as the checkbox; exclusive selection
+ * via `name`. Read-only via `aria-readonly` (the HTML `readonly` attribute
+ * is ignored by native radios) — `bindFormRadios()` blocks the choice.
  */
 
 /**
- * Markup d’un bouton radio (`label.form-check.form-radio`).
+ * Markup for a radio (`label.form-check.form-radio`).
  * @param {{
  *   id: string,
  *   name?: string,
@@ -58,9 +58,9 @@ export function formRadioMarkup(opts) {
 }
 
 /**
- * Empêche de changer les radios en lecture seule (`aria-readonly="true"`),
- * y compris en sélectionnant une autre option du même `name` si l’option
- * cochée est figée.
+ * Prevents changing read-only radios (`aria-readonly="true"`),
+ * including selecting another option of the same `name` if the checked
+ * option is frozen.
  * @param {ParentNode} root
  * @returns {() => void}
  */

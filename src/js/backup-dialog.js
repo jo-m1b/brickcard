@@ -1,6 +1,6 @@
 /**
- * Modale de sauvegarde de la collection (`#backup`).
- * Fermeture (X, Échap, backdrop, Annuler, ou après un export réussi) → accueil.
+ * Collection backup modal (`#backup`).
+ * Close (X, Escape, backdrop, Cancel, or after a successful export) → home.
  */
 
 import { ICON_CLOSE, ICON_DOWNLOAD, modalTitleMarkup } from "./icons.js";

@@ -17,7 +17,7 @@ function aboutBrandHtml() {
 }
 
 /**
- * Texte brut du titre Markdown (déjà échappé en HTML) pour `document.title`.
+ * Plain-text Markdown title (already HTML-escaped) for `document.title`.
  * @param {{ title: string }} page
  * @returns {string}
  */
@@ -28,10 +28,10 @@ function pageTitleText(page) {
 }
 
 /**
- * Affiche une page Markdown (`data/page-{{slug}}.md` ou `.{{locale}}.md`) en modale overlay.
- * @param {HTMLElement} host Conteneur modale (#modal-root)
+ * Shows a Markdown page (`data/page-{{slug}}.md` or `.{{locale}}.md`) in an overlay modal.
+ * @param {HTMLElement} host Modal container (#modal-root)
  * @param {{ slug: string, onClose: () => void, toast?: (msg: string, type?: string) => void }} opts
- * @returns {Promise<(() => void)|null>} cleanup, ou `null` si la page est introuvable
+ * @returns {Promise<(() => void)|null>} cleanup, or `null` if the page is not found
  */
 export async function renderPageModal(host, opts) {
   const { slug, onClose, toast } = opts;
@@ -71,7 +71,7 @@ export async function renderPageModal(host, opts) {
   const body = host.querySelector("#page-md-body");
   if (body) body.innerHTML = page.html;
 
-  // Le # du markdown = titre du dialog (h1). ## / ### restent h2 / h3.
+  // Markdown # = dialog title (h1). ## / ### stay h2 / h3.
   const firstH1 = body?.querySelector("h1");
   if (firstH1) firstH1.remove();
 

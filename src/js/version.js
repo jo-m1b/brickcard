@@ -1,14 +1,14 @@
-/** Version applicative — SemVer (https://semver.org/) */
+/** App version — SemVer (https://semver.org/) */
 export const APP_VERSION = "0.8.6";
 
-/** Identifiant technique (sauvegardes .brickcard, IndexedDB, etc.) */
+/** Technical id (.brickcard backups, IndexedDB, etc.) */
 export const APP_ID = "brickcard";
 
-/** Nom produit affiché (UI, manifeste). */
+/** Displayed product name (UI, manifest). */
 export const APP_NAME = "Brickcard";
 
-/** Titre de document par défaut (`<title>` / `document.title`) — pas de version.
- *  Aligner le `<title>` de `src/index.html`.
+/** Default document title (`<title>` / `document.title`) — no version.
+ *  Keep in sync with the `<title>` in `src/index.html`.
  */
 export const APP_DOCUMENT_TITLE =
   "Brickcard - Print lovely cards for your LEGO® bricks";

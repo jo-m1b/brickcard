@@ -64,8 +64,8 @@ import {
 import { includesCI } from "../includes-ci.js";
 
 /**
- * Modale de configuration.
- * @param {HTMLElement} host Conteneur modale (#modal-root)
+ * Settings modal.
+ * @param {HTMLElement} host Modal container (#modal-root)
  * @param {{
  *   onClose: () => void,
  *   onClearCards?: () => void | Promise<void>,

@@ -1,14 +1,14 @@
 /**
- * Design des cartes (bordure face, arrondi coins / images, couleur par défaut) — persisté en localStorage.
+ * Card design (face border, corner / image radius, default color) — persisted in localStorage.
  *
- * Couleur d’accent d’une carte :
- * 1. couleur du thème (si définie)
- * 2. couleur configurée ici (si définie)
- * 3. gris d’usine `DEFAULT_THEME_COLOR`
+ * Card accent color:
+ * 1. theme color (if set)
+ * 2. color configured here (if set)
+ * 3. factory gray `DEFAULT_THEME_COLOR`
  *
- * Couleur des textes / icônes / logo Brickcard (`--card-accent-fg`) :
- * 1. `theme.secondaryColor` si hex valide
- * 2. sinon contraste auto (`contrastText`) sur l’accent
+ * Text / icon / Brickcard logo color (`--card-accent-fg`):
+ * 1. `theme.secondaryColor` if valid hex
+ * 2. else auto contrast (`contrastText`) on the accent
  */
 
 import {
@@ -22,24 +22,24 @@ const RADIUS_KEY = "brickcard:card-radius-mm";
 const IMAGE_RADIUS_KEY = "brickcard:card-image-radius-mm";
 const COLOR_KEY = "brickcard:card-default-color";
 
-/** Largeur de bordure face par défaut (mm). */
+/** Default face border width (mm). */
 export const DEFAULT_FACE_BORDER_MM = 3;
 
-/** Min / max (mm) pour le réglage de bordure. */
+/** Min / max (mm) for the border setting. */
 export const FACE_BORDER_MIN_MM = 0;
 export const FACE_BORDER_MAX_MM = 10;
 
-/** Rayon d’arrondi des coins par défaut (mm) — 0 = angles droits. */
+/** Default corner radius (mm) — 0 = square corners. */
 export const DEFAULT_CARD_RADIUS_MM = 2;
 
-/** Min / max (mm) pour l’arrondi des coins de carte. */
+/** Min / max (mm) for the card corner radius. */
 export const CARD_RADIUS_MIN_MM = 0;
 export const CARD_RADIUS_MAX_MM = 8;
 
-/** Rayon d’arrondi des images par défaut (mm) — 0 = angles droits. */
+/** Default image radius (mm) — 0 = square corners. */
 export const DEFAULT_CARD_IMAGE_RADIUS_MM = 1;
 
-/** Min / max (mm) pour l’arrondi des images. */
+/** Min / max (mm) for the image radius. */
 export const CARD_IMAGE_RADIUS_MIN_MM = 0;
 export const CARD_IMAGE_RADIUS_MAX_MM = 8;
 
@@ -69,7 +69,7 @@ export function clampFaceBorderMm(value) {
   );
 }
 
-/** @returns {number} largeur en mm */
+/** @returns {number} width in mm */
 export function getFaceBorderMm() {
   try {
     const raw = localStorage.getItem(BORDER_KEY);
@@ -82,7 +82,7 @@ export function getFaceBorderMm() {
   return DEFAULT_FACE_BORDER_MM;
 }
 
-/** Applique la variable CSS (sans persister). */
+/** Apply the CSS variable (do not persist). */
 export function applyFaceBorderMm(mm) {
   const value = clampFaceBorderMm(mm);
   document.documentElement.style.setProperty(
@@ -92,7 +92,7 @@ export function applyFaceBorderMm(mm) {
   return value;
 }
 
-/** Persiste et applique. @param {number} mm */
+/** Persist and apply. @param {number} mm */
 export function setFaceBorderMm(mm) {
   const value = clampFaceBorderMm(mm);
   try {
@@ -117,7 +117,7 @@ export function clampCardRadiusMm(value) {
   );
 }
 
-/** @returns {number} rayon en mm */
+/** @returns {number} radius in mm */
 export function getCardRadiusMm() {
   try {
     const raw = localStorage.getItem(RADIUS_KEY);
@@ -130,14 +130,14 @@ export function getCardRadiusMm() {
   return DEFAULT_CARD_RADIUS_MM;
 }
 
-/** Applique --card-radius (sans persister). */
+/** Apply --card-radius (do not persist). */
 export function applyCardRadiusMm(mm) {
   const value = clampCardRadiusMm(mm);
   document.documentElement.style.setProperty("--card-radius", `${value}mm`);
   return value;
 }
 
-/** Persiste et applique. @param {number} mm */
+/** Persist and apply. @param {number} mm */
 export function setCardRadiusMm(mm) {
   const value = clampCardRadiusMm(mm);
   try {
@@ -162,7 +162,7 @@ export function clampCardImageRadiusMm(value) {
   );
 }
 
-/** @returns {number} rayon en mm */
+/** @returns {number} radius in mm */
 export function getCardImageRadiusMm() {
   try {
     const raw = localStorage.getItem(IMAGE_RADIUS_KEY);
@@ -175,14 +175,14 @@ export function getCardImageRadiusMm() {
   return DEFAULT_CARD_IMAGE_RADIUS_MM;
 }
 
-/** Applique --card-image-radius (sans persister). */
+/** Apply --card-image-radius (do not persist). */
 export function applyCardImageRadiusMm(mm) {
   const value = clampCardImageRadiusMm(mm);
   document.documentElement.style.setProperty("--card-image-radius", `${value}mm`);
   return value;
 }
 
-/** Persiste et applique. @param {number} mm */
+/** Persist and apply. @param {number} mm */
 export function setCardImageRadiusMm(mm) {
   const value = clampCardImageRadiusMm(mm);
   try {
@@ -195,8 +195,8 @@ export function setCardImageRadiusMm(mm) {
 }
 
 /**
- * Couleur configurée (étape 2) — chaîne vide = non configurée.
- * @returns {string} hex #rrggbb ou ""
+ * Configured color (step 2) — empty string = not configured.
+ * @returns {string} hex #rrggbb or ""
  */
 export function getConfiguredCardColor() {
   try {
@@ -207,14 +207,14 @@ export function getConfiguredCardColor() {
 }
 
 /**
- * Couleur effective pour l’affichage du sélecteur (configurée ou gris d’usine).
+ * Effective color for the picker display (configured or factory gray).
  * @returns {string} hex #rrggbb
  */
 export function getConfiguredCardColorDisplay() {
   return getConfiguredCardColor() || DEFAULT_THEME_COLOR;
 }
 
-/** Applique --card-default-accent (couleur résolue sans thème). */
+/** Apply --card-default-accent (resolved color with no theme). */
 export function applyConfiguredCardColor() {
   const accent = resolveCardAccent(null);
   const root = document.documentElement;
@@ -225,9 +225,9 @@ export function applyConfiguredCardColor() {
 }
 
 /**
- * Persiste la couleur par défaut des cartes.
- * @param {string} [hex] hex ou vide pour revenir au gris d’usine
- * @returns {string} valeur stockée ("" ou #rrggbb)
+ * Persist the default card color.
+ * @param {string} [hex] hex or empty to revert to factory gray
+ * @returns {string} stored value ("" or #rrggbb)
  */
 export function setConfiguredCardColor(hex) {
   const value = parseHexColor(hex);
@@ -242,7 +242,7 @@ export function setConfiguredCardColor(hex) {
 }
 
 /**
- * Résout la couleur d’accent d’une carte.
+ * Resolve a card’s accent color.
  * @param {{ color?: string }|null|undefined} legoTheme
  * @returns {string} hex #rrggbb
  */
@@ -255,9 +255,9 @@ export function resolveCardAccent(legoTheme) {
 }
 
 /**
- * Couleur des textes / icônes / logo Brickcard sur l’accent.
+ * Text / icon / Brickcard logo color on the accent.
  * @param {{ secondaryColor?: string }|null|undefined} legoTheme
- * @param {string} [accent] hex déjà résolu (évite un second passage)
+ * @param {string} [accent] already-resolved hex (avoids a second pass)
  * @returns {string} hex #rrggbb
  */
 export function resolveCardAccentFg(legoTheme, accent) {
@@ -267,8 +267,8 @@ export function resolveCardAccentFg(legoTheme, accent) {
 }
 
 /**
- * Met à jour les cartes déjà montées qui n’ont pas de couleur de thème
- * (data-card-theme-color vide).
+ * Update already-mounted cards that have no theme color
+ * (empty data-card-theme-color).
  */
 export function refreshRenderedCardAccents() {
   document.querySelectorAll(".card, .card-back").forEach((el) => {
@@ -286,7 +286,7 @@ export function refreshRenderedCardAccents() {
 }
 
 /**
- * Snapshot des 4 réglages « Apparence des cartes » (sauvegarde `.brickcard`).
+ * Snapshot of the 4 “Card appearance” settings (`.brickcard` backup).
  * @returns {{
  *   faceBorderMm: number,
  *   cardRadiusMm: number,
@@ -304,7 +304,7 @@ export function getCardAppearanceSettings() {
 }
 
 /**
- * Applique un snapshot d’apparence (import de sauvegarde). Champs absents ignorés.
+ * Apply an appearance snapshot (backup import). Missing fields ignored.
  * @param {Partial<{
  *   faceBorderMm: unknown,
  *   cardRadiusMm: unknown,
@@ -330,7 +330,7 @@ export function applyCardAppearanceSettings(raw) {
   return getCardAppearanceSettings();
 }
 
-/** Applique bordure, arrondis et couleur stockés au démarrage. */
+/** Apply stored border, radii, and color at startup. */
 export function initCardDesign() {
   applyFaceBorderMm(getFaceBorderMm());
   applyCardRadiusMm(getCardRadiusMm());

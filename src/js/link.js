@@ -1,6 +1,6 @@
 /**
- * Liens du design system (`a.link`).
- * Couleur = texte (`--ink`) ; underline ; externe → `_blank` + icône Remix à droite.
+ * Design-system links (`a.link`).
+ * Color = text (`--ink`); underline; external → `_blank` + Remix icon on the right.
  */
 
 import { ICON_EXTERNAL_LINK, remixIconByName } from "./icons.js";
@@ -35,7 +35,7 @@ function escapeHtml(s) {
 }
 
 /**
- * @param {string|false|null|undefined} icon Clé Remix, markup SVG, ou `false` pour aucune icône
+ * @param {string|false|null|undefined} icon Remix key, SVG markup, or `false` for no icon
  * @returns {string}
  */
 function resolveIcon(icon) {
@@ -46,7 +46,7 @@ function resolveIcon(icon) {
 }
 
 /**
- * Libellé HTML qui n’est qu’une image (badge Markdown `[![alt](src)](url)`).
+ * HTML label that is only an image (Markdown badge `[![alt](src)](url)`).
  * @param {string} html
  */
 function isImageOnlyHtml(html) {

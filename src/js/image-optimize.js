@@ -1,11 +1,11 @@
 /**
- * Conversion WebP à l’import des images (localStorage).
- * SVG exclus. Ne concerne que les nouveaux chargements.
+ * WebP conversion on image import (localStorage).
+ * SVGs excluded. Only applies to new loads.
  */
 
 const OPTIMIZE_KEY = "brickcard:optimize-images";
 
-/** Défaut : case cochée. */
+/** Default: checked. */
 export const DEFAULT_OPTIMIZE_IMAGES = true;
 
 /** @returns {boolean} */

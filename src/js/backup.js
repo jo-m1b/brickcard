@@ -1,6 +1,6 @@
 /**
- * Format, parse, migrations et export des sauvegardes `.brickcard`.
- * `version` = `APP_VERSION` (SemVer), même sans changement de structure.
+ * Format, parse, migrations and export of `.brickcard` backups.
+ * `version` = `APP_VERSION` (SemVer), even with no structure change.
  */
 
 import { downloadBlob } from "./card-export.js";
@@ -15,22 +15,22 @@ export const BACKUP_LOAD_ERROR = "Backup loading error!";
 export const BACKUP_LOAD_ERROR_CORS =
   "Backup loading error! Network or CORS - the source site refuses the load.";
 
-/** Sauvegarde de démo livrée avec l’app (`src/data/`), chemin relatif à `src/`. */
+/** Demo backup shipped with the app (`src/data/`), path relative to `src/`. */
 export const DEMO_BACKUP_SRC = "data/backup-demo-jo.brickcard";
 
-/** Id sentinelle : cartes sans thème connu (case « Sans thème »). */
+/** Sentinel id: cards with no known theme (“No theme” checkbox). */
 export const UNTHEMED_BACKUP_THEME_ID = "";
 
-/** Nombre de réglages « Apparence des cartes » inclus dans une sauvegarde. */
+/** Number of “Card appearance” settings included in a backup. */
 export const CARD_APPEARANCE_SETTING_COUNT = 4;
 
 /**
- * Migrations de structure, dans l’ordre SemVer croissant.
- * Chaque entrée s’applique si la version du fichier est < `since`.
+ * Structure migrations, in ascending SemVer order.
+ * Each entry applies if the file version is < `since`.
  * @type {{ since: string, apply: (data: BackupData) => BackupData }[]}
  */
 const BACKUP_MIGRATIONS = [
-  // Exemple futur : { since: "0.8.0", apply(data) { return data; } },
+  // Future example: { since: "0.8.0", apply(data) { return data; } },
 ];
 
 /**
@@ -60,7 +60,7 @@ const BACKUP_MIGRATIONS = [
  * @typedef {Object} BackupBuildOpts
  * @property {"full"|"custom"} [kind]
  * @property {Card[]} cards
- * @property {LegoTheme[]} themes Tous les thèmes (pour grouper les cartes)
+ * @property {LegoTheme[]} themes All themes (to group cards)
  * @property {LegoTheme[]} customThemes
  * @property {string[]} [selectedThemeIds]
  * @property {boolean} [includeSettings]
@@ -137,7 +137,7 @@ function normalizeSemverString(raw) {
   return `${parsed[0]}.${parsed[1]}.${parsed[2]}`;
 }
 
-/** Photo, fond et cadrage — omis si les images ne sont pas incluses. */
+/** Photo, background and crop — omitted if images are not included. */
 function stripCardImage(card) {
   const {
     imageDataUrl: _imageDataUrl,
@@ -155,7 +155,7 @@ function stripCardImage(card) {
   return rest;
 }
 
-/** Logo et cadrage — omis si les logos ne sont pas inclus. */
+/** Logo and crop — omitted if logos are not included. */
 function stripThemeLogo(theme) {
   const {
     logoDataUrl: _logoDataUrl,
@@ -175,7 +175,7 @@ function cardThemeId(card) {
   return String(c.brickcardThemeId ?? c.legoThemeId ?? c.themeId ?? "").trim();
 }
 
-/** Les sauvegardes n’ont que des thèmes perso : `isBuiltin` / `builtin` inutiles. */
+/** Backups only have custom themes: `isBuiltin` / `builtin` unused. */
 function stripThemeBuiltinFlag(theme) {
   const { isBuiltin: _isBuiltin, builtin: _builtin, ...rest } = theme;
   return rest;
@@ -201,7 +201,7 @@ export function groupCardsForBackup(cards, themes) {
 }
 
 /**
- * Thèmes ayant au moins une carte (plus « Sans thème » si besoin).
+ * Themes with at least one card (plus “No theme” if needed).
  * @param {Card[]} cards
  * @param {LegoTheme[]} themes
  * @returns {{ id: string, name: string, cardCount: number, isCustom: boolean }[]}
@@ -304,13 +304,13 @@ export function buildBackupPayload(opts) {
   return payload;
 }
 
-/** Sauvegarde impossible sans au moins une carte. */
+/** Backup impossible without at least one card. */
 export function isBackupPayloadEmpty(payload) {
   return !payload || !payload.cards.length;
 }
 
 /**
- * Thèmes du fichier à importer : ceux qui ont des cartes, plus les thèmes perso vides.
+ * Themes from the file to import: those with cards, plus empty custom themes.
  * @param {Card[]} cards
  * @param {LegoTheme[]} themes
  * @param {LegoTheme[]} customThemes
@@ -377,7 +377,7 @@ export function buildImportPayload(backup, opts) {
   return payload;
 }
 
-/** Import impossible sans carte, thème ni paramètre sélectionné. */
+/** Import impossible without a selected card, theme, or setting. */
 export function isImportPayloadEmpty(payload) {
   if (!payload) return true;
   const hasCards = Array.isArray(payload.cards) && payload.cards.length > 0;
@@ -387,8 +387,8 @@ export function isImportPayloadEmpty(payload) {
 }
 
 /**
- * Télécharge une sauvegarde depuis une URL http(s) (absolue ou relative) et renvoie le texte.
- * L’URL n’est pas conservée.
+ * Download a backup from an http(s) URL (absolute or relative) and return the text.
+ * The URL is not kept.
  * @param {string} urlString
  * @param {{ signal?: AbortSignal }} [opts]
  * @returns {Promise<string>}
@@ -435,7 +435,7 @@ export function backupPayloadBytes(payload) {
 }
 
 /**
- * Poids estimé des cartes d’un thème (images incluses ou non).
+ * Estimated size of a theme's cards (images included or not).
  * @param {Card[]} cards
  * @param {boolean} includeImages
  */
@@ -445,7 +445,7 @@ export function estimateThemeCardsBytes(cards, includeImages) {
 }
 
 /**
- * Hint d’une case thème : `12 cartes · 2 Mo`
+ * Theme checkbox hint: `12 cards · 2 MB`
  * @param {number} cardCount
  * @param {number} bytes
  */
@@ -497,7 +497,7 @@ function formatCountItem(n, kind) {
 }
 
 /**
- * Recap pied de modale : comptes > 0 puis taille (à afficher en gras).
+ * Modal footer recap: counts > 0 then size (to show in bold).
  * @param {{ cardCount: number, themeCount: number, settingCount: number, bytes: number }} recap
  * @returns {{ items: string[], size: string }}
  */
@@ -514,7 +514,7 @@ export function formatBackupFooterRecap(recap) {
 }
 
 /**
- * Recap toast : nom de fichier optionnel + mêmes items que le pied, taille en gras (HTML).
+ * Toast recap: optional filename + same items as the footer, size in bold (HTML).
  * @param {{ cardCount: number, themeCount: number, settingCount: number, bytes: number }} recap
  * @param {{ filename?: string }} [opts]
  * @returns {{ message: string, messageHtml: string }}

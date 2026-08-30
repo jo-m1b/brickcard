@@ -1,9 +1,9 @@
 /**
- * Modale d’import de sauvegarde (`#import`).
- * Étape 1 : charger un `.brickcard` (fichier ou URL) sans toucher à la collection.
- * Étape 2 : choisir quoi fusionner. L’écriture n’a lieu qu’au clic Importer.
- * Fermeture (X, Échap, backdrop, Annuler, ou après un import réussi) → accueil.
- * Accueil vide : `openDemoBackupDialog` charge `data/backup-demo-jo.brickcard` et fusionne sans étape de choix.
+ * Backup import modal (`#import`).
+ * Step 1: load a `.brickcard` (file or URL) without touching the collection.
+ * Step 2: choose what to merge. Write happens only on Import.
+ * Close (X, Escape, backdrop, Cancel, or after a successful import) → home.
+ * Empty home: `openDemoBackupDialog` loads `data/backup-demo-jo.brickcard` and merges with no choice step.
  */
 
 import {
@@ -49,7 +49,7 @@ import {
 const UNTHEMED_VALUE = "none";
 
 /**
- * Toast après un import réussi (même recap que le pied `#import-dialog-recap`).
+ * Toast after a successful import (same recap as the `#import-dialog-recap` footer).
  * @param {(msg: string | object, type?: string) => void} [toast]
  * @param {unknown} payload
  * @param {{ title?: string, icon?: string }} [opts]
@@ -90,7 +90,7 @@ function escapeHtml(s) {
 }
 
 /**
- * Modale « Charger depuis une URL » (enfant, sans route).
+ * “Load from a URL” modal (child, no route).
  * @param {HTMLElement} host
  * @returns {Promise<{ backup: import("./backup.js").BackupData, href: string }|null>}
  */
@@ -264,14 +264,14 @@ function openBackupUrlDialog(host) {
 const DEMO_BACKUP_TITLE = () => _t("Demo backup");
 
 /**
- * Charge `data/backup-demo-jo.brickcard` et fusionne toute la sauvegarde (sans étape de choix).
- * Modale enfant `modal--sm`, sans route : brique + « Chargement... » jusqu’à la fin.
+ * Loads `data/backup-demo-jo.brickcard` and merges the whole backup (no choice step).
+ * Child `modal--sm`, no route: brick + “Loading” until done.
  * @param {HTMLElement} host `#modal-root`
  * @param {{
  *   toast?: (msg: string, type?: string) => void,
  *   onImported?: () => void | Promise<void>,
  * }} [opts]
- * @returns {Promise<boolean>} `true` si l’import a réussi
+ * @returns {Promise<boolean>} `true` if the import succeeded
  */
 export function openDemoBackupDialog(host, opts = {}) {
   const { toast, onImported } = opts;

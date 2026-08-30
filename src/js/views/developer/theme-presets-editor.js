@@ -22,11 +22,11 @@ import {
 } from "../../preset-draft.js";
 import { _t } from "../../i18n.js";
 
-/** Section d’index `#developer` pour l’outil thèmes par défaut. */
+/** `#developer` index section for the default-themes tool. */
 const PRESETS_SECTION = "Development help";
 
 /**
- * Éditeur d’un thème du brouillon presets (`#developer/theme-presets/new`, `#developer/theme-presets/edit/:slug`).
+ * Preset-draft theme editor (`#developer/theme-presets/new`, `#developer/theme-presets/edit/:slug`).
  * @param {HTMLElement} host `#developer-demo-root`
  * @param {{
  *   themeId?: string|null,

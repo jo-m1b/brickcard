@@ -24,7 +24,7 @@ function loadPrintQtyMap() {
   return map;
 }
 
-/** Sélection d’impression (persistée). */
+/** Print selection (persisted). */
 /** @type {Map<string, number>} */
 export const printQty = loadPrintQtyMap();
 

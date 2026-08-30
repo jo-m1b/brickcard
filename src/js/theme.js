@@ -1,4 +1,4 @@
-/** Thème UI : system (défaut) | light | dark */
+/** UI theme: system (default) | light | dark */
 
 const THEME_KEY = "brickcard:ui-theme";
 const MODES = ["system", "light", "dark"];
@@ -43,7 +43,7 @@ export function cycleTheme() {
   return next;
 }
 
-/** Applique le thème stocké au démarrage. */
+/** Apply the stored theme at startup. */
 export function initTheme() {
   applyTheme(getTheme());
 }

@@ -1,5 +1,5 @@
 /**
- * Titre de l’onglet : défaut `APP_DOCUMENT_TITLE`, overlays, verrou pendant l’impression PDF.
+ * Tab title: default `APP_DOCUMENT_TITLE`, overlays, lock during PDF print.
  */
 
 import { APP_DOCUMENT_TITLE } from "./version.js";
@@ -45,9 +45,9 @@ function applyDocumentTitle() {
 }
 
 /**
- * Titre de la route / modale principale.
- * `{titre} | {section?} | {défaut}` ; sans argument → titre par défaut (accueil).
- * Vide la pile des modales enfants.
+ * Title of the main route / modal.
+ * `{title} | {section?} | {default}`; no argument → default title (home).
+ * Clears the child-modal stack.
  * @param {...(string|null|undefined)} parts
  */
 export function setAppDocumentTitle(...parts) {
@@ -57,7 +57,7 @@ export function setAppDocumentTitle(...parts) {
 }
 
 /**
- * Modale enfant (confirmation, URL d’image, éditeur superposé) au-dessus de la route.
+ * Child modal (confirmation, image URL, stacked editor) above the route.
  * @param {...(string|null|undefined)} parts
  */
 export function pushModalDocumentTitle(...parts) {
@@ -65,7 +65,7 @@ export function pushModalDocumentTitle(...parts) {
   applyDocumentTitle();
 }
 
-/** Retire la dernière modale enfant. Sans effet si la pile est vide. */
+/** Remove the last child modal. No-op if the stack is empty. */
 export function popModalDocumentTitle() {
   if (!modalStack.length) return;
   modalStack.pop();
@@ -73,9 +73,9 @@ export function popModalDocumentTitle() {
 }
 
 /**
- * Remplace le titre par le nom de fichier PDF pendant le dialogue d’impression.
- * Firefox déclenche `afterprint` dès le clone (dialogue encore ouvert) : ne pas
- * restaurer le titre dans ce handler, sinon Save to PDF → `127.0.0.1.pdf`.
+ * Replace the title with the PDF filename during the print dialog.
+ * Firefox fires `afterprint` on the clone (dialog still open): do not
+ * restore the title in that handler, or Save to PDF → `127.0.0.1.pdf`.
  * @param {string} printTitle
  */
 export function beginPrintDocumentTitle(printTitle) {
@@ -83,7 +83,7 @@ export function beginPrintDocumentTitle(printTitle) {
   document.title = String(printTitle || "");
 }
 
-/** Restaure le titre applicatif après l’impression. */
+/** Restore the app title after printing. */
 export function endPrintDocumentTitle() {
   if (!printTitleLocked) return;
   printTitleLocked = false;

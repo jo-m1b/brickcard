@@ -1,9 +1,9 @@
 /**
- * Focus initial + piège Tab dans la modale au premier plan.
- * Chrome rend les overflow:auto tabulables : `.modal-body` a `tabindex="-1"`.
- * À l’ouverture, le focus va sur `.modal` (tabindex -1) : le premier Tab atteint le contenu
- * (Fermer n’est pas tabulable : Échap / clic).
- * Le scroll (backdrop + corps) est remis en haut, sauf si `resetScroll: false` (piège Tab).
+ * Initial focus + Tab trap in the frontmost modal.
+ * Chrome makes overflow:auto tabbable: `.modal-body` has `tabindex="-1"`.
+ * On open, focus goes to `.modal` (tabindex -1): the first Tab reaches the content
+ * (Close is not tabbable: Escape / click).
+ * Scroll (backdrop + body) is reset to the top, unless `resetScroll: false` (Tab trap).
  */
 
 const TABBABLE = [
@@ -67,8 +67,8 @@ function resetModalScroll(modal) {
 }
 
 /**
- * Place le focus sur la modale au premier plan (prochain Tab → premier contrôle du contenu).
- * @param {{ resetScroll?: boolean }} [opts] `resetScroll: false` pour le piège Tab
+ * Put focus on the frontmost modal (next Tab → first content control).
+ * @param {{ resetScroll?: boolean }} [opts] `resetScroll: false` for the Tab trap
  */
 export function focusTopModal(opts = {}) {
   const modal = getTopModal();
@@ -81,7 +81,7 @@ export function focusTopModal(opts = {}) {
   modal.focus({ preventScroll: true });
 }
 
-/** Piège Tab dans la modale au premier plan. À installer une fois au boot. */
+/** Tab trap in the frontmost modal. Install once at boot. */
 export function bindModalFocusTrap() {
   /** @param {KeyboardEvent} e */
   function onKey(e) {

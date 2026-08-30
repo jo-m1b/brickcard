@@ -1,6 +1,6 @@
 /**
- * Champ image design system : `form-image`.
- * Deux vues : vide (fichier / URL) et image (fond optionnel + aperçu de cadrage).
+ * Image field (design system): `form-image`.
+ * Two views: empty (file / URL) and image (optional background + crop preview).
  */
 
 import { applyImageTransform, applyThemeLogoTransform } from "./card-render.js";
@@ -100,7 +100,7 @@ function clampZoomPercent(percent, max = ZOOM_MAX) {
 }
 
 /**
- * Markup d’un contrôle image.
+ * Markup for an image control.
  * @param {{
  *   id: string,
  *   dataUrl?: string,
@@ -236,10 +236,10 @@ export function formImageMarkup(opts) {
 }
 
 /**
- * Modale « Charger depuis une URL » (enfant, sans route).
+ * “Load from a URL” modal (child, no route).
  * @param {HTMLElement} host
  * @param {{ processFile: (file: File) => Promise<string> }} opts
- * @returns {Promise<string|null>} data URL, ou null si dismiss
+ * @returns {Promise<string|null>} data URL, or null if dismissed
  */
 function openImageUrlDialog(host, opts) {
   const processFile = opts.processFile;
@@ -411,7 +411,7 @@ function openImageUrlDialog(host, opts) {
 }
 
 /**
- * Synchronise fichier / URL / cadrage dans un `.form-image`.
+ * Sync file / URL / crop inside a `.form-image`.
  * @param {HTMLElement} root
  * @param {{
  *   processFile: (file: File) => Promise<string>,
@@ -743,7 +743,7 @@ export function bindFormImage(root, opts = {}) {
       toastImageSaved();
       opts.onDownload?.();
     } catch {
-      /* src attendue ; échec silencieux */
+      /* src expected; fail silently */
     }
   }
 

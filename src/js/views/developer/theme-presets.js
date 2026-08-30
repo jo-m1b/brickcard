@@ -37,7 +37,7 @@ let mountedFocusPresetInList = null;
 let pendingFocusPresetId = null;
 
 /**
- * Ajoute un thème au brouillon affiché : recherche vidée, tri date desc, scroll haut.
+ * Adds a theme to the shown draft: search cleared, date desc sort, scroll top.
  * @param {import("../../preset-draft.js").PresetDraftTheme} theme
  * @returns {boolean}
  */
@@ -47,7 +47,7 @@ export function refreshPresetDraftAfterCreate(theme) {
 }
 
 /**
- * Met à jour la mini-carte d’un thème du brouillon, sans reconstruire la grille.
+ * Updates a draft theme mini-card, without rebuilding the grid.
  * @param {import("../../preset-draft.js").PresetDraftTheme} theme
  * @param {string} [previousId]
  * @returns {boolean}
@@ -58,8 +58,8 @@ export function patchPresetDraftInList(theme, previousId) {
 }
 
 /**
- * Place le focus clavier sur la mini-carte d’un thème du brouillon.
- * Si la tuile n’est pas encore dans la grille, le focus est appliqué au prochain rendu.
+ * Puts keyboard focus on a draft theme mini-card.
+ * If the tile is not in the grid yet, focus is applied on the next render.
  * @param {string} [id]
  */
 export function focusPresetDraftInList(id) {
@@ -72,7 +72,7 @@ export function focusPresetDraftInList(id) {
   requestAnimationFrame(() => applyPendingPresetFocus());
 }
 
-/** Applique un focus de tuile en attente (après `focusTopModal` au retour liste). */
+/** Applies a pending tile focus (after `focusTopModal` when returning to the list). */
 export function applyPendingPresetFocus() {
   if (!pendingFocusPresetId) return;
   if (mountedFocusPresetInList?.(pendingFocusPresetId)) pendingFocusPresetId = null;
@@ -90,7 +90,7 @@ function applyPresetTileFocus(tile) {
 }
 
 /**
- * Retire un thème du brouillon affiché, sans reconstruire la grille.
+ * Removes a theme from the shown draft, without rebuilding the grid.
  * @param {string} id
  * @returns {boolean}
  */
@@ -107,7 +107,7 @@ function dialogHost() {
 }
 
 /**
- * Outil développeur : brouillon de `themes-presets.json`.
+ * Developer tool: `themes-presets.json` draft.
  * @param {HTMLElement} host
  * @param {{ onCreate: () => void, onEdit: (id: string) => void }} opts
  * @returns {() => void}

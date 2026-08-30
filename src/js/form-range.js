@@ -1,14 +1,14 @@
 /**
- * Curseur design system : `form-range-row` + reset optionnel (valeur par défaut).
- * Bouton close-circle après l’input / output, non focusable, emplacement toujours
- * réservé, icône visible si ≠ défaut.
+ * Slider (design system): `form-range-row` + optional reset (default value).
+ * Close-circle button after the input / output, not focusable, slot always
+ * reserved, icon visible if ≠ default.
  */
 
 import { ICON_CLOSE_CIRCLE } from "./icons.js";
 import { _t } from "./i18n.js";
 
 /**
- * Markup du bouton restaurer (à placer après input / output).
+ * Markup for the restore button (place after input / output).
  * @returns {string}
  */
 export function formRangeResetMarkup() {
@@ -16,7 +16,7 @@ export function formRangeResetMarkup() {
 }
 
 /**
- * Synchronise output, gras, visibilité du reset.
+ * Sync output, bold, reset visibility.
  * @param {HTMLElement} row
  * @param {{
  *   defaultValue: number|string,

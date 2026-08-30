@@ -1,9 +1,9 @@
 /**
- * Modale de paramètres d’impression (`#print`).
- * Fermeture (X, Échap, backdrop ; Annuler s’il y a des cartes) → accueil ; les réglages restent enregistrés.
- * « Lancer l’impression » imprime sans fermer la modale.
- * Rien à imprimer : message à la place des options, pas de pied (la croix suffit).
- * Ctrl/Cmd+P : ouvrir la modale, ou lancer l’impression si elle est déjà ouverte.
+ * Print settings modal (`#print`).
+ * Close (X, Escape, backdrop; Cancel if there are cards) → home; settings stay saved.
+ * “Start printing” prints without closing the modal.
+ * Nothing to print: message instead of options, no footer (the close button is enough).
+ * Ctrl/Cmd+P: open the modal, or start printing if it is already open.
  */
 
 import { ICON_CLOSE, ICON_PRINTER, modalTitleMarkup } from "./icons.js";

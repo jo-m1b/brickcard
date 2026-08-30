@@ -30,7 +30,7 @@ import { partitionThemes } from "../themes-data.js";
 import { setAppDocumentTitle } from "../document-title.js";
 
 /**
- * @param {HTMLElement} host Conteneur modale (#modal-root)
+ * @param {HTMLElement} host Modal container (#modal-root)
  * @param {{
  *   cardId?: string|null,
  *   onSaved: (subject: string, meta: { isNew: boolean, card: import("../storage.js").Card }) => void,
@@ -457,7 +457,7 @@ export async function renderEditor(host, opts) {
 }
 
 /**
- * Titre du dialog d’édition (valeurs à l’ouverture).
+ * Edit dialog title (values at open).
  * @param {{ title?: string, legoSetRef?: string }|null} existing
  */
 function editorDialogTitle(existing) {

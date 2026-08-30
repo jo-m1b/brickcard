@@ -1,4 +1,4 @@
-/* Polices auto-hébergées (SIL OFL) — src/fonts/ */
+/* Self-hosted fonts (SIL OFL) — src/fonts/ */
 @font-face {
   font-family: "Open Sans";
   font-style: normal;
@@ -15,12 +15,12 @@
   src: url("../fonts/InterVariable.woff2") format("woff2-variations");
 }
 
-/* Thème clair (défaut) */
+/* Light theme (default) */
 :root {
   color-scheme: light;
   --font-ui: "Open Sans", system-ui, sans-serif;
   --font-card: "Inter", system-ui, sans-serif;
-  /* Accent UI neutre — les couleurs vives restent sur les cartes */
+  /* Neutral UI accent — bright colors stay on the cards */
   --brick-red: #141414;
   --brick-red-dark: #000000;
   --on-accent-fg: #ffffff;
@@ -51,7 +51,7 @@
   --toast-error-fg: #ffffff;
   --card-w: 63mm;
   --card-h: 88mm;
-  /* Inset du cadre logo (dos) = bordure face d’usine ; ne suit pas le réglage. */
+  /* Logo frame inset (back) = factory face border; does not follow the setting. */
   --card-logo-inset: 3mm;
   --card-logo-inset-tile: 1mm;
   --cols: 3;
@@ -59,7 +59,7 @@
   --list-cols-max: 4;
 }
 
-/* Système dark (sauf si forcé light) */
+/* System dark (unless forced light) */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
@@ -93,7 +93,7 @@
   }
 }
 
-/* Forcé dark */
+/* Forced dark */
 :root[data-theme="dark"] {
   color-scheme: dark;
   --brick-red: #ececec;
@@ -125,7 +125,7 @@
   --toast-error-fg: #121212;
 }
 
-/* Forcé light (écrase le media query) */
+/* Forced light (overrides the media query) */
 :root[data-theme="light"] {
   color-scheme: light;
   --brick-red: #141414;
@@ -187,7 +187,7 @@ body {
   background: var(--bg);
 }
 
-/* Remix Icon : glyphes 24×24, jamais étirés (défaut SVG sans taille = 300×150) */
+/* Remix Icon: 24×24 glyphs, never stretched (unsized SVG default = 300×150) */
 svg[viewBox="0 0 24 24"] {
   aspect-ratio: 1;
   overflow: visible;
@@ -203,7 +203,7 @@ textarea {
 }
 
 .app {
-  /* Logo 55px + padding vertical du topbar (0.85rem × 2) */
+  /* Logo 55px + topbar vertical padding (0.85rem × 2) */
   --topbar-h: calc(55px + 1.7rem);
   margin: 0 auto;
   padding: 0 1.25rem 3rem;
@@ -229,7 +229,7 @@ textarea {
   min-height: 0;
 }
 
-/* ——— Topbar sticky ——— */
+/* ——— Sticky topbar ——— */
 .topbar {
   position: sticky;
   top: 0;
@@ -265,9 +265,9 @@ textarea {
 }
 
 /* ——— Search bar (design system) ———
-   Slot topbar : `.topbar-search` centre le bloc.
-   Contrôle : `input.form-control` dans `.search-bar` (+ trail compteur / tri).
-   Icône : `.form-control-icon` optionnelle (défaut recherche : `ri-search-line`). */
+   Topbar slot: `.topbar-search` centers the block.
+   Control: `input.form-control` in `.search-bar` (+ count / sort trail).
+   Icon: optional `.form-control-icon` (search default: `ri-search-line`). */
 .search-bar {
   position: relative;
   width: min(100%, 28rem);
@@ -285,11 +285,11 @@ textarea {
 }
 
 .search-bar > .form-control {
-  /* place pour compteur + bouton tri */
+  /* room for count + sort button */
   padding-right: 7.5rem;
 }
 
-/* Cadre focus du champ : aussi quand le tri a le focus ou le menu est ouvert */
+/* Field focus frame: also when sort is focused or the menu is open */
 .search-bar:has(.search-sort-btn:focus-visible) > .form-control,
 .search-bar:has(.search-sort-btn[aria-expanded="true"]) > .form-control {
   outline: 2px solid var(--ink);
@@ -300,7 +300,7 @@ textarea {
   margin-right: 0.15rem;
 }
 
-/* Trail masqué (< 2 éléments) ou démo sans trail → padding texte normal à droite */
+/* Hidden trail (< 2 items) or demo without trail → normal text padding on the right */
 .search-bar--input-only > .form-control,
 .search-bar:has(> .search-bar-trail[hidden]) > .form-control {
   padding-right: 0.85rem;
@@ -308,7 +308,7 @@ textarea {
 
 .search-bar-trail {
   position: absolute;
-  /* 2px d’air en haut / à droite ; 4px en bas = 2px au-dessus du trait inset 2px */
+  /* 2px gap top / right; 4px bottom = 2px above the 2px inset stroke */
   top: 2px;
   right: 2px;
   bottom: 4px;
@@ -338,7 +338,7 @@ textarea {
   display: none;
 }
 
-/* Compteur seul : air à droite (équivalent au gap avec l’icône de tri) */
+/* Count only: right gap (same as the gap with the sort icon) */
 .search-count:last-child {
   padding-right: 0.35rem;
 }
@@ -351,7 +351,7 @@ textarea {
   cursor: auto;
 }
 
-/* Bouton tri : carré qui remplit la hauteur utile (marges égales autour au hover) */
+/* Sort button: square filling the usable height (even hover margins) */
 .search-bar .search-sort-btn.btn.sm.icon-only {
   box-sizing: border-box;
   width: auto;
@@ -360,7 +360,7 @@ textarea {
   flex-shrink: 0;
 }
 
-/* Menu tri : ancré au search-bar (comme form-select sur son trigger) */
+/* Sort menu: anchored to the search-bar (like form-select on its trigger) */
 .search-sort-menu.form-select-list {
   left: auto;
   right: -3px;
@@ -374,14 +374,14 @@ textarea {
   display: none !important;
 }
 
-/* Menu ouvert = même look que ghost hover/focus */
+/* Open menu = same look as ghost hover/focus */
 .btn.ghost[aria-expanded="true"] {
   background: var(--brick-red);
   color: var(--on-accent-fg);
   border-color: var(--brick-red);
 }
 
-/* Démos styleguide : fond pour voir le champ transparent */
+/* Styleguide demos: background so the transparent field is visible */
 .styleguide-search-demo {
   padding: 0.85rem 1rem;
   border: 1px solid var(--line);
@@ -408,7 +408,7 @@ textarea {
   }
 }
 
-/* Nouvelle carte : icône seule sous 540px (le nom Brickcard reste visible) */
+/* New card: icon only under 540px (the Brickcard name stays visible) */
 @media (max-width: 539px) {
   #btn-new-card {
     width: 2.4rem;
@@ -471,7 +471,7 @@ textarea {
   display: block;
 }
 
-/* Silhouette noire → claire en dark mode */
+/* Black silhouette → light in dark mode */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .brand-logo {
     filter: invert(1);
@@ -482,7 +482,7 @@ textarea {
   filter: invert(1);
 }
 
-/* Hover/focus : logo contrasté sur le fond accent (comme ghost) */
+/* Hover/focus: contrasted logo on the accent background (like ghost) */
 .topbar-brand:hover .brand-logo,
 .topbar-brand:focus-visible .brand-logo {
   filter: invert(1);
@@ -524,7 +524,7 @@ textarea {
   font-variant-numeric: tabular-nums;
 }
 
-/* Dernier recours : barre trop étroite (le nom tient dès que Nouvelle carte est en icône) */
+/* Last resort: bar too narrow (the name fits once New card is icon-only) */
 @media (max-width: 300px) {
   .topbar:not(:has(#topbar-search:not([hidden]))) {
     grid-template-columns: minmax(0, 1fr) auto;
@@ -560,19 +560,19 @@ textarea {
   display: none !important;
 }
 
-/* Page de chargement (en cours ou erreur) : uniquement la marque */
+/* Loading page (in progress or error): brand only */
 .app:has(> .main[aria-busy="true"]) .topbar-actions,
 .app:has(> .main .empty-view-error:not([hidden])) .topbar-actions {
   display: none !important;
 }
 
 /* ——— Buttons (design system) ———
- * Variantes : .primary | .secondary | .ghost | .danger
- * Contenu   : texte | texte+icône | .icon-only (label .visually-hidden)
- * Disposition texte+icône : icône à gauche (défaut) | .icon-right
+ * Variants  : .primary | .secondary | .ghost | .danger
+ * Content   : text | text+icon | .icon-only (label .visually-hidden)
+ * Text+icon layout: icon on the left (default) | .icon-right
  * Badge     : .btn-badge (overlay, aria-hidden)
- * Taille    : (défaut) | .sm
- * Hover et :focus-visible partagent le même style (pas d’outline dédié).
+ * Size      : (default) | .sm
+ * Hover and :focus-visible share the same style (no dedicated outline).
  */
 .visually-hidden {
   position: absolute;
@@ -709,7 +709,7 @@ textarea {
   height: 1rem;
 }
 
-/* Badge compteur (coin haut-droit, dépasse ~50 %) — aria-hidden ; nom accessible sur le bouton */
+/* Count badge (top-right corner, overhangs ~50%) — aria-hidden; accessible name on the button */
 .btn-badge {
   position: absolute;
   top: 0;
@@ -743,26 +743,26 @@ textarea {
   font-size: 0.58rem;
 }
 
-/* Primary au repos = fond accent → badge inversé pour rester lisible */
+/* Primary at rest = accent background → inverted badge to stay readable */
 .btn.primary > .btn-badge {
   background: var(--bg);
   color: var(--ink);
 }
 
-/* Danger : badge = bordure danger, texte clair pour le contraste */
+/* Danger: badge = danger border, light text for contrast */
 .btn.danger > .btn-badge {
   background: var(--danger-line);
   color: #ffffff;
 }
 
-/* Primary hover : bouton s’inverse → badge repasse en accent */
+/* Primary hover: button inverts → badge back to accent */
 .btn.primary:hover:not(:disabled) > .btn-badge,
 .btn.primary:focus-visible > .btn-badge {
   background: var(--brick-red);
   color: var(--on-accent-fg);
 }
 
-/* Ghost hover : bouton passe en accent → badge inversé (secondary / danger : badge fixe) */
+/* Ghost hover: button goes accent → inverted badge (secondary / danger: badge stays) */
 .btn.ghost:hover:not(:disabled) > .btn-badge,
 .btn.ghost:focus-visible > .btn-badge,
 .btn.ghost[aria-expanded="true"] > .btn-badge {
@@ -771,11 +771,11 @@ textarea {
 }
 
 /* ——— Links (design system) ———
- * Classe : .link — contenu Markdown des modales : .md-content a
- * Taille : (défaut) | .sm
- * Disposition texte+icône : icône à gauche (défaut) | .icon-right
- * État   : (actif) | .disabled / [aria-disabled]
- * Externe : target=_blank + icône ri-external-link-fill à droite par défaut
+ * Class  : .link — modal Markdown content: .md-content a
+ * Size   : (default) | .sm
+ * Text+icon layout: icon on the left (default) | .icon-right
+ * State  : (active) | .disabled / [aria-disabled]
+ * External: target=_blank + ri-external-link-fill icon on the right by default
  */
 :is(a.link, .md-content a) {
   color: var(--ink);
@@ -829,7 +829,7 @@ a.link > svg {
   display: block;
 }
 
-/* Libellé image (badge Markdown) : pas d’icône externe ni soulignement sur le wrap */
+/* Image label (Markdown badge): no external icon or underline on the wrap */
 a.link:has(img) > svg {
   display: none;
 }
@@ -866,12 +866,12 @@ a.link[aria-disabled="true"]:has(> svg) > span {
 }
 
 /* ——— Tiles (design system) ———
- * Liste : ul.tile-list
- * Tuile : a.tile | button.tile (+ .disabled)
- * Titre / desc / icône gauche optionnels
- * Trait bas inset 2px --ink-soft (comme les champs, pas de biseau)
- * Hover et :focus-visible : inversion (fond ink / texte panel), pas d’outline
- * Variante : .danger (couleurs --danger-line / --danger-bg, comme les boutons)
+ * List : ul.tile-list
+ * Tile : a.tile | button.tile (+ .disabled)
+ * Title / desc / left icon optional
+ * 2px inset bottom stroke --ink-soft (like fields, no bevel)
+ * Hover and :focus-visible: invert (ink bg / panel text), no outline
+ * Variant : .danger (colors --danger-line / --danger-bg, like buttons)
  */
 .tile-list {
   list-style: none;
@@ -1011,13 +1011,13 @@ button.tile.danger:disabled .tile-desc {
   opacity: 1;
 }
 
-/* Topbar : icônes un peu plus grandes */
+/* Topbar: slightly larger icons */
 .topbar-actions .btn.icon-only > svg {
   width: 1.45rem;
   height: 1.45rem;
 }
 
-/* Print menu : ouvert / survol parent = même état que ghost hover/focus */
+/* Print menu: open / parent hover = same state as ghost hover/focus */
 .topbar-actions .print-menu:hover .print-menu-btn:not(:disabled),
 .topbar-actions .print-menu.is-open .print-menu-btn:not(:disabled),
 .topbar-actions .print-menu:focus-within .print-menu-btn:not(:disabled) {
@@ -1039,12 +1039,12 @@ button.tile.danger:disabled .tile-desc {
   opacity: 1;
 }
 
-/* Menu impression topbar */
+/* Topbar print menu */
 .print-menu[hidden] {
   display: none !important;
 }
 
-/* Badge compteur : styles via .btn-badge ; invert si menu ouvert / survol parent */
+/* Count badge: styles via .btn-badge; invert if menu open / parent hover */
 .print-menu:hover .print-menu-btn > .btn-badge,
 .print-menu.is-open .print-menu-btn > .btn-badge,
 .print-menu:focus-within .print-menu-btn > .btn-badge {
@@ -1056,7 +1056,7 @@ button.tile.danger:disabled .tile-desc {
   --inv-bg: var(--ink);
   --inv-fg: var(--bg);
   position: absolute;
-  /* Collé au bord droit des actions (bouton Paramètres) ; padding haut = pont de survol */
+  /* Flush to the right edge of actions (Settings button); top padding = hover bridge */
   top: 100%;
   right: 0;
   z-index: 320;
@@ -1124,7 +1124,7 @@ button.tile.danger:disabled .tile-desc {
   display: none !important;
 }
 
-/* Boutons : mêmes variantes DS, tokens inversés (surface = encre de la page) */
+/* Buttons: same DS variants, inverted tokens (surface = page ink) */
 .print-menu-panel .btn {
   width: 100%;
   --bg: var(--inv-bg);
@@ -1139,7 +1139,7 @@ button.tile.danger:disabled .tile-desc {
   display: none !important;
 }
 
-/* Icônes thème (plusieurs SVG dans le même bouton) : n’afficher que le mode actif */
+/* Theme icons (several SVGs in the same button): show only the active mode */
 .btn .icon-system,
 .btn .icon-sun,
 .btn .icon-moon {
@@ -1223,24 +1223,24 @@ html:not([data-theme]) .btn .icon-system {
   overflow-y: auto;
 }
 
-/* `safe` : si le bloc dépasse, aligner en haut pour pouvoir tout défiler —
-   `center` seul clippe le haut et bloque le scroll. */
+/* `safe`: if the block overflows, align to the top so it can scroll —
+   `center` alone clips the top and blocks scroll. */
 .main > .empty-view,
 .main > .panel:has(> .empty-view:not([hidden])) > .empty-view {
   place-content: safe center;
 }
 
-/* Accueil / chargement : le header est vide visuellement, le centrage dans #main
-   paraît trop bas. place-content centre dans la zone de contenu : un padding-bottom
-   de 2× topbar remonte le bloc d’une hauteur de header. */
+/* Home / loading: the header looks empty, so centering in #main
+   sits too low. place-content centers in the content area: a padding-bottom
+   of 2× topbar lifts the block by one header height. */
 @media (min-height: 40rem) {
   .main > .empty-view {
     padding-bottom: calc(var(--topbar-h) * 2);
   }
 }
 
-/* Petite hauteur (ex. téléphone paysage) : coller en haut (`start` évite un
-   scroll fantôme sous les tuiles) et réserver la brique hors flux. */
+/* Short height (e.g. phone landscape): stick to the top (`start` avoids a
+   ghost scroll under the tiles) and reserve the out-of-flow brick. */
 @media (max-height: 39.99rem) {
   .main > .empty-view,
   .main > .panel:has(> .empty-view:not([hidden])) > .empty-view {
@@ -1262,7 +1262,7 @@ html:not([data-theme]) .btn .icon-system {
   flex: 1 1 auto;
 }
 
-/* Titre + texte + tuiles : c’est ce bloc qui est centré. La brique est hors flux, au-dessus. */
+/* Title + text + tiles: this is the centered block. The brick is out of flow, above. */
 .empty-view-body {
   position: relative;
   display: grid;
@@ -1327,14 +1327,14 @@ html:not([data-theme]) .btn .icon-system {
   position: relative;
 }
 
-/* Hors flux : le titre se centre sur « Chargement », pas sur les points */
+/* Out of flow: the title centers on “Loading”, not on the dots */
 .loading-dots {
   position: absolute;
   left: 100%;
   white-space: nowrap;
 }
 
-/* Chargement : plots + points (boot `#main` busy, ou modèle `.empty-view[aria-busy]`) */
+/* Loading: studs + dots (boot `#main` busy, or `.empty-view[aria-busy]` template) */
 :is(#main[aria-busy="true"] .empty-view, .empty-view[aria-busy="true"]) .brick::before,
 :is(#main[aria-busy="true"] .empty-view, .empty-view[aria-busy="true"]) .brick::after {
   animation: loading-stud-blink 1.4s ease-in-out infinite;
@@ -1367,7 +1367,7 @@ html:not([data-theme]) .btn .icon-system {
   }
 }
 
-/* Séquence `.` → `..` → `...` → vide */
+/* Sequence `.` → `..` → `...` → empty */
 @keyframes loading-dot-1 {
   0%,
   74.99% {
@@ -1465,7 +1465,7 @@ html:not([data-theme]) .btn .icon-system {
   }
 }
 
-/* ——— Styleguide / pages de test ——— */
+/* ——— Styleguide / test pages ——— */
 .styleguide {
   max-width: 52rem;
 }
@@ -1640,17 +1640,17 @@ html:not([data-theme]) .btn .icon-system {
 }
 
 /* ——— Form fields (design system) ———
- * Ordre : 1 label → 2 hint → 3 contrôle → 4 erreur (si affichée)
- * Exception checkbox : case à gauche du libellé / hint (`.form-check`).
- * Vocabulaire :
- *   bloc     → .form-field
+ * Order : 1 label → 2 hint → 3 control → 4 error (if shown)
+ * Checkbox exception: box to the left of the label / hint (`.form-check`).
+ * Vocabulary :
+ *   block    → .form-field
  *   label    → .form-label (+ .form-label--required)
- *   aide     → .form-hint
- *   contrôle → .form-control (input text/number, textarea ; select → plus tard)
- *   icône    → .form-control-wrap + .form-control-icon (optionnel, gauche)
- *   erreur   → .form-error + .is-invalid / aria-invalid
- *   taille   → .sm
- * Repos : fond + trait bas (box-shadow inset). Focus : outline 2px + offset 1px (trait bas conservé ; couleur inchangée en erreur).
+ *   hint     → .form-hint
+ *   control  → .form-control (input text/number, textarea; select → later)
+ *   icon     → .form-control-wrap + .form-control-icon (optional, left)
+ *   error    → .form-error + .is-invalid / aria-invalid
+ *   size     → .sm
+ * Rest: background + bottom stroke (inset box-shadow). Focus: 2px outline + 1px offset (bottom stroke kept; color unchanged on error).
  */
 .form-field {
   display: grid;
@@ -1709,7 +1709,7 @@ html:not([data-theme]) .btn .icon-system {
   margin: 0;
 }
 
-/* Icône optionnelle à gauche (text / number / textarea / search) */
+/* Optional icon on the left (text / number / textarea / search) */
 .form-control-wrap {
   position: relative;
   display: block;
@@ -1757,7 +1757,7 @@ html:not([data-theme]) .btn .icon-system {
   padding-left: 2rem;
 }
 
-/* Textarea : icône en haut à gauche */
+/* Textarea: icon at the top left */
 .form-control-wrap:has(> textarea.form-control) > .form-control-icon {
   top: 0.7rem;
   transform: none;
@@ -1767,8 +1767,8 @@ html:not([data-theme]) .btn .icon-system {
   top: 0.5rem;
 }
 
-/* Contrôle range : piste + valeur (output optionnel)
- * Piste et poignée sans arrondi ; focus = cadre sur la poignée seule. */
+/* Range control: track + value (optional output)
+ * Track and thumb with no radius; focus = frame on the thumb only. */
 .form-range-row {
   display: flex;
   align-items: center;
@@ -1955,11 +1955,11 @@ html:not([data-theme]) .btn .icon-system {
   cursor: not-allowed;
 }
 
-/* Contrôle checkbox / radio : case (carré) ou rond à gauche, centré sur le
- * bloc libellé (+ hint). Input natif masqué ; `.form-check-ui` dessine le
- * contrôle. Checkbox : coche ri-check-fill (masque CSS). Radio (`.form-radio`) :
- * ri-radio-button-line (masque CSS ; repos = sans le disque interne).
- * Focus : cadre sur le contrôle seul. */
+/* Checkbox / radio control: box (square) or circle on the left, centered on the
+ * label block (+ hint). Native input hidden; `.form-check-ui` draws the
+ * control. Checkbox: ri-check-fill check (CSS mask). Radio (`.form-radio`):
+ * ri-radio-button-line (CSS mask; rest = no inner disc).
+ * Focus: frame on the control only. */
 .form-check {
   position: relative;
   display: flex;
@@ -2073,7 +2073,7 @@ html:not([data-theme]) .btn .icon-system {
   gap: 0.65rem;
 }
 
-/* Groupe : décalage à gauche sous la légende (vertical et horizontal). */
+/* Group: left indent under the legend (vertical and horizontal). */
 .form-check-group > .form-check-list {
   padding-inline-start: 1.5rem;
 }
@@ -2089,8 +2089,8 @@ html:not([data-theme]) .btn .icon-system {
   gap: 0.65rem 1.25rem;
 }
 
-/* Radio : glyphe ri-radio-button-line (même viewBox aux deux états).
- * Repos = anneau seul (path du disque interne retiré) ; coché = glyphe complet. */
+/* Radio: ri-radio-button-line glyph (same viewBox in both states).
+ * Rest = ring only (inner disc path removed); checked = full glyph. */
 .form-radio .form-check-ui {
   --form-radio-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' fill-rule='evenodd' d='M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20Z'/%3E%3C/svg%3E");
   border: 0;
@@ -2119,7 +2119,7 @@ html:not([data-theme]) .btn .icon-system {
   background-color: transparent;
 }
 
-/* Contrôle couleur : vrai input.form-control + pastille / clear en overlay */
+/* Color control: real input.form-control + swatch / clear overlay */
 .form-color {
   position: relative;
   display: block;
@@ -2127,7 +2127,7 @@ html:not([data-theme]) .btn .icon-system {
 }
 
 .form-color > .form-control.form-color-hex {
-  /* place pour pastille ≈ hauteur input − 4px + inset 2px + gap */
+  /* room for swatch ≈ input height − 4px + 2px inset + gap */
   padding-left: 2.65rem;
 }
 
@@ -2149,7 +2149,7 @@ html:not([data-theme]) .btn .icon-system {
   top: 2px;
   z-index: 1;
   box-sizing: border-box;
-  /* 2px haut + 2px air au-dessus du trait bas inset (2px) */
+  /* 2px top + 2px gap above the 2px inset bottom stroke */
   height: calc(100% - 6px);
   width: auto;
   aspect-ratio: 1;
@@ -2248,12 +2248,12 @@ html:not([data-theme]) .btn .icon-system {
 }
 
 /* ——— Images (design system) ———
- * Contrôle : `.form-image` (vide : fichier / URL ; image : fond optionnel + aperçu).
- * Aperçu : `.form-image-crop` (focus = glisser / molette / flèches / +−).
- * Ratio : `--form-image-aspect` (défaut 1 / 1).
- * Fond : champ `form-color` (éditeur carte) ou couleur externe (`withBackgroundColor: false`, thèmes).
- * Badges overlay : `.btn.primary.sm` (apparence, non cliquables).
- * Reset : `.btn.ghost.sm.icon-only` positionné en overlay. */
+ * Control: `.form-image` (empty: file / URL; image: optional background + preview).
+ * Preview: `.form-image-crop` (focus = drag / wheel / arrows / +−).
+ * Ratio: `--form-image-aspect` (default 1 / 1).
+ * Background: `form-color` field (card editor) or external color (`withBackgroundColor: false`, themes).
+ * Overlay badges: `.btn.primary.sm` (look only, not clickable).
+ * Reset: `.btn.ghost.sm.icon-only` positioned as overlay. */
 .form-image {
   display: grid;
   gap: 0.75rem;
@@ -2379,7 +2379,7 @@ html:not([data-theme]) .btn .icon-system {
   white-space: nowrap;
 }
 
-/* Valeur : signe + 3 chiffres + % (`+100%`) — évite le yoyo de largeur. */
+/* Value: sign + 3 digits + % (`+100%`) — avoids width yo-yo. */
 .form-image-crop-badge > span {
   display: inline-block;
   min-width: 5ch;
@@ -2482,7 +2482,7 @@ select.form-control:focus,
 button.form-select-trigger:focus {
   outline: 2px solid var(--ink);
   outline-offset: 1px;
-  /* Trait bas conservé sous l’encadrement */
+  /* Bottom stroke kept under the frame */
   box-shadow: inset 0 -2px 0 0 var(--ink-soft);
 }
 
@@ -2519,7 +2519,7 @@ input.form-control[aria-invalid="true"]:focus,
 textarea.form-control[aria-invalid="true"]:focus,
 select.form-control[aria-invalid="true"]:focus,
 button.form-select-trigger[aria-invalid="true"]:focus {
-  /* Encadrement focus inchangé (ink) ; seul le trait bas reste en erreur */
+  /* Focus frame unchanged (ink); only the bottom stroke stays in error */
   box-shadow: inset 0 -2px 0 0 var(--form-error);
 }
 
@@ -2551,7 +2551,7 @@ select.form-control.sm {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23b0b0b0'%3E%3Cpath d='m12 16l-6-6h12z'/%3E%3C/svg%3E");
 }
 
-/* ——— Select custom (surcouche unobtrusive) ——— */
+/* ——— Custom select (unobtrusive overlay) ——— */
 .form-select {
   position: relative;
   display: block;
@@ -2580,7 +2580,7 @@ button.form-select-trigger {
   text-align: left;
   cursor: pointer;
   background-image: none;
-  /* place pour le chevron */
+  /* room for the chevron */
   padding-right: 2.25rem;
 }
 
@@ -2737,7 +2737,7 @@ button.form-select-trigger.sm {
 .form-select-list {
   position: absolute;
   z-index: 50;
-  /* Aligne les bords L/R/B sur l’outline focus (2px + offset 1px) */
+  /* Align L/R/B edges to the focus outline (2px + 1px offset) */
   left: -3px;
   right: -3px;
   top: calc(100% + 1px);
@@ -2826,7 +2826,7 @@ button.form-select-trigger.sm {
 /* ——— Cards grid ——— */
 .cards-grid {
   --list-gap-x: 1.25rem;
-  /* Flex : gap fixe + lignes centrées ; max-width en px via list-layout.js */
+  /* Flex: fixed gap + centered rows; max-width in px via list-layout.js */
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -2872,7 +2872,7 @@ button.form-select-trigger.sm {
   transition: transform 0.15s ease;
 }
 
-/* Sélection impression : encadrement sur la carte seulement */
+/* Print selection: frame on the card only */
 .card-tile.is-selected .card-tile-preview {
   outline: 2px solid var(--ink);
   outline-offset: 3px;
@@ -2941,9 +2941,9 @@ button.form-select-trigger.sm {
   line-height: 1;
 }
 
-/* ——— Modales ———
-   Dimensions toujours bornées au viewport (vw / dvh), jamais à la largeur
-   scrollable du document — sinon un overflow horizontal de l’app élargit la modale. */
+/* ——— Modals ———
+   Always clamped to the viewport (vw / dvh), never to the document’s
+   scrollable width — otherwise a horizontal app overflow widens the modal. */
 .modal-root:empty {
   display: none;
 }
@@ -2965,7 +2965,7 @@ button.form-select-trigger.sm {
   max-height: 100dvh;
   display: grid;
   justify-items: center;
-  align-items: safe center; /* milieu par défaut ; « safe » évite de couper le haut si trop haut */
+  align-items: safe center; /* middle by default; “safe” avoids clipping the top if too tall */
   padding: 1.25rem 1rem 2rem;
   overflow-x: hidden;
   overflow-y: auto;
@@ -2994,7 +2994,7 @@ button.form-select-trigger.sm {
 .modal {
   --modal-max-w: calc(100vw - 2rem);
   --modal-max-h: calc(100dvh - 2.5rem);
-  --modal-width: 56rem; /* moyenne par défaut (~896px) */
+  --modal-width: 56rem; /* default medium (~896px) */
   box-sizing: border-box;
   width: min(var(--modal-width), var(--modal-max-w));
   max-width: var(--modal-max-w);
@@ -3018,7 +3018,7 @@ button.form-select-trigger.sm {
   }
 }
 
-/* Tailles design system : petite / moyenne (défaut) / grande */
+/* Design system sizes: small / medium (default) / large */
 .modal.modal--sm {
   --modal-width: 40rem; /* ~640px */
 }
@@ -3031,14 +3031,14 @@ button.form-select-trigger.sm {
   --modal-width: 72rem; /* ~1152px */
 }
 
-/* Hauteur fixe (évite le yoyo selon le nombre de résultats) */
+/* Fixed height (avoids yo-yo as the result count changes) */
 #themes-modal-backdrop > .modal,
 #settings-modal-backdrop > .modal,
 #developer-modal-backdrop > .modal.is-fixed-h {
   height: var(--modal-max-h);
 }
 
-/* Accueil développeur / presets : état vide / chargement centré sous la recherche (brique hors flux) */
+/* Developer home / presets: empty / loading state centered under search (brick out of flow) */
 #developer-modal-backdrop > .modal.is-fixed-h .modal-body:has(.empty-view:not([hidden])) {
   display: flex;
   flex-direction: column;
@@ -3092,7 +3092,7 @@ button.form-select-trigger.sm {
   flex-wrap: wrap;
 }
 
-/* Icône + titre (et galerie : lien + flèche + titre) : pas de passage du texte sous l’icône */
+/* Icon + title (and gallery: link + arrow + title): no text wrapping under the icon */
 .modal-header .view-title:has(> svg:first-child),
 .modal-header .view-title:has(> a:first-child) {
   flex-wrap: nowrap;
@@ -3104,7 +3104,7 @@ button.form-select-trigger.sm {
   padding: 0.35rem var(--modal-header-inset);
   margin-right: calc(-1 * var(--modal-header-inset));
   border: 1px solid transparent;
-  /* Mêmes tokens inversés que `.modal-close` (hover = primary hover) */
+  /* Same inverted tokens as `.modal-close` (hover = primary hover) */
   --bg: var(--inv-bg);
   --ink: var(--inv-fg);
   --panel: var(--inv-bg);
@@ -3136,7 +3136,7 @@ button.form-select-trigger.sm {
   align-self: center;
 }
 
-/* Titre à côté de l’icône (plusieurs lignes si besoin), comme `.toast-header` */
+/* Title beside the icon (several lines if needed), like `.toast-header` */
 .modal-header .view-title:has(> svg:first-child) > span,
 .modal-header .view-title:has(> a:first-child) > span {
   flex: 1 1 auto;
@@ -3149,7 +3149,7 @@ button.form-select-trigger.sm {
   flex: 1 1 auto;
 }
 
-/* Même mécanisme que le menu impression : le primary DS, tokens inversés */
+/* Same mechanism as the print menu: DS primary, inverted tokens */
 .modal-header .modal-close {
   --bg: var(--inv-bg);
   --ink: var(--inv-fg);
@@ -3166,7 +3166,7 @@ button.form-select-trigger.sm {
   overscroll-behavior: none;
 }
 
-/* Chrome rend les overflow:auto tabulables ; le corps n’est pas un contrôle */
+/* Chrome makes overflow:auto tabbable; the body is not a control */
 .modal-body:focus {
   outline: none;
 }
@@ -3178,7 +3178,7 @@ button.form-select-trigger.sm {
   overflow: visible;
 }
 
-/* Accueil : brique hors flux au-dessus du titre (le #main est haut). En modale, réserver sa place. */
+/* Home: brick out of flow above the title (#main is tall). In a modal, reserve its space. */
 .modal-body .empty-view:not([hidden]) {
   padding-top: calc(0.75rem + 9px + 40px);
 }
@@ -3197,7 +3197,7 @@ button.form-select-trigger.sm {
   flex-shrink: 0;
 }
 
-/* Zones d’actions : gauche = validation / sauvegarde ; droite = danger */
+/* Action areas: left = confirm / save; right = danger */
 .modal-footer-start,
 .modal-footer-end {
   display: flex;
@@ -3206,7 +3206,7 @@ button.form-select-trigger.sm {
   gap: 0.5rem;
 }
 
-/* `display: flex` / `.btn { display: inline-flex }` gagnent sur le UA `[hidden]` */
+/* `display: flex` / `.btn { display: inline-flex }` win over the UA `[hidden]` */
 .modal-footer-start[hidden],
 .modal-footer-end[hidden],
 .modal-footer-start.is-hidden,
@@ -3219,8 +3219,8 @@ button.form-select-trigger.sm {
   margin-left: auto;
 }
 
-/* Visuel : Annuler puis action primaire à droite (éditeur : Supprimer à gauche) ;
-   tabulation : primaire → Annuler → Supprimer */
+/* Visual: Cancel then primary action on the right (editor: Delete on the left);
+   tab order: primary → Cancel → Delete */
 .modal-footer--primary-first .modal-footer-start {
   order: 1;
 }
@@ -3231,7 +3231,7 @@ button.form-select-trigger.sm {
 }
 
 .modal-footer .btn {
-  /* Aligne les hauteurs mixte (normal + sm) sur l’axe vertical */
+  /* Align mixed heights (normal + sm) on the vertical axis */
   align-self: center;
 }
 
@@ -3269,7 +3269,7 @@ body.modal-open {
   overflow: hidden;
 }
 
-/* Écran étroit : plein écran viewport, plus d’overlay visible */
+/* Narrow screen: full-screen viewport, overlay no longer visible */
 @media (max-width: 640px) {
   .modal-backdrop {
     padding: 0;
@@ -3305,7 +3305,7 @@ body.modal-open {
     }
   }
 
-  /* Titre : lien de section avec icône → icône seule (texte masqué, toujours nommé) */
+  /* Title: section link with icon → icon only (text hidden, still named) */
   .modal-header .view-title > .link:has(> svg) {
     position: relative;
   }
@@ -3577,7 +3577,7 @@ textarea {
   min-height: 72px;
 }
 
-/* Erreurs page / panel (hors design system form-field) */
+/* Page / panel errors (outside the form-field design system) */
 .error {
   color: var(--form-error);
   font-size: 0.85rem;
@@ -3814,9 +3814,9 @@ textarea {
 }
 
 /*
- * Filet écran : silhouette vs --bg (cartes très claires / très foncées).
- * box-shadow (pas border) : suit --card-radius, ne change pas le 63×88 mm.
- * Impression : filet sombre sur le slot (papier blanc) — voir .print-slot.
+ * Screen hairline: silhouette vs --bg (very light / very dark cards).
+ * box-shadow (not border): follows --card-radius, does not change 63×88 mm.
+ * Print: dark hairline on the slot (white paper) — see .print-slot.
  */
 .card,
 .card-back,
@@ -3825,8 +3825,8 @@ textarea {
 }
 
 /*
- * Cartes physiques : accent via --card-accent (thème LEGO).
- * Face : header auto (1 ligne) · photo flexible · footer fixe.
+ * Physical cards: accent via --card-accent (LEGO theme).
+ * Face: auto header (1 line) · flexible photo · fixed footer.
  */
 .card {
   width: var(--card-w);
@@ -3952,7 +3952,7 @@ textarea {
   place-items: center;
 }
 
-/* Cadre photo arrondi : clippe l’image (y compris avec transform) ; coins = accent carte. */
+/* Rounded photo frame: clips the image (including with transform); corners = card accent. */
 .card-photo-frame {
   position: absolute;
   inset: 0;
@@ -4193,8 +4193,8 @@ textarea {
 }
 
 /*
- * Folio haut / bas : hors flux (absolute, pas une piste de grille).
- * Sous les cartes (z-index) — une carte qui recouvre cache le texte.
+ * Top / bottom folio: out of flow (absolute, not a grid track).
+ * Under the cards (z-index) — a covering card hides the text.
  */
 .print-sheet-folio {
   position: absolute;
@@ -4235,9 +4235,9 @@ textarea {
 }
 
 /*
- * Filet d’impression (tracé de découpe) : 1 px #000 (papier blanc).
- * Overlay ::after au-dessus de la carte — un outline sur le slot passe
- * dessous et s’imprime trop fin. Visible seulement si Face / Dos est coché.
+ * Print hairline (cut mark): 1 px #000 (white paper).
+ * ::after overlay above the card — an outline on the slot sits
+ * underneath and prints too thin. Visible only if Face / Back is checked.
  */
 .print-document.print-cut-mark-face .print-sheet--front .print-slot:not(.is-empty)::after,
 .print-document.print-cut-mark-back .print-sheet--back .print-slot:not(.is-empty)::after {
@@ -4267,7 +4267,7 @@ textarea {
 }
 
 @media screen {
-  /* Layout hors écran pour mesurer les cartes avant impression (zoom/pan). */
+  /* Off-screen layout to measure cards before print (zoom/pan). */
   .print-root.is-preparing {
     display: block;
     position: absolute;
@@ -4444,7 +4444,7 @@ textarea {
     touch-action: auto;
   }
 
-  /* Ne garder que les feuilles de cartes — rien d’autre (toast, UI, etc.). */
+  /* Keep only the card sheets — nothing else (toast, UI, etc.). */
   body > *:not(.print-root) {
     display: none !important;
   }
@@ -4467,7 +4467,7 @@ textarea {
 
   .print-root.is-preparing,
   .print-root.is-preview {
-    /* Annuler le layout hors écran / aperçu pendant l’impression réelle */
+    /* Undo the off-screen / preview layout during the real print */
     position: static !important;
     left: auto !important;
     opacity: 1 !important;
@@ -4492,10 +4492,10 @@ textarea {
   }
 
   /*
-   * Fond perdu : rectangle sur le slot (repère feuille, pas le
-   * transform de la carte). 2 mm des quatre côtés — scale avec la grille.
-   * Face / dos selon .print-bleed-face / .print-bleed-back (jamais si
-   * le tracé de découpe du même côté est coché).
+   * Bleed: rectangle on the slot (sheet mark, not the
+   * card transform). 2 mm on all four sides — scales with the grid.
+   * Face / back via .print-bleed-face / .print-bleed-back (never if
+   * cut marks on the same side are checked).
    */
   .print-document.print-bleed-face .print-sheet--front,
   .print-document.print-bleed-back .print-sheet--back {

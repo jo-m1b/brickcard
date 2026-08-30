@@ -1,16 +1,16 @@
 /**
- * Surcouche unobtrusive pour `<select class="form-control">`.
- * Conserve le select natif (soumission / a11y de secours) et affiche
- * un déclencheur + liste stylables.
- * L’option placeholder (value="") n’apparaît pas dans la liste ; un reset
- * (ri-close-circle-fill) permet d’y revenir.
+ * Unobtrusive overlay for `<select class="form-control">`.
+ * Keeps the native select (submit / fallback a11y) and shows
+ * a styled trigger + list.
+ * The placeholder option (value="") is omitted from the list; a reset
+ * (ri-close-circle-fill) returns to it.
  */
 
 import { ICON_ARROW_DOWN_S_LINE, ICON_CLOSE_CIRCLE, remixIconByName } from "./icons.js";
 import { _t } from "./i18n.js";
 
 /**
- * Améliore tous les `select.form-control` dans un conteneur.
+ * Enhance every `select.form-control` in a container.
  * @param {ParentNode} root
  * @returns {() => void} cleanup
  */

@@ -1,22 +1,22 @@
 /**
- * Champ couleur design system : `form-color` + `input.form-control`.
- * Pastille (color picker) + hex + clear (non focusable) en overlay.
+ * Color field (design system): `form-color` + `input.form-control`.
+ * Swatch (color picker) + hex + clear (not focusable) overlay.
  *
- * Pastille vide (damier) uniquement si le champ est vide *et* qu’il n’y a pas
- * de couleur par défaut (`fallback` / `fallbackColor`). Sinon la pastille
- * affiche la valeur ou le défaut.
+ * Empty swatch (checkerboard) only if the field is empty *and* there is no
+ * default color (`fallback` / `fallbackColor`). Otherwise the swatch
+ * shows the value or the default.
  */
 
 import { ICON_CLOSE_CIRCLE } from "./icons.js";
 import { parseHexColor } from "./themes-data.js";
 import { _t } from "./i18n.js";
 
-/** Valeur technique pour `<input type="color">` quand aucun défaut d’affichage. */
+/** Technical value for `<input type="color">` when there is no display default. */
 const PICKER_SEED = "#ffffff";
 
 /**
  * @param {string} value
- * @returns {string|null} #rrggbb ou null
+ * @returns {string|null} #rrggbb or null
  */
 export function normalizeHex(value) {
   const parsed = parseHexColor(value);
@@ -32,8 +32,8 @@ export function normalizeHex(value) {
 }
 
 /**
- * Hex « complet » pour la saisie live : 6 chiffres seulement (pas d’expansion #rgb).
- * Évite de transformer `#fff` en `#ffffff` pendant qu’on tape `#fffccc`.
+ * “Complete” hex for live input: 6 digits only (no #rgb expansion).
+ * Avoids turning `#fff` into `#ffffff` while typing `#fffccc`.
  * @param {string} value
  * @returns {string|null}
  */
@@ -42,7 +42,7 @@ export function completeHex(value) {
 }
 
 /**
- * Markup d’un contrôle couleur.
+ * Markup for a color control.
  * @param {{
  *   id: string,
  *   value?: string,
@@ -105,7 +105,7 @@ export function formColorMarkup(opts) {
 }
 
 /**
- * Synchronise pastille / hex / clear dans un `.form-color`.
+ * Sync swatch / hex / clear inside a `.form-color`.
  * @param {HTMLElement} root
  * @param {{
  *   onChange?: (value: string) => void,
@@ -153,7 +153,7 @@ export function bindFormColor(root, opts = {}) {
     }
   }
 
-  /** Pastille : valeur, sinon défaut, sinon damier transparent. */
+  /** Swatch: value, else default, else transparent checkerboard. */
   function paintEmptyOrFallback() {
     paintSwatch(fallbackColor);
   }
@@ -173,7 +173,7 @@ export function bindFormColor(root, opts = {}) {
 
   function applyFromHex(/** @type {boolean} */ commit) {
     const raw = hex.value.trim();
-    /* Pendant la saisie : uniquement #rrggbb / rrggbb (pas d’expansion #rgb) */
+    /* While typing: #rrggbb / rrggbb only (no #rgb expansion) */
     const normalized = completeHex(raw);
     if (normalized) {
       lastValid = normalized;
@@ -187,7 +187,7 @@ export function bindFormColor(root, opts = {}) {
       syncClear(false);
       if (commit) emit("");
     } else {
-      /* Incomplet ou invalide (#fff, texte…) : pastille = défaut ou transparent */
+      /* Incomplete or invalid (#fff, text…): swatch = default or transparent */
       native.value = pickerSeed();
       paintEmptyOrFallback();
       syncClear(true);
@@ -249,7 +249,7 @@ export function bindFormColor(root, opts = {}) {
       applyFromHex(true);
       return;
     }
-    /* Au blur seulement : normaliser (#, casse, expansion #rgb → #rrggbb) */
+    /* On blur only: normalize (#, case, #rgb → #rrggbb expansion) */
     const normalized = normalizeHex(raw);
     if (normalized) {
       hex.value = normalized;

@@ -17,8 +17,8 @@ import { setAppDocumentTitle } from "../document-title.js";
 import { _t } from "../i18n.js";
 
 /**
- * Modale d’édition d’un thème personnalisé (`#themes/new`, `#themes/edit/:id`)
- * ou lecture seule d’un thème par défaut (`#themes/view/:id`).
+ * Custom theme editor modal (`#themes/new`, `#themes/edit/:id`)
+ * or read-only view of a default theme (`#themes/view/:id`).
  * @param {HTMLElement} host
  * @param {{
  *   themeId?: string|null,
@@ -27,7 +27,7 @@ import { _t } from "../i18n.js";
  *   onSaved: (name: string, meta: { isNew: boolean, theme: import("../themes-data.js").LegoTheme }) => void,
  *   onDeleted?: (name: string, themeId: string) => void,
  * }} opts
- * @returns {Promise<(() => void)|null>} cleanup, ou null si id invalide / mode incompatible
+ * @returns {Promise<(() => void)|null>} cleanup, or null if id invalid / mode mismatch
  */
 export async function renderThemeEditor(host, opts) {
   const { onClose, onSaved, onDeleted } = opts;

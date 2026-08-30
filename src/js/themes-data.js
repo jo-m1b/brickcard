@@ -1,7 +1,7 @@
 /**
- * Thèmes LEGO prédéfinis — métadonnées dans `data/themes-presets.json`.
- * Logos : chemin relatif (`logoSrc`, ex. data/theme-logo-…) — optionnel, pas de fallback généré.
- * Sans `color` → chaîne vide ; l’affichage carte utilise la couleur configurée puis le gris d’usine.
+ * Default LEGO themes — metadata in `data/themes-presets.json`.
+ * Logos: relative path (`logoSrc`, e.g. data/theme-logo-…) — optional, no generated fallback.
+ * No `color` → empty string; card display uses the configured color then factory gray.
  */
 
 import { _t } from "./i18n.js";
@@ -9,36 +9,36 @@ import { _t } from "./i18n.js";
 /**
  * @typedef {Object} LegoTheme
  * @property {string} id
- * @property {string} name Affichage (ex. "Aquazone", "CITY")
- * @property {string} color Couleur du thème (cartes), hex #rrggbb ou "" si non définie
- * @property {string} secondaryColor Textes / icônes / logo Brickcard, hex #rrggbb ou "" (contraste auto)
- * @property {string} logoDataUrl Logo JPEG/PNG/SVG/WebP (data URL ou chemin relatif), optionnel
- * @property {number} logoZoom Zoom largeur logo (1 = 75 % de la largeur de carte)
- * @property {number} logoOffsetX Décalage horizontal logo (fraction de la boîte)
- * @property {number} logoOffsetY Décalage vertical logo (fraction de la boîte)
- * @property {boolean} isBuiltin Thème par défaut (lecture seule, non supprimable)
- * @property {string} updatedAt ISO (personnalisés) ; vide pour les thèmes par défaut
+ * @property {string} name Display (e.g. "Aquazone", "CITY")
+ * @property {string} color Theme color (cards), hex #rrggbb or "" if unset
+ * @property {string} secondaryColor Texts / icons / Brickcard logo, hex #rrggbb or "" (auto contrast)
+ * @property {string} logoDataUrl JPEG/PNG/SVG/WebP logo (data URL or relative path), optional
+ * @property {number} logoZoom Logo width zoom (1 = 75% of the card width)
+ * @property {number} logoOffsetX Horizontal logo offset (box fraction)
+ * @property {number} logoOffsetY Vertical logo offset (box fraction)
+ * @property {boolean} isBuiltin Default theme (read-only, not deletable)
+ * @property {string} updatedAt ISO (custom); empty for default themes
  */
 
 /**
- * Entrée dans data/themes-presets.json
+ * Entry in data/themes-presets.json
  * @typedef {Object} PresetMeta
  * @property {string} id
  * @property {string} name
- * @property {string} [color] Hex ; omis → pas de couleur propre (cascade carte)
- * @property {string} [secondaryColor] Hex ; omis → noir ou blanc selon l’accent
- * @property {string} [logoSrc] Chemin relatif depuis src/ (ex. "data/theme-logo-….png")
- * @property {number} [logoZoom] Largeur logo (1 = 75 % de la carte) ; omis → 1
- * @property {number} [logoOffsetX] Décalage horizontal ; omis → 0
- * @property {number} [logoOffsetY] Décalage vertical ; omis → 0
+ * @property {string} [color] Hex; omitted → no own color (card cascade)
+ * @property {string} [secondaryColor] Hex; omitted → black or white from the accent
+ * @property {string} [logoSrc] Relative path from src/ (e.g. "data/theme-logo-….png")
+ * @property {number} [logoZoom] Logo width (1 = 75% of the card); omitted → 1
+ * @property {number} [logoOffsetX] Horizontal offset; omitted → 0
+ * @property {number} [logoOffsetY] Vertical offset; omitted → 0
  */
 
 const PRESETS_URL = "data/themes-presets.json";
 
-/** Gris neutre d’usine — dernier recours pour l’accent carte. */
+/** Neutral factory gray — last resort for the card accent. */
 export const DEFAULT_THEME_COLOR = "#6e6e6e";
 
-/** Anciens ids de thèmes par défaut → id actuel (`themes-presets.json`). */
+/** Old default theme ids → current id (`themes-presets.json`). */
 const PRESET_ID_ALIASES = {
   "the-lord-of-the-rings": "lord-of-the-rings",
 };
@@ -49,13 +49,13 @@ export function resolvePresetThemeId(id) {
   return PRESET_ID_ALIASES[s] || s;
 }
 
-/** Hosts locaux (bouton reset + fetch sans cache HTTP). */
+/** Local hosts (reset button + fetch with no HTTP cache). */
 export function isLocalDevHost() {
   const host = location.hostname;
   return host === "127.0.0.1" || host === "localhost" || host === "[::1]";
 }
 
-/** Invalide le cache mémoire des presets (après wipe / avant reseed). */
+/** Invalidate the in-memory preset cache (after wipe / before reseed). */
 export function clearPresetCache() {
   presetMetaPromise = null;
   presetThemesPromise = null;
@@ -68,7 +68,7 @@ let presetMetaPromise = null;
 let presetThemesPromise = null;
 
 /**
- * Arrondi à 2 décimales. `0.00` (et `-0`) → `0`.
+ * Round to 2 decimal places. `0.00` (and `-0`) → `0`.
  * @param {unknown} raw
  * @returns {number}
  */
@@ -80,7 +80,7 @@ export function roundCropCoord(raw) {
 }
 
 /**
- * Borne le zoom logo (même plage que les thèmes personnalisés), arrondi à 2 décimales.
+ * Clamp logo zoom (same range as custom themes), rounded to 2 decimal places.
  * @param {unknown} raw
  * @returns {number}
  */
@@ -124,9 +124,9 @@ export function isHexColor(hex) {
 }
 
 /**
- * Parse une couleur hex ; chaîne vide si absente / invalide.
+ * Parse a hex color; empty string if missing / invalid.
  * @param {string|null|undefined} hex
- * @returns {string} #rrggbb ou ""
+ * @returns {string} #rrggbb or ""
  */
 export function parseHexColor(hex) {
   const raw = String(hex || "").trim();
@@ -136,7 +136,7 @@ export function parseHexColor(hex) {
 }
 
 /**
- * Couleur explicite ou gris d’usine (pour contextes qui exigent toujours un hex).
+ * Explicit color or factory gray (for contexts that always need a hex).
  * @param {{ color?: string, accentColor?: string }|string|null|undefined} themeOrHex
  * @returns {string} hex #rrggbb
  */
@@ -151,7 +151,7 @@ export function resolveThemeColor(themeOrHex) {
 /** @returns {Promise<LegoTheme[]>} */
 export async function getPresetThemes() {
   if (isLocalDevHost()) {
-    // En local : toujours relire le JSON (pas de cache mémoire entre resets)
+    // Locally: always re-read the JSON (no in-memory cache between resets)
     clearPresetCache();
   }
 
@@ -211,9 +211,9 @@ export function partitionThemes(themes) {
 }
 
 /**
- * Contraste texte sur fond couleur.
- * Noir seulement si le fond est vraiment pâle (gris clair, pastel, quasi blanc).
- * Une teinte saturée (jaune, orange, lime…) reste en blanc.
+ * Text contrast on a color background.
+ * Black only if the background is truly pale (light gray, pastel, near-white).
+ * A saturated hue (yellow, orange, lime…) stays white.
  * @param {string} hex
  * @returns {"#ffffff"|"#141414"}
  */

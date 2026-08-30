@@ -34,7 +34,7 @@ const SECTION_TOOLS = { name: "Development help", icon: "pencil-ruler-2" };
 /** @type {DeveloperSection} */
 const SECTION_MODELS = { name: "Templates", icon: "pages" };
 
-/** Section d’index pour les pages ouvertes par une tuile (`#developer`). */
+/** Index section for pages opened from a tile (`#developer`). */
 const PAGE_SECTIONS = {
   typography: SECTION_DESIGN,
   links: SECTION_DESIGN,
@@ -66,8 +66,8 @@ const PAGE_SECTIONS = {
 let session = null;
 
 /**
- * Titre du dialog = header de la galerie (comme les pages Markdown).
- * Pages tuile : section (lien `#developer`, icône optionnelle) + séparateur + titre de page (pas d’icône de tuile).
+ * Dialog title = gallery header (like Markdown pages).
+ * Tile pages: section (`#developer` link, optional icon) + separator + page title (no tile icon).
  * @param {HTMLElement} body
  * @param {HTMLElement} titleEl
  * @param {string} page
@@ -98,7 +98,7 @@ function liftStyleguideHeader(body, titleEl, page) {
 }
 
 /**
- * Pied de page optionnel : déplacé hors du corps pour rester collé au bas de la modale.
+ * Optional footer: moved out of the body to stay stuck to the bottom of the modal.
  * @param {HTMLElement} body
  * @param {HTMLElement} modal
  */
@@ -109,7 +109,7 @@ function liftModalFooter(body, modal) {
 }
 
 /**
- * Barre de recherche : collée sous le header, hors du corps qui défile (comme `#themes`).
+ * Search bar: stuck under the header, outside the scrolling body (like `#themes`).
  * @param {HTMLElement} body
  * @param {HTMLElement} modal
  */
@@ -131,10 +131,10 @@ function clearLiftedChrome(modal) {
 }
 
 /**
- * Espace développeur en modale overlay (même coquille que les pages Markdown).
- * Un second appel avec la coquille déjà en place ne swap que le corps.
- * Liste `#developer/theme-presets` : conservée sous l’éditeur (`/new`, `/edit/:slug`).
- * @param {HTMLElement} host Conteneur (#modal-root)
+ * Developer space in an overlay modal (same shell as Markdown pages).
+ * A second call with the shell already in place only swaps the body.
+ * `#developer/theme-presets` list: kept under the editor (`/new`, `/edit/:slug`).
+ * @param {HTMLElement} host Container (#modal-root)
  * @param {{
  *   page?: string,
  *   presetPage?: string,
@@ -263,7 +263,7 @@ export async function renderDeveloperModal(host, opts) {
       onSaved: (meta) => {
         if (meta?.isNew) {
           if (!presets.refreshPresetDraftAfterCreate(meta.theme)) {
-            /* liste absente */
+            /* list missing */
           }
         } else {
           presets.patchPresetDraftInList(meta.theme, meta.previousId);

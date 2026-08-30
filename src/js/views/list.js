@@ -78,7 +78,7 @@ function saveSortDir(dir) {
   }
 }
 
-/** Après création d’une carte : recherche vidée, tri par date de modification (récent d’abord). */
+/** After creating a card: search cleared, sort by date modified (newest first). */
 export function prepareListAfterCardCreate() {
   const searchInput = document.getElementById("global-search");
   if (searchInput instanceof HTMLInputElement) {
@@ -98,9 +98,9 @@ let mountedFocusListCard = null;
 let pendingFocusCardId = null;
 
 /**
- * Met à jour l’aperçu d’une carte déjà affichée, sans reconstruire la grille.
+ * Updates the preview of a card already shown, without rebuilding the grid.
  * @param {import("../storage.js").Card} card
- * @returns {boolean} false si la liste n’est pas montée
+ * @returns {boolean} false if the list is not mounted
  */
 export function patchListCard(card) {
   if (!mountedPatchListCard || !card?.id) return false;
@@ -108,8 +108,8 @@ export function patchListCard(card) {
 }
 
 /**
- * Place le focus clavier sur la tuile d’une carte (création / modification).
- * Si la tuile n’est pas encore dans la grille, le focus est appliqué au prochain rendu.
+ * Puts keyboard focus on a card tile (create / edit).
+ * If the tile is not in the grid yet, focus is applied on the next render.
  * @param {string} [id]
  */
 export function focusListCard(id) {
@@ -130,9 +130,9 @@ function applyListCardFocus(tile) {
 }
 
 /**
- * Retire une carte de la liste montée (tuile + mémoire + compteurs), sans reconstruire la grille.
+ * Removes a card from the mounted list (tile + memory + counters), without rebuilding the grid.
  * @param {string} id
- * @returns {{ empty: boolean } | false} false si la liste n’est pas montée
+ * @returns {{ empty: boolean } | false} false if the list is not mounted
  */
 export function removeListCard(id) {
   if (!mountedRemoveListCard || !id) return false;
@@ -243,7 +243,7 @@ export async function renderList(main, opts) {
     }
   }
 
-  /** Compteur + tri : visibles seulement s’il y a au moins 2 cartes. */
+  /** Count + sort: visible only if there are at least 2 cards. */
   function syncSearchTrail() {
     const show = cards.length >= 2;
     if (searchTrail) searchTrail.hidden = !show;
@@ -530,7 +530,7 @@ export async function renderList(main, opts) {
     searchInput.focus();
   }
 
-  /** Clic sur l’icône / le padding : même cible que le champ. */
+  /** Click on the icon / padding: same target as the field. */
   function onSearchBarMouseDown(e) {
     if (!searchInput || !searchBar) return;
     const t = /** @type {Node} */ (e.target);
@@ -620,7 +620,7 @@ export async function renderList(main, opts) {
       return;
     }
 
-    /* Édition uniquement au clic sur la carte (pas sur les marges de la tuile) */
+    /* Edit only on a click on the card (not on the tile margins) */
     const preview = t.closest(".card-tile-preview");
     const tile = preview?.closest(".card-tile");
     if (tile?.dataset.id) {

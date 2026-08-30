@@ -1,4 +1,4 @@
-/** i18n : catalogues gettext `.po`, anglais source, pas de compilateur. */
+/** i18n: gettext `.po` catalogs, English source, no compiler. */
 
 const LOCALE_KEY = "brickcard:ui-locale";
 const LOCALES_URL = "i18n/locales.json";
@@ -28,8 +28,8 @@ function unescapePo(raw) {
 }
 
 /**
- * Parser gettext minimal : msgid / msgstr, chaînes concaténées, commentaires `#`.
- * Ignore l’en-tête `msgid ""`. Pas de msgctxt ni formes plurielles.
+ * Minimal gettext parser: msgid / msgstr, concatenated strings, `#` comments.
+ * Ignores the `msgid ""` header. No msgctxt or plural forms.
  * @param {string} text
  * @returns {Map<string, string>}
  */
@@ -113,7 +113,7 @@ function browserLanguageTags() {
   return [];
 }
 
-/** Locale navigateur si elle est traduite, sinon anglais. */
+/** Browser locale if translated, otherwise English. */
 function detectBrowserLocale() {
   for (const tag of browserLanguageTags()) {
     const full = normalizeLocaleCode(tag);
@@ -164,7 +164,7 @@ export function getDefaultLocale() {
 }
 
 /**
- * Libellé de select : `EN · English`.
+ * Select label: `EN · English`.
  * @param {LocaleInfo} loc
  */
 export function localeDisplayName(loc) {
@@ -173,7 +173,7 @@ export function localeDisplayName(loc) {
   return name ? `${code} · ${name}` : code;
 }
 
-/** @returns {LocaleInfo[]} triées par code ISO ASC */
+/** @returns {LocaleInfo[]} sorted by ISO code ASC */
 export function listLocales() {
   return locales.slice().sort((a, b) => a.code.localeCompare(b.code, "en"));
 }
@@ -214,7 +214,7 @@ async function loadLocalesJson() {
       locales.unshift({ code: DEFAULT_LOCALE, name: "English" });
     }
   } catch {
-    /* fallback : English seul */
+    /* fallback: English only */
   }
 }
 
@@ -236,7 +236,7 @@ async function loadCatalog(locale, suffix = "") {
   }
 }
 
-/** Charge les locales, résout la langue, charge le `.po` si besoin. */
+/** Load locales, resolve the language, load the `.po` if needed. */
 export async function initI18n() {
   await loadLocalesJson();
   currentLocale = readStoredLocale() || detectBrowserLocale();
@@ -245,7 +245,7 @@ export async function initI18n() {
 }
 
 /**
- * Textes du chrome statique (`index.html`) après chargement du catalogue.
+ * Static chrome copy (`index.html`) after the catalog is loaded.
  */
 export function applyChromeI18n() {
   const search = document.getElementById("global-search");

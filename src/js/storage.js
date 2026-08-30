@@ -1,7 +1,7 @@
 /**
- * Persistance IndexedDB (cartes + thèmes personnalisés) + import `.brickcard`.
- * Les thèmes par défaut viennent du JSON, pas d’IndexedDB.
- * Format / export : `backup.js`.
+ * IndexedDB persistence (cards + custom themes) + `.brickcard` import.
+ * Default themes come from the JSON, not IndexedDB.
+ * Format / export: `backup.js`.
  */
 
 import { getPresetThemes, getPresetTheme, parseHexColor, clearPresetCache, clampLogoZoom, roundCropCoord, resolvePresetThemeId } from "./themes-data.js";
@@ -19,24 +19,24 @@ const STORE_THEMES = "themes";
 /**
  * @typedef {Object} Card
  * @property {string} id
- * @property {string} legoSetRef Référence set (ex. "6140/6109")
- * @property {string} title Titre de la Brickcard (`\n` = saut de ligne)
- * @property {string} brickcardThemeId Id du thème Brickcard associé
- * @property {number|null} pieceCount Nombre de pièces
- * @property {number|null} figurineCount Nombre de figurines (optionnel)
- * @property {number|null} releaseYear Année de sortie (optionnel)
- * @property {string} imageDataUrl Photo (data URL JPEG/PNG/SVG/WebP)
- * @property {string} imageBackgroundColor Fond derrière l’image (hex) ; vide = blanc à l’affichage
- * @property {number} imageZoom Zoom de cadrage photo (1 = cover / 100 % ; < 1 = dézoom)
- * @property {number} imageOffsetX Décalage horizontal photo (fraction)
- * @property {number} imageOffsetY Décalage vertical photo (fraction)
+ * @property {string} legoSetRef Set reference (e.g. "6140/6109")
+ * @property {string} title Brickcard title (`\n` = line break)
+ * @property {string} brickcardThemeId Associated Brickcard theme id
+ * @property {number|null} pieceCount Piece count
+ * @property {number|null} figurineCount Figurine count (optional)
+ * @property {number|null} releaseYear Release year (optional)
+ * @property {string} imageDataUrl Photo (JPEG/PNG/SVG/WebP data URL)
+ * @property {string} imageBackgroundColor Image-area background (hex); empty = white on screen
+ * @property {number} imageZoom Photo crop zoom (1 = cover / 100%; < 1 = zoom out)
+ * @property {number} imageOffsetX Photo horizontal offset (fraction)
+ * @property {number} imageOffsetY Photo vertical offset (fraction)
  * @property {string} updatedAt ISO
  */
 
-/** Fond image par défaut (images transparentes). */
+/** Default image background (transparent images). */
 export const DEFAULT_IMAGE_BACKGROUND = "#ffffff";
 
-/** Erreur générique de chargement d’image (fichier ou URL). */
+/** Generic image load error (file or URL). */
 export const IMAGE_LOAD_ERROR = "Image loading error!";
 export const IMAGE_LOAD_ERROR_FORMAT =
   "Image loading error! Invalid format (SVG, PNG, WebP, JPG…).";
@@ -44,13 +44,13 @@ export const IMAGE_LOAD_ERROR_CORS =
   "Image loading error! Network or CORS - the source site refuses the load.";
 export const IMAGE_URL_INVALID = "The image URL is invalid.";
 
-/** Côté max des rasters importés (cartes et logos). */
+/** Max side of imported rasters (cards and logos). */
 export const IMAGE_MAX_SIDE = 2000;
 
-/** Qualité JPEG / WebP après retaille canvas. */
+/** JPEG / WebP quality after canvas resize. */
 const IMAGE_ENCODE_QUALITY = 0.88;
 
-/** Sélecteur de fichiers (cartes et logos). */
+/** File picker (cards and logos). */
 export const IMAGE_FILE_ACCEPT = "image/*,image/svg+xml,.svg";
 
 /**
@@ -63,7 +63,7 @@ let dbPromise = null;
 /** @type {Promise<void>|null} */
 let seedPromise = null;
 
-/** Nom IndexedDB courant (génération pour échapper à un delete/open coincé). */
+/** Current IndexedDB name (generation to escape a stuck delete/open). */
 function getDbName() {
   try {
     const gen = String(localStorage.getItem(DB_GEN_KEY) || "").trim();
@@ -75,8 +75,8 @@ function getDbName() {
 }
 
 /**
- * Query de rechargement après reset : `?{timestamp}` (legacy `?_=`).
- * Sert à contourner le cache HTTP / SW de `index.html`.
+ * Reload query after reset: `?{timestamp}` (legacy `?_=`).
+ * Bypasses the HTTP / SW cache of `index.html`.
  * @param {string} [search]
  */
 export function isResetReloadQuery(search = typeof location !== "undefined" ? location.search : "") {
@@ -88,9 +88,9 @@ export function isResetReloadQuery(search = typeof location !== "undefined" ? lo
 }
 
 /**
- * Query de rechargement après **Réessayer** (échec de boot) : `?r={timestamp}`.
- * Même cache-bust que le reset, sans le motif `?{timestamp}` / `?_=` qui peut
- * réparer une base IndexedDB coincée.
+ * Reload query after **Retry** (boot failure): `?r={timestamp}`.
+ * Same cache-bust as reset, without the `?{timestamp}` / `?_=` pattern that can
+ * repair a stuck IndexedDB.
  * @param {string} [search]
  */
 export function isBootRetryQuery(search = typeof location !== "undefined" ? location.search : "") {
@@ -100,8 +100,8 @@ export function isBootRetryQuery(search = typeof location !== "undefined" ? loca
 }
 
 /**
- * Après un reset buggé, l’URL a souvent `?{timestamp}` / `?_=` et la base historique est coincée.
- * On bascule alors sur une nouvelle génération (données déjà vidées de toute façon).
+ * After a buggy reset, the URL often has `?{timestamp}` / `?_=` and the old DB is stuck.
+ * Switch to a new generation then (data already wiped anyway).
  */
 function repairWedgedDbIfNeeded() {
   try {
@@ -116,7 +116,7 @@ function repairWedgedDbIfNeeded() {
   }
 }
 
-/** @returns {string} ancien nom de base */
+/** @returns {string} previous database name */
 function bumpDbGeneration() {
   const prev = getDbName();
   const next = String(Date.now());
@@ -227,7 +227,7 @@ function txDone(tx) {
   });
 }
 
-/** Supprime l’ancienne base / clés `lego-set-cards`. */
+/** Remove the old `lego-set-cards` database / keys. */
 let legacyStoragePurged = false;
 function purgeLegacyBrowserStorage() {
   if (legacyStoragePurged) return;
@@ -245,7 +245,7 @@ function purgeLegacyBrowserStorage() {
   }
 }
 
-/** Best-effort : ne bloque jamais le flux appelant. */
+/** Best-effort: never blocks the caller. */
 function deleteDatabaseBestEffort(name) {
   try {
     indexedDB.deleteDatabase(name);
@@ -255,7 +255,7 @@ function deleteDatabaseBestEffort(name) {
 }
 
 /**
- * Ferme la connexion singleton si elle existe.
+ * Close the singleton connection if it exists.
  * @returns {Promise<void>}
  */
 async function closeDbConnection() {
@@ -276,15 +276,15 @@ async function closeDbConnection() {
       /* ignore */
     }
   } catch {
-    /* open bloqué / erreur */
+    /* open stuck / error */
   }
 }
 
 /**
- * Dev only : vide IndexedDB + localStorage liés à l’app (retour usine).
- * Stratégie : basculer sur un nouveau nom de base (génération) pour ne jamais
- * dépendre d’un `deleteDatabase` qui peut rester bloqué indéfiniment.
- * Recharger la page ensuite pour reseeder les thèmes depuis le JSON.
+ * Dev only: wipe IndexedDB + app localStorage (factory reset).
+ * Strategy: switch to a new database name (generation) so we never
+ * depend on a `deleteDatabase` that can stay stuck forever.
+ * Reload the page afterwards to reseed themes from the JSON.
  */
 export async function wipeAllLocalData() {
   clearPresetCache();
@@ -292,10 +292,10 @@ export async function wipeAllLocalData() {
   const oldDbName = getDbName();
   await closeDbConnection();
 
-  // Nouvelle génération AVANT de vider le reste du localStorage
+  // New generation BEFORE clearing the rest of localStorage
   bumpDbGeneration();
 
-  // Best-effort : nettoyer l’ancienne base (peut rester coincée — sans importance)
+  // Best-effort: clean the old database (may stay stuck — does not matter)
   deleteDatabaseBestEffort(oldDbName);
   deleteDatabaseBestEffort(DB_NAME_BASE);
   deleteDatabaseBestEffort("lego-set-cards");
@@ -321,7 +321,7 @@ export async function wipeAllLocalData() {
     localStorage.removeItem("brickcard:developer-enabled");
     localStorage.removeItem("lego-set-cards:v1");
     localStorage.removeItem("lego-set-cards:theme");
-    /* Ne pas retirer DB_GEN_KEY : c’est la clé de la nouvelle base vide. */
+    /* Do not remove DB_GEN_KEY: it is the key of the new empty database. */
   } catch {
     /* ignore */
   }
@@ -354,8 +354,8 @@ async function presetIdSet() {
 }
 
 /**
- * Purge les thèmes par défaut encore stockés en IndexedDB
- * (ils se lisent désormais uniquement depuis le JSON).
+ * Purge default themes still stored in IndexedDB
+ * (they are now read from the JSON only).
  */
 async function seedThemesIfNeeded() {
   if (seedPromise) return seedPromise;
@@ -450,8 +450,8 @@ function normalizeTheme(t) {
 }
 
 /**
- * Normalise une couleur de fond image : hex valide ou chaîne vide.
- * L’affichage utilise `DEFAULT_IMAGE_BACKGROUND` si vide.
+ * Normalize an image background color: valid hex or empty string.
+ * Display uses `DEFAULT_IMAGE_BACKGROUND` if empty.
  * @param {string} [hex]
  * @returns {string}
  */
@@ -463,12 +463,12 @@ export function normalizeImageBackground(hex) {
   return "";
 }
 
-/** Couleur de fond effective pour l’affichage (blanc si non précisée). */
+/** Effective background color for display (white if unset). */
 export function resolveImageBackground(hex) {
   return normalizeImageBackground(hex) || DEFAULT_IMAGE_BACKGROUND;
 }
 
-/** Ouvre la DB sans attendre le seed des thèmes (affichage liste / empty rapide). */
+/** Open the DB without waiting for theme seed (fast list / empty display). */
 async function openDbReady() {
   purgeLegacyBrowserStorage();
   repairWedgedDbIfNeeded();
@@ -554,7 +554,7 @@ export async function deleteCard(id) {
   return loadCards();
 }
 
-/** Vide le store des cartes uniquement (thèmes et réglages inchangés). */
+/** Clear the cards store only (themes and settings unchanged). */
 export async function deleteAllCards() {
   await ready();
   const db = await openDb();
@@ -573,7 +573,7 @@ export async function getCard(id) {
   return isValidCard(card) ? normalizeCard(card) : null;
 }
 
-/** @returns {Promise<LegoTheme[]>} thèmes personnalisés IndexedDB (sans les thèmes par défaut) */
+/** @returns {Promise<LegoTheme[]>} custom IndexedDB themes (without default themes) */
 export async function loadCustomThemes() {
   await ready();
   const db = await openDb();
@@ -590,7 +590,7 @@ export async function loadCustomThemes() {
   );
 }
 
-/** Personnalisés (alpha) puis thèmes par défaut (alpha). */
+/** Custom (alpha) then default themes (alpha). */
 export async function loadThemes() {
   const [custom, presets] = await Promise.all([
     loadCustomThemes(),
@@ -661,7 +661,7 @@ export async function upsertTheme(input) {
 }
 
 /**
- * Vide `brickcardThemeId` des cartes associées à l’un des thèmes.
+ * Clear `brickcardThemeId` on cards associated with any of the themes.
  * @param {Iterable<string>} themeIds
  */
 async function clearCardsThemeAssociation(themeIds) {
@@ -680,7 +680,7 @@ async function clearCardsThemeAssociation(themeIds) {
   await txDone(tx);
 }
 
-/** Supprime un thème personnalisé uniquement. */
+/** Delete a custom theme only. */
 export async function deleteTheme(id) {
   await ready();
   if (await getPresetTheme(id)) {
@@ -700,7 +700,7 @@ export async function deleteTheme(id) {
   await clearCardsThemeAssociation([id]);
 }
 
-/** Supprime tous les thèmes personnalisés et détache les cartes associées. */
+/** Delete all custom themes and detach associated cards. */
 export async function deleteAllCustomThemes() {
   await ready();
   const custom = await loadCustomThemes();
@@ -853,8 +853,8 @@ async function fileLooksLikeSvg(file) {
 }
 
 /**
- * Retire scripts, gestionnaires d’événements et hôtes HTML d’un SVG
- * (défense en profondeur — un `<img>` n’exécute en général pas les scripts).
+ * Strip scripts, event handlers and HTML hosts from an SVG
+ * (defense in depth — an `<img>` usually does not run scripts).
  * @param {string} text
  * @returns {string}
  */
@@ -907,8 +907,8 @@ function decodeSvgDataUrl(dataUrl) {
 }
 
 /**
- * Si la data URL est un SVG, retire les scripts et ré-encode.
- * Sinon laisse la valeur inchangée. SVG illisible / uniquement script → vide.
+ * If the data URL is an SVG, strip scripts and re-encode.
+ * Otherwise leave the value unchanged. Unreadable / script-only SVG → empty.
  * @param {string} dataUrl
  * @returns {string}
  */
@@ -941,8 +941,8 @@ function encodeSvgFile(file) {
 }
 
 /**
- * Télécharge une image depuis une URL http(s) et renvoie un File
- * (l’URL n’est pas conservée — uniquement pour import).
+ * Download an image from an http(s) URL and return a File
+ * (the URL is not kept — import only).
  * @param {string} urlString
  * @returns {Promise<File>}
  */
@@ -1001,8 +1001,8 @@ export async function fetchImageAsFile(urlString) {
 }
 
 /**
- * Type source d’un raster : MIME d’abord, puis extension.
- * JPEG / WebP / PNG conservés ; le reste → PNG.
+ * Raster source kind: MIME first, then extension.
+ * JPEG / WebP / PNG kept; anything else → PNG.
  * @param {File|Blob} file
  * @returns {"jpeg"|"webp"|"png"|"other"}
  */
@@ -1106,11 +1106,11 @@ function encodeRasterCanvas(img, width, height, outputType, quality) {
 }
 
 /**
- * Compresse une image File/Blob en data URL (cartes et logos).
- * SVG : vectoriel, scripts retirés.
- * Si « Optimiser les images » : rasters → WebP (côté max 2000 ; repli PNG).
- * Sinon : JPEG / WebP / PNG conservés s’ils tiennent en 2000 px, sinon retaillés
- * (même format ; WebP → PNG si l’encodage canvas échoue) ; le reste → PNG.
+ * Compress a File/Blob image to a data URL (cards and logos).
+ * SVG: kept as vectors, scripts stripped.
+ * If “Optimize images”: rasters → WebP (max side 2000; PNG fallback).
+ * Else: JPEG / WebP / PNG kept if they fit in 2000 px, otherwise resized
+ * (same format; WebP → PNG if canvas encoding fails); anything else → PNG.
  * @param {File|Blob} file
  * @param {{ maxSize?: number, quality?: number }} [opts]
  * @returns {Promise<string>}

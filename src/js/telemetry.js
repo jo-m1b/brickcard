@@ -1,6 +1,6 @@
 /**
- * Télémétrie d’usage anonyme (localStorage).
- * Script injecté seulement si activée (défaut : case cochée). Hors local.
+ * Anonymous usage telemetry (localStorage).
+ * Script injected only if enabled (default: checked). Off-local.
  */
 
 import { isLocalDevHost } from "./themes-data.js";
@@ -11,12 +11,12 @@ const SCRIPT_ID = "brickcard-telemetry";
 const SCRIPT_SRC = "https://data.brickcard.org/script.js";
 const WEBSITE_ID = "27efb7e5-60ce-4840-a3bb-325954f006a2";
 
-/** Défaut : case cochée. */
+/** Default: checked. */
 export const DEFAULT_TELEMETRY = true;
 
 /** @type {string} */
 let lastTrackedUrl = "";
-/** Premier `trackTelemetryPage()` (fin de `route()`) — évite un track script trop tôt. */
+/** First `trackTelemetryPage()` (end of `route()`) — avoids an early script track. */
 let routeHasTracked = false;
 
 /** @returns {boolean} */
@@ -40,7 +40,7 @@ export function setTelemetry(on) {
   applyTelemetry(on);
 }
 
-/** Disponible hors local seulement (pas d’injection, pas de champ Paramètres). */
+/** Available off-local only (no injection, no Settings field). */
 export function isTelemetryAvailable() {
   return !isLocalDevHost();
 }
@@ -49,7 +49,7 @@ export function initTelemetry() {
   applyTelemetry(getTelemetry());
 }
 
-/** Page vue courante (pathname + hash), si la télémétrie est active. */
+/** Current page view (pathname + hash), if telemetry is on. */
 export function trackTelemetryPage() {
   routeHasTracked = true;
   trackCurrentView();
@@ -69,7 +69,7 @@ function telemetryPath(hash) {
 }
 
 /**
- * Hash envoyé à Umami : sans id dynamique (éditeur de carte / thème perso).
+ * Hash sent to Umami: no dynamic id (card / custom theme editor).
  * @param {string} hash
  * @returns {string}
  */
@@ -81,8 +81,8 @@ function telemetryHash(hash) {
 }
 
 /**
- * Titre envoyé à Umami : `{locale} · ` + libellé UI (sans suffixe SEO).
- * Accueil / éditeurs : `_t` générique. `#developer/…` : 2ᵉ `|` (`page | section`).
+ * Title sent to Umami: `{locale} · ` + UI label (no SEO suffix).
+ * Home / editors: generic `_t`. `#developer/…`: 2nd `|` (`page | section`).
  * @param {string} hash
  * @returns {string}
  */

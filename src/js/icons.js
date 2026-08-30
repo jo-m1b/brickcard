@@ -1,16 +1,16 @@
 /**
- * Icônes UI — [Remix Icon](https://remixicon.com/) (fill), toujours carrées (24×24).
- * Préférer ces glyphes (ou un autre Remix Icon) avant d’inventer un SVG.
- * Ne pas omettre `width`/`height` : un SVG sans taille intrinsèque vaut 300×150.
+ * UI icons — [Remix Icon](https://remixicon.com/) (fill), always square (24×24).
+ * Prefer these glyphs (or another Remix Icon) before inventing an SVG.
+ * Do not omit `width`/`height`: an SVG with no intrinsic size is 300×150.
  *
- * @param {string} d Attribut `d` du path Remix
- * @returns {string} Markup SVG inline
+ * @param {string} d Remix path `d` attribute
+ * @returns {string} Inline SVG markup
  */
 export function remixIcon(d) {
   return `<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><path d="${d}"/></svg>`;
 }
 
-/** Path `d` seuls (HTML inline, commentaires `ri-*`) */
+/** Path `d` only (inline HTML, `ri-*` comments) */
 export const RI = {
   /** ri-add-fill */
   add: "M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2z",
@@ -65,13 +65,13 @@ export const RI = {
   /** ri-calendar-line */
   calendarLine:
     "M9 1v2h6V1h2v2h4a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4V1zm11 10H4v8h16zM7 5H4v4h16V5h-3v2h-2V5H9v2H7z",
-  /** ri-calendar-todo-fill — badge année de carte */
+  /** ri-calendar-todo-fill — card year badge */
   calendarTodo:
     "M17 3H21C21.5523 3 22 3.44772 22 4V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V4C2 3.44772 2.44772 3 3 3H7V1H9V3H15V1H17V3ZM4 9V19H20V9H4ZM6 11H8V13H6V11ZM11 11H13V13H11V11ZM16 11H18V13H16V11Z",
-  /** ri-apps-2-fill — badge nombre de pièces */
+  /** ri-apps-2-fill — piece-count badge */
   apps2:
     "M5 5V11H11V5H5ZM5 13V19H11V13H5ZM13 5V11H19V5H13ZM13 13V19H19V13H13ZM7 7H9V9H7V7ZM7 15H9V17H7V15ZM15 7H17V9H15V7ZM15 15H17V17H15V15Z",
-  /** ri-user-3-fill — badge nombre de figurines */
+  /** ri-user-3-fill — figurine-count badge */
   user3:
     "M12 2C13.6569 2 15 3.34315 15 5C15 6.65685 13.6569 8 12 8C10.3431 8 9 6.65685 9 5C9 3.34315 10.3431 2 12 2ZM12 10C16.4183 10 20 12.2386 20 15V20H4V15C4 12.2386 7.58172 10 12 10Z",
   /** ri-file-text-line */
@@ -220,7 +220,7 @@ export const ICON_ALIGN_ITEM_HORIZONTAL_CENTER = remixIcon(RI.alignItemHorizonta
 export const ICON_ALIGN_ITEM_VERTICAL_CENTER = remixIcon(RI.alignItemVerticalCenter);
 
 /**
- * Résout une clé d’icône (`printer`, `arrow-right`, `pencil-ruler-2`, `closeCircle`…) vers le path `d`.
+ * Resolve an icon key (`printer`, `arrow-right`, `pencil-ruler-2`, `closeCircle`…) to the path `d`.
  * @param {string|null|undefined} name
  * @returns {string|null}
  */
@@ -233,7 +233,7 @@ export function resolveRemixPath(name) {
 }
 
 /**
- * Markup SVG pour une clé Remix connue, ou chaîne vide.
+ * SVG markup for a known Remix key, or an empty string.
  * @param {string|null|undefined} name
  * @returns {string}
  */
@@ -243,9 +243,9 @@ export function remixIconByName(name) {
 }
 
 /**
- * Titre de modale : icône Remix optionnelle à gauche (décorative), puis le texte.
+ * Modal title: optional Remix icon on the left (decorative), then the text.
  * @param {string} text
- * @param {string|false|null|undefined} icon Clé Remix ou markup SVG
+ * @param {string|false|null|undefined} icon Remix key or SVG markup
  * @returns {string}
  */
 export function modalTitleMarkup(text, icon) {

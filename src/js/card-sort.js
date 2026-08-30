@@ -1,5 +1,5 @@
 /**
- * Comparaison ASC des cartes (liste d’accueil et impression).
+ * ASC card comparison (home list and print).
  */
 
 import { getLocale } from "./i18n.js";

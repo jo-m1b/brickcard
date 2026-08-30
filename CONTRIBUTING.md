@@ -16,6 +16,6 @@ Keep the change small and focused.
 - No bundler, framework, or Node — `src/` is the app
 - Default themes live in `src/data/themes-presets.json` (logos in `src/data/`)
 
-See the [README](README.md) to run locally.
+See the [README](README.md) to run locally. App conventions (routing, design system, i18n) live in [AGENTS.md](AGENTS.md) (English). Source comments and JSDoc in `src/` are English.
 
 By contributing, you agree that your work is licensed under the [MIT License](LICENSE).

@@ -1,11 +1,11 @@
 /**
- * Case à cocher design system : `form-check` (case à gauche du libellé / hint).
- * Lecture seule via `aria-readonly` (l’attribut HTML `readonly` est ignoré
- * par les checkboxes natives) — `bindFormCheckboxes()` bloque le bascule.
+ * Checkbox (design system): `form-check` (box to the left of the label / hint).
+ * Read-only via `aria-readonly` (the HTML `readonly` attribute is ignored
+ * by native checkboxes) — `bindFormCheckboxes()` blocks the toggle.
  */
 
 /**
- * Markup d’une case à cocher (`label.form-check`).
+ * Markup for a checkbox (`label.form-check`).
  * @param {{
  *   id: string,
  *   name?: string,
@@ -57,7 +57,7 @@ export function formCheckboxMarkup(opts) {
 }
 
 /**
- * Empêche de basculer les cases en lecture seule (`aria-readonly="true"`).
+ * Prevents toggling read-only checkboxes (`aria-readonly="true"`).
  * @param {ParentNode} root
  * @returns {() => void}
  */

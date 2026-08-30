@@ -42,7 +42,7 @@ export function setPrintMenuVisible(visible) {
 }
 
 /**
- * Met à jour badge, résumé et boutons selon la sélection et le nombre de cartes.
+ * Update badge, summary, and buttons from the selection and card count.
  * @param {{
  *   cardCount?: number,
  *   addableCount?: number,

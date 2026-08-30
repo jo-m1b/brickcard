@@ -1,5 +1,5 @@
 /**
- * Comparaison de recherche : casse et accents ignorés (`Sel` → `Sélecteur`).
+ * Search comparison: case and accents ignored (`Sel` → `Sélecteur`).
  */
 
 /** @param {string} s */

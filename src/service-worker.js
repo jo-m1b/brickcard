@@ -1,9 +1,9 @@
 /**
- * Service worker minimal (install PWA + cache same-origin).
- * Doit rester à la racine du site : le scope par défaut est le dossier du script,
- * et GitHub Pages ne peut pas envoyer Service-Worker-Allowed pour l’élargir.
- * Aligner CACHE sur APP_VERSION (version.js) et les ?v= de index.html
- * (CSS + import map app.js / version.js).
+ * Minimal service worker (PWA install + same-origin cache).
+ * Must stay at the site root: the default scope is the script’s folder,
+ * and GitHub Pages cannot send Service-Worker-Allowed to widen it.
+ * Keep CACHE aligned with APP_VERSION (version.js) and the ?v= in index.html
+ * (CSS + app.js / version.js import map).
  */
 const CACHE = "brickcard-0.8.6";
 
@@ -24,7 +24,7 @@ async function precacheAppShell() {
       const res = await fetch(new URL(path, self.location), { cache: "reload" });
       if (res.ok) await cache.put(res.url, res);
     } catch {
-      /* GitHub Pages / réseau : ne pas faire échouer l’install */
+      /* GitHub Pages / network: do not fail the install */
     }
   }
 }

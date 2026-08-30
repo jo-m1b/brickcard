@@ -1,5 +1,5 @@
 /**
- * Raccourcis clavier de l’app (ouverts depuis l’accueil, hors éditeurs).
+ * App keyboard shortcuts (opened from home, outside editors).
  * @param {KeyboardEvent} e
  * @returns {boolean}
  */
@@ -10,7 +10,7 @@ export function isPrintShortcut(e) {
 }
 
 /**
- * Ctrl/Cmd+S (sans Alt / Maj) — ouvrir `#backup` ou lancer l’export.
+ * Ctrl/Cmd+S (no Alt / Shift) — open `#backup` or start the export.
  * @param {KeyboardEvent} e
  * @returns {boolean}
  */
