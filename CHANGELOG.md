@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.9.0] — 2026-08-30
+
 ### ➕ Added
 
 - Interface language: English is the source language (`_t('…')`); catalogs live in `i18n/{de,es,fr,it,pt}.po` (gettext, loaded and parsed in JS, no compiler) — German, Spanish, French, Italian, and Portuguese (Brazilian). Settings → Application starts with a language dropdown (`DE · Deutsch`, `EN · English`…, sorted by ISO code); the choice is stored as `brickcard:ui-locale`. First visit uses the browser language when a catalog exists, otherwise English. HTML and the web manifest stay `lang="en"` for crawlers; the document language is updated in JS.
