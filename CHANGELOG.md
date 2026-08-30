@@ -9,9 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### ➕ Added
 
-- Interface language: English is the source language (`_t('…')`); French lives in `i18n/fr.po` (gettext, loaded and parsed in JS, no compiler). Settings → Application starts with a language dropdown (`EN · English`, sorted by ISO code); the choice is stored as `brickcard:ui-locale`. First visit uses the browser language when a catalog exists, otherwise English. HTML and the web manifest stay `lang="en"` for crawlers; the document language is updated in JS.
+- Interface language: English is the source language (`_t('…')`); catalogs live in `i18n/{de,es,fr,it,pt}.po` (gettext, loaded and parsed in JS, no compiler) — German, Spanish, French, Italian, and Portuguese (Brazilian). Settings → Application starts with a language dropdown (`DE · Deutsch`, `EN · English`…, sorted by ISO code); the choice is stored as `brickcard:ui-locale`. First visit uses the browser language when a catalog exists, otherwise English. HTML and the web manifest stay `lang="en"` for crawlers; the document language is updated in JS.
 - Print PDF filename: localized words (`grid`, `front`, `duplex`…) are translated then slugified (`brickcard-…-grille-3x3-face-et-dos-…` in French).
-- Markdown pages (`#page/:slug`): English file `data/page-{{slug}}.md`, locale file `data/page-{{slug}}.{{locale}}.md` (About: `page-about.fr.md`); missing locale falls back to English.
+- Markdown pages (`#page/:slug`): English file `data/page-{{slug}}.md`, locale file `data/page-{{slug}}.{{locale}}.md` (About: `page-about.de.md`, `page-about.es.md`, `page-about.fr.md`, `page-about.it.md`, `page-about.pt.md`); missing locale falls back to English.
 
 ### ✏️ Changed
 
