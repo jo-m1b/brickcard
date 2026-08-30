@@ -23,166 +23,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - About (`#page/about`): disclaimer wording **une marque de LEGO Group** / **par LEGO Group** (no article **du** / **le**); intro uses **petite application** and **de bien jolies cartes pour vos briques LEGO®**
 - Demo backup (`data/backup-demo-jo.brickcard`): re-exported at 0.8.6; the **jo** card photo is now WebP (pink background, new crop)
 
-## [0.8.6] — 2026-08-29
+## [0.8] — 2026-08-29
 
 ### ➕ Added
 
-- Themes (`#themes`): default tiles are focusable / clickable and open a read-only viewer (`#themes/view/:id`) — identifier, name, colors, logo download
-- Color field: `disabled` option (`form-color`)
-- Image field: `readOnly` option (`form-image`; download stays)
-- Print: folio `Brickcard · n / total` at the top and bottom of each A4 sheet (small, centered, under the cards)
+- Collection backup (`#backup`) and import (`#import`): full / custom export, file or URL import, in-memory validation, merge choices, live recap; writes only on **Import**; Ctrl/Cmd+S / Ctrl/Cmd+P (print) shortcuts
+- Demo backup: `data/backup-demo-jo.brickcard` (WebP photos); empty-home **Load a demo** tile (`ri-emotion-fill`)
+- Themes: optional `secondaryColor`; read-only default-theme viewer (`#themes/view/:id`); **Delete all custom themes** (when more than 2)
+- Print: card order, print side, sheet assembly, cut marks, 2 mm bleed, A4 folio; 2 px `--ink` hairline on screen
+- Toasts (normal / success / error, stacking); **Optimize images** (WebP by default); anonymous telemetry (off-local); boot **Retry**
+- Settings / developer-home search; `#developer/welcome` and `#developer/notifications` galleries
+- GitHub Releases on each `vX.Y.Z` tag; color `disabled` and image `readOnly` field options
 
 ### ✏️ Changed
 
-- Settings: **Télémétrie** checkbox hidden locally (the script is not loaded there)
-- About (`#page/about`): title is **À propos** only; body follows the French README (brand like the header, Ko-fi markdown at the bottom; no badges, screenshots, or getting-started)
-- About (`#page/about`): disclaimer wording **Cette application est un projet personnel** (instead of **Ceci est…**)
-- Markdown pages: raw HTML blocks in trusted `data/` files (GitHub-style, not escaped)
-- Header: brand name and version stay visible on small screens (ellipsis if the bar is extremely narrow)
-- Card editor: below 550px, the preview shows one side at a time (face first); click toggles face / back
+- Import is always a merge configured in `#import` (no more Merge / Replace); backup version = app SemVer; `.brickcard` names `brickcard-backup-…`
+- Default themes: catalog 65 entries (SVG / WebP); added Botanicals, Braille Bricks, BrickHeadz, Creator 3in1, DC, Marvel, Nike; `the-lord-of-the-rings` → `lord-of-the-rings`
+- List / themes / preset draft: in-place tile update after edit or delete; after create, search cleared and sort by date; keyboard focus on the tile
+- Search: accent-insensitive; settings **Application** section; display mode as radios
+- Image field: one `compressImage` pipeline; SVG kept as vectors; download names `brickcard-card-image-…` / `brickcard-theme-logo-…`
+- Overlays and `#developer/…` galleries `import()` on open; `app.js` / `version.js` cache-bust via import map
+- Document title: tagline (no version), overlay scheme; Brickcard logo on cards is inline SVG (`--card-accent-fg`)
+- Service worker at the site root (scope `/`); auto contrast only uses black on a truly pale accent
+- Card editor: one-side preview below 550px; About follows the product README (brand + Ko-fi)
 
 ### 🔧 Fixed
 
-- Links: no external-link icon when the label is an image (Markdown `[![alt](src)](url)`)
-- Telemetry: page views send the full payload (no more 400 / CORS error on the collector)
-- Markdown: `blockquote` keeps the same 0.9rem bottom gap as other blocks; last inner child’s margin is dropped so the quote has no extra space at the bottom
-
-## [0.8.5] — 2026-08-27
-
-### ➕ Added
-
-- Home: **Réessayer** button under the load-error message (cache-bust refresh `?r=`; `#developer/loading` gallery)
-- Settings: **Télémétrie** checkbox (checked by default) to send anonymous usage telemetry
-
-### ✏️ Changed
-
-- JS loading: route overlays and `#developer/…` galleries `import()` on open (boot = list + storage + chrome)
-- Notifications: in-app toasts only (no HTML5 Notification / browser permission)
-
-## [0.8.4] — 2026-08-25
-
-### ➕ Added
-
-- Print: **Tracé de découpe** setting (Sur la face avant / Sur le dos (arrière) checkboxes, face on by default) in `#settings` and `#print`; the 1 px `#000000` hairline appears only on checked sides
-- Print: **Fond perdu** setting (Sur la face avant / Sur le dos (arrière) checkboxes, back on by default) in `#settings` and `#print`; 2 mm on all four sides, including the face; disabled and ignored if cut marks are on for the same side
-- Cards (face, back) and theme tiles: 2 px `--ink` hairline on screen so the edge reads on light or dark UI
-
-### 🔧 Fixed
-
-- Print PDF: filename stays `brickcard-…` even with many cards (Firefox: `afterprint` fires too early on the clone; no more `127.0.0.1.pdf` fallback)
-- Print: Brickcard logo (back / faceless photo) stays sharp (inline SVG instead of a CSS mask rasterized at print)
-
-### ✏️ Changed
-
-- Cache-bust `app.js` and `version.js` via an import map in `index.html` (no more `?v=` on JS imports)
-- Print back: 2 mm bleed on all four sides (no more 1 mm L/R)
-- Print: 5 mm horizontal card gap (same as vertical; no more bleed overlap)
-- Demo backup: last PNG photo converted to WebP (~4.6 MB → ~2.9 MB)
-- Settings: **Interface** section renamed **Application**
-- Empty home: **Démonstration chargée** toast (instead of **Démonstration importée**)
-- Print (`#print`): fronts-then-backs detail separator is a midpoint `·` (same as backup recap)
-- Print: **Tracé de découpe** hint “Imprimer un tracé technique pour faciliter la découpe des cartes”; **Sur la face avant** / **Sur le dos (arrière)** checkboxes
-- Print: **Ordre d’impression des cartes**, **Côté d’impression** (Les deux faces / Face uniquement / Dos uniquement), **Assemblage des feuilles**
-- Print: `brickcard:print-settings` keys aligned with the UI (`cardPrintOrder`, `printSide`/`both`, `sheetAssembly`); no migration of old keys
-
-## [0.8.3] — 2026-08-25
-
-### ➕ Added
-
-- Print: **Tri des cartes** setting (reference by default, always ascending) in `#settings` and `#print`; the printed document follows that choice
-- Developer home (`#developer`) and settings (`#settings`): search bar (`search-bar--input-only`); filter sections / tiles / `href` (settings: also labels and hints); accent-insensitive; **Oups !** when nothing matches
-- Themes (`#themes`): **Supprimer tous les thèmes personnalisés** button (when more than 2 custom themes); confirmation; kept cards lose their theme association
-
-### ✏️ Changed
-
-- Search (cards, themes, default themes, settings, developer home): accent-insensitive (`Sel` finds “Sélecteur”)
-- Default themes: catalog cut from 119 to 65 (SVG / WebP, Aquazone as PNG); added Botanicals, Braille Bricks, BrickHeadz, Creator 3in1, DC, Marvel, Nike; `the-lord-of-the-rings` → `lord-of-the-rings`; logos and crops updated
-- `form-hint`: no trailing period on a single sentence (several sentences: periods kept)
-- Settings: **Gestion de votre collection** section; Import / Backup / Themes / Delete all cards tile descriptions reworded (“votre collection”)
-- Settings → Interface: **Mode d’affichage** as radio buttons (Thème clair / Thème sombre / Système), vertical group
-- Checkboxes / radios: in a group, the option list (vertical or horizontal) is indented under the legend
-- Settings and `#print`: **Côtés des cartes à imprimer** as radios (horizontal); **Impression recto-verso des feuilles** as radios (vertical, hint under each option)
-- List: after creating or editing a card, keyboard focus lands on that tile; closing an existing-card editor (Escape / close / Cancel): same focus, so keyboard navigation can resume
-- Themes (`#themes` and `#developer/theme-presets`): same keyboard focus on the mini-card after create / edit, and when closing an existing-theme editor
-- Developer `#developer/theme-presets`: general success and errors as toasts (load, **Réinitialiser**, **Sauvegarder themes-presets.json**, **Sauvegarder les logos**, save / delete in the editor); Name / Id validation still under the field
-- Modals: Settings, developer space, and print settings unified as `modal--md`; `modal--lg` kept for themes (`#themes`, `#developer/theme-presets`) and card / theme editors
-
-### 🔧 Fixed
-
-- Settings (`#settings`) and developer home (`#developer`): modal height stays fixed while searching (no more yoyo as results change)
-
-## [0.8.2] — 2026-08-24
-
-### ➕ Added
-
-- Notifications (Toast): normal / success / error types, stacking, manual dismiss, HTML5 system notification; `#developer/notifications` gallery
-- Settings → Interface: **Optimiser les images** checkbox (checked by default); converts new rasters to WebP on load
-- Print: Ctrl/Cmd+P shortcut opens `#print` (except card / theme / preset editors and `#import`); already open → starts printing
-
-### ✏️ Changed
-
-- Empty home: **Charger une démonstration** tile (“Importer une sauvegarde de la collection de cartes des briques de Jo”)
-- Empty home: after **Charger une démonstration**, **Démonstration importée** toast (`ri-emotion-fill`); recap unchanged
-- Settings → Interface: **Optimiser les images** hint (“Convertir automatiquement les nouvelles images ajoutées à la collection dans un format optimisé.”)
-- List: after **editing** or **deleting** a card, the grid is no longer rebuilt (tile updated or removed, scroll / search / sort kept; search and print counts recalculated); after **creating**, search is cleared and sort is modification date (newest first)
-- Themes (`#themes` and `#developer/theme-presets`): after **editing** or **deleting**, the grid is no longer rebuilt (mini-card updated or removed, scroll / search / sort kept); after **creating**, search is cleared, sort is date desc, scroll to top
-- Delete confirmations (card / theme): French « » quotes like edit titles; card title + reference wrapped together
-- Empty image field: “Charger une nouvelle image pour la prévisualiser et la recadrer.” (`form-hint` style)
-- Action toasts (save, delete, import, backup, photo): success type; 7 s delay (15 s for collection import / backup); notifications stack instead of replacing each other
-- Product toasts: specific titles and icons (theme, card, image, backup); backup/import recap aligned with modal footers; print-selection error
-- GitHub Release: grouped notes no longer show the `feat:` / `fix:` / `docs:` / `chore:` prefix
-- Card image: **Sauvegarder** downloads `brickcard-card-image-YYYY-MM-DD-…` (ref, title, both, or card id)
-- Theme logo: **Sauvegarder** downloads `brickcard-theme-logo-YYYY-MM-DD-…` (name slug, or theme id)
-- Image field: one pipeline (`compressImage`) for card photos and theme logos; JPEG / WebP / PNG kept (canvas resize past 2000 px on a side); everything else → PNG; logos: no more 400 px cap or systematic PNG conversion
-- Demo backup (`data/backup-demo-jo.brickcard`): photos converted to WebP (~41 MB → ~4.6 MB)
-
-### 🔧 Fixed
-
-- Modal title with icon: text stays to the right of the icon (wraps if needed) instead of dropping below on small screens
-- GitHub Release: the last commit between two tags is listed in the notes
-- Image field: **Sauvegarder** a WebP downloads the file (no more opening in a new tab)
-
-## [0.8.1] — 2026-08-24
-
-### ➕ Added
-
-- GitHub Releases: automatic publish (grouped notes + source zip/tar.gz) on each `vX.Y.Z` tag
-
-### 🔧 Fixed
-
-- Empty home: on a short viewport (e.g. phone landscape) the content scrolls; the brick and “Bienvenue” no longer sit under the header
-- Print: default-theme logos (`data/theme-logo-…` files) are awaited before `window.print()` — no more backs with only the centered Brickcard logo if the image had not loaded yet
-
-## [0.8.0] — 2026-08-23
-
-### ➕ Added
-
-- Backup import: `#import` modal (file or URL, in-memory validation, merge choices, live recap); writes only on **Importer**
-- Demo backup: `data/backup-demo-jo.brickcard`; home tile **Charger la démonstration** (`ri-emotion-fill`) that imports it automatically (**Sauvegarde de démonstration** modal, no choice step)
-- Themes (default and custom): optional secondary color (`secondaryColor`) for texts, badge icons, and the Brickcard logo; empty = automatic black or white
-- Collection backup: `#backup` modal (full / custom, live recap, estimated size)
-- Backup: Ctrl/Cmd+S shortcut opens `#backup` (except card / theme / preset editors and `#import`)
-- Developer space: **Page de bienvenue** gallery (`#developer/welcome`, `ri-home-smile-fill`) — empty-collection home mock
-
-### ✏️ Changed
-
-- Import: no more Merge / Replace dialog; always a merge, configured in `#import` (Settings and empty home open the modal)
-- Import: invalid-backup / incompatible-version errors reworded (“La sauvegarde chargée…”)
-- Import URL: animated brick + “Chargement...” under the field during download / parse
-- Images / logos: same loading indicator in “Charger depuis une URL”
-- Theme editor: secondary color placeholder = auto black or white (follows the main color)
-- Theme editor: “Couleur” labels / primary and secondary hints
-- Auto card contrast (`contrastText`): black text / logo only on a truly pale background (no more black on saturated yellows, oranges, and limes)
-- Card Brickcard logo (back, faceless photo, themeless theme tiles): CSS mask tinted with `--card-accent-fg` (no more `brickcard-logo.svg` / `brickcard-logo-white.svg` swap)
-- Backup `#backup`: **Sauvegarder** closes the modal once the file is started; “Aucune carte à sauvegarder !” recap (bold) if the button is disabled
-- SVG images (cards and logos): kept as vectors on load (file / URL) so they can be re-downloaded; scripts, `foreignObject`, and `on*` handlers stripped (including on import)
-- Collection backup: `#backup` modal (full or custom) before download; file version = app version; `brickcard-backup-…` names; import of old `version` 1–3 files and appearance settings when present
-- Document title: default tagline (no version); overlays `{modal} | {section if any} | {default}`; PDF filename unchanged during print
-- Service worker: `service-worker.js` at the site root (scope `/`; GitHub Pages cannot host it in `js/`)
-
-### 🔧 Fixed
-
-- Service worker: install no longer fails if GitHub Pages precache fails (`cache.addAll`); the script is no longer intercepted or replaced by `index.html`
+- Print: wait for photos and default-theme logos; sharp Brickcard logo; PDF name stays `brickcard-…` (Firefox `afterprint`)
+- Empty home: short viewports scroll; boot error can retry without a stuck cache
+- Settings / developer search: modal height no longer yo-yos; toast / telemetry collector payloads
+- Service worker: install survives a failed precache; WebP **Download** saves the file
 
 ## [0.7] — 2026-08-22
 
