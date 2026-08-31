@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.9.1] — 2026-08-31
+
 ### ➕ Added
 
 - GitHub Pages 404 (`404.html`): English empty-view (same look as boot **Load error — retry**); title **Brickcard**, message **404 - page not found**, **Reload the app** link to `/`; `noindex`; no i18n

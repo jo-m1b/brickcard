@@ -1,5 +1,5 @@
 /** App version — SemVer (https://semver.org/) */
-export const APP_VERSION = "0.9.0";
+export const APP_VERSION = "0.9.1";
 
 /** Technical id (.brickcard backups, IndexedDB, etc.) */
 export const APP_ID = "brickcard";
