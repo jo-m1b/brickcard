@@ -20,8 +20,11 @@ All app code lives in **`src/`**.
 
 | File | Role |
 |------|------|
-| `src/index.html` | Shell: `<title>` = `APP_DOCUMENT_TITLE`, sticky topbar, `#main`, `#modal-root`, `#toast-root`, `#print-root`; import map (`?v=` on `app.js` / `version.js`) |
-| `src/manifest.webmanifest` | PWA manifest (name, icons, `standalone`); `lang` = `en` (source / SEO; static file, not updated with the UI locale) |
+| `src/index.html` | Shell: `<title>` = `APP_DOCUMENT_TITLE`; English SEO (`description`, canonical, Open Graph, Twitter Card, JSON-LD — not updated with the UI locale); sticky topbar, `#main`, `#modal-root`, `#toast-root`, `#print-root`; import map (`?v=` on `app.js` / `version.js`) |
+| `src/404.html` | GitHub Pages 404 (unknown paths, not hash routes); English, no i18n; empty-view like boot **Load error — retry**; `<base href="/">`; CSS `?v=` aligned with `index.html` |
+| `src/robots.txt` | Crawlers: allow `/`; sitemap URL (do not block `js/` / `css/`) |
+| `src/sitemap.xml` | One URL (`https://brickcard.org/`); hash routes omitted |
+| `src/manifest.webmanifest` | PWA manifest (name, `description`, icons, `standalone`); `lang` = `en` (source / SEO; static file, not updated with the UI locale) |
 | `src/service-worker.js` | Service worker at the site root (scope `/`; GitHub Pages does not allow a SW in `js/`); `CACHE` = `APP_VERSION`; online fetch with `cache: "reload"`; non-blocking install precache; does not intercept its own script |
 | `src/data/themes-presets.json` | Default LEGO themes (editable without touching JS) |
 | `src/data/theme-logo-*` | Default theme logos (PNG / SVG / WebP / JPEG) |
@@ -33,7 +36,9 @@ All app code lives in **`src/`**.
 | `src/img/brickcard-favicon.ico` / `brickcard-favicon-96x96.png` | Raster favicon (tab) |
 | `src/img/brickcard-apple-touch-icon.png` | iOS icon 180×180 |
 | `src/img/brickcard-web-app-manifest-192x192.png` / `512x512.png` | PWA icons (any + maskable) |
+| `src/img/brickcard-og-1200x630.png` | Open Graph / Twitter share image (1200×630 PNG; absolute URL in `index.html`) |
 | `src/fonts/` | Open Sans + Inter (woff2 variable, latin-ext) + SIL OFL licenses |
+| `src/i18n/README.md` | Translator guide (add a language, `.po` structure, ISO codes) |
 | `src/i18n/locales.json` | Supported locales (`code` ISO + `name` in that language) |
 | `src/i18n/{de,es,fr,it,pt}.po` | UI catalogs (`msgid` English = source) |
 | `src/js/i18n.js` | `.po` parser, `_t()`, locale (`brickcard:ui-locale`), `index.html` chrome |
@@ -170,7 +175,7 @@ The Brickcard logo (back, and face with no photo) is an **inline SVG** (`fill="c
 - Preset-tool IndexedDB: `brickcard-preset-draft` — `#developer/theme-presets` draft only (independent of local Reset)
 - UI theme key: `brickcard:ui-theme`
 - UI locale key: `brickcard:ui-locale` (`de` / `en` / `es` / `fr` / `it` / `pt`; missing = browser language if a `.po` exists, else English); local Reset removes it; change in Settings → reload
-- i18n: `_t('English msgid')` / `_t('… %(name)s …', { name })`; fallback = msgid; no compiler or lib; `en` has no `.po`; `index.html` / manifest: `lang="en"` (SEO / crawler default); `document.documentElement.lang` updated in JS from the locale; Markdown pages: `data/page-{{slug}}.md` (English) / `page-{{slug}}.{{locale}}.md` (English fallback); `#developer/…` copy is **hardcoded English** (no `.po`); `#developer/theme-presets` reuses existing `_t` strings (Save, Delete, Close…); **Brickcard** brand is not translated; PDF filenames: `_t` strings then slugified (`filenameSlug`)
+- i18n: `_t('English msgid')` / `_t('… %(name)s …', { name })`; fallback = msgid; no compiler or lib; `en` has no `.po`; `index.html` / manifest: `lang="en"` (SEO / crawler default); SEO meta (`description`, canonical, Open Graph, Twitter Card, JSON-LD) stay English in `index.html` (not updated with the UI locale); `document.documentElement.lang` updated in JS from the locale; Markdown pages: `data/page-{{slug}}.md` (English) / `page-{{slug}}.{{locale}}.md` (English fallback); `#developer/…` copy is **hardcoded English** (no `.po`); `#developer/theme-presets` reuses existing `_t` strings (Save, Delete, Close…); **Brickcard** brand is not translated; PDF filenames: `_t` strings then slugified (`filenameSlug`)
 - Face border key: `brickcard:card-face-border-mm` (default `3`)
 - Corner radius key: `brickcard:card-radius-mm` (default `2`, face + back)
 - Image radius key: `brickcard:card-image-radius-mm` (default `1`, photo frame)
@@ -410,5 +415,5 @@ A4 portrait; **grid** 1×1 to 10×10 (default **3×3** poker 63×88 mm). 5 mm ga
 - No npm dependencies unless explicitly asked.
 - **Modules**: boot loads the list, storage, and chrome (including the design system already pulled by the print menu). Route overlays and `#developer/…` galleries load with native `import()` when needed (`print.js` on **Start printing**). No bundler; no `?v=` outside the `app.js` / `version.js` import map.
 - **Git — commits**: commit as soon as an intent (feature or fix) is **done**, or **before** starting another. One commit = one intent (a revert = one thing). Do not wait to be told “commit”. Do not dump a whole session. Never commit `.local/` or `.cursor/`.
-- **Git — version, tag, and push**: **only on an explicit request**. Bump `APP_VERSION` (and the cache `?v=` in `index.html`: CSS and `app.js` / `version.js` import map, `CACHE` in `service-worker.js`, and a dated `CHANGELOG.md` entry) only when asked. Between versions, record **app code** (`src/`) changes under `## [Unreleased]` **in English** (not README, CONTRIBUTING, CI, GitHub templates, Ko-fi). If the number is not given, ask (patch / minor / major) — do not pick. Accepted **without confirmation**: only the next patch (`0.8.0` → `0.8.1`), next minor (`0.8.0` → `0.9.0`), or next major (`0.8.0` → `1.0.0`), from the current `APP_VERSION`. Anything else (jump `0.7.1` → `0.9.0`, downgrade, same number, invalid SemVer, `vX.Y.Z` tag already present): **stop and ask** before bump / tag / push. Bump OK → `chore: bump to X.Y.Z` commit + annotated `vX.Y.Z` tag. Push (commits **and** tags) only if asked. Pushing the `vX.Y.Z` tag publishes the GitHub Release (`release.yml` workflow, native zip/tar.gz); do not call `gh release create` locally.
+- **Git — version, tag, and push**: **only on an explicit request**. Bump `APP_VERSION` (and the cache `?v=` in `index.html` and `404.html`: CSS and `app.js` / `version.js` import map, `CACHE` in `service-worker.js`, and a dated `CHANGELOG.md` entry) only when asked. Between versions, record **app code** (`src/`) changes under `## [Unreleased]` **in English** (not README, CONTRIBUTING, CI, GitHub templates, Ko-fi). If the number is not given, ask (patch / minor / major) — do not pick. Accepted **without confirmation**: only the next patch (`0.8.0` → `0.8.1`), next minor (`0.8.0` → `0.9.0`), or next major (`0.8.0` → `1.0.0`), from the current `APP_VERSION`. Anything else (jump `0.7.1` → `0.9.0`, downgrade, same number, invalid SemVer, `vX.Y.Z` tag already present): **stop and ask** before bump / tag / push. Bump OK → `chore: bump to X.Y.Z` commit + annotated `vX.Y.Z` tag. Push (commits **and** tags) only if asked. Pushing the `vX.Y.Z` tag publishes the GitHub Release (`release.yml` workflow, native zip/tar.gz); do not call `gh release create` locally.
 - **Git — messages**: `feat` / `fix` / `docs` / `chore` + 1 *why* sentence (English); optional body. `feat` = new capability, `fix` = bugfix, `docs` = AGENTS / README, `chore` = version bump, CI, assets. No scope (`feat(print):`), no other type.

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### ➕ Added
+
+- GitHub Pages 404 (`404.html`): English empty-view (same look as boot **Load error — retry**); title **Brickcard**, message **404 - page not found**, **Reload the app** link to `/`; `noindex`; no i18n
+- SEO and social previews: English `meta description`, canonical, Open Graph, Twitter Card, and JSON-LD (`WebApplication`) in `index.html`; `robots.txt` and a one-URL `sitemap.xml`; share image `img/brickcard-og-1200x630.png`. Print menu and topbar actions use `data-nosnippet` so Google does not recycle chrome copy as the search snippet.
+
 ## [0.9.0] — 2026-08-30
 
 ### ➕ Added

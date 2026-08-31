@@ -1,6 +1,7 @@
 {
   "name": "Brickcard",
   "short_name": "Brickcard",
+  "description": "Create and print poker-size cards for your LEGO® sets. Add a photo, theme, and details, then laminate them for box-less sets.",
   "lang": "en",
   "start_url": "./",
   "scope": "./",

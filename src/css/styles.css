@@ -223,6 +223,12 @@ textarea {
   padding-bottom: 0;
 }
 
+/* No topbar (GitHub Pages 404): one full-height row so empty-view can center */
+.app:not(:has(> .topbar)) {
+  grid-template-rows: minmax(0, 1fr);
+  gap: 0;
+}
+
 .main {
   display: flex;
   flex-direction: column;
@@ -596,6 +602,7 @@ textarea {
   line-height: 1.2;
   background: transparent;
   color: var(--ink);
+  text-decoration: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -636,6 +643,10 @@ textarea {
   background: var(--brick-red);
   color: var(--on-accent-fg);
   border-color: var(--brick-red);
+}
+
+.btn.primary:visited {
+  color: var(--on-accent-fg);
 }
 
 .btn.primary:hover:not(:disabled),
@@ -1250,6 +1261,16 @@ html:not([data-theme]) .btn .icon-system {
   .main > .empty-view > .empty-view-body {
     margin-top: calc(9px + 40px + 0.75rem);
   }
+}
+
+/* 404 / no topbar: center in the viewport (home empty-view assumes a header) */
+.app:not(:has(> .topbar)) > .main > .empty-view {
+  place-content: center;
+  padding-bottom: 0;
+}
+
+.app:not(:has(> .topbar)) > .main > .empty-view > .empty-view-body {
+  margin-top: calc(9px + 40px + 0.75rem);
 }
 
 .main > .panel:has(> .empty-view:not([hidden])) {

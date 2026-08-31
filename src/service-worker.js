@@ -3,7 +3,7 @@
  * Must stay at the site root: the default scope is the script’s folder,
  * and GitHub Pages cannot send Service-Worker-Allowed to widen it.
  * Keep CACHE aligned with APP_VERSION (version.js) and the ?v= in index.html
- * (CSS + app.js / version.js import map).
+ * (CSS + app.js / version.js import map) and 404.html (CSS).
  */
 const CACHE = "brickcard-0.9.0";
 
