@@ -867,6 +867,10 @@ function registerServiceWorker() {
   if (!secure) return;
   navigator.serviceWorker
     .register(`service-worker.js?v=${APP_VERSION}`, { updateViaCache: "none" })
+    .then(() => navigator.serviceWorker.ready)
+    .then((reg) => {
+      reg.active?.postMessage({ type: "precache-offline" });
+    })
     .catch((err) => console.error(err));
 }
 

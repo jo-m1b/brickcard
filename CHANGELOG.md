@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### 🔧 Fixed
+
+- Offline PWA: after the first online visit, the service worker background-precache every app file (lazy overlay modules, i18n, About pages, default-theme logos, demo) so **New card**, **About**, themes, and the rest work without having opened them beforehand
+
 ## [0.9.1] — 2026-08-31
 
 ### ➕ Added

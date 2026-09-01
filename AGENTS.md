@@ -25,7 +25,7 @@ All app code lives in **`src/`**.
 | `src/robots.txt` | Crawlers: allow `/`; sitemap URL (do not block `js/` / `css/`) |
 | `src/sitemap.xml` | One URL (`https://brickcard.org/`); hash routes omitted |
 | `src/manifest.webmanifest` | PWA manifest (name, `description`, icons, `standalone`); `lang` = `en` (source / SEO; static file, not updated with the UI locale) |
-| `src/service-worker.js` | Service worker at the site root (scope `/`; GitHub Pages does not allow a SW in `js/`); `CACHE` = `APP_VERSION`; online fetch with `cache: "reload"`; non-blocking install precache; does not intercept its own script |
+| `src/service-worker.js` | Service worker at the site root (scope `/`; GitHub Pages does not allow a SW in `js/`); `CACHE` = `APP_VERSION`; online fetch with `cache: "reload"`; install precaches the app shell only (non-blocking); after activate (and on a `precache-offline` message from the page) background-precache all app files (JS including lazy overlays / `#developer/…`, i18n, markdown pages, `themes-presets.json` + logos from that JSON, fonts, PWA icons, demo) so unused `import()` routes work offline; does not intercept its own script. Adding a JS file, markdown page, or locale catalog: add it to `OFFLINE_ASSETS` |
 | `src/data/themes-presets.json` | Default LEGO themes (editable without touching JS) |
 | `src/data/theme-logo-*` | Default theme logos (PNG / SVG / WebP / JPEG) |
 | `src/data/backup-demo-jo.brickcard` | Demo backup (empty home: **Load a demo** tile; WebP photos; URL: `data/backup-demo-jo.brickcard`) |
