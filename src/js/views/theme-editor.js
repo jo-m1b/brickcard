@@ -12,7 +12,7 @@ import {
 import { mountCardBackPreview, refreshCardBackPreview } from "../card-render.js";
 import { contrastText, DEFAULT_THEME_COLOR } from "../themes-data.js";
 import { resolveCardAccent } from "../card-design.js";
-import { confirmDialog } from "../confirm-dialog.js";
+import { confirmDialog, confirmUnsavedClose } from "../confirm-dialog.js";
 import { setAppDocumentTitle } from "../document-title.js";
 import { _t } from "../i18n.js";
 
@@ -305,6 +305,23 @@ export async function renderThemeEditor(host, opts) {
     });
   }
 
+  function persistSnapshot() {
+    return JSON.stringify({
+      name: nameInput.value.trim(),
+      color: draft.color,
+      secondaryColor: draft.secondaryColor,
+      logoDataUrl: draft.logoDataUrl || "",
+      logoZoom: draft.logoZoom,
+      logoOffsetX: draft.logoOffsetX,
+      logoOffsetY: draft.logoOffsetY,
+    });
+  }
+
+  const initialSnapshot = persistSnapshot();
+  function isDirty() {
+    return persistSnapshot() !== initialSnapshot;
+  }
+
   function setNameError(message) {
     if (!nameError) return;
     const msg = String(message || "");
@@ -323,11 +340,55 @@ export async function renderThemeEditor(host, opts) {
     });
   }
 
-  function requestClose() {
-    onClose();
+  let closeBusy = false;
+
+  async function saveTheme() {
+    const name = nameInput.value.trim();
+    if (!name) {
+      if (errEl) errEl.textContent = "";
+      setNameError(_t("The name is required."));
+      nameInput.focus();
+      return false;
+    }
+    setNameError("");
+    if (errEl) errEl.textContent = "";
+    try {
+      const saved = await upsertTheme({
+        id: draft.id,
+        name,
+        color: draft.color,
+        secondaryColor: draft.secondaryColor,
+        logoDataUrl: draft.logoDataUrl || "",
+        logoZoom: draft.logoZoom,
+        logoOffsetX: draft.logoOffsetX,
+        logoOffsetY: draft.logoOffsetY,
+        isBuiltin: false,
+      });
+      onSaved(name, { isNew: !isEdit, theme: saved });
+      return true;
+    } catch (ex) {
+      if (errEl) errEl.textContent = ex.message || _t("Unable to save.");
+      return false;
+    }
   }
 
-  q("#theme-cancel").onclick = requestClose;
+  async function requestClose(optsClose = {}) {
+    if (readOnly || optsClose.skipConfirm) {
+      onClose();
+      return;
+    }
+    if (closeBusy) return;
+    closeBusy = true;
+    try {
+      const result = await confirmUnsavedClose(host, { isDirty, save: saveTheme });
+      if (result === "stay" || result === "saved") return;
+      onClose();
+    } finally {
+      closeBusy = false;
+    }
+  }
+
+  q("#theme-cancel").onclick = () => requestClose({ skipConfirm: true });
   q("#theme-modal-close").onclick = requestClose;
   backdrop.onclick = (e) => {
     if (e.target === backdrop) requestClose();
@@ -344,32 +405,8 @@ export async function renderThemeEditor(host, opts) {
 
   const saveBtn = q("#theme-save");
   if (saveBtn) {
-    saveBtn.onclick = async () => {
-      const name = nameInput.value.trim();
-      if (!name) {
-        if (errEl) errEl.textContent = "";
-        setNameError(_t("The name is required."));
-        nameInput.focus();
-        return;
-      }
-      setNameError("");
-      if (errEl) errEl.textContent = "";
-      try {
-        const saved = await upsertTheme({
-          id: draft.id,
-          name,
-          color: draft.color,
-          secondaryColor: draft.secondaryColor,
-          logoDataUrl: draft.logoDataUrl || "",
-          logoZoom: draft.logoZoom,
-          logoOffsetX: draft.logoOffsetX,
-          logoOffsetY: draft.logoOffsetY,
-          isBuiltin: false,
-        });
-        onSaved(name, { isNew: !isEdit, theme: saved });
-      } catch (ex) {
-        if (errEl) errEl.textContent = ex.message || _t("Unable to save.");
-      }
+    saveBtn.onclick = () => {
+      saveTheme();
     };
   }
 

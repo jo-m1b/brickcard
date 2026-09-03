@@ -97,6 +97,15 @@ msgstr "Cancelar"
 msgid "Save"
 msgstr "Salvar"
 
+msgid "Save?"
+msgstr "Salvar?"
+
+msgid "Save the changes before closing?"
+msgstr "Salvar as alterações antes de fechar?"
+
+msgid "Close without saving"
+msgstr "Fechar sem salvar"
+
 msgid "Delete"
 msgstr "Excluir"
 

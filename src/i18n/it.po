@@ -97,6 +97,15 @@ msgstr "Annulla"
 msgid "Save"
 msgstr "Salva"
 
+msgid "Save?"
+msgstr "Salvare?"
+
+msgid "Save the changes before closing?"
+msgstr "Salvare le modifiche prima di chiudere?"
+
+msgid "Close without saving"
+msgstr "Chiudi senza salvare"
+
 msgid "Delete"
 msgstr "Elimina"
 

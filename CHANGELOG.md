@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### ➕ Added
+
+- Draft editors (`#new-card`, `#edit-card`, `#themes/new`, `#themes/edit`, `#developer/theme-presets/new`, `#developer/theme-presets/edit`): if a field changed, closing via Escape / close / backdrop asks **Save?** (**Close without saving**, **Cancel**, **Save**) instead of discarding silently; footer **Cancel** still closes immediately
+
 ### 🔧 Fixed
 
 - Offline PWA: after the first online visit, the service worker background-precache every app file (lazy overlay modules, i18n, About pages, default-theme logos, demo) so **New card**, **About**, themes, and the rest work without having opened them beforehand

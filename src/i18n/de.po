@@ -97,6 +97,15 @@ msgstr "Abbrechen"
 msgid "Save"
 msgstr "Speichern"
 
+msgid "Save?"
+msgstr "Speichern?"
+
+msgid "Save the changes before closing?"
+msgstr "Änderungen vor dem Schließen speichern?"
+
+msgid "Close without saving"
+msgstr "Schließen ohne zu speichern"
+
 msgid "Delete"
 msgstr "Löschen"
 

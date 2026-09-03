@@ -24,7 +24,7 @@ import {
 } from "../storage.js";
 import { mountCardPreview, refreshCardPreview, mountCardBackPreview, refreshCardBackPreview } from "../card-render.js";
 import { formatCardImageBasename } from "../card-export.js";
-import { confirmDialog } from "../confirm-dialog.js";
+import { confirmDialog, confirmUnsavedClose } from "../confirm-dialog.js";
 import { _t } from "../i18n.js";
 import { partitionThemes } from "../themes-data.js";
 import { setAppDocumentTitle } from "../document-title.js";
@@ -305,6 +305,11 @@ export async function renderEditor(host, opts) {
     });
   }
 
+  const initialSnapshot = JSON.stringify(draft());
+  function isDirty() {
+    return JSON.stringify(draft()) !== initialSnapshot;
+  }
+
   syncPreview();
 
   ["input", "change"].forEach((evt) => {
@@ -367,11 +372,43 @@ export async function renderEditor(host, opts) {
     previewFlipAria();
   }
 
-  function requestClose() {
-    opts.onCancel();
+  let closeBusy = false;
+
+  async function saveCard() {
+    const data = draft();
+    refs.error.textContent = "";
+    refs.save.disabled = true;
+    try {
+      const saved = await upsertCard({
+        ...data,
+        id: cardId,
+      });
+      opts.onSaved(cardToastSubject(), { isNew: !isEdit, card: saved });
+      return true;
+    } catch (err) {
+      refs.error.textContent = err.message || _t("Unable to save.");
+      refs.save.disabled = false;
+      return false;
+    }
   }
 
-  refs.cancel.addEventListener("click", requestClose);
+  async function requestClose(optsClose = {}) {
+    if (optsClose.skipConfirm) {
+      opts.onCancel();
+      return;
+    }
+    if (closeBusy) return;
+    closeBusy = true;
+    try {
+      const result = await confirmUnsavedClose(host, { isDirty, save: saveCard });
+      if (result === "stay" || result === "saved") return;
+      opts.onCancel();
+    } finally {
+      closeBusy = false;
+    }
+  }
+
+  refs.cancel.addEventListener("click", () => requestClose({ skipConfirm: true }));
   refs.close.addEventListener("click", requestClose);
 
   refs.backdrop.addEventListener("click", (e) => {
@@ -401,20 +438,8 @@ export async function renderEditor(host, opts) {
   }
   window.addEventListener("keydown", onKeydown);
 
-  refs.save.addEventListener("click", async () => {
-    const data = draft();
-    refs.error.textContent = "";
-    refs.save.disabled = true;
-    try {
-      const saved = await upsertCard({
-        ...data,
-        id: cardId,
-      });
-      opts.onSaved(cardToastSubject(), { isNew: !isEdit, card: saved });
-    } catch (err) {
-      refs.error.textContent = err.message || _t("Unable to save.");
-      refs.save.disabled = false;
-    }
+  refs.save.addEventListener("click", () => {
+    saveCard();
   });
 
   if (refs.deleteBtn && existing) {

@@ -6,7 +6,7 @@ import { compressImage } from "../../storage.js";
 import { mountCardBackPreview, refreshCardBackPreview } from "../../card-render.js";
 import { contrastText, DEFAULT_THEME_COLOR } from "../../themes-data.js";
 import { resolveCardAccent } from "../../card-design.js";
-import { confirmDialog } from "../../confirm-dialog.js";
+import { confirmDialog, confirmUnsavedClose } from "../../confirm-dialog.js";
 import { toast } from "../../toast.js";
 import { focusTopModal } from "../../modal-focus.js";
 import { popModalDocumentTitle, pushModalDocumentTitle } from "../../document-title.js";
@@ -295,6 +295,25 @@ export async function renderPresetDraftEditor(host, opts) {
     });
   }
 
+  function persistSnapshot() {
+    return JSON.stringify({
+      name: nameInput.value.trim(),
+      id: idInput.value.trim(),
+      color: draft.color,
+      secondaryColor: draft.secondaryColor,
+      logoSrc: draft.logoSrc,
+      logoDataUrl: draft.logoDataUrl,
+      logoZoom: currentLogoUrl() ? draft.logoZoom : 1,
+      logoOffsetX: currentLogoUrl() ? draft.logoOffsetX : 0,
+      logoOffsetY: currentLogoUrl() ? draft.logoOffsetY : 0,
+    });
+  }
+
+  const initialSnapshot = persistSnapshot();
+  function isDirty() {
+    return persistSnapshot() !== initialSnapshot;
+  }
+
   /**
    * @param {HTMLElement|null} el
    * @param {HTMLInputElement} input
@@ -331,28 +350,9 @@ export async function renderPresetDraftEditor(host, opts) {
     }
   });
 
-  function requestClose() {
-    onClose();
-  }
+  let closeBusy = false;
 
-  q("#preset-theme-cancel").onclick = requestClose;
-  q("#preset-editor-close").onclick = requestClose;
-  backdrop.onclick = (e) => {
-    if (e.target === backdrop) requestClose();
-  };
-
-  /** @param {KeyboardEvent} e */
-  function onKey(e) {
-    if (e.key !== "Escape") return;
-    if (host.querySelectorAll(".modal-backdrop").length > 1) return;
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    requestClose();
-  }
-  document.addEventListener("keydown", onKey, true);
-  window.addEventListener("resize", syncPreview);
-
-  q("#preset-theme-save").onclick = async () => {
+  async function savePreset() {
     const name = nameInput.value.trim();
     const id = idInput.value.trim();
     setFieldError(nameError, nameInput, "", "preset-theme-name-error");
@@ -361,7 +361,7 @@ export async function renderPresetDraftEditor(host, opts) {
     if (!name) {
       setFieldError(nameError, nameInput, _t("The name is required."), "preset-theme-name-error");
       nameInput.focus();
-      return;
+      return false;
     }
     if (!isValidPresetId(id)) {
       setFieldError(
@@ -371,7 +371,7 @@ export async function renderPresetDraftEditor(host, opts) {
         "preset-theme-id-error"
       );
       idInput.focus();
-      return;
+      return false;
     }
 
     const others = await loadPresetDraftThemes();
@@ -383,7 +383,7 @@ export async function renderPresetDraftEditor(host, opts) {
         "preset-theme-id-error"
       );
       idInput.focus();
-      return;
+      return false;
     }
 
     try {
@@ -403,9 +403,48 @@ export async function renderPresetDraftEditor(host, opts) {
         { previousId: draft.previousId }
       );
       onSaved({ isNew: !isEdit, theme: saved, previousId: draft.previousId });
+      return true;
     } catch (ex) {
       toast(ex.message || _t("Unable to save."), "error");
+      return false;
     }
+  }
+
+  async function requestClose(optsClose = {}) {
+    if (optsClose.skipConfirm) {
+      onClose();
+      return;
+    }
+    if (closeBusy) return;
+    closeBusy = true;
+    try {
+      const result = await confirmUnsavedClose(host, { isDirty, save: savePreset });
+      if (result === "stay" || result === "saved") return;
+      onClose();
+    } finally {
+      closeBusy = false;
+    }
+  }
+
+  q("#preset-theme-cancel").onclick = () => requestClose({ skipConfirm: true });
+  q("#preset-editor-close").onclick = requestClose;
+  backdrop.onclick = (e) => {
+    if (e.target === backdrop) requestClose();
+  };
+
+  /** @param {KeyboardEvent} e */
+  function onKey(e) {
+    if (e.key !== "Escape") return;
+    if (host.querySelectorAll(".modal-backdrop").length > 1) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    requestClose();
+  }
+  document.addEventListener("keydown", onKey, true);
+  window.addEventListener("resize", syncPreview);
+
+  q("#preset-theme-save").onclick = () => {
+    savePreset();
   };
 
   const deleteBtn = q("#preset-theme-delete");

@@ -1,6 +1,7 @@
 /**
  * Confirmation dialogs (`modal--sm`), instead of `alert()` / `confirm()` / `prompt()`.
  * Child of the host (`#modal-root`): second backdrop, no route.
+ * `confirmUnsavedClose()` is the dirty-close prompt for draft editors.
  */
 
 import { ICON_CLOSE, ICON_DELETE_BIN_2, ICON_SAVE, modalTitleMarkup, remixIconByName } from "./icons.js";
@@ -225,4 +226,35 @@ export async function alertDialog(host, opts) {
     icon: opts.icon,
     actions: [{ id: "ok", label: opts.okLabel || "OK", variant: "primary", slot: "end" }],
   });
+}
+
+/**
+ * Unsaved-close confirmation for draft editors (card, theme, preset).
+ * No prompt if the form is unchanged. Dismiss (X / Escape / backdrop) = stay.
+ *
+ * @param {HTMLElement} host
+ * @param {{
+ *   isDirty: () => boolean,
+ *   save: () => Promise<boolean>,
+ * }} opts
+ * @returns {Promise<"discard"|"saved"|"stay">}
+ */
+export async function confirmUnsavedClose(host, opts) {
+  if (!opts.isDirty()) return "discard";
+  const choice = await openConfirmDialog(host, {
+    title: _t("Save?"),
+    icon: "save",
+    message: _t("Save the changes before closing?"),
+    actions: [
+      { id: "discard", label: _t("Close without saving"), variant: "danger", slot: "start" },
+      { id: "cancel", label: _t("Cancel"), variant: "secondary", slot: "end" },
+      { id: "save", label: _t("Save"), variant: "primary", slot: "end" },
+    ],
+  });
+  if (choice === "save") {
+    const ok = await opts.save();
+    return ok ? "saved" : "stay";
+  }
+  if (choice === "discard") return "discard";
+  return "stay";
 }
