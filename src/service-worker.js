@@ -4,7 +4,7 @@
  * and GitHub Pages cannot send Service-Worker-Allowed to widen it.
  * Keep APP_VERSION aligned with version.js and the ?v= in index.html
  * (CSS + app.js / version.js import map) and 404.html (CSS).
- * Adding a JS file, markdown page, or locale catalog: add it to OFFLINE_ASSETS.
+ * Adding a JS file, markdown page, locale catalog, or data JSON: add it to OFFLINE_ASSETS.
  */
 const APP_VERSION = "0.9.1";
 const CACHE = `brickcard-${APP_VERSION}`;
@@ -103,7 +103,7 @@ const OFFLINE_ASSETS = [
     "./data/page-about.it.md",
     "./data/page-about.pt.md",
   ],
-  ["./data/themes-presets.json"],
+  ["./data/themes-presets.json", "./data/sets-presets.json"],
   [
     `./css/styles.css?v=${APP_VERSION}`,
     "./fonts/OpenSans-Variable.woff2",

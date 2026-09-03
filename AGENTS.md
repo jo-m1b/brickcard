@@ -25,8 +25,9 @@ All app code lives in **`src/`**.
 | `src/robots.txt` | Crawlers: allow `/`; sitemap URL (do not block `js/` / `css/`) |
 | `src/sitemap.xml` | One URL (`https://brickcard.org/`); hash routes omitted |
 | `src/manifest.webmanifest` | PWA manifest (name, `description`, icons, `standalone`); `lang` = `en` (source / SEO; static file, not updated with the UI locale) |
-| `src/service-worker.js` | Service worker at the site root (scope `/`; GitHub Pages does not allow a SW in `js/`); `CACHE` = `APP_VERSION`; online fetch with `cache: "reload"`; install precaches the app shell only (non-blocking); after activate (and on a `precache-offline` message from the page) background-precache all app files (JS including lazy overlays / `#developer/…`, i18n, markdown pages, `themes-presets.json` + logos from that JSON, fonts, PWA icons, demo) so unused `import()` routes work offline; does not intercept its own script. Adding a JS file, markdown page, or locale catalog: add it to `OFFLINE_ASSETS` |
+| `src/service-worker.js` | Service worker at the site root (scope `/`; GitHub Pages does not allow a SW in `js/`); `CACHE` = `APP_VERSION`; online fetch with `cache: "reload"`; install precaches the app shell only (non-blocking); after activate (and on a `precache-offline` message from the page) background-precache all app files (JS including lazy overlays / `#developer/…`, i18n, markdown pages, `themes-presets.json` + logos from that JSON, `sets-presets.json`, fonts, PWA icons, demo) so unused `import()` routes work offline; does not intercept its own script. Adding a JS file, markdown page, locale catalog, or data JSON: add it to `OFFLINE_ASSETS` |
 | `src/data/themes-presets.json` | Default LEGO themes (editable without touching JS) |
+| `src/data/sets-presets.json` | Offline Rebrickable set catalog (no images) for a future card-editor autocomplete; rebuilt by `scripts/build-sets-presets.py` |
 | `src/data/theme-logo-*` | Default theme logos (PNG / SVG / WebP / JPEG) |
 | `src/data/backup-demo-jo.brickcard` | Demo backup (empty home: **Load a demo** tile; WebP photos; URL: `data/backup-demo-jo.brickcard`) |
 | `src/data/page-{{slug}}.md` | Markdown pages in a modal (`#page/:slug`): English source; translation `page-{{slug}}.{{locale}}.md` (e.g. `page-about.de.md`, `page-about.fr.md`); 404 → English file; `# Title` → dialog title; raw HTML like GitHub (trusted `data/` pages); `#page/about`: header brand (logo + name + version) injected at the top; Ko-fi in markdown at the bottom |
@@ -98,6 +99,8 @@ All app code lives in **`src/`**.
 | `.github/ISSUE_TEMPLATE/config.yml` | Issue chooser: no empty tickets; Discussions link for questions |
 | `.github/ISSUE_TEMPLATE/feature_request.yml` | Enhancement issue form (What would you like / Why; link to existing `enhancement` issues) |
 | `.github/pull_request_template.md` | PR template (description, changelog Added/Changed/Fixed/Removed, UI screenshots) |
+| `.github/workflows/sets-presets.yml` | Daily rebuild of `sets-presets.json` from Rebrickable dumps (commit if the catalog changed) |
+| `scripts/build-sets-presets.py` | Compile Rebrickable CSV dumps into `src/data/sets-presets.json` (Python 3 stdlib; no API key) |
 
 ## Card model (`Card`)
 
@@ -133,10 +136,32 @@ Fields per entry:
 - `secondaryColor` (hex, optional) — texts, badge icons, and the Brickcard logo; if omitted → black `#141414` or white `#ffffff` from accent luminance
 - `logoSrc` (optional) — path from `src/` (e.g. `data/theme-logo-….png`); no logo / load failure → show the theme **name** (no generated SVG)
 - `logoZoom` / `logoOffsetX` / `logoOffsetY` (optional) — logo crop (1 / 0 / 0 if omitted); same units as custom themes; tool export: 2 decimal places, `0.00` omitted (`logoZoom` of `1` too)
+- `rebrickableThemeId` (optional positive integer) — Rebrickable theme id for `sets-presets.json`; the build script walks `parent_id` and writes `brickcardThemeId` on matching sets; omitted on export when unset; `#developer/theme-presets` Save keeps the field (no editor UI; edit the JSON)
 
 Default themes are **read-only** in the app (no edit, no delete); focusable / clickable tiles → `#themes/view/:id` (identifier, name, colors, downloadable logo). Custom themes have a UUID id (`createId()`), live in IndexedDB, and are edited via `#themes/new` / `#themes/edit/:id`.
 
 Developer tool `#developer/theme-presets`: isolated local copy (IndexedDB `brickcard-preset-draft`) to edit id/slug, name, colors (accent + secondary), logo and crop (`#developer/theme-presets/new`, `#developer/theme-presets/edit/:slug`), then **save** `themes-presets.json` + `theme-logo-{id}.{ext}` to drop into `data/` yourself. Never reads/writes the `cards` / `themes` stores or settings. On first load (or after **Reset**): seed from the JSON. **General** success / errors (load, **Reset**, **Save themes-presets.json**, **Save logos**, save / delete in the editor) → `toast()`; Name / Identifier field validation → `form-error` under the input. Local collection reset does **not** touch this draft.
+
+## Set catalog (`src/data/sets-presets.json`)
+
+Compiled from the daily [Rebrickable downloads](https://rebrickable.com/downloads/) (CSV dumps, no API key, no images). The app precaches the file offline; no UI reads it yet (future card-editor autocomplete).
+
+```
+python3 scripts/build-sets-presets.py
+python3 scripts/build-sets-presets.py --output src/data/sets-presets.json --min-piece-count 0
+```
+
+Paths are relative to the repo root. Arguments:
+
+- `--output` (default `src/data/sets-presets.json`)
+- `--themes-presets` (default `src/data/themes-presets.json`) — reads `rebrickableThemeId`
+- `--min-piece-count` (default `10`; `--min-piece-count 0` keeps 0-piece sets)
+- `--max-piece-count`, `--min-release-year`, `--max-release-year`, `--min-figurine-count`, `--max-figurine-count` (inactive if omitted)
+- `--exclude-theme-id` (repeatable; default `746` Database Sets) — drop that Rebrickable theme, its descendants, and their sets (passing the flag replaces the default)
+
+An **active** filter + a **missing** value (`null` / unparseable) excludes the set. `0` is a value for filters. `figurineCount` is the sum of minifig quantities on the set’s latest inventory (no rows → `0`). Each set’s `id` is the Rebrickable `set_num` (including the `-\d+` suffix); map to the card `legoSetRef` later at import / autocomplete. `pieceCount`, `figurineCount`, and `releaseYear` are stored as `null` (or dropped when trailing) when missing or `0`. `themes` lists only named Rebrickable themes used by kept sets (no empty names, no unused themes). `brickcardThemeId` is omitted when no preset maps (trailing). If `themes` + `sets` match the existing file, the script does not rewrite (so the daily workflow does not commit a date-only change).
+
+JSON shape: `meta` (`generatedAt`, `source`, `themesCount`, `setsCount`, `themeKeys`, `setKeys`); `themes` and `sets` are **positional rows** (`themeKeys` = `id`, `name`; `setKeys` = `id`, `name`, `pieceCount`, `figurineCount`, `releaseYear`, `themeId`, `brickcardThemeId`). Read with `Object.fromEntries(keys.map((k, i) => [k, row[i]]))`. GitHub Actions `.github/workflows/sets-presets.yml` runs the script daily (`07:30` UTC) and on `workflow_dispatch`, then commits when the catalog changed (`chore: refresh sets-presets.json`). The Actions app needs write access to the default branch.
 
 ## LEGO theme model (`LegoTheme`)
 

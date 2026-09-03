@@ -29,6 +29,13 @@ const PRESET_LOGO_DIR = "data";
 /** kebab-case : `city`, `avatar-the-last-airbender` */
 export const PRESET_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
+/** @param {unknown} raw @returns {number} Positive Rebrickable theme id, or 0 if unset */
+function parseRebrickableThemeId(raw) {
+  if (raw == null || raw === "") return 0;
+  const n = Number(raw);
+  return Number.isInteger(n) && n > 0 ? n : 0;
+}
+
 /**
  * @typedef {Object} PresetDraftTheme
  * @property {string} id
@@ -40,6 +47,7 @@ export const PRESET_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
  * @property {number} logoZoom
  * @property {number} logoOffsetX
  * @property {number} logoOffsetY
+ * @property {number} [rebrickableThemeId] Rebrickable theme id; omitted when unset
  * @property {string} updatedAt ISO; empty until changed since the seed
  */
 
@@ -179,6 +187,7 @@ function normalizeDraft(t) {
     logoZoom: clampLogoZoom(t.logoZoom),
     logoOffsetX: roundCropCoord(t.logoOffsetX),
     logoOffsetY: roundCropCoord(t.logoOffsetY),
+    rebrickableThemeId: parseRebrickableThemeId(t.rebrickableThemeId),
     updatedAt: String(t.updatedAt || "").trim(),
   };
 }
@@ -196,6 +205,7 @@ function metaToDraft(entry) {
     logoZoom: entry.logoZoom,
     logoOffsetX: entry.logoOffsetX,
     logoOffsetY: entry.logoOffsetY,
+    rebrickableThemeId: entry.rebrickableThemeId,
     updatedAt: "",
   });
 }
@@ -339,6 +349,8 @@ function toPresetMeta(theme) {
   const oy = roundCropCoord(theme.logoOffsetY);
   if (ox !== 0) out.logoOffsetX = ox;
   if (oy !== 0) out.logoOffsetY = oy;
+  const rebrickableThemeId = parseRebrickableThemeId(theme.rebrickableThemeId);
+  if (rebrickableThemeId) out.rebrickableThemeId = rebrickableThemeId;
   return out;
 }
 

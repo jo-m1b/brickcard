@@ -53,6 +53,7 @@ export async function renderPresetDraftEditor(host, opts) {
    *   logoZoom: number,
    *   logoOffsetX: number,
    *   logoOffsetY: number,
+   *   rebrickableThemeId: number,
    *   idTouched: boolean,
    * }} */
   const draft = {
@@ -66,6 +67,7 @@ export async function renderPresetDraftEditor(host, opts) {
     logoZoom: existing?.logoZoom || 1,
     logoOffsetX: existing?.logoOffsetX || 0,
     logoOffsetY: existing?.logoOffsetY || 0,
+    rebrickableThemeId: existing?.rebrickableThemeId || 0,
     idTouched: isEdit,
   };
 
@@ -398,6 +400,7 @@ export async function renderPresetDraftEditor(host, opts) {
           logoZoom: currentLogoUrl() ? draft.logoZoom : 1,
           logoOffsetX: currentLogoUrl() ? draft.logoOffsetX : 0,
           logoOffsetY: currentLogoUrl() ? draft.logoOffsetY : 0,
+          rebrickableThemeId: draft.rebrickableThemeId,
           updatedAt: "",
         },
         { previousId: draft.previousId }

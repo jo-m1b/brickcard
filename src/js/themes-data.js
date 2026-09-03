@@ -31,6 +31,7 @@ import { _t } from "./i18n.js";
  * @property {number} [logoZoom] Logo width (1 = 75% of the card); omitted → 1
  * @property {number} [logoOffsetX] Horizontal offset; omitted → 0
  * @property {number} [logoOffsetY] Vertical offset; omitted → 0
+ * @property {number} [rebrickableThemeId] Rebrickable theme id for sets-presets mapping
  */
 
 const PRESETS_URL = "data/themes-presets.json";

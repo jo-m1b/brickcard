@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ### ➕ Added
 
 - Draft editors (`#new-card`, `#edit-card`, `#themes/new`, `#themes/edit`, `#developer/theme-presets/new`, `#developer/theme-presets/edit`): if a field changed, closing via Escape / close / backdrop asks **Save?** (**Close without saving**, **Cancel**, **Save**) instead of discarding silently; footer **Cancel** still closes immediately
+- Offline set catalog `data/sets-presets.json` (Rebrickable dumps, no images): piece count, figurines, year, theme id — precached by the service worker for a future card-editor autocomplete; optional `rebrickableThemeId` on a default theme maps to `brickcardThemeId`; positional rows (`meta.themeKeys` / `meta.setKeys`) to keep the file small; card `legoSetRef` / `title` are derived later; Database Sets (theme `746`) and empty theme names are omitted; missing / `0` counts are `null` or trailing-omitted
 
 ### 🔧 Fixed
 

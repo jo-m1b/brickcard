@@ -15,6 +15,7 @@ Keep the change small and focused.
 
 - No bundler, framework, or Node — `src/` is the app
 - Default themes live in `src/data/themes-presets.json` (logos in `src/data/`)
+- Set catalog: `src/data/sets-presets.json` from `python3 scripts/build-sets-presets.py` (Rebrickable dumps; see [AGENTS.md](AGENTS.md))
 - Translations → [src/i18n/README.md](src/i18n/README.md)
 
 See the [README](README.md) to run locally. App conventions (routing, design system, i18n) live in [AGENTS.md](AGENTS.md) (English). Source comments and JSDoc in `src/` are English.
