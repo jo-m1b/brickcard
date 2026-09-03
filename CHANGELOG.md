@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.9.2] — 2026-09-03
+
 ### ➕ Added
 
 - Draft editors (`#new-card`, `#edit-card`, `#themes/new`, `#themes/edit`, `#developer/theme-presets/new`, `#developer/theme-presets/edit`): if a field changed, closing via Escape / close / backdrop asks **Save?** (**Close without saving**, **Cancel**, **Save**) instead of discarding silently; footer **Cancel** still closes immediately
