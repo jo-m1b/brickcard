@@ -9,10 +9,13 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -32,3 +35,4 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "chore: refresh sets-presets.json"
           git push
+          gh workflow run "Deploy Brickcard to GitHub Pages"
