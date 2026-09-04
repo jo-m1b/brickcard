@@ -1,5 +1,5 @@
 import { ICON_ADD, ICON_PRINTER, ICON_SORT_ASC, ICON_SORT_DESC, ICON_SUBTRACT } from "../icons.js";
-import { CARD_SORT_KEYS, compareCardsAsc } from "../card-sort.js";
+import { CARD_SORT_KEYS, compareCardsAsc, normalizeCardSortKey } from "../card-sort.js";
 import { loadCards, loadThemes } from "../storage.js";
 import {
   printQty,
@@ -40,9 +40,7 @@ function defaultSortDir(key) {
 function loadSortKey() {
   try {
     const v = localStorage.getItem(SORT_KEY);
-    if (v && SORT_KEYS.includes(/** @type {ListSortKey} */ (v))) {
-      return /** @type {ListSortKey} */ (v);
-    }
+    if (v) return normalizeCardSortKey(v, "updatedAt");
   } catch {
     /* ignore */
   }
@@ -174,7 +172,7 @@ export async function renderList(main, opts) {
   let sortDir = loadSortDir(sortKey);
 
   const searchInput = document.getElementById("global-search");
-  const searchCount = document.getElementById("search-count");
+  const searchNumResults = document.getElementById("search-num-results");
   const sortBtn = document.getElementById("search-sort-btn");
   const sortMenu = document.getElementById("search-sort-menu");
   const searchBar = searchInput?.closest(".search-bar");
@@ -227,23 +225,23 @@ export async function renderList(main, opts) {
       .sort((a, b) => compareCardsAsc(a, b, sortKey) * dir);
   }
 
-  function updateSearchCount() {
-    if (!searchCount) return;
+  function updateSearchNumResults() {
+    if (!searchNumResults) return;
     const total = cards.length;
     const shown = filtered().length;
     const q = searchQuery();
     if (!total) {
-      searchCount.textContent = _t("0 cards");
+      searchNumResults.textContent = _t("0 cards");
       return;
     }
     if (q) {
-      searchCount.textContent = _t("%(shown)s / %(total)s cards", { shown, total });
+      searchNumResults.textContent = _t("%(shown)s / %(total)s cards", { shown, total });
     } else {
-      searchCount.textContent = _t("%(total)s cards", { total });
+      searchNumResults.textContent = _t("%(total)s cards", { total });
     }
   }
 
-  /** Count + sort: visible only if there are at least 2 cards. */
+  /** Results + sort: visible only if there are at least 2 cards. */
   function syncSearchTrail() {
     const show = cards.length >= 2;
     if (searchTrail) searchTrail.hidden = !show;
@@ -365,7 +363,7 @@ export async function renderList(main, opts) {
           ${ICON_MINUS}
           <span class="visually-hidden">${decLabel}</span>
         </button>
-        <span class="print-qty-count" ${has ? "" : "hidden"} aria-label="${qtyLabel}">
+        <span ${has ? "" : "hidden"} aria-label="${qtyLabel}">
           ${ICON_PRINT}
           <span class="print-qty-num">${qty}</span>
         </span>
@@ -379,15 +377,15 @@ export async function renderList(main, opts) {
 
   function syncListChrome() {
     const list = filtered();
-    const addableCount = list.filter((c) => getPrintQty(c.id) < 1).length;
+    const numAddable = list.filter((c) => getPrintQty(c.id) < 1).length;
     syncSearchTrail();
-    updateSearchCount();
+    updateSearchNumResults();
     syncSortMenu();
     syncPrintMenu({
-      cardCount: cards.length,
-      addableCount,
+      numCards: cards.length,
+      numAddable,
       searching: Boolean(searchQuery()),
-      missing: addableCount < list.length,
+      missing: numAddable < list.length,
     });
   }
 

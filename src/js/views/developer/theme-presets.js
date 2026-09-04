@@ -128,10 +128,10 @@ export function renderDeveloperThemePresets(host, opts) {
             placeholder="${_t("Search for a theme…")}"
             autocomplete="off"
             aria-label="${_t("Search for a theme")}"
-            aria-describedby="preset-draft-search-count"
+            aria-describedby="preset-draft-search-num-results"
           />
           <div class="search-bar-trail" id="preset-draft-search-trail">
-            <span class="search-count" id="preset-draft-search-count" aria-live="polite"></span>
+            <span class="search-num-results" id="preset-draft-search-num-results" aria-live="polite"></span>
           </div>
         </div>
       </div>
@@ -177,7 +177,7 @@ export function renderDeveloperThemePresets(host, opts) {
   const q = (sel) => host.querySelector(sel);
   const searchBar = q("#preset-draft-search-bar");
   const searchInput = /** @type {HTMLInputElement} */ (q("#preset-draft-search"));
-  const searchCount = q("#preset-draft-search-count");
+  const searchNumResults = q("#preset-draft-search-num-results");
   const searchTrail = q("#preset-draft-search-trail");
   const grid = q("#preset-draft-grid");
   const emptyFilter = q("#preset-draft-empty-filter");
@@ -212,15 +212,15 @@ export function renderDeveloperThemePresets(host, opts) {
     return includesCI(theme.name, needle) || includesCI(theme.id, needle);
   }
 
-  function updateSearchCount(shown) {
+  function updateSearchNumResults(shown) {
     const total = themes.length;
     const query = searchQuery();
-    if (!searchCount) return;
+    if (!searchNumResults) return;
     if (!total) {
-      searchCount.textContent = _t("0 themes");
+      searchNumResults.textContent = _t("0 themes");
       return;
     }
-    searchCount.textContent = query
+    searchNumResults.textContent = query
       ? _t("%(shown)s / %(total)s themes", { shown, total })
       : _t("%(total)s themes", { total });
   }
@@ -300,7 +300,7 @@ export function renderDeveloperThemePresets(host, opts) {
       }
     }
     if (searchTrail) searchTrail.hidden = themes.length < 2;
-    updateSearchCount(visible);
+    updateSearchNumResults(visible);
   }
 
   function scrollPresetListTop() {
@@ -542,7 +542,7 @@ function themeTileMarkup(theme) {
         <p class="theme-tile-name">${name}</p>
         ${logo}
       </div>
-      <p class="theme-tile-count">${escapeHtml(theme.id)}</p>
+      <p class="theme-tile-id">${escapeHtml(theme.id)}</p>
     </article>`;
 }
 

@@ -217,10 +217,10 @@ function setSearchVisible(visible) {
   if (topbarSearch) topbarSearch.hidden = !visible;
 }
 
-/** @param {number} cardCount */
-function syncHeaderPrint(cardCount) {
-  setPrintMenuVisible(cardCount > 0);
-  syncPrintMenu({ cardCount });
+/** @param {number} numCards */
+function syncHeaderPrint(numCards) {
+  setPrintMenuVisible(numCards > 0);
+  syncPrintMenu({ numCards });
 }
 
 function isOverlayRoute(info) {
@@ -327,9 +327,9 @@ async function showOverlay(routeInfo) {
   if (routeInfo.name === "settings") {
     const settings = await loadOverlay(() => import("./views/settings.js"));
     if (!settings) return;
-    let cardCount = 0;
+    let numCards = 0;
     try {
-      cardCount = (await loadCards()).length;
+      numCards = (await loadCards()).length;
     } catch {
       /* ignore */
     }
@@ -337,7 +337,7 @@ async function showOverlay(routeInfo) {
       onClose: overlayOnClose("settings"),
       onClearCards: handleClearCards,
       onDevReset: isDeveloperEnabled() ? handleDevReset : undefined,
-      cardCount,
+      numCards,
     });
     focusTopModal();
     return;

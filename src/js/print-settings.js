@@ -6,7 +6,7 @@
 import { filenameSlug } from "./card-export.js";
 import { formCheckboxMarkup } from "./form-checkbox.js";
 import { formRadioMarkup } from "./form-radio.js";
-import { CARD_SORT_KEYS } from "./card-sort.js";
+import { normalizeCardSortKey } from "./card-sort.js";
 import { _t } from "./i18n.js";
 
 const SETTINGS_KEY = "brickcard:print-settings";
@@ -32,8 +32,8 @@ export const PRINT_CARD_ORDER_OPTIONS = [
   { value: "legoSetRef", label: "Reference" },
   { value: "title", label: "Title" },
   { value: "releaseYear", label: "Release year" },
-  { value: "pieceCount", label: "Number of pieces" },
-  { value: "figurineCount", label: "Number of figurines" },
+  { value: "numPieces", label: "Number of pieces" },
+  { value: "numFigurines", label: "Number of figurines" },
   { value: "updatedAt", label: "Date modified" },
 ];
 
@@ -92,10 +92,7 @@ export function normalizeSheetAssembly(value) {
 
 /** @param {unknown} value @returns {CardSortKey} */
 export function normalizeCardPrintOrder(value) {
-  if (CARD_SORT_KEYS.includes(/** @type {CardSortKey} */ (value))) {
-    return /** @type {CardSortKey} */ (value);
-  }
-  return DEFAULT_CARD_PRINT_ORDER;
+  return normalizeCardSortKey(value, DEFAULT_CARD_PRINT_ORDER);
 }
 
 /** @param {unknown} value @returns {boolean} */
@@ -376,26 +373,26 @@ export function setPrintSettings(partial) {
 }
 
 /**
- * @param {number} cardCount
+ * @param {number} numCards
  * @param {number} [printGrid]
  * @returns {number}
  */
 export function countPrintSheets(
-  cardCount,
+  numCards,
   printGrid = getPrintSettings().printGrid
 ) {
   const { cardsPerPage } = computePrintLayout(printGrid);
-  if (!(cardCount > 0) || !(cardsPerPage > 0)) return 0;
-  return Math.ceil(cardCount / cardsPerPage);
+  if (!(numCards > 0) || !(cardsPerPage > 0)) return 0;
+  return Math.ceil(numCards / cardsPerPage);
 }
 
 /**
- * @param {number} cardCount
+ * @param {number} numCards
  * @param {PrintSettings} [settings]
  * @returns {string}
  */
-export function formatPrintSheetsLabel(cardCount, settings = getPrintSettings()) {
-  const sheets = countPrintSheets(cardCount, settings.printGrid);
+export function formatPrintSheetsLabel(numCards, settings = getPrintSettings()) {
+  const sheets = countPrintSheets(numCards, settings.printGrid);
   if (!sheets) return "";
   if (settings.printSide === "faceOnly") {
     return sheets === 1
@@ -430,20 +427,20 @@ export function formatPrintGridSize(layout) {
 
 /**
  * Header menu label (`#print-menu-desc`): grid then sheets.
- * @param {number} cardCount
+ * @param {number} numCards
  * @param {PrintSettings} [settings]
  * @returns {string}
  */
-export function formatPrintMenuDesc(cardCount, settings = getPrintSettings()) {
+export function formatPrintMenuDesc(numCards, settings = getPrintSettings()) {
   const layout = computePrintLayout(settings.printGrid);
-  const sheets = formatPrintSheetsLabel(cardCount, settings);
+  const sheets = formatPrintSheetsLabel(numCards, settings);
   if (!sheets) return formatPrintGridLabel(layout);
   return `${formatPrintGridLabel(layout)}\n${sheets}`;
 }
 
-/** @param {number} cardCount @returns {string} */
-export function formatPrintCountLabel(cardCount) {
-  const n = Math.max(0, Math.round(Number(cardCount) || 0));
+/** @param {number} numCards @returns {string} */
+export function formatPrintCountLabel(numCards) {
+  const n = Math.max(0, Math.round(Number(numCards) || 0));
   return n === 1
     ? _t("%(count)s card to print", { count: n })
     : _t("%(count)s cards to print", { count: n });
@@ -454,15 +451,15 @@ export function formatPrintCountLabel(cardCount) {
  * (`document.title` during `window.print()`, no `.pdf`).
  * Locked via `beginPrintDocumentTitle` / `endPrintDocumentTitle` so the
  * navigation title does not overwrite the filename.
- * @param {number} cardCount
+ * @param {number} numCards
  * @param {PrintSettings} [settings]
  * @returns {string}
  */
 export function formatPrintPdfBasename(
-  cardCount,
+  numCards,
   settings = getPrintSettings()
 ) {
-  const n = Math.max(0, Math.round(Number(cardCount) || 0));
+  const n = Math.max(0, Math.round(Number(numCards) || 0));
   const layout = computePrintLayout(settings.printGrid);
   const date = new Date().toISOString().slice(0, 10);
   const grid = `${layout.cols}x${layout.rows}`;

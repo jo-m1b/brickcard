@@ -27,7 +27,7 @@ import { TOAST_DELAY_BACKUP } from "./toast.js";
 import {
   BACKUP_INVALID,
   BACKUP_URL_INVALID,
-  CARD_APPEARANCE_SETTING_COUNT,
+  CARD_APPEARANCE_NUM_SETTINGS,
   DEMO_BACKUP_SRC,
   UNTHEMED_BACKUP_THEME_ID,
   backupPayloadBytes,
@@ -63,9 +63,9 @@ function toastImportedBackup(toast, payload, opts = {}) {
       ? /** @type {Record<string, unknown>} */ (data.settings)
       : null;
   const recap = formatBackupToastRecap({
-    cardCount: cards.length,
-    themeCount: themes.length,
-    settingCount: settings?.cardAppearance ? CARD_APPEARANCE_SETTING_COUNT : 0,
+    numCards: cards.length,
+    numThemes: themes.length,
+    numSettings: settings?.cardAppearance ? CARD_APPEARANCE_NUM_SETTINGS : 0,
     bytes: backupPayloadBytes(payload),
   });
   toast?.({
@@ -429,7 +429,7 @@ export async function renderImportDialog(host, opts) {
   let sourceHref = "";
   /** @type {import("./themes-data.js").LegoTheme[]} */
   let themesForGrouping = [];
-  /** @type {{ id: string, name: string, cardCount: number, isCustom: boolean }[]} */
+  /** @type {{ id: string, name: string, numCards: number, isCustom: boolean }[]} */
   let themeChoices = [];
   const selectedThemeIds = new Set();
   let includeSettings = true;
@@ -493,7 +493,7 @@ export async function renderImportDialog(host, opts) {
   function themeChoiceHint(choice) {
     const group = groupCardsForBackup(backup?.cards || [], themesForGrouping).get(choice.id) || [];
     return formatBackupThemeChoiceHint(
-      choice.cardCount,
+      choice.numCards,
       estimateThemeCardsBytes(group, includeImages)
     );
   }
@@ -529,8 +529,8 @@ export async function renderImportDialog(host, opts) {
       return;
     }
     const payload = currentPayload();
-    const settingCount = payload.settings?.cardAppearance
-      ? CARD_APPEARANCE_SETTING_COUNT
+    const numSettings = payload.settings?.cardAppearance
+      ? CARD_APPEARANCE_NUM_SETTINGS
       : 0;
     const empty = isImportPayloadEmpty(payload);
     if (recapEl instanceof HTMLElement) {
@@ -538,9 +538,9 @@ export async function renderImportDialog(host, opts) {
         setRecapEmpty(_t("Nothing to import!"));
       } else {
         const recap = formatBackupFooterRecap({
-          cardCount: payload.cards.length,
-          themeCount: payload.themes.length,
-          settingCount,
+          numCards: payload.cards.length,
+          numThemes: payload.themes.length,
+          numSettings,
           bytes: backupPayloadBytes(payload),
         });
         /** @type {Array<Text|HTMLElement>} */

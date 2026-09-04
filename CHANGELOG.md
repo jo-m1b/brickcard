@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.9.3] — 2026-09-04
+
+### ✏️ Changed
+
+- Set catalog `data/sets-presets.json`: `meta.numThemes` / `meta.themesKeys` / `meta.numSets` / `meta.setsKeys`; rows no longer include `brickcardThemeId` (map from Rebrickable `themeId` later)
+- Card fields `pieceCount` / `figurineCount` renamed `numPieces` / `numFigurines` (editor ids `num-pieces` / `num-figurines`; list and print sort keys; old names still read from IndexedDB / `.brickcard` / localStorage)
+- Theme sort key `cardCount` renamed `numCards` (old localStorage value still read); backup / import recap fields `numCards` / `numThemes` / `numSettings` / `numImages` / `numLogos`; search trail class `search-num-results`; theme tile caption `.theme-tile-num-cards` (preset id uses `.theme-tile-id`); print qty badge is the `span` inside `.print-qty`
+
 ## [0.9.2] — 2026-09-03
 
 ### ➕ Added

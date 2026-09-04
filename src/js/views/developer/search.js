@@ -28,16 +28,16 @@ export function renderDeveloperSearch(host) {
 
       <p class="styleguide-intro">
         <code>search-bar</code> block&nbsp;: <code>input.form-control</code>
-        (<code>type="search"</code>) + optional trail (<code>search-count</code>,
+        (<code>type="search"</code>) + optional trail (<code>search-num-results</code>,
         <code>search-sort</code> menu).
         Icon&nbsp;: <code>form-control-icon</code> <strong>optional</strong>
         (search default&nbsp;: <code>ri-search-line</code>).
         Same look as a text field (<code>--form-control-bg</code> background,
         inset bottom rule, focus frame <code>ink</code>).
         Topbar slot&nbsp;: <code>topbar-search</code> centers the block.
-        Count + sort&nbsp;: visible only when there are <strong>at least 2</strong>
+        Results + sort&nbsp;: visible only when there are <strong>at least 2</strong>
         items. Label is always “&nbsp;cards&nbsp;”.
-        Used: card list (topbar) · themes modal (count + sort) ·
+        Used: card list (topbar) · themes modal (num results + sort) ·
         developer home and settings (<code>search-bar--input-only</code>).
       </p>
 
@@ -65,28 +65,28 @@ export function renderDeveloperSearch(host) {
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">With count</h2>
-        <p class="form-hint" style="margin-bottom: 0.65rem">Type to see the count update (local demo)</p>
+        <h2 class="styleguide-section-title">With results</h2>
+        <p class="form-hint" style="margin-bottom: 0.65rem">Type to see the results update (local demo)</p>
         <div class="styleguide-search-demo">
           <div class="search-bar">
             ${controlIconMarkup(ICON_SEARCH_LINE)}
-            <input class="form-control" type="search" id="demo-search-count" placeholder="Search for a card…" autocomplete="off" aria-label="Search with count" aria-describedby="demo-search-count-out" />
+            <input class="form-control" type="search" id="demo-search-num-results" placeholder="Search for a card…" autocomplete="off" aria-label="Search with results" aria-describedby="demo-search-num-results-out" />
             <div class="search-bar-trail">
-              <span class="search-count" id="demo-search-count-out" aria-live="polite">12 cards</span>
+              <span class="search-num-results" id="demo-search-num-results-out" aria-live="polite">12 cards</span>
             </div>
           </div>
         </div>
       </div>
 
       <div class="styleguide-section">
-        <h2 class="styleguide-section-title">Full (count + sort)</h2>
+        <h2 class="styleguide-section-title">Full (results + sort)</h2>
         <p class="form-hint" style="margin-bottom: 0.65rem">Same composition as the list topbar. Menu styled like <code>form-select</code>; ↑↓ / Enter / Escape; clicking the active option again reverses direction (<code>ri-sort-asc</code> / <code>ri-sort-desc</code>).</p>
         <div class="styleguide-search-demo">
           <div class="search-bar" data-demo-sort>
             ${controlIconMarkup(ICON_SEARCH_LINE)}
             <input class="form-control" type="search" id="demo-search-full" placeholder="Search for a card…" autocomplete="off" aria-label="Full search" />
             <div class="search-bar-trail">
-              <span class="search-count" id="demo-search-full-count" aria-live="polite">3 / 12 cards</span>
+              <span class="search-num-results" id="demo-search-full-num-results" aria-live="polite">3 / 12 cards</span>
               <div class="search-sort">
                 <button
                   type="button"
@@ -131,7 +131,7 @@ export function renderDeveloperSearch(host) {
             ${controlIconMarkup(ICON_SEARCH_LINE)}
             <input class="form-control" type="search" placeholder="Search for a card…" autocomplete="off" aria-label="Search without trail" />
             <div class="search-bar-trail" hidden>
-              <span class="search-count">12 cards</span>
+              <span class="search-num-results">12 cards</span>
             </div>
           </div>
         </div>
@@ -141,13 +141,13 @@ export function renderDeveloperSearch(host) {
         <h2 class="styleguide-section-title">States</h2>
         <div class="styleguide-fields">
           <div>
-            <p class="form-hint" style="margin-bottom: 0.5rem">Empty count (hidden)</p>
+            <p class="form-hint" style="margin-bottom: 0.5rem">Empty results (hidden)</p>
             <div class="styleguide-search-demo">
               <div class="search-bar">
                 ${controlIconMarkup(ICON_SEARCH_LINE)}
-                <input class="form-control" type="search" placeholder="Search…" autocomplete="off" aria-label="Search without count" disabled />
+                <input class="form-control" type="search" placeholder="Search…" autocomplete="off" aria-label="Search without results" disabled />
                 <div class="search-bar-trail">
-                  <span class="search-count"></span>
+                  <span class="search-num-results"></span>
                 </div>
               </div>
             </div>
@@ -168,13 +168,13 @@ export function renderDeveloperSearch(host) {
 
   const TOTAL = 12;
   const countInput = /** @type {HTMLInputElement|null} */ (
-    host.querySelector("#demo-search-count")
+    host.querySelector("#demo-search-num-results")
   );
-  const countOut = host.querySelector("#demo-search-count-out");
+  const countOut = host.querySelector("#demo-search-num-results-out");
   const fullInput = /** @type {HTMLInputElement|null} */ (
     host.querySelector("#demo-search-full")
   );
-  const fullCount = host.querySelector("#demo-search-full-count");
+  const fullCount = host.querySelector("#demo-search-full-num-results");
 
   function syncDemoCount(input, out) {
     if (!input || !out) return;

@@ -22,15 +22,14 @@ USER_AGENT = "Brickcard/sets-presets (+https://brickcard.org)"
 DOWNLOAD_TIMEOUT_S = 120
 # Rebrickable “Database Sets” — not physical boxed sets
 DEFAULT_EXCLUDE_THEME_IDS = (746,)
-THEME_KEYS = ("id", "name")
-SET_KEYS = (
+THEMES_KEYS = ("id", "name")
+SETS_KEYS = (
     "id",
     "name",
-    "pieceCount",
-    "figurineCount",
+    "numPieces",
+    "numFigurines",
     "releaseYear",
     "themeId",
-    "brickcardThemeId",
 )
 
 CSV_FILES = (
@@ -55,13 +54,6 @@ def parse_optional_int(raw: object) -> int | None:
         return None
 
 
-def parse_rebrickable_theme_id(raw: object) -> int | None:
-    value = parse_optional_int(raw)
-    if value is None or value < 1:
-        return None
-    return value
-
-
 def download_csv_rows(filename: str) -> list[dict[str, str]]:
     url = f"{DOWNLOAD_BASE}/{filename}"
     log(f"Downloading {url}")
@@ -74,28 +66,6 @@ def download_csv_rows(filename: str) -> list[dict[str, str]]:
     with gzip.GzipFile(fileobj=io.BytesIO(raw)) as gz:
         text = gz.read().decode("utf-8")
     return list(csv.DictReader(io.StringIO(text)))
-
-
-def load_brickcard_theme_map(path: Path) -> dict[int, str]:
-    if not path.is_file():
-        log(f"No themes presets at {path}; brickcardThemeId will be omitted")
-        return {}
-    try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
-        raise SystemExit(f"Unable to read {path}: {exc}") from exc
-    themes = data if isinstance(data, list) else data.get("themes")
-    if not isinstance(themes, list):
-        raise SystemExit(f"{path}: missing or invalid \"themes\" array")
-    mapping: dict[int, str] = {}
-    for entry in themes:
-        if not isinstance(entry, dict):
-            continue
-        brickcard_id = str(entry.get("id") or "").strip()
-        rebrickable_id = parse_rebrickable_theme_id(entry.get("rebrickableThemeId"))
-        if brickcard_id and rebrickable_id is not None:
-            mapping[rebrickable_id] = brickcard_id
-    return mapping
 
 
 def theme_parent_map(rows: list[dict[str, str]]) -> tuple[dict[int, str], dict[int, int]]:
@@ -128,22 +98,6 @@ def excluded_theme_ids(roots: set[int], parents: dict[int, int]) -> set[int]:
     return excluded
 
 
-def resolve_brickcard_theme_id(
-    theme_id: int | None,
-    parents: dict[int, int],
-    brickcard_by_rebrickable: dict[int, str],
-) -> str | None:
-    current = theme_id
-    seen: set[int] = set()
-    while current is not None and current not in seen:
-        seen.add(current)
-        match = brickcard_by_rebrickable.get(current)
-        if match:
-            return match
-        current = parents.get(current)
-    return None
-
-
 def latest_inventory_ids(rows: list[dict[str, str]]) -> dict[str, int]:
     best: dict[str, tuple[int, int]] = {}
     for row in rows:
@@ -158,15 +112,15 @@ def latest_inventory_ids(rows: list[dict[str, str]]) -> dict[str, int]:
     return {set_num: inventory_id for set_num, (_version, inventory_id) in best.items()}
 
 
-def figurine_counts_by_inventory(rows: list[dict[str, str]]) -> dict[int, int]:
-    counts: dict[int, int] = defaultdict(int)
+def num_figurines_by_inventory(rows: list[dict[str, str]]) -> dict[int, int]:
+    nums: dict[int, int] = defaultdict(int)
     for row in rows:
         inventory_id = parse_optional_int(row.get("inventory_id"))
         quantity = parse_optional_int(row.get("quantity"))
         if inventory_id is None or quantity is None:
             continue
-        counts[inventory_id] += quantity
-    return counts
+        nums[inventory_id] += quantity
+    return nums
 
 
 def filter_active(min_value: int | None, max_value: int | None) -> bool:
@@ -212,21 +166,19 @@ def set_row(
     *,
     set_id: str,
     name: str,
-    piece_count: int | None,
-    figurine_count: int,
+    num_pieces: int | None,
+    num_figurines: int,
     release_year: int | None,
     theme_id: int | None,
-    brickcard_theme_id: str | None,
 ) -> list:
     return trim_trailing_none(
         [
             set_id,
             name,
-            piece_count or None,
-            figurine_count or None,
+            num_pieces or None,
+            num_figurines or None,
             release_year or None,
             theme_id,
-            brickcard_theme_id or None,
         ]
     )
 
@@ -236,10 +188,10 @@ def encode_json(meta: dict, themes: list[list], sets: list[list]) -> str:
     lines.append('  "meta": {')
     lines.append(f'    "generatedAt": {json.dumps(meta["generatedAt"])},')
     lines.append(f'    "source": {json.dumps(meta["source"])},')
-    lines.append(f'    "themesCount": {meta["themesCount"]},')
-    lines.append(f'    "setsCount": {meta["setsCount"]},')
-    lines.append(f'    "themeKeys": {json.dumps(list(THEME_KEYS))},')
-    lines.append(f'    "setKeys": {json.dumps(list(SET_KEYS))}')
+    lines.append(f'    "numThemes": {meta["numThemes"]},')
+    lines.append(f'    "themesKeys": {json.dumps(list(THEMES_KEYS))},')
+    lines.append(f'    "numSets": {meta["numSets"]},')
+    lines.append(f'    "setsKeys": {json.dumps(list(SETS_KEYS))}')
     lines.append("  },")
     lines.append('  "themes": [')
     for index, theme in enumerate(themes):
@@ -266,21 +218,16 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Destination JSON path (default: src/data/sets-presets.json)",
     )
     parser.add_argument(
-        "--themes-presets",
-        default="src/data/themes-presets.json",
-        help="Brickcard themes-presets.json for rebrickableThemeId mapping",
-    )
-    parser.add_argument(
-        "--min-piece-count",
+        "--min-num-pieces",
         type=int,
         default=10,
-        help="Minimum pieceCount (default: 10; use 0 to keep empty sets)",
+        help="Minimum numPieces (default: 10; use 0 to keep empty sets)",
     )
-    parser.add_argument("--max-piece-count", type=int, default=None)
+    parser.add_argument("--max-num-pieces", type=int, default=None)
     parser.add_argument("--min-release-year", type=int, default=None)
     parser.add_argument("--max-release-year", type=int, default=None)
-    parser.add_argument("--min-figurine-count", type=int, default=None)
-    parser.add_argument("--max-figurine-count", type=int, default=None)
+    parser.add_argument("--min-num-figurines", type=int, default=None)
+    parser.add_argument("--max-num-figurines", type=int, default=None)
     parser.add_argument(
         "--exclude-theme-id",
         dest="exclude_theme_ids",
@@ -312,9 +259,8 @@ def build_catalog(args: argparse.Namespace) -> tuple[list[list], list[list]]:
             + ", ".join(str(i) for i in sorted(exclude_roots))
             + f" ({len(excluded)} theme(s) with descendants)"
         )
-    brickcard_by_rebrickable = load_brickcard_theme_map(resolve_path(args.themes_presets))
     inventory_by_set = latest_inventory_ids(rows["inventories.csv.gz"])
-    figs_by_inventory = figurine_counts_by_inventory(rows["inventory_minifigs.csv.gz"])
+    figs_by_inventory = num_figurines_by_inventory(rows["inventory_minifigs.csv.gz"])
 
     sets: list[list] = []
     used_theme_ids: set[int] = set()
@@ -324,35 +270,31 @@ def build_catalog(args: argparse.Namespace) -> tuple[list[list], list[list]]:
         name = str(row.get("name") or "").strip()
         if not set_num:
             continue
-        piece_count = parse_optional_int(row.get("num_parts"))
+        num_pieces = parse_optional_int(row.get("num_parts"))
         release_year = parse_optional_int(row.get("year"))
         theme_id = parse_optional_int(row.get("theme_id"))
         if theme_id is not None and theme_id in excluded:
             continue
         inventory_id = inventory_by_set.get(set_num)
-        figurine_count = figs_by_inventory.get(inventory_id, 0) if inventory_id is not None else 0
+        num_figurines = figs_by_inventory.get(inventory_id, 0) if inventory_id is not None else 0
 
-        if not passes_range(piece_count, args.min_piece_count, args.max_piece_count):
+        if not passes_range(num_pieces, args.min_num_pieces, args.max_num_pieces):
             continue
         if not passes_range(release_year, args.min_release_year, args.max_release_year):
             continue
-        if not passes_range(figurine_count, args.min_figurine_count, args.max_figurine_count):
+        if not passes_range(num_figurines, args.min_num_figurines, args.max_num_figurines):
             continue
 
-        brickcard_theme_id = resolve_brickcard_theme_id(
-            theme_id, theme_parents, brickcard_by_rebrickable
-        )
         if theme_id is not None:
             used_theme_ids.add(theme_id)
         sets.append(
             set_row(
                 set_id=set_num,
                 name=name,
-                piece_count=piece_count,
-                figurine_count=figurine_count,
+                num_pieces=num_pieces,
+                num_figurines=num_figurines,
                 release_year=release_year,
                 theme_id=theme_id,
-                brickcard_theme_id=brickcard_theme_id,
             )
         )
 
@@ -376,17 +318,23 @@ def main(argv: list[str] | None = None) -> int:
     output_path = resolve_path(args.output)
     themes, sets = build_catalog(args)
     existing = load_existing_payload(output_path)
-    if existing and existing.get("themes") == themes and existing.get("sets") == sets:
+    existing_meta = existing.get("meta") if existing else None
+    same_schema = (
+        isinstance(existing_meta, dict)
+        and existing_meta.get("themesKeys") == list(THEMES_KEYS)
+        and existing_meta.get("setsKeys") == list(SETS_KEYS)
+    )
+    if existing and same_schema and existing.get("themes") == themes and existing.get("sets") == sets:
         log(f"Unchanged ({len(sets)} sets, {len(themes)} themes) — {output_path}")
         return 0
 
     meta = {
         "generatedAt": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "source": SOURCE_URL,
-        "themesCount": len(themes),
-        "setsCount": len(sets),
-        "themeKeys": list(THEME_KEYS),
-        "setKeys": list(SET_KEYS),
+        "numThemes": len(themes),
+        "themesKeys": list(THEMES_KEYS),
+        "numSets": len(sets),
+        "setsKeys": list(SETS_KEYS),
     }
     output_path.parent.mkdir(parents=True, exist_ok=True)
     tmp_path = output_path.with_name(f".{output_path.name}.tmp")

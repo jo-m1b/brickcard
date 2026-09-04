@@ -22,8 +22,8 @@ const STORE_THEMES = "themes";
  * @property {string} legoSetRef Set reference (e.g. "6140/6109")
  * @property {string} title Brickcard title (`\n` = line break)
  * @property {string} brickcardThemeId Associated Brickcard theme id
- * @property {number|null} pieceCount Piece count
- * @property {number|null} figurineCount Figurine count (optional)
+ * @property {number|null} numPieces Piece count
+ * @property {number|null} numFigurines Figurine count (optional)
  * @property {number|null} releaseYear Release year (optional)
  * @property {string} imageDataUrl Photo (JPEG/PNG/SVG/WebP data URL)
  * @property {string} imageBackgroundColor Image-area background (hex); empty = white on screen
@@ -388,18 +388,18 @@ async function seedThemesIfNeeded() {
 /** @param {object} c @returns {Card} */
 function normalizeCard(c) {
   const now = new Date().toISOString();
-  const piecesRaw = c.pieceCount ?? c.pieces;
-  let pieceCount = null;
+  const piecesRaw = c.numPieces ?? c.pieceCount ?? c.pieces;
+  let numPieces = null;
   if (piecesRaw !== null && piecesRaw !== undefined && piecesRaw !== "") {
     const n = Number(piecesRaw);
-    pieceCount = Number.isFinite(n) ? Math.max(0, Math.round(n)) : null;
+    numPieces = Number.isFinite(n) ? Math.max(0, Math.round(n)) : null;
   }
 
-  const figurinesRaw = c.figurineCount ?? c.figurines ?? c.minifigCount;
-  let figurineCount = null;
+  const figurinesRaw = c.numFigurines ?? c.figurineCount ?? c.figurines ?? c.minifigCount;
+  let numFigurines = null;
   if (figurinesRaw !== null && figurinesRaw !== undefined && figurinesRaw !== "") {
     const n = Number(figurinesRaw);
-    figurineCount = Number.isFinite(n) ? Math.max(0, Math.round(n)) : null;
+    numFigurines = Number.isFinite(n) ? Math.max(0, Math.round(n)) : null;
   }
 
   const yearRaw = c.releaseYear ?? c.year;
@@ -419,8 +419,8 @@ function normalizeCard(c) {
     brickcardThemeId: resolvePresetThemeId(
       c.brickcardThemeId ?? c.legoThemeId ?? c.themeId ?? ""
     ),
-    pieceCount,
-    figurineCount,
+    numPieces,
+    numFigurines,
     releaseYear,
     imageDataUrl: sanitizeSvgDataUrl(
       String(c.imageDataUrl ?? c.setImageDataUrl ?? c.image ?? "")

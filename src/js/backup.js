@@ -22,7 +22,7 @@ export const DEMO_BACKUP_SRC = "data/backup-demo-jo.brickcard";
 export const UNTHEMED_BACKUP_THEME_ID = "";
 
 /** Number of “Card appearance” settings included in a backup. */
-export const CARD_APPEARANCE_SETTING_COUNT = 4;
+export const CARD_APPEARANCE_NUM_SETTINGS = 4;
 
 /**
  * Structure migrations, in ascending SemVer order.
@@ -204,12 +204,12 @@ export function groupCardsForBackup(cards, themes) {
  * Themes with at least one card (plus “No theme” if needed).
  * @param {Card[]} cards
  * @param {LegoTheme[]} themes
- * @returns {{ id: string, name: string, cardCount: number, isCustom: boolean }[]}
+ * @returns {{ id: string, name: string, numCards: number, isCustom: boolean }[]}
  */
 export function listBackupThemeChoices(cards, themes) {
   const groups = groupCardsForBackup(cards, themes);
   const themeById = new Map((themes || []).map((t) => [t.id, t]));
-  /** @type {{ id: string, name: string, cardCount: number, isCustom: boolean }[]} */
+  /** @type {{ id: string, name: string, numCards: number, isCustom: boolean }[]} */
   const choices = [];
   for (const [id, groupCards] of groups) {
     if (id === UNTHEMED_BACKUP_THEME_ID) continue;
@@ -221,7 +221,7 @@ export function listBackupThemeChoices(cards, themes) {
     choices.push({
       id,
       name: themeName,
-      cardCount: groupCards.length,
+      numCards: groupCards.length,
       isCustom: !theme.isBuiltin,
     });
   }
@@ -230,7 +230,7 @@ export function listBackupThemeChoices(cards, themes) {
     choices.push({
       id: UNTHEMED_BACKUP_THEME_ID,
       name: _t("No theme"),
-      cardCount: unthemed.length,
+      numCards: unthemed.length,
       isCustom: false,
     });
   }
@@ -314,19 +314,19 @@ export function isBackupPayloadEmpty(payload) {
  * @param {Card[]} cards
  * @param {LegoTheme[]} themes
  * @param {LegoTheme[]} customThemes
- * @returns {{ id: string, name: string, cardCount: number, isCustom: boolean }[]}
+ * @returns {{ id: string, name: string, numCards: number, isCustom: boolean }[]}
  */
 export function listImportThemeChoices(cards, themes, customThemes) {
   const choices = listBackupThemeChoices(cards, themes);
   const chosen = new Set(choices.map((c) => c.id));
-  /** @type {{ id: string, name: string, cardCount: number, isCustom: boolean }[]} */
+  /** @type {{ id: string, name: string, numCards: number, isCustom: boolean }[]} */
   const empty = [];
   for (const theme of customThemes || []) {
     if (!theme || !theme.id || chosen.has(theme.id)) continue;
     empty.push({
       id: theme.id,
       name: String(theme.name || "").trim() || _t("THEME"),
-      cardCount: 0,
+      numCards: 0,
       isCustom: true,
     });
   }
@@ -446,11 +446,11 @@ export function estimateThemeCardsBytes(cards, includeImages) {
 
 /**
  * Theme checkbox hint: `12 cards · 2 MB`
- * @param {number} cardCount
+ * @param {number} numCards
  * @param {number} bytes
  */
-export function formatBackupThemeChoiceHint(cardCount, bytes) {
-  const n = Math.max(0, Math.round(Number(cardCount) || 0));
+export function formatBackupThemeChoiceHint(numCards, bytes) {
+  const n = Math.max(0, Math.round(Number(numCards) || 0));
   const cards =
     n === 1 ? _t("%(count)s card", { count: n }) : _t("%(count)s cards", { count: n });
   return `${cards} · ${formatBackupSize(bytes)}`;
@@ -498,13 +498,13 @@ function formatCountItem(n, kind) {
 
 /**
  * Modal footer recap: counts > 0 then size (to show in bold).
- * @param {{ cardCount: number, themeCount: number, settingCount: number, bytes: number }} recap
+ * @param {{ numCards: number, numThemes: number, numSettings: number, bytes: number }} recap
  * @returns {{ items: string[], size: string }}
  */
 export function formatBackupFooterRecap(recap) {
-  const cards = Math.max(0, Math.round(Number(recap.cardCount) || 0));
-  const themes = Math.max(0, Math.round(Number(recap.themeCount) || 0));
-  const settings = Math.max(0, Math.round(Number(recap.settingCount) || 0));
+  const cards = Math.max(0, Math.round(Number(recap.numCards) || 0));
+  const themes = Math.max(0, Math.round(Number(recap.numThemes) || 0));
+  const settings = Math.max(0, Math.round(Number(recap.numSettings) || 0));
   /** @type {string[]} */
   const items = [];
   if (cards > 0) items.push(formatCountItem(cards, "card"));
@@ -515,7 +515,7 @@ export function formatBackupFooterRecap(recap) {
 
 /**
  * Toast recap: optional filename + same items as the footer, size in bold (HTML).
- * @param {{ cardCount: number, themeCount: number, settingCount: number, bytes: number }} recap
+ * @param {{ numCards: number, numThemes: number, numSettings: number, bytes: number }} recap
  * @param {{ filename?: string }} [opts]
  * @returns {{ message: string, messageHtml: string }}
  */
@@ -562,20 +562,20 @@ export function countBackupThemeLogos(themes) {
 /**
  * @param {{
  *   kind?: "full"|"custom",
- *   cardCount: number,
- *   themeCount: number,
- *   imageCount?: number,
- *   logoCount?: number,
+ *   numCards: number,
+ *   numThemes: number,
+ *   numImages?: number,
+ *   numLogos?: number,
  *   date?: string,
  * }} opts
  */
 export function formatBackupFilename(opts) {
   const kind = opts.kind === "custom" ? "custom" : "full";
   const date = opts.date || new Date().toISOString().slice(0, 10);
-  const cards = Math.max(0, Math.round(Number(opts.cardCount) || 0));
-  const themes = Math.max(0, Math.round(Number(opts.themeCount) || 0));
-  const images = Math.max(0, Math.round(Number(opts.imageCount) || 0));
-  const logos = Math.max(0, Math.round(Number(opts.logoCount) || 0));
+  const cards = Math.max(0, Math.round(Number(opts.numCards) || 0));
+  const themes = Math.max(0, Math.round(Number(opts.numThemes) || 0));
+  const images = Math.max(0, Math.round(Number(opts.numImages) || 0));
+  const logos = Math.max(0, Math.round(Number(opts.numLogos) || 0));
   const parts = [
     "brickcard-backup",
     date,
@@ -733,10 +733,10 @@ export async function exportBackup(opts = /** @type {BackupBuildOpts} */ ({})) {
   });
   const filename = formatBackupFilename({
     kind,
-    cardCount: payload.cards.length,
-    themeCount: payload.themes.length,
-    imageCount: countBackupCardImages(payload.cards),
-    logoCount: countBackupThemeLogos(payload.themes),
+    numCards: payload.cards.length,
+    numThemes: payload.themes.length,
+    numImages: countBackupCardImages(payload.cards),
+    numLogos: countBackupThemeLogos(payload.themes),
   });
   const blob = new Blob([JSON.stringify(payload, null, 2)], {
     type: "application/json",

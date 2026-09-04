@@ -70,12 +70,12 @@ import { includesCI } from "../includes-ci.js";
  *   onClose: () => void,
  *   onClearCards?: () => void | Promise<void>,
  *   onDevReset?: () => void | Promise<void>,
- *   cardCount?: number,
+ *   numCards?: number,
  * }} opts
  * @returns {() => void} cleanup
  */
 export function renderSettingsModal(host, opts) {
-  const { onClose, onClearCards, onDevReset, cardCount = 0 } = opts;
+  const { onClose, onClearCards, onDevReset, numCards = 0 } = opts;
   const showDevReset = Boolean(onDevReset);
   const showTelemetry = isTelemetryAvailable();
   const currentTheme = getTheme();
@@ -395,7 +395,7 @@ export function renderSettingsModal(host, opts) {
                   tag: "button",
                   id: "settings-clear-cards",
                   danger: true,
-                  disabled: cardCount === 0,
+                  disabled: numCards === 0,
                 },
               ])}
             </section>

@@ -12,7 +12,7 @@ import { formRadioMarkup } from "./form-radio.js";
 import { formCheckboxMarkup } from "./form-checkbox.js";
 import { loadCards, loadCustomThemes, loadThemes } from "./storage.js";
 import {
-  CARD_APPEARANCE_SETTING_COUNT,
+  CARD_APPEARANCE_NUM_SETTINGS,
   UNTHEMED_BACKUP_THEME_ID,
   backupPayloadBytes,
   buildBackupPayload,
@@ -58,7 +58,7 @@ export async function renderBackupDialog(host, opts) {
   function themeChoiceHint(choice) {
     const group = cardsByTheme.get(choice.id) || [];
     return formatBackupThemeChoiceHint(
-      choice.cardCount,
+      choice.numCards,
       estimateThemeCardsBytes(group, includeImages)
     );
   }
@@ -216,8 +216,8 @@ export async function renderBackupDialog(host, opts) {
       if (choice && hint) hint.textContent = themeChoiceHint(choice);
     });
     const payload = currentPayload();
-    const settingCount = payload.settings?.cardAppearance
-      ? CARD_APPEARANCE_SETTING_COUNT
+    const numSettings = payload.settings?.cardAppearance
+      ? CARD_APPEARANCE_NUM_SETTINGS
       : 0;
     const empty = isBackupPayloadEmpty(payload);
     if (recapEl instanceof HTMLElement) {
@@ -227,9 +227,9 @@ export async function renderBackupDialog(host, opts) {
         recapEl.replaceChildren(strong);
       } else {
         const recap = formatBackupFooterRecap({
-          cardCount: payload.cards.length,
-          themeCount: payload.themes.length,
-          settingCount,
+          numCards: payload.cards.length,
+          numThemes: payload.themes.length,
+          numSettings,
           bytes: backupPayloadBytes(payload),
         });
         /** @type {Array<Text|HTMLElement>} */
@@ -312,9 +312,9 @@ export async function renderBackupDialog(host, opts) {
       });
       const recap = formatBackupToastRecap(
         {
-          cardCount: result.cards,
-          themeCount: result.themes,
-          settingCount: result.settings ? CARD_APPEARANCE_SETTING_COUNT : 0,
+          numCards: result.cards,
+          numThemes: result.themes,
+          numSettings: result.settings ? CARD_APPEARANCE_NUM_SETTINGS : 0,
           bytes: result.bytes,
         },
         { filename: result.filename }

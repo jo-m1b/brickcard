@@ -6,7 +6,7 @@
  * (CSS + app.js / version.js import map) and 404.html (CSS).
  * Adding a JS file, markdown page, locale catalog, or data JSON: add it to OFFLINE_ASSETS.
  */
-const APP_VERSION = "0.9.2";
+const APP_VERSION = "0.9.3";
 const CACHE = `brickcard-${APP_VERSION}`;
 
 const PRECACHE_BATCH = 4;

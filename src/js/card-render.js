@@ -214,10 +214,10 @@ export function cardFaceMarkup() {
         <span class="card-badge card-meta-release-year" hidden title="${_t("Release year")}">
           ${ICON_YEAR}<span class="card-badge-value"></span>
         </span>
-        <span class="card-badge card-meta-piece-count" hidden title="${_t("Pieces")}">
+        <span class="card-badge card-meta-num-pieces" hidden title="${_t("Pieces")}">
           ${ICON_PIECES}<span class="card-badge-value"></span>
         </span>
-        <span class="card-badge card-meta-figurine-count" hidden title="${_t("Figurines")}">
+        <span class="card-badge card-meta-num-figurines" hidden title="${_t("Figurines")}">
           ${ICON_FIGURINES}<span class="card-badge-value"></span>
         </span>
       </div>
@@ -294,8 +294,8 @@ export function fillCardFace(root, card, legoTheme) {
   if (brand) brand.hidden = Boolean(card.imageDataUrl);
 
   const yearEl = root.querySelector(".card-meta-release-year");
-  const piecesEl = root.querySelector(".card-meta-piece-count");
-  const figurinesEl = root.querySelector(".card-meta-figurine-count");
+  const piecesEl = root.querySelector(".card-meta-num-pieces");
+  const figurinesEl = root.querySelector(".card-meta-num-figurines");
   const yearVal = yearEl?.querySelector(".card-badge-value");
   const piecesVal = piecesEl?.querySelector(".card-badge-value");
   const figurinesVal = figurinesEl?.querySelector(".card-badge-value");
@@ -303,24 +303,24 @@ export function fillCardFace(root, card, legoTheme) {
     card.releaseYear != null && card.releaseYear !== ""
       ? Number(card.releaseYear)
       : null;
-  const pieceCount =
-    card.pieceCount != null && card.pieceCount !== "" ? Number(card.pieceCount) : null;
-  const figurineCount =
-    card.figurineCount != null && card.figurineCount !== ""
-      ? Number(card.figurineCount)
+  const numPieces =
+    card.numPieces != null && card.numPieces !== "" ? Number(card.numPieces) : null;
+  const numFigurines =
+    card.numFigurines != null && card.numFigurines !== ""
+      ? Number(card.numFigurines)
       : null;
 
   const showYear = releaseYear != null && Number.isFinite(releaseYear);
-  const showPieces = pieceCount != null && Number.isFinite(pieceCount);
-  const showFigurines = figurineCount != null && Number.isFinite(figurineCount);
+  const showPieces = numPieces != null && Number.isFinite(numPieces);
+  const showFigurines = numFigurines != null && Number.isFinite(numFigurines);
 
   if (yearVal) yearVal.textContent = showYear ? String(releaseYear) : "";
   if (yearEl) yearEl.hidden = !showYear;
 
-  if (piecesVal) piecesVal.textContent = showPieces ? String(pieceCount) : "";
+  if (piecesVal) piecesVal.textContent = showPieces ? String(numPieces) : "";
   if (piecesEl) piecesEl.hidden = !showPieces;
 
-  if (figurinesVal) figurinesVal.textContent = showFigurines ? String(figurineCount) : "";
+  if (figurinesVal) figurinesVal.textContent = showFigurines ? String(numFigurines) : "";
   if (figurinesEl) figurinesEl.hidden = !showFigurines;
 
   const meta = root.querySelector(".card-meta");

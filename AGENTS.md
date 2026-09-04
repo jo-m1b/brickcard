@@ -112,8 +112,8 @@ Field names are intentionally verbose (readable without docs):
   legoSetRef: string,       // e.g. "6140/6109"
   title: string,            // Brickcard title (`\n` = line break)
   brickcardThemeId: string, // Brickcard theme id
-  pieceCount: number|null,
-  figurineCount: number|null, // figurine count, optional
+  numPieces: number|null,
+  numFigurines: number|null, // figurine count, optional
   releaseYear: number|null, // release year, optional
   imageDataUrl: string,     // photo data URL (JPEG/PNG/SVG/WebP) — optional
   imageBackgroundColor: string, // image-area background (hex); empty = white on screen
@@ -124,7 +124,7 @@ Field names are intentionally verbose (readable without docs):
 }
 ```
 
-Auto-migration from old names (`setTitle` → `title`, `setImageDataUrl` → `imageDataUrl`, `legoThemeId` → `brickcardThemeId`, plus `ref`, `image`, `zoom`, …). `createdAt` ignored. Old default theme id `the-lord-of-the-rings` → `lord-of-the-rings`.
+Auto-migration from old names (`setTitle` → `title`, `setImageDataUrl` → `imageDataUrl`, `legoThemeId` → `brickcardThemeId`, `pieceCount` → `numPieces`, `figurineCount` → `numFigurines`, plus `ref`, `image`, `zoom`, …). `createdAt` ignored. Old default theme id `the-lord-of-the-rings` → `lord-of-the-rings`.
 
 ## Default themes (`src/data/themes-presets.json`)
 
@@ -136,7 +136,7 @@ Fields per entry:
 - `secondaryColor` (hex, optional) — texts, badge icons, and the Brickcard logo; if omitted → black `#141414` or white `#ffffff` from accent luminance
 - `logoSrc` (optional) — path from `src/` (e.g. `data/theme-logo-….png`); no logo / load failure → show the theme **name** (no generated SVG)
 - `logoZoom` / `logoOffsetX` / `logoOffsetY` (optional) — logo crop (1 / 0 / 0 if omitted); same units as custom themes; tool export: 2 decimal places, `0.00` omitted (`logoZoom` of `1` too)
-- `rebrickableThemeId` (optional positive integer) — Rebrickable theme id for `sets-presets.json`; the build script walks `parent_id` and writes `brickcardThemeId` on matching sets; omitted on export when unset; `#developer/theme-presets` Save keeps the field (no editor UI; edit the JSON)
+- `rebrickableThemeId` (optional positive integer) — Rebrickable theme id to map a catalog `themeId` to this preset later (import / autocomplete); omitted on export when unset; `#developer/theme-presets` Save keeps the field (no editor UI; edit the JSON)
 
 Default themes are **read-only** in the app (no edit, no delete); focusable / clickable tiles → `#themes/view/:id` (identifier, name, colors, downloadable logo). Custom themes have a UUID id (`createId()`), live in IndexedDB, and are edited via `#themes/new` / `#themes/edit/:id`.
 
@@ -148,20 +148,19 @@ Compiled from the daily [Rebrickable downloads](https://rebrickable.com/download
 
 ```
 python3 scripts/build-sets-presets.py
-python3 scripts/build-sets-presets.py --output src/data/sets-presets.json --min-piece-count 0
+python3 scripts/build-sets-presets.py --output src/data/sets-presets.json --min-num-pieces 0
 ```
 
 Paths are relative to the repo root. Arguments:
 
 - `--output` (default `src/data/sets-presets.json`)
-- `--themes-presets` (default `src/data/themes-presets.json`) — reads `rebrickableThemeId`
-- `--min-piece-count` (default `10`; `--min-piece-count 0` keeps 0-piece sets)
-- `--max-piece-count`, `--min-release-year`, `--max-release-year`, `--min-figurine-count`, `--max-figurine-count` (inactive if omitted)
+- `--min-num-pieces` (default `10`; `--min-num-pieces 0` keeps 0-piece sets)
+- `--max-num-pieces`, `--min-release-year`, `--max-release-year`, `--min-num-figurines`, `--max-num-figurines` (inactive if omitted)
 - `--exclude-theme-id` (repeatable; default `746` Database Sets) — drop that Rebrickable theme, its descendants, and their sets (passing the flag replaces the default)
 
-An **active** filter + a **missing** value (`null` / unparseable) excludes the set. `0` is a value for filters. `figurineCount` is the sum of minifig quantities on the set’s latest inventory (no rows → `0`). Each set’s `id` is the Rebrickable `set_num` (including the `-\d+` suffix); map to the card `legoSetRef` later at import / autocomplete. `pieceCount`, `figurineCount`, and `releaseYear` are stored as `null` (or dropped when trailing) when missing or `0`. `themes` lists only named Rebrickable themes used by kept sets (no empty names, no unused themes). `brickcardThemeId` is omitted when no preset maps (trailing). If `themes` + `sets` match the existing file, the script does not rewrite (so the daily workflow does not commit a date-only change).
+An **active** filter + a **missing** value (`null` / unparseable) excludes the set. `0` is a value for filters. `numFigurines` is the sum of minifig quantities on the set’s latest inventory (no rows → `0`). Each set’s `id` is the Rebrickable `set_num` (including the `-\d+` suffix); map to the card `legoSetRef` later at import / autocomplete. `numPieces`, `numFigurines`, and `releaseYear` are stored as `null` (or dropped when trailing) when missing or `0`. `themes` lists only named Rebrickable themes used by kept sets (no empty names, no unused themes). If `themes` + `sets` match the existing file, the script does not rewrite (so the daily workflow does not commit a date-only change).
 
-JSON shape: `meta` (`generatedAt`, `source`, `themesCount`, `setsCount`, `themeKeys`, `setKeys`); `themes` and `sets` are **positional rows** (`themeKeys` = `id`, `name`; `setKeys` = `id`, `name`, `pieceCount`, `figurineCount`, `releaseYear`, `themeId`, `brickcardThemeId`). Read with `Object.fromEntries(keys.map((k, i) => [k, row[i]]))`. GitHub Actions `.github/workflows/sets-presets.yml` runs the script daily (`07:30` UTC) and on `workflow_dispatch`, then commits when the catalog changed (`chore: refresh sets-presets.json`) and triggers **Deploy Brickcard to GitHub Pages** (`workflow_dispatch`; a bot `push` does not start `pages.yml`). The Actions app needs write access to the default branch (contents + actions).
+JSON shape: `meta` (`generatedAt`, `source`, `numThemes`, `themesKeys`, `numSets`, `setsKeys`); `themes` and `sets` are **positional rows** (`themesKeys` = `id`, `name`; `setsKeys` = `id`, `name`, `numPieces`, `numFigurines`, `releaseYear`, `themeId`). Read with `Object.fromEntries(keys.map((k, i) => [k, row[i]]))`. GitHub Actions `.github/workflows/sets-presets.yml` runs the script daily (`07:30` UTC) and on `workflow_dispatch`, then commits when the catalog changed (`chore: refresh sets-presets.json`) and triggers **Deploy Brickcard to GitHub Pages** (`workflow_dispatch`; a bot `push` does not start `pages.yml`). The Actions app needs write access to the default branch (contents + actions).
 
 ## LEGO theme model (`LegoTheme`)
 
@@ -206,10 +205,10 @@ The Brickcard logo (back, and face with no photo) is an **inline SVG** (`fill="c
 - Image radius key: `brickcard:card-image-radius-mm` (default `1`, photo frame)
 - Default card color key: `brickcard:card-default-color` (empty = factory gray `#6e6e6e`)
 - Print selection key: `brickcard:print-qty` (`{ [cardId]: qty }`)
-- Print settings key: `brickcard:print-settings` (`{ printGrid: 1–10, cardPrintOrder: "legoSetRef"|"title"|"releaseYear"|"pieceCount"|"figurineCount"|"updatedAt", printSide: "both"|"faceOnly"|"backOnly", sheetAssembly: "alternate"|"grouped", cutMarkFace: boolean, cutMarkBack: boolean, bleedFace: boolean, bleedBack: boolean }`, default `3` / `legoSetRef` / `both` / `alternate` / Face / not Back / not face / Back; order always ASC, independent of `brickcard:list-sort`)
+- Print settings key: `brickcard:print-settings` (`{ printGrid: 1–10, cardPrintOrder: "legoSetRef"|"title"|"releaseYear"|"numPieces"|"numFigurines"|"updatedAt", printSide: "both"|"faceOnly"|"backOnly", sheetAssembly: "alternate"|"grouped", cutMarkFace: boolean, cutMarkBack: boolean, bleedFace: boolean, bleedBack: boolean }`, default `3` / `legoSetRef` / `both` / `alternate` / Face / not Back / not face / Back; order always ASC, independent of `brickcard:list-sort`)
 - Developer space key: `brickcard:developer-enabled` (`"1"` if enabled off-local; always treated as on on localhost / `127.0.0.1` / `[::1]`); local Reset removes it
 - List sort keys: `brickcard:list-sort`, `brickcard:list-sort-dir` (default `updatedAt` / `desc`); after **creating** a card: search cleared and sort reset to date modified descending; after **edit** or **delete**: the grid is not rebuilt (tile updated or removed, scroll / search / sort unchanged; search and print counters recalculated; last card → empty home); after **create** or **edit**: keyboard focus on the affected tile (scroll into view if needed); closing the editor of an existing card (Escape / close / Cancel / backdrop): same focus on the edited tile
-- Theme sort keys: `brickcard:themes-sort`, `brickcard:themes-sort-dir` (default `cardCount` / `desc`); after **creating** a custom theme: search cleared and sort reset to date modified descending (if ≥ 2 custom themes; else fall back to the default); after **edit** or **delete**: the grid is not rebuilt (mini-card updated or removed, scroll / search / sort unchanged; counter recalculated; no custom left → custom section hidden); **Delete all custom themes** (if more than 2 custom): custom section emptied; cards kept, `brickcardThemeId` cleared; after **create** or **edit**: keyboard focus on the mini-card; closing the editor of an existing theme (Escape / close / Cancel / backdrop) or the default-theme view (`#themes/view/:id`): same focus. Same idea for `#developer/theme-presets` (create: search cleared, date desc sort, scroll top, focus; edit: in-place tile and focus; closing the editor of an existing theme: focus; last theme → empty “No theme”)
+- Theme sort keys: `brickcard:themes-sort`, `brickcard:themes-sort-dir` (default `numCards` / `desc`; old `cardCount` still read); after **creating** a custom theme: search cleared and sort reset to date modified descending (if ≥ 2 custom themes; else fall back to the default); after **edit** or **delete**: the grid is not rebuilt (mini-card updated or removed, scroll / search / sort unchanged; counter recalculated; no custom left → custom section hidden); **Delete all custom themes** (if more than 2 custom): custom section emptied; cards kept, `brickcardThemeId` cleared; after **create** or **edit**: keyboard focus on the mini-card; closing the editor of an existing theme (Escape / close / Cancel / backdrop) or the default-theme view (`#themes/view/:id`): same focus. Same idea for `#developer/theme-presets` (create: search cleared, date desc sort, scroll top, focus; edit: in-place tile and focus; closing the editor of an existing theme: focus; last theme → empty “No theme”)
 - Max list columns key: `brickcard:list-cols-max` (default `4`, range 2–10, or `infinite`)
 - Optimize images key: `brickcard:optimize-images` (`"1"` / missing = checked, default; `"0"` = unchecked); local Reset removes it
 - Telemetry key: `brickcard:telemetry` (`"1"` / missing = checked, default; `"0"` = unchecked); local Reset removes it; Settings checkbox and script off-local only; views = pathname + hash (`data-auto-track` off); stable Umami URL (English hashes, `#edit-card/:id` → `#edit-card`, `#themes/edit/:id` → `#themes/edit`; not other ids / slugs); title = `{locale} · ` + UI label (`getLocale()`, middle dot): home → `_t("Home")`, `#edit-card/…` → `_t("Edit card")`, `#themes/edit/…` → `_t("Edit theme")`; `#developer/…` = before the 2nd `|` (`page | section`, EN titles); other views = segment before `|` (not the SEO suffix); track at the end of `route()` (after title / overlay)
@@ -366,12 +365,12 @@ Center bar (list): `search-bar` block in the `topbar-search` slot.
 | Icon | optional — `form-control-icon` (default search: `ri-search-line`) |
 | Control | `input.form-control` `type="search"` (same look as a text field) |
 | Trail | `search-bar-trail` (absolute, right) — visible only if ≥ 2 items (`[hidden]` otherwise) |
-| Count | `search-count` (empty → hidden) |
+| Results | `search-num-results` (empty → hidden) |
 | Sort | `search-sort` + `btn ghost sm icon-only` (`ri-filter-3-fill`) + `search-sort-menu form-select-list` menu (child of `search-bar`, no top border, aligned to the focus frame) / `form-select-option` options; right icon `ri-sort-asc` / `ri-sort-desc` on the active option |
 
 Opening the sort menu: **click** only (not hover or focus alone); once the button is focused, keyboard like `form-select` (↑↓ Enter/Space Home/End Escape, `aria-activedescendant`). The menu **stays open** after a criterion choice or direction flip (close: outside click, Escape, or click the button again).
 
-Applied: list topbar · themes modal (count + sort: card count, title, date modified if ≥ 2 custom themes — default themes not involved; default card count descending) · `#developer` home and `#settings` (`search-bar--input-only`, no count or sort). Matching: `includesCI` (`includes-ci.js`), case- and accent-insensitive. Gallery: `#developer/search`.
+Applied: list topbar · themes modal (results + sort: `numCards`, title, date modified if ≥ 2 custom themes — default themes not involved; default `numCards` descending) · `#developer` home and `#settings` (`search-bar--input-only`, no results or sort). Matching: `includesCI` (`includes-ci.js`), case- and accent-insensitive. Gallery: `#developer/search`.
 
 ## Titles (design system)
 

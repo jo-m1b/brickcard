@@ -263,8 +263,8 @@ export function applyChromeI18n() {
     legoSetRef: _t("Reference"),
     title: _t("Title"),
     releaseYear: _t("Release year"),
-    pieceCount: _t("Number of pieces"),
-    figurineCount: _t("Number of figurines"),
+    numPieces: _t("Number of pieces"),
+    numFigurines: _t("Number of figurines"),
   };
   for (const [key, label] of Object.entries(sortLabels)) {
     const el = document.querySelector(`#search-sort-opt-${key} .form-select-option-label`);

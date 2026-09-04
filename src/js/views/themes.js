@@ -27,11 +27,15 @@ import { includesCI } from "../includes-ci.js";
 const SORT_KEY = "brickcard:themes-sort";
 const SORT_DIR_KEY = "brickcard:themes-sort-dir";
 
-/** @typedef {"cardCount"|"name"|"updatedAt"} ThemesSortKey */
+/** @typedef {"numCards"|"name"|"updatedAt"} ThemesSortKey */
 /** @typedef {"asc"|"desc"} ThemesSortDir */
 
 /** @type {ThemesSortKey[]} */
-const SORT_KEYS = ["cardCount", "name", "updatedAt"];
+const SORT_KEYS = ["numCards", "name", "updatedAt"];
+
+const SORT_KEY_ALIASES = {
+  cardCount: "numCards",
+};
 
 /** @param {ThemesSortKey} key @returns {ThemesSortDir} */
 function defaultSortDir(key) {
@@ -42,14 +46,14 @@ function defaultSortDir(key) {
 function loadSortKey() {
   try {
     const raw = localStorage.getItem(SORT_KEY);
-    const v = raw === "themeName" ? "name" : raw;
-    if (v && SORT_KEYS.includes(/** @type {ThemesSortKey} */ (v))) {
-      return /** @type {ThemesSortKey} */ (v);
+    const mapped = raw === "themeName" ? "name" : SORT_KEY_ALIASES[raw] || raw;
+    if (mapped && SORT_KEYS.includes(/** @type {ThemesSortKey} */ (mapped))) {
+      return /** @type {ThemesSortKey} */ (mapped);
     }
   } catch {
     /* ignore */
   }
-  return "cardCount";
+  return "numCards";
 }
 
 /** @param {ThemesSortKey} key */
@@ -168,7 +172,7 @@ export function removeThemeFromList(id) {
  * @param {Map<string, number>} usage
  */
 function compareThemesAsc(a, b, key, usage) {
-  if (key === "cardCount") {
+  if (key === "numCards") {
     return (usage.get(a.id) || 0) - (usage.get(b.id) || 0);
   }
   return String(a.name || "").localeCompare(String(b.name || ""), getLocale(), {
@@ -225,8 +229,8 @@ export async function renderThemesModal(host, opts) {
   }
 
   if (sortKey === "updatedAt" && !canSortByDate()) {
-    sortKey = "cardCount";
-    sortDir = defaultSortDir("cardCount");
+    sortKey = "numCards";
+    sortDir = defaultSortDir("numCards");
   }
 
   document.body.classList.add("modal-open");
@@ -253,10 +257,10 @@ export async function renderThemesModal(host, opts) {
               placeholder="${_t("Search for a theme…")}"
               autocomplete="off"
               aria-label="${_t("Search for a theme")}"
-              aria-describedby="themes-search-count"
+              aria-describedby="themes-search-num-results"
             />
             <div class="search-bar-trail" id="themes-search-trail">
-              <span class="search-count" id="themes-search-count" aria-live="polite"></span>
+              <span class="search-num-results" id="themes-search-num-results" aria-live="polite"></span>
               <div class="search-sort">
                 <button
                   type="button"
@@ -272,7 +276,7 @@ export async function renderThemesModal(host, opts) {
               </div>
             </div>
             <div class="search-sort-menu form-select-list" id="themes-sort-menu" role="listbox" hidden>
-              <div class="form-select-option" role="option" id="themes-sort-opt-cardCount" data-sort="cardCount" aria-selected="false">
+              <div class="form-select-option" role="option" id="themes-sort-opt-numCards" data-sort="numCards" aria-selected="false">
                 <span class="form-select-option-label">${_t("Number of cards")}</span>
                 <span class="form-select-icon form-select-icon--right" hidden></span>
               </div>
@@ -329,7 +333,7 @@ export async function renderThemesModal(host, opts) {
   const btnClose = q("#btn-themes-close");
   const searchBar = q("#themes-search-bar");
   const searchInput = q("#themes-search");
-  const searchCount = q("#themes-search-count");
+  const searchNumResults = q("#themes-search-num-results");
   const sortBtn = q("#themes-sort-btn");
   const sortMenu = q("#themes-sort-menu");
   const customSection = q("#themes-section-custom");
@@ -381,14 +385,14 @@ export async function renderThemesModal(host, opts) {
     });
   }
 
-  function updateSearchCount(shown) {
+  function updateSearchNumResults(shown) {
     const total = custom.length + builtin.length;
     const query = searchQuery();
     if (!total) {
-      searchCount.textContent = _t("0 themes");
+      searchNumResults.textContent = _t("0 themes");
       return;
     }
-    searchCount.textContent = query
+    searchNumResults.textContent = query
       ? _t("%(shown)s / %(total)s themes", { shown, total })
       : _t("%(total)s themes", { total });
   }
@@ -549,7 +553,7 @@ export async function renderThemesModal(host, opts) {
     customSection.hidden = customShown.length === 0;
     builtinSection.hidden = builtinShown.length === 0;
     emptyFilter.hidden = shown > 0;
-    updateSearchCount(shown);
+    updateSearchNumResults(shown);
     syncSortMenu();
     syncDeleteAllCustomBtn();
     bindThemeTileLogos(host);
@@ -568,7 +572,7 @@ export async function renderThemesModal(host, opts) {
     );
   }
 
-  function visibleTileCount() {
+  function visibleNumTiles() {
     return (
       customGrid.querySelectorAll(".theme-tile").length +
       builtinGrid.querySelectorAll(".theme-tile").length
@@ -576,14 +580,14 @@ export async function renderThemesModal(host, opts) {
   }
 
   function syncThemesChrome() {
-    const shown = visibleTileCount();
+    const shown = visibleNumTiles();
     customSection.hidden = customGrid.querySelectorAll(".theme-tile").length === 0;
     builtinSection.hidden = builtinGrid.querySelectorAll(".theme-tile").length === 0;
     emptyFilter.hidden = shown > 0;
-    updateSearchCount(shown);
+    updateSearchNumResults(shown);
     if (sortKey === "updatedAt" && !canSortByDate()) {
-      sortKey = "cardCount";
-      sortDir = defaultSortDir("cardCount");
+      sortKey = "numCards";
+      sortDir = defaultSortDir("numCards");
     }
     syncSortMenu();
     syncDeleteAllCustomBtn();
@@ -750,8 +754,8 @@ export async function renderThemesModal(host, opts) {
     sortKey = loadSortKey();
     sortDir = loadSortDir(sortKey);
     if (sortKey === "updatedAt" && !canSortByDate()) {
-      sortKey = "cardCount";
-      sortDir = defaultSortDir("cardCount");
+      sortKey = "numCards";
+      sortDir = defaultSortDir("numCards");
     }
     paint();
     scrollThemesListTop();
@@ -887,7 +891,7 @@ function themeTileMarkup(theme, count, action) {
         <p class="theme-tile-name">${name}</p>
         ${logo}
       </div>
-      ${count > 0 ? `<p class="theme-tile-count">${countLabel}</p>` : ""}
+      ${count > 0 ? `<p class="theme-tile-num-cards">${countLabel}</p>` : ""}
     </article>`;
 }
 

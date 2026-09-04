@@ -69,7 +69,7 @@ export function renderDeveloperTiles(host) {
         ${tileListMarkup([
           {
             title: "Search",
-            desc: "search-bar — field, count, sort",
+            desc: "search-bar — field, num results, sort",
             href: "#developer/search",
             icon: ICON_SEARCH_LINE,
           },

@@ -44,8 +44,8 @@ export function setPrintMenuVisible(visible) {
 /**
  * Update badge, summary, and buttons from the selection and card count.
  * @param {{
- *   cardCount?: number,
- *   addableCount?: number,
+ *   numCards?: number,
+ *   numAddable?: number,
  *   searching?: boolean,
  *   missing?: boolean,
  * }} [state]
@@ -53,7 +53,7 @@ export function setPrintMenuVisible(visible) {
 export function syncPrintMenu(state = {}) {
   const root = document.getElementById("print-menu");
   const btn = document.getElementById("btn-print-menu");
-  const countEl = document.getElementById("print-menu-count");
+  const countEl = document.getElementById("print-menu-num");
   const title = document.getElementById("print-menu-title");
   const desc = document.getElementById("print-menu-desc");
   const btnSelectAll = document.getElementById("btn-print-select-all");
@@ -63,16 +63,16 @@ export function syncPrintMenu(state = {}) {
   if (!root || !btn) return;
 
   const count = totalPrintCount();
-  const cardCount =
-    state.cardCount != null
-      ? state.cardCount
-      : Number(root.dataset.cardCount || 0);
+  const numCards =
+    state.numCards != null
+      ? state.numCards
+      : Number(root.dataset.numCards || 0);
 
-  if (state.cardCount != null) {
-    root.dataset.cardCount = String(cardCount);
+  if (state.numCards != null) {
+    root.dataset.numCards = String(numCards);
   }
-  if (state.addableCount != null) {
-    root.dataset.addableCount = String(state.addableCount);
+  if (state.numAddable != null) {
+    root.dataset.numAddable = String(state.numAddable);
   }
   if (state.searching != null) {
     root.dataset.searching = state.searching ? "1" : "0";
@@ -81,10 +81,10 @@ export function syncPrintMenu(state = {}) {
     root.dataset.missing = state.missing ? "1" : "0";
   }
 
-  const addableCount =
-    state.addableCount != null
-      ? state.addableCount
-      : Number(root.dataset.addableCount || 0);
+  const numAddable =
+    state.numAddable != null
+      ? state.numAddable
+      : Number(root.dataset.numAddable || 0);
   const searching =
     state.searching != null ? state.searching : root.dataset.searching === "1";
   const missing =
@@ -128,32 +128,32 @@ export function syncPrintMenu(state = {}) {
   }
 
   if (btnSelectAll) {
-    const showAdd = addableCount >= 2 || (addableCount === 1 && missing);
+    const showAdd = numAddable >= 2 || (numAddable === 1 && missing);
     btnSelectAll.hidden = !showAdd;
     if (showAdd && selectAllLabel) {
-      const oneMissing = missing && addableCount === 1;
+      const oneMissing = missing && numAddable === 1;
       if (searching) {
         if (oneMissing) {
           selectAllLabel.textContent = _t("Add the missing card from the search");
         } else if (missing) {
           selectAllLabel.textContent = _t(
             "Add the %(count)s missing cards from the search",
-            { count: addableCount }
+            { count: numAddable }
           );
         } else {
           selectAllLabel.textContent = _t("Add the %(count)s cards from the search", {
-            count: addableCount,
+            count: numAddable,
           });
         }
       } else if (oneMissing) {
         selectAllLabel.textContent = _t("Add the missing card");
       } else if (missing) {
         selectAllLabel.textContent = _t("Add the %(count)s missing cards", {
-          count: addableCount,
+          count: numAddable,
         });
       } else {
         selectAllLabel.textContent = _t("Add the %(count)s cards", {
-          count: addableCount,
+          count: numAddable,
         });
       }
     }

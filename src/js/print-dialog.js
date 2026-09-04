@@ -46,8 +46,8 @@ import {
  */
 export function renderPrintDialog(host, opts) {
   const { onClose, toast } = opts;
-  const cardCount = totalPrintCount();
-  const empty = cardCount < 1;
+  const numCards = totalPrintCount();
+  const empty = numCards < 1;
 
   document.body.classList.add("modal-open");
 
@@ -56,7 +56,7 @@ export function renderPrintDialog(host, opts) {
 
   host.innerHTML = `
     <div class="modal-backdrop" id="print-dialog-backdrop" role="presentation">
-      <div class="modal modal--md" role="dialog" aria-modal="true" aria-labelledby="print-dialog-title"${empty ? ` aria-describedby="print-dialog-empty"` : ` aria-describedby="print-dialog-count print-dialog-desc"`}>
+      <div class="modal modal--md" role="dialog" aria-modal="true" aria-labelledby="print-dialog-title"${empty ? ` aria-describedby="print-dialog-empty"` : ` aria-describedby="print-dialog-num print-dialog-desc"`}>
         <div class="modal-header">
           <div>
             <h1 class="view-title" id="print-dialog-title">${modalTitleMarkup(_t("Print settings"), ICON_PRINTER)}</h1>
@@ -77,7 +77,7 @@ export function renderPrintDialog(host, opts) {
                 })
               : `
           <div class="modal-confirm-msg" id="print-dialog-recap">
-            <h2 class="section-title" id="print-dialog-count"></h2>
+            <h2 class="section-title" id="print-dialog-num"></h2>
             <p class="view-desc" id="print-dialog-desc"></p>
           </div>
           <div class="form-field">
@@ -203,7 +203,7 @@ export function renderPrintDialog(host, opts) {
   let gridRangeField = null;
 
   if (!empty) {
-    const countEl = host.querySelector("#print-dialog-count");
+    const countEl = host.querySelector("#print-dialog-num");
     const descEl = host.querySelector("#print-dialog-desc");
     const gridRow = /** @type {HTMLElement|null} */ (
       host.querySelector("#print-dialog-grid")?.closest(".form-range-row")
@@ -218,10 +218,10 @@ export function renderPrintDialog(host, opts) {
 
     function refresh() {
       if (countEl instanceof HTMLElement) {
-        countEl.textContent = formatPrintCountLabel(cardCount);
+        countEl.textContent = formatPrintCountLabel(numCards);
       }
       if (descEl instanceof HTMLElement) {
-        const lines = formatPrintMenuDesc(cardCount, settings).split("\n");
+        const lines = formatPrintMenuDesc(numCards, settings).split("\n");
         descEl.replaceChildren(
           ...lines.flatMap((line, i) =>
             i === 0

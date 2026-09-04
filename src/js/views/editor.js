@@ -131,17 +131,17 @@ export async function renderEditor(host, opts) {
                   </div>
                 </div>
                 <div class="form-field">
-                  <label class="form-label" for="piece-count">${_t("Number of pieces")}</label>
+                  <label class="form-label" for="num-pieces">${_t("Number of pieces")}</label>
                   <div class="form-control-wrap">
                     <span class="form-control-icon" aria-hidden="true">${ICON_APPS_2}</span>
-                    <input class="form-control" type="number" id="piece-count" min="0" step="1" inputmode="numeric" />
+                    <input class="form-control" type="number" id="num-pieces" min="0" step="1" inputmode="numeric" />
                   </div>
                 </div>
                 <div class="form-field">
-                  <label class="form-label" for="figurine-count">${_t("Number of figurines")}</label>
+                  <label class="form-label" for="num-figurines">${_t("Number of figurines")}</label>
                   <div class="form-control-wrap">
                     <span class="form-control-icon" aria-hidden="true">${ICON_USER_3}</span>
-                    <input class="form-control" type="number" id="figurine-count" min="0" step="1" inputmode="numeric" />
+                    <input class="form-control" type="number" id="num-figurines" min="0" step="1" inputmode="numeric" />
                   </div>
                 </div>
               </div>
@@ -198,8 +198,8 @@ export async function renderEditor(host, opts) {
     legoSetRef: host.querySelector("#lego-set-ref"),
     title: host.querySelector("#card-title"),
     releaseYear: host.querySelector("#release-year"),
-    pieceCount: host.querySelector("#piece-count"),
-    figurineCount: host.querySelector("#figurine-count"),
+    numPieces: host.querySelector("#num-pieces"),
+    numFigurines: host.querySelector("#num-figurines"),
     brickcardThemeId: host.querySelector("#brickcard-theme-id"),
     error: host.querySelector("#error"),
     previewWrap: host.querySelector("#preview-wrap"),
@@ -222,8 +222,8 @@ export async function renderEditor(host, opts) {
     legoSetRef: existing?.legoSetRef || "",
     title: existing?.title || "",
     releaseYear: existing?.releaseYear ?? null,
-    pieceCount: existing?.pieceCount ?? null,
-    figurineCount: existing?.figurineCount ?? null,
+    numPieces: existing?.numPieces ?? null,
+    numFigurines: existing?.numFigurines ?? null,
     imageDataUrl: state.imageDataUrl || "",
     imageBackgroundColor: state.imageBackgroundColor,
     imageZoom: state.imageZoom,
@@ -246,22 +246,22 @@ export async function renderEditor(host, opts) {
     refs.title.value = existing.title;
     refs.releaseYear.value =
       existing.releaseYear != null ? String(existing.releaseYear) : "";
-    refs.pieceCount.value =
-      existing.pieceCount != null ? String(existing.pieceCount) : "";
-    refs.figurineCount.value =
-      existing.figurineCount != null ? String(existing.figurineCount) : "";
+    refs.numPieces.value =
+      existing.numPieces != null ? String(existing.numPieces) : "";
+    refs.numFigurines.value =
+      existing.numFigurines != null ? String(existing.numFigurines) : "";
   }
 
   function draft() {
-    const pieceCountVal = refs.pieceCount.value.trim();
-    const figurineCountVal = refs.figurineCount.value.trim();
+    const numPiecesVal = refs.numPieces.value.trim();
+    const numFigurinesVal = refs.numFigurines.value.trim();
     const releaseYearVal = refs.releaseYear.value.trim();
     return {
       legoSetRef: refs.legoSetRef.value.trim(),
       title: refs.title.value.trim(),
       brickcardThemeId: refs.brickcardThemeId.value,
-      pieceCount: pieceCountVal === "" ? null : Number(pieceCountVal),
-      figurineCount: figurineCountVal === "" ? null : Number(figurineCountVal),
+      numPieces: numPiecesVal === "" ? null : Number(numPiecesVal),
+      numFigurines: numFigurinesVal === "" ? null : Number(numFigurinesVal),
       releaseYear: releaseYearVal === "" ? null : Number(releaseYearVal),
       imageDataUrl: state.imageDataUrl || "",
       imageBackgroundColor: state.imageBackgroundColor || "",
@@ -316,8 +316,8 @@ export async function renderEditor(host, opts) {
     refs.legoSetRef.addEventListener(evt, syncPreview);
     refs.title.addEventListener(evt, syncPreview);
     refs.releaseYear.addEventListener(evt, syncPreview);
-    refs.pieceCount.addEventListener(evt, syncPreview);
-    refs.figurineCount.addEventListener(evt, syncPreview);
+    refs.numPieces.addEventListener(evt, syncPreview);
+    refs.numFigurines.addEventListener(evt, syncPreview);
   });
 
   refs.brickcardThemeId.addEventListener("change", () => {

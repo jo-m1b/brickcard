@@ -1,11 +1,11 @@
 {
   "meta": {
-    "generatedAt": "2026-09-03T21:14:16Z",
+    "generatedAt": "2026-09-04T17:48:30Z",
     "source": "https://rebrickable.com/downloads/",
-    "themesCount": 461,
-    "setsCount": 16536,
-    "themeKeys": ["id", "name"],
-    "setKeys": ["id", "name", "pieceCount", "figurineCount", "releaseYear", "themeId", "brickcardThemeId"]
+    "numThemes": 461,
+    "themesKeys": ["id", "name"],
+    "numSets": 16536,
+    "setsKeys": ["id", "name", "numPieces", "numFigurines", "releaseYear", "themeId"]
   },
   "themes": [
     [1,"Technic"],

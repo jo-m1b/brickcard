@@ -47,12 +47,12 @@
   <link rel="icon" href="img/brickcard-favicon-96x96.png" type="image/png" sizes="96x96" />
   <link rel="icon" href="img/brickcard-favicon.ico" sizes="48x48" />
   <link rel="apple-touch-icon" href="img/brickcard-apple-touch-icon.png" sizes="180x180" />
-  <link rel="stylesheet" href="css/styles.css?v=0.9.2" />
+  <link rel="stylesheet" href="css/styles.css?v=0.9.3" />
   <script type="importmap">
   {
     "imports": {
-      "./js/app.js": "./js/app.js?v=0.9.2",
-      "./js/version.js": "./js/version.js?v=0.9.2"
+      "./js/app.js": "./js/app.js?v=0.9.3",
+      "./js/version.js": "./js/version.js?v=0.9.3"
     }
   }
   </script>
@@ -111,7 +111,7 @@
             aria-label="Search (reference, title, theme, year)"
           />
           <div class="search-bar-trail">
-            <span class="search-count" id="search-count" aria-live="polite"></span>
+            <span class="search-num-results" id="search-num-results" aria-live="polite"></span>
             <div class="search-sort">
               <button
                 type="button"
@@ -146,11 +146,11 @@
               <span class="form-select-option-label">Release year</span>
               <span class="form-select-icon form-select-icon--right" hidden></span>
             </div>
-            <div class="form-select-option" role="option" id="search-sort-opt-pieceCount" data-sort="pieceCount" aria-selected="false">
+            <div class="form-select-option" role="option" id="search-sort-opt-numPieces" data-sort="numPieces" aria-selected="false">
               <span class="form-select-option-label">Number of pieces</span>
               <span class="form-select-icon form-select-icon--right" hidden></span>
             </div>
-            <div class="form-select-option" role="option" id="search-sort-opt-figurineCount" data-sort="figurineCount" aria-selected="false">
+            <div class="form-select-option" role="option" id="search-sort-opt-numFigurines" data-sort="numFigurines" aria-selected="false">
               <span class="form-select-option-label">Number of figurines</span>
               <span class="form-select-icon form-select-icon--right" hidden></span>
             </div>
@@ -181,7 +181,7 @@
               <path d="M7 17h10v5H7zm12 3v-5H5v5H3a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1h18a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1zM5 10v2h3v-2zm2-8h10a1 1 0 0 1 1 1v3H6V3a1 1 0 0 1 1-1"/>
             </svg>
             <span class="visually-hidden">Print</span>
-            <span class="btn-badge" id="print-menu-count" hidden aria-hidden="true">0</span>
+            <span class="btn-badge" id="print-menu-num" hidden aria-hidden="true">0</span>
           </button>
           <div class="print-menu-panel" id="print-menu-panel" role="dialog" aria-labelledby="print-menu-title" aria-describedby="print-menu-desc">
             <p class="print-menu-title" id="print-menu-title">No cards to print!</p>
