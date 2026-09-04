@@ -51,6 +51,7 @@ const BACKUP_MIGRATIONS = [
  * @property {string} version
  * @property {string} app
  * @property {string} [exportedAt]
+ * @property {string} [exportedFrom]
  * @property {unknown[]} cards
  * @property {unknown[]} themes
  * @property {{ cardAppearance: BackupCardAppearance }} [settings]
@@ -71,6 +72,35 @@ const BACKUP_MIGRATIONS = [
 /** @param {string} [name] */
 export function isBrickcardBackupFilename(name) {
   return String(name || "").toLowerCase().endsWith(BACKUP_EXT);
+}
+
+/**
+ * DNS host for `exportedFrom` (not localhost, not an IP, not mDNS `.local`).
+ * @param {string} [hostname]
+ */
+export function isBackupExportedFromHost(hostname) {
+  const host = String(hostname || "")
+    .trim()
+    .toLowerCase();
+  if (!host || host.includes(":")) return false;
+  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(host)) return false;
+  if (!host.includes(".")) return false;
+  if (host === "localhost" || host.endsWith(".localhost") || host.endsWith(".local")) {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Informational instance URL (origin + path, no hash / query).
+ * Empty when the host is local or an IP — omit the field from the file.
+ * @param {Pick<Location, "hostname" | "origin" | "pathname">} [loc]
+ */
+export function backupExportedFrom(loc = globalThis.location) {
+  if (!loc || !isBackupExportedFromHost(loc.hostname)) return "";
+  const origin = String(loc.origin || "");
+  if (!origin || origin === "null") return "";
+  return `${origin}${String(loc.pathname || "/") || "/"}`;
 }
 
 /** @param {unknown} card */
@@ -298,6 +328,8 @@ export function buildBackupPayload(opts) {
     cards: exportedCards,
     themes: exportedThemes,
   };
+  const exportedFrom = backupExportedFrom();
+  if (exportedFrom) payload.exportedFrom = exportedFrom;
   if (includeSettings) {
     payload.settings = { cardAppearance: getCardAppearanceSettings() };
   }

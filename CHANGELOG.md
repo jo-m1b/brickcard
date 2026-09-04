@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### ➕ Added
+
+- Collection backup (`.brickcard`): optional `exportedFrom` (page origin + path, no hash / query) when exporting from a DNS host; omitted on localhost, IP addresses, and `.local` / `.localhost`; ignored on import
+
 ## [0.9.3] — 2026-09-04
 
 ### ✏️ Changed
