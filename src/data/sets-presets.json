@@ -1,10 +1,10 @@
 {
   "meta": {
-    "generatedAt": "2026-09-08T12:15:09Z",
+    "generatedAt": "2026-09-09T12:26:26Z",
     "source": "https://rebrickable.com/downloads/",
     "numThemes": 461,
     "themesKeys": ["id", "name"],
-    "numSets": 16540,
+    "numSets": 16538,
     "setsKeys": ["id", "name", "numPieces", "numFigurines", "releaseYear", "themeId"]
   },
   "themes": [
@@ -12798,7 +12798,7 @@
     ["75453-1","Offworld Sandcrawler and Mudhorn",1684,7,2026,158],
     ["75454-1","Imperial Remnant AT-AT with INT-4",1453,7,2026,158],
     ["75455-1","Boba Fett",1544,1,2026,158],
-    ["75456-1","Star Wars Advent Calendar 2026",290,7,2026,209],
+    ["75456-1","Star Wars Advent Calendar 2026",292,7,2026,209],
     ["75458-1","Imperial Remnant AT-RT Driver Helmet",775,null,2026,158],
     ["75459-1","Imperial Lambda-Class Shuttle",961,5,2026,158],
     ["7546-1","Tropical Breeze Jewels 'n' More",73,null,2006,500],
@@ -16871,8 +16871,6 @@
     ["SANFRANCISCO-1","LEGO Store Grand Opening San Francisco CA",17,3,2016,408],
     ["SANTACHIMNEY-1","Santa In A Chimney",24,null,2019,410],
     ["SANTAORNAMENT-1","Santa",15,null,2014,227],
-    ["SCP6604H1DE-1","Activity Cards: Sommer",25,null,2026,741],
-    ["SCP6607H1DE-1","Activity Cards: Schule",25,null,2026,741],
     ["SDCC2010-1","CubeDude - The Clone Wars Edition",416,null,2010,158],
     ["SDCC2015-1","Throne of Ultron",196,4,2015,702],
     ["SDCC2015-2","Dagobah Mini-Build",177,1,2015,158],
