@@ -150,8 +150,8 @@ Developer tool `#developer/theme-presets`: isolated local copy (IndexedDB `brick
 Compiled from the daily [Rebrickable downloads](https://rebrickable.com/downloads/) (CSV dumps, no API key, no images). The app precaches the file offline. [`src/js/sets-presets.js`](src/js/sets-presets.js) loads it on demand (not at boot). No editor autocomplete yet.
 
 ```
-python3 scripts/build-sets-presets.py
-python3 scripts/build-sets-presets.py --output src/data/sets-presets.json --min-num-pieces 0
+python3 -B scripts/build-sets-presets.py
+python3 -B scripts/build-sets-presets.py --output src/data/sets-presets.json --min-num-pieces 0
 ```
 
 Paths are relative to the repo root. Arguments:

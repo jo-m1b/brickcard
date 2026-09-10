@@ -19,4 +19,6 @@ node_modules/
 # Logs / caches
 *.log
 .cache/
+__pycache__/
+*.pyc
 dist/
