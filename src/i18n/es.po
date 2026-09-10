@@ -712,8 +712,8 @@ msgstr "Número máximo de tarjetas por fila"
 msgid "Optimize images"
 msgstr "Optimizar las imágenes"
 
-msgid "Automatically convert new images added to the collection to an optimized format"
-msgstr "Convertir automáticamente las imágenes nuevas de la colección a un formato optimizado"
+msgid "Automatically convert new images imported into the collection to an optimized format"
+msgstr "Convertir automáticamente las imágenes nuevas importadas en la colección a un formato optimizado"
 
 msgid "Telemetry"
 msgstr "Telemetría"

@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ### ✏️ Changed
 
 - Collection backup (`.brickcard`): omit `null`, empty-string, and default fields on cards and themes (card crop `1` / `0` / `0`; theme logo crop `1` / `0` / `0`); `themes` is written before `cards`
+- Settings **Optimize images** hint: “imported into the collection” instead of “added to the collection”
 
 ## [0.9.3] — 2026-09-04
 

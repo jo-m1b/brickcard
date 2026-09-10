@@ -182,7 +182,7 @@ export function renderSettingsModal(host, opts) {
                 ${formCheckboxMarkup({
                   id: "settings-optimize-images",
                   label: _t("Optimize images"),
-                  hint: _t("Automatically convert new images added to the collection to an optimized format"),
+                  hint: _t("Automatically convert new images imported into the collection to an optimized format"),
                   checked: getOptimizeImages(),
                 })}
               </div>

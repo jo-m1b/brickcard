@@ -712,8 +712,8 @@ msgstr "Numero massimo di carte per riga"
 msgid "Optimize images"
 msgstr "Ottimizza le immagini"
 
-msgid "Automatically convert new images added to the collection to an optimized format"
-msgstr "Converti automaticamente le nuove immagini della collezione in un formato ottimizzato"
+msgid "Automatically convert new images imported into the collection to an optimized format"
+msgstr "Converti automaticamente le nuove immagini importate nella collezione in un formato ottimizzato"
 
 msgid "Telemetry"
 msgstr "Telemetria"

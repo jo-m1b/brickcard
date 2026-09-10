@@ -712,8 +712,8 @@ msgstr "Maximale Anzahl Karten pro Zeile"
 msgid "Optimize images"
 msgstr "Bilder optimieren"
 
-msgid "Automatically convert new images added to the collection to an optimized format"
-msgstr "Neue Bilder der Sammlung automatisch in ein optimiertes Format umwandeln"
+msgid "Automatically convert new images imported into the collection to an optimized format"
+msgstr "Neue in die Sammlung importierte Bilder automatisch in ein optimiertes Format umwandeln"
 
 msgid "Telemetry"
 msgstr "Telemetrie"
