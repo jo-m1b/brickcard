@@ -1,6 +1,6 @@
 # Daily Rebrickable catalog → src/data/sets-presets.json
 
-name: Refresh sets presets
+name: Refresh sets presets from Rebrickable
 
 on:
   schedule:
