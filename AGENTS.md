@@ -27,7 +27,7 @@ All app code lives in **`src/`**.
 | `src/manifest.webmanifest` | PWA manifest (name, `description`, icons, `standalone`); `lang` = `en` (source / SEO; static file, not updated with the UI locale) |
 | `src/service-worker.js` | Service worker at the site root (scope `/`; GitHub Pages does not allow a SW in `js/`); `CACHE` = `APP_VERSION`; online fetch with `cache: "reload"`; install precaches the app shell only (non-blocking); after activate (and on a `precache-offline` message from the page) background-precache all app files (JS including lazy overlays / `#developer/…`, i18n, markdown pages, `themes-presets.json` + logos from that JSON, `sets-presets.json`, fonts, PWA icons, demo) so unused `import()` routes work offline; does not intercept its own script. Adding a JS file, markdown page, locale catalog, or data JSON: add it to `OFFLINE_ASSETS` |
 | `src/data/themes-presets.json` | Default LEGO themes (editable without touching JS) |
-| `src/data/sets-presets.json` | Offline Rebrickable set catalog (no images) for a future card-editor autocomplete; rebuilt by `scripts/build-sets-presets.py` |
+| `src/data/sets-presets.json` | Offline Rebrickable set catalog (no images) for a future card-editor autocomplete; rebuilt by `scripts/build-sets-presets-from-rebrickable.py` |
 | `src/data/theme-logo-*` | Default theme logos (PNG / SVG / WebP / JPEG) |
 | `src/data/backup-demo-jo.brickcard` | Demo backup (empty home: **Load a demo** tile; WebP photos; URL: `data/backup-demo-jo.brickcard`) |
 | `src/data/page-{{slug}}.md` | Markdown pages in a modal (`#page/:slug`): English source; translation `page-{{slug}}.{{locale}}.md` (e.g. `page-about.de.md`, `page-about.fr.md`); 404 → English file; `# Title` → dialog title; raw HTML like GitHub (trusted `data/` pages); `#page/about`: header brand (logo + name + version) injected at the top; Ko-fi in markdown at the bottom |
@@ -100,8 +100,8 @@ All app code lives in **`src/`**.
 | `.github/ISSUE_TEMPLATE/config.yml` | Issue chooser: no empty tickets; Discussions link for questions |
 | `.github/ISSUE_TEMPLATE/feature_request.yml` | Enhancement issue form (What would you like / Why; link to existing `enhancement` issues) |
 | `.github/pull_request_template.md` | PR template (description, changelog Added/Changed/Fixed/Removed, UI screenshots) |
-| `.github/workflows/sets-presets.yml` | Daily rebuild of `sets-presets.json` from Rebrickable dumps (commit if the catalog changed) |
-| `scripts/build-sets-presets.py` | Compile Rebrickable CSV dumps into `src/data/sets-presets.json` (Python 3 stdlib; no API key) |
+| `.github/workflows/refresh-sets-presets-from-rebrickable.yml` | Daily rebuild of `sets-presets.json` from Rebrickable dumps (commit if the catalog changed) |
+| `scripts/build-sets-presets-from-rebrickable.py` | Compile Rebrickable CSV dumps into `src/data/sets-presets.json` (Python 3 stdlib; no API key) |
 
 ## Card model (`Card`)
 
@@ -150,8 +150,8 @@ Developer tool `#developer/theme-presets`: isolated local copy (IndexedDB `brick
 Compiled from the daily [Rebrickable downloads](https://rebrickable.com/downloads/) (CSV dumps, no API key, no images). The app precaches the file offline. [`src/js/sets-presets.js`](src/js/sets-presets.js) loads it on demand (not at boot). No editor autocomplete yet.
 
 ```
-python3 -B scripts/build-sets-presets.py
-python3 -B scripts/build-sets-presets.py --output src/data/sets-presets.json --min-num-pieces 0
+python3 -B scripts/build-sets-presets-from-rebrickable.py
+python3 -B scripts/build-sets-presets-from-rebrickable.py --output src/data/sets-presets.json --min-num-pieces 0
 ```
 
 Paths are relative to the repo root. Arguments:
@@ -170,7 +170,7 @@ Helpers (catalog creation / matching only; the card ↔ theme link stays `brickc
 - `resolveOrCreateThemeFromRebrickable(themeId)` — reuse if found; else create a custom theme (catalog name only, prefixed id). Call when persisting a card, not while browsing
 - `cardDraftFromRebrickableSet(setId)` — card fields, not persisted; does not create a theme (`brickcardThemeId` empty if none matches yet)
 
-JSON shape: `meta` (`generatedAt`, `source`, `numThemes`, `themesKeys`, `numSets`, `setsKeys`); `themes` and `sets` are **positional rows** (`themesKeys` = `id`, `name`; `setsKeys` = `id`, `name`, `numPieces`, `numFigurines`, `releaseYear`, `themeId`). Read with `Object.fromEntries(keys.map((k, i) => [k, row[i]]))`. GitHub Actions `.github/workflows/sets-presets.yml` runs the script daily (`07:30` UTC) and on `workflow_dispatch`, then commits when the catalog changed (`chore: refresh sets-presets.json`) and triggers **Deploy Brickcard to GitHub Pages** (`workflow_dispatch`; a bot `push` does not start `pages.yml`). The Actions app needs write access to the default branch (contents + actions).
+JSON shape: `meta` (`generatedAt`, `source`, `numThemes`, `themesKeys`, `numSets`, `setsKeys`); `themes` and `sets` are **positional rows** (`themesKeys` = `id`, `name`; `setsKeys` = `id`, `name`, `numPieces`, `numFigurines`, `releaseYear`, `themeId`). Read with `Object.fromEntries(keys.map((k, i) => [k, row[i]]))`. GitHub Actions `.github/workflows/refresh-sets-presets-from-rebrickable.yml` runs the script daily (`07:30` UTC) and on `workflow_dispatch`, then commits when the catalog changed (`chore: refresh sets-presets.json`) and triggers **Deploy Brickcard to GitHub Pages** (`workflow_dispatch`; a bot `push` does not start `pages.yml`). The Actions app needs write access to the default branch (contents + actions).
 
 ## LEGO theme model (`LegoTheme`)
 
