@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Optional Rebrickable origin refs on cards (`rebrickableSetId`, `rebrickableThemeId`) and themes (`rebrickableThemeId`); catalog-created ids use the `rebrickable-{id}-` + UUID prefix; `sets-presets.js` drafts a card from the offline catalog and reuses or creates a custom theme by `rebrickableThemeId` (`brickcardThemeId` stays the card ↔ theme link)
 - Collection backup (`.brickcard`): optional `exportedFrom` (page origin + path, no hash / query) when exporting from a DNS host; omitted on localhost, IP addresses, and `.local` / `.localhost`; ignored on import
 
+### ✏️ Changed
+
+- Collection backup (`.brickcard`): omit `null`, empty-string, and default fields on cards and themes (card crop `1` / `0` / `0`; theme logo crop `1` / `0` / `0`); `themes` is written before `cards`
+
 ## [0.9.3] — 2026-09-04
 
 ### ✏️ Changed

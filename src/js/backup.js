@@ -211,6 +211,84 @@ function stripThemeBuiltinFlag(theme) {
   return rest;
 }
 
+/** Crop defaults restored by `normalizeCard` when the keys are missing. */
+const CARD_BACKUP_DEFAULTS = {
+  imageZoom: 1,
+  imageOffsetX: 0,
+  imageOffsetY: 0,
+};
+
+/** Crop defaults restored by `normalizeTheme` when the keys are missing. */
+const THEME_BACKUP_DEFAULTS = {
+  logoZoom: 1,
+  logoOffsetX: 0,
+  logoOffsetY: 0,
+};
+
+/**
+ * Drop `null`, empty-string, and default fields.
+ * Import `normalize*` already fills missing keys.
+ * @param {object} row
+ * @param {Record<string, unknown>} [defaults]
+ */
+function omitEmptyBackupFields(row, defaults = {}) {
+  /** @type {Record<string, unknown>} */
+  const out = {};
+  for (const [key, value] of Object.entries(row || {})) {
+    if (value == null || value === "") continue;
+    if (Object.hasOwn(defaults, key) && Object.is(value, defaults[key])) continue;
+    out[key] = value;
+  }
+  return out;
+}
+
+/**
+ * @param {object[]} cards
+ * @param {boolean} includeImages
+ */
+function compactBackupCards(cards, includeImages) {
+  const rows = includeImages ? cards : cards.map(stripCardImage);
+  return rows.map((row) => omitEmptyBackupFields(row, CARD_BACKUP_DEFAULTS));
+}
+
+/**
+ * @param {object[]} themes
+ * @param {boolean} includeThemeLogos
+ */
+function compactBackupThemes(themes, includeThemeLogos) {
+  const rows = includeThemeLogos ? themes : themes.map(stripThemeLogo);
+  return rows.map(stripThemeBuiltinFlag).map((row) =>
+    omitEmptyBackupFields(row, THEME_BACKUP_DEFAULTS)
+  );
+}
+
+/**
+ * File key order: header, then themes, then cards, then settings.
+ * @param {{
+ *   version: string,
+ *   app: string,
+ *   exportedAt?: string,
+ *   exportedFrom?: string,
+ *   themes: unknown[],
+ *   cards: unknown[],
+ *   settings?: BackupData["settings"],
+ * }} parts
+ * @returns {BackupData}
+ */
+function backupFilePayload(parts) {
+  /** @type {BackupData} */
+  const payload = {
+    version: parts.version,
+    app: parts.app,
+  };
+  if (parts.exportedAt) payload.exportedAt = parts.exportedAt;
+  if (parts.exportedFrom) payload.exportedFrom = parts.exportedFrom;
+  payload.themes = parts.themes;
+  payload.cards = parts.cards;
+  if (parts.settings) payload.settings = parts.settings;
+  return payload;
+}
+
 /**
  * @param {Card[]} cards
  * @param {LegoTheme[]} themes
@@ -314,26 +392,20 @@ export function buildBackupPayload(opts) {
     exportedThemes = customThemes.filter((t) => selected.has(t.id));
   }
 
-  const exportedCards = includeImages ? cards : cards.map(stripCardImage);
-  if (!includeThemeLogos) {
-    exportedThemes = exportedThemes.map(stripThemeLogo);
-  }
-  exportedThemes = exportedThemes.map(stripThemeBuiltinFlag);
+  const exportedCards = compactBackupCards(cards, includeImages);
+  exportedThemes = compactBackupThemes(exportedThemes, includeThemeLogos);
 
-  /** @type {BackupData} */
-  const payload = {
+  return backupFilePayload({
     version: APP_VERSION,
     app: APP_ID,
     exportedAt: new Date().toISOString(),
-    cards: exportedCards,
+    exportedFrom: backupExportedFrom(),
     themes: exportedThemes,
-  };
-  const exportedFrom = backupExportedFrom();
-  if (exportedFrom) payload.exportedFrom = exportedFrom;
-  if (includeSettings) {
-    payload.settings = { cardAppearance: getCardAppearanceSettings() };
-  }
-  return payload;
+    cards: exportedCards,
+    settings: includeSettings
+      ? { cardAppearance: getCardAppearanceSettings() }
+      : undefined,
+  });
 }
 
 /** Backup impossible without at least one card. */
@@ -388,25 +460,23 @@ export function buildImportPayload(backup, opts) {
   const selectedThemeIds = opts.selectedThemeIds || choices.map((c) => c.id);
   const selected = new Set(selectedThemeIds);
   const cards = selectCardsByThemes(cardsIn, themes, selected);
-  let exportedThemes = customThemes.filter((t) => t && selected.has(t.id));
-  const exportedCards = includeImages ? cards : cards.map(stripCardImage);
-  if (!includeThemeLogos) {
-    exportedThemes = exportedThemes.map(stripThemeLogo);
-  }
-  exportedThemes = exportedThemes.map(stripThemeBuiltinFlag);
+  const exportedThemes = compactBackupThemes(
+    customThemes.filter((t) => t && selected.has(t.id)),
+    includeThemeLogos
+  );
+  const exportedCards = compactBackupCards(cards, includeImages);
 
-  /** @type {BackupData} */
-  const payload = {
+  return backupFilePayload({
     version: backup.version,
     app: backup.app,
     exportedAt: backup.exportedAt,
-    cards: exportedCards,
     themes: exportedThemes,
-  };
-  if (includeSettings && backup.settings?.cardAppearance) {
-    payload.settings = { cardAppearance: backup.settings.cardAppearance };
-  }
-  return payload;
+    cards: exportedCards,
+    settings:
+      includeSettings && backup.settings?.cardAppearance
+        ? { cardAppearance: backup.settings.cardAppearance }
+        : undefined,
+  });
 }
 
 /** Import impossible without a selected card, theme, or setting. */
@@ -472,7 +542,7 @@ export function backupPayloadBytes(payload) {
  * @param {boolean} includeImages
  */
 export function estimateThemeCardsBytes(cards, includeImages) {
-  const exported = includeImages ? cards || [] : (cards || []).map(stripCardImage);
+  const exported = compactBackupCards(cards || [], includeImages);
   return backupPayloadBytes(exported);
 }
 
