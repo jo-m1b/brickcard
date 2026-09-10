@@ -362,6 +362,7 @@ export async function renderThemeEditor(host, opts) {
         logoZoom: draft.logoZoom,
         logoOffsetX: draft.logoOffsetX,
         logoOffsetY: draft.logoOffsetY,
+        rebrickableThemeId: existing?.rebrickableThemeId ?? null,
         isBuiltin: false,
       });
       onSaved(name, { isNew: !isEdit, theme: saved });

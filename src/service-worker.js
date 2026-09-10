@@ -53,6 +53,7 @@ const OFFLINE_ASSETS = [
     "./js/print-qty.js",
     "./js/print-settings.js",
     "./js/print.js",
+    "./js/sets-presets.js",
     "./js/storage.js",
     "./js/telemetry.js",
     "./js/theme.js",

@@ -4,7 +4,7 @@
  * Format / export: `backup.js`.
  */
 
-import { getPresetThemes, getPresetTheme, parseHexColor, clearPresetCache, clampLogoZoom, roundCropCoord, resolvePresetThemeId } from "./themes-data.js";
+import { getPresetThemes, getPresetTheme, parseHexColor, parseRebrickableThemeId, clearPresetCache, clampLogoZoom, roundCropCoord, resolvePresetThemeId } from "./themes-data.js";
 import { applyCardAppearanceSettings } from "./card-design.js";
 import { getOptimizeImages } from "./image-optimize.js";
 import { APP_ID } from "./version.js";
@@ -22,6 +22,8 @@ const STORE_THEMES = "themes";
  * @property {string} legoSetRef Set reference (e.g. "6140/6109")
  * @property {string} title Brickcard title (`\n` = line break)
  * @property {string} brickcardThemeId Associated Brickcard theme id
+ * @property {string} rebrickableSetId Catalog set id (`sets-presets.json`); empty if unset
+ * @property {number|null} rebrickableThemeId Catalog theme id; null if unset
  * @property {number|null} numPieces Piece count
  * @property {number|null} numFigurines Figurine count (optional)
  * @property {number|null} releaseYear Release year (optional)
@@ -133,6 +135,29 @@ export function createId() {
     return crypto.randomUUID();
   }
   return `card-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+/** Catalog set id (`set_num`); empty string if unset. */
+export function parseRebrickableSetId(raw) {
+  return String(raw ?? "").trim();
+}
+
+/**
+ * Card id for a catalog-created card: `rebrickable-{setId}-{uuid}`.
+ * @param {unknown} setId
+ */
+export function createRebrickableCardId(setId) {
+  const id = parseRebrickableSetId(setId);
+  return id ? `rebrickable-${id}-${createId()}` : createId();
+}
+
+/**
+ * Theme id for a catalog-created custom theme: `rebrickable-{themeId}-{uuid}`.
+ * @param {unknown} themeId
+ */
+export function createRebrickableThemeId(themeId) {
+  const id = parseRebrickableThemeId(themeId);
+  return id ? `rebrickable-${id}-${createId()}` : createId();
 }
 
 /** @param {object} card */
@@ -419,6 +444,8 @@ function normalizeCard(c) {
     brickcardThemeId: resolvePresetThemeId(
       c.brickcardThemeId ?? c.legoThemeId ?? c.themeId ?? ""
     ),
+    rebrickableSetId: parseRebrickableSetId(c.rebrickableSetId),
+    rebrickableThemeId: parseRebrickableThemeId(c.rebrickableThemeId),
     numPieces,
     numFigurines,
     releaseYear,
@@ -445,6 +472,7 @@ function normalizeTheme(t) {
     logoOffsetX: roundCropCoord(t.logoOffsetX),
     logoOffsetY: roundCropCoord(t.logoOffsetY),
     isBuiltin: Boolean(t.isBuiltin ?? t.builtin),
+    rebrickableThemeId: parseRebrickableThemeId(t.rebrickableThemeId),
     updatedAt: String(t.updatedAt || t.createdAt || "").trim(),
   };
 }

@@ -15,6 +15,7 @@ import {
   clearPresetCache,
   loadPresetMeta,
   parseHexColor,
+  parseRebrickableThemeId,
   roundCropCoord,
 } from "./themes-data.js";
 
@@ -28,13 +29,6 @@ const PRESET_LOGO_DIR = "data";
 
 /** kebab-case : `city`, `avatar-the-last-airbender` */
 export const PRESET_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-
-/** @param {unknown} raw @returns {number} Positive Rebrickable theme id, or 0 if unset */
-function parseRebrickableThemeId(raw) {
-  if (raw == null || raw === "") return 0;
-  const n = Number(raw);
-  return Number.isInteger(n) && n > 0 ? n : 0;
-}
 
 /**
  * @typedef {Object} PresetDraftTheme
@@ -91,6 +85,7 @@ export function draftToLegoTheme(theme) {
     logoOffsetX: roundCropCoord(theme.logoOffsetX),
     logoOffsetY: roundCropCoord(theme.logoOffsetY),
     isBuiltin: false,
+    rebrickableThemeId: parseRebrickableThemeId(theme.rebrickableThemeId),
     updatedAt: String(theme.updatedAt || "").trim(),
   };
 }
@@ -187,7 +182,7 @@ function normalizeDraft(t) {
     logoZoom: clampLogoZoom(t.logoZoom),
     logoOffsetX: roundCropCoord(t.logoOffsetX),
     logoOffsetY: roundCropCoord(t.logoOffsetY),
-    rebrickableThemeId: parseRebrickableThemeId(t.rebrickableThemeId),
+    rebrickableThemeId: parseRebrickableThemeId(t.rebrickableThemeId) || 0,
     updatedAt: String(t.updatedAt || "").trim(),
   };
 }

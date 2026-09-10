@@ -52,8 +52,9 @@ All app code lives in **`src/`**.
 | `src/js/list-layout.js` | List density (max cards per row) — localStorage |
 | `src/js/image-optimize.js` | Optimize images (WebP on import) — localStorage |
 | `src/js/telemetry.js` | Anonymous usage telemetry (opt-out, localStorage) |
-| `src/js/themes-data.js` | Loads the default-themes JSON, `logoSrc`, default accent |
-| `src/js/storage.js` | IndexedDB cards + **custom** themes, `.brickcard` import |
+| `src/js/themes-data.js` | Loads the default-themes JSON, `logoSrc`, default accent, `parseRebrickableThemeId` |
+| `src/js/storage.js` | IndexedDB cards + **custom** themes, `.brickcard` import; `createRebrickableCardId` / `createRebrickableThemeId` |
+| `src/js/sets-presets.js` | Loads `sets-presets.json`; `cardDraftFromRebrickableSet`, `findThemeByRebrickableId`, `resolveOrCreateThemeFromRebrickable` (lazy; not imported at boot) |
 | `src/js/backup.js` | `.brickcard` format / parse / migrations / export (`version` = `APP_VERSION`) |
 | `src/js/backup-dialog.js` | Backup modal (`#backup`) |
 | `src/js/import-dialog.js` | Import modal (`#import`); auto demo import (`openDemoBackupDialog`) |
@@ -108,10 +109,12 @@ Field names are intentionally verbose (readable without docs):
 
 ```js
 {
-  id: string,
+  id: string,               // UUID (`createId()`); catalog-created: `rebrickable-{rebrickableSetId}-` + UUID
   legoSetRef: string,       // e.g. "6140/6109"
   title: string,            // Brickcard title (`\n` = line break)
-  brickcardThemeId: string, // Brickcard theme id
+  brickcardThemeId: string, // Brickcard theme id (the card ↔ theme link)
+  rebrickableSetId: string, // catalog set id (`set_num`, e.g. "75192-1"); empty if unset
+  rebrickableThemeId: number|null, // catalog theme id; null if unset; origin only (autocomplete)
   numPieces: number|null,
   numFigurines: number|null, // figurine count, optional
   releaseYear: number|null, // release year, optional
@@ -136,15 +139,15 @@ Fields per entry:
 - `secondaryColor` (hex, optional) — texts, badge icons, and the Brickcard logo; if omitted → black `#141414` or white `#ffffff` from accent luminance
 - `logoSrc` (optional) — path from `src/` (e.g. `data/theme-logo-….png`); no logo / load failure → show the theme **name** (no generated SVG)
 - `logoZoom` / `logoOffsetX` / `logoOffsetY` (optional) — logo crop (1 / 0 / 0 if omitted); same units as custom themes; tool export: 2 decimal places, `0.00` omitted (`logoZoom` of `1` too)
-- `rebrickableThemeId` (optional positive integer) — Rebrickable theme id to map a catalog `themeId` to this preset later (import / autocomplete); omitted on export when unset; `#developer/theme-presets` Save keeps the field (no editor UI; edit the JSON)
+- `rebrickableThemeId` (optional positive integer) — Rebrickable theme id to map a catalog `themeId` to this preset later (import / autocomplete); omitted on export when unset; `#developer/theme-presets` Save keeps the field (no editor UI; edit the JSON); exposed on the runtime `LegoTheme` (`null` if unset) so `findThemeByRebrickableId` can reuse a default theme
 
-Default themes are **read-only** in the app (no edit, no delete); focusable / clickable tiles → `#themes/view/:id` (identifier, name, colors, downloadable logo). Custom themes have a UUID id (`createId()`), live in IndexedDB, and are edited via `#themes/new` / `#themes/edit/:id`.
+Default themes are **read-only** in the app (no edit, no delete); focusable / clickable tiles → `#themes/view/:id` (identifier, name, colors, downloadable logo). Custom themes have a UUID id (`createId()`), or `rebrickable-{rebrickableThemeId}-` + UUID when created from the catalog; they live in IndexedDB, and are edited via `#themes/new` / `#themes/edit/:id`. The card editor and theme editor keep Rebrickable refs on save (no UI fields). Changing `brickcardThemeId` in the card editor does not update `rebrickableThemeId` / `rebrickableSetId` (origin metadata).
 
 Developer tool `#developer/theme-presets`: isolated local copy (IndexedDB `brickcard-preset-draft`) to edit id/slug, name, colors (accent + secondary), logo and crop (`#developer/theme-presets/new`, `#developer/theme-presets/edit/:slug`), then **save** `themes-presets.json` + `theme-logo-{id}.{ext}` to drop into `data/` yourself. Never reads/writes the `cards` / `themes` stores or settings. On first load (or after **Reset**): seed from the JSON. **General** success / errors (load, **Reset**, **Save themes-presets.json**, **Save logos**, save / delete in the editor) → `toast()`; Name / Identifier field validation → `form-error` under the input. Local collection reset does **not** touch this draft.
 
 ## Set catalog (`src/data/sets-presets.json`)
 
-Compiled from the daily [Rebrickable downloads](https://rebrickable.com/downloads/) (CSV dumps, no API key, no images). The app precaches the file offline; no UI reads it yet (future card-editor autocomplete).
+Compiled from the daily [Rebrickable downloads](https://rebrickable.com/downloads/) (CSV dumps, no API key, no images). The app precaches the file offline. [`src/js/sets-presets.js`](src/js/sets-presets.js) loads it on demand (not at boot). No editor autocomplete yet.
 
 ```
 python3 scripts/build-sets-presets.py
@@ -158,7 +161,14 @@ Paths are relative to the repo root. Arguments:
 - `--max-num-pieces`, `--min-release-year`, `--max-release-year`, `--min-num-figurines`, `--max-num-figurines` (inactive if omitted)
 - `--exclude-theme-id` (repeatable; default `746` Database Sets) — drop that Rebrickable theme, its descendants, and their sets (passing the flag replaces the default)
 
-An **active** filter + a **missing** value (`null` / unparseable) excludes the set. `0` is a value for filters. `numFigurines` is the sum of minifig quantities on the set’s latest inventory (no rows → `0`). Each set’s `id` is the Rebrickable `set_num` (including the `-\d+` suffix); map to the card `legoSetRef` later at import / autocomplete. `numPieces`, `numFigurines`, and `releaseYear` are stored as `null` (or dropped when trailing) when missing or `0`. `themes` lists only named Rebrickable themes used by kept sets (no empty names, no unused themes). If `themes` + `sets` match the existing file, the script does not rewrite (so the daily workflow does not commit a date-only change).
+An **active** filter + a **missing** value (`null` / unparseable) excludes the set. `0` is a value for filters. `numFigurines` is the sum of minifig quantities on the set’s latest inventory (no rows → `0`). Each set’s `id` is the Rebrickable `set_num` (including the `-\d+` suffix). `cardDraftFromRebrickableSet` maps it to `legoSetRef` by stripping the trailing `-\d+`, `title` = catalog name, and sets `rebrickableSetId` / `rebrickableThemeId`. `numPieces`, `numFigurines`, and `releaseYear` are stored as `null` (or dropped when trailing) when missing or `0`. `themes` lists only named Rebrickable themes used by kept sets (no empty names, no unused themes). If `themes` + `sets` match the existing file, the script does not rewrite (so the daily workflow does not commit a date-only change).
+
+Helpers (catalog creation / matching only; the card ↔ theme link stays `brickcardThemeId`):
+
+- `createRebrickableCardId(setId)` / `createRebrickableThemeId(themeId)` — prefix + `createId()`
+- `findThemeByRebrickableId(themeId)` — default themes first, then custom; match on the `rebrickableThemeId` field (not the Brickcard id)
+- `resolveOrCreateThemeFromRebrickable(themeId)` — reuse if found; else create a custom theme (catalog name only, prefixed id). Call when persisting a card, not while browsing
+- `cardDraftFromRebrickableSet(setId)` — card fields, not persisted; does not create a theme (`brickcardThemeId` empty if none matches yet)
 
 JSON shape: `meta` (`generatedAt`, `source`, `numThemes`, `themesKeys`, `numSets`, `setsKeys`); `themes` and `sets` are **positional rows** (`themesKeys` = `id`, `name`; `setsKeys` = `id`, `name`, `numPieces`, `numFigurines`, `releaseYear`, `themeId`). Read with `Object.fromEntries(keys.map((k, i) => [k, row[i]]))`. GitHub Actions `.github/workflows/sets-presets.yml` runs the script daily (`07:30` UTC) and on `workflow_dispatch`, then commits when the catalog changed (`chore: refresh sets-presets.json`) and triggers **Deploy Brickcard to GitHub Pages** (`workflow_dispatch`; a bot `push` does not start `pages.yml`). The Actions app needs write access to the default branch (contents + actions).
 
@@ -166,7 +176,7 @@ JSON shape: `meta` (`generatedAt`, `source`, `numThemes`, `themesKeys`, `numSets
 
 ```js
 {
-  id: string,               // default = JSON slug; custom = UUID (`createId()`)
+  id: string,               // default = JSON slug; custom = UUID (`createId()`); catalog-created: `rebrickable-{rebrickableThemeId}-` + UUID
   name: string,             // e.g. "CITY"
   color: string,            // hex; empty = no own color (card cascade)
   secondaryColor: string,   // hex; empty = auto contrast (black / white) on the accent
@@ -175,6 +185,7 @@ JSON shape: `meta` (`generatedAt`, `source`, `numThemes`, `themesKeys`, `numSets
   logoOffsetX: number,      // logo offset (width fraction of the lower half); 2 decimal places (`0.00` → 0)
   logoOffsetY: number,      // logo offset (height fraction of the lower half); 2 decimal places
   isBuiltin: boolean,       // default = read-only, not deletable
+  rebrickableThemeId: number|null, // catalog theme id; null if unset; origin / matching only
   updatedAt: string         // ISO (custom); empty for default themes
 }
 ```

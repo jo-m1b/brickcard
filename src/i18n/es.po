@@ -313,6 +313,15 @@ msgstr "No se pudo cargar %(url)s (%(status)s)"
 msgid "themes-presets.json: missing or empty \"themes\" array"
 msgstr "themes-presets.json: falta el array « themes » o está vacío"
 
+msgid "sets-presets.json: missing or invalid catalog"
+msgstr "sets-presets.json: catálogo ausente o no válido"
+
+msgid "Unknown Rebrickable set “%(id)s”"
+msgstr "Set de Rebrickable « %(id)s » desconocido"
+
+msgid "Unknown Rebrickable theme “%(id)s”"
+msgstr "Tema de Rebrickable « %(id)s » desconocido"
+
 msgid "%(count)s theme"
 msgstr "%(count)s tema"
 

@@ -17,6 +17,7 @@ import { _t } from "./i18n.js";
  * @property {number} logoOffsetX Horizontal logo offset (box fraction)
  * @property {number} logoOffsetY Vertical logo offset (box fraction)
  * @property {boolean} isBuiltin Default theme (read-only, not deletable)
+ * @property {number|null} rebrickableThemeId Catalog theme id (`sets-presets.json`); null if unset
  * @property {string} updatedAt ISO (custom); empty for default themes
  */
 
@@ -48,6 +49,17 @@ const PRESET_ID_ALIASES = {
 export function resolvePresetThemeId(id) {
   const s = String(id || "").trim();
   return PRESET_ID_ALIASES[s] || s;
+}
+
+/**
+ * Positive Rebrickable theme id, or `null` if unset / invalid.
+ * @param {unknown} raw
+ * @returns {number|null}
+ */
+export function parseRebrickableThemeId(raw) {
+  if (raw == null || raw === "") return null;
+  const n = Number(raw);
+  return Number.isInteger(n) && n > 0 ? n : null;
 }
 
 /** Local hosts (reset button + fetch with no HTTP cache). */
@@ -178,6 +190,7 @@ export async function getPresetThemes() {
           logoZoom: clampLogoZoom(entry.logoZoom),
           logoOffsetX: roundCropCoord(entry.logoOffsetX),
           logoOffsetY: roundCropCoord(entry.logoOffsetY),
+          rebrickableThemeId: parseRebrickableThemeId(entry.rebrickableThemeId),
           updatedAt: "",
         };
       });

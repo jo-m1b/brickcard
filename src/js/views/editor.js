@@ -382,6 +382,8 @@ export async function renderEditor(host, opts) {
       const saved = await upsertCard({
         ...data,
         id: cardId,
+        rebrickableSetId: existing?.rebrickableSetId || "",
+        rebrickableThemeId: existing?.rebrickableThemeId ?? null,
       });
       opts.onSaved(cardToastSubject(), { isNew: !isEdit, card: saved });
       return true;
