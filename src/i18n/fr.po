@@ -535,6 +535,15 @@ msgstr "%(shown)s / %(total)s cartes"
 msgid "%(total)s cards"
 msgstr "%(total)s cartes"
 
+msgid "0 sets"
+msgstr "0 sets"
+
+msgid "%(shown)s / %(total)s sets"
+msgstr "%(shown)s / %(total)s sets"
+
+msgid "%(total)s sets"
+msgstr "%(total)s sets"
+
 msgid "Ascending"
 msgstr "Croissant"
 

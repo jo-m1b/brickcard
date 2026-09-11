@@ -295,9 +295,10 @@ textarea {
   padding-right: 7.5rem;
 }
 
-/* Field focus frame: also when sort is focused or the menu is open */
+/* Field focus frame: also when sort is focused or a suggest / sort list is open */
 .search-bar:has(.search-sort-btn:focus-visible) > .form-control,
-.search-bar:has(.search-sort-btn[aria-expanded="true"]) > .form-control {
+.search-bar:has(.search-sort-btn[aria-expanded="true"]) > .form-control,
+.search-bar:has(> .form-select-list:not([hidden])) > .form-control {
   outline: 2px solid var(--ink);
   outline-offset: 1px;
 }
@@ -380,6 +381,24 @@ textarea {
   display: none !important;
 }
 
+/* Catalog autocomplete: longer trail (count · date) + multi-line suggest list */
+.search-bar--suggest {
+  width: min(100%, 36rem);
+}
+
+.search-bar--suggest > .form-control {
+  padding-right: 16rem;
+}
+
+.search-bar--suggest .search-num-results {
+  max-width: 15.5rem;
+}
+
+.search-bar--suggest > .form-select-list {
+  z-index: 350;
+  max-height: min(24rem, 50vh);
+}
+
 /* Open menu = same look as ghost hover/focus */
 .btn.ghost[aria-expanded="true"] {
   background: var(--brick-red);
@@ -393,6 +412,7 @@ textarea {
   border: 1px solid var(--line);
   background: var(--bg);
   max-width: 36rem;
+  overflow: visible;
 }
 
 @media (max-width: 840px) {
@@ -2842,6 +2862,139 @@ button.form-select-trigger.sm {
 
 .form-select.is-disabled button.form-select-trigger {
   cursor: not-allowed;
+}
+
+/* Multi-line select option (set catalog suggest; optional media slot on the left) */
+.form-select-option--multiline {
+  align-items: flex-start;
+  gap: 0.55rem;
+  font-weight: 400;
+}
+
+.form-select-option--multiline b {
+  font-weight: 700;
+}
+
+.form-select-option-media {
+  flex: 0 0 auto;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: var(--bg);
+}
+
+.form-select-option-media[hidden] {
+  display: none !important;
+}
+
+.form-select-option-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+}
+
+.form-select-option-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.form-select-option-id {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.form-select-option-id-icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+  color: inherit;
+}
+
+.form-select-option-id-icon svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  display: block;
+}
+
+.form-select-option-id-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.form-select-option-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.45rem;
+  flex: 0 0 auto;
+}
+
+.form-select-option-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.form-select-option-badge svg {
+  width: 0.9rem;
+  height: 0.9rem;
+  display: block;
+  flex-shrink: 0;
+}
+
+.form-select-option-theme {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+  color: var(--ink-soft);
+}
+
+.form-select-option:hover .form-select-option-theme,
+.form-select-option.is-active .form-select-option-theme {
+  color: inherit;
+}
+
+.form-select-option-theme-icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  line-height: 0;
+}
+
+.form-select-option-theme-icon svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  display: block;
+}
+
+.form-select-option-theme-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.form-select-option-name {
+  font-size: 1.1rem;
+  overflow-wrap: anywhere;
 }
 
 /* ——— Cards grid ——— */

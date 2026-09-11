@@ -54,7 +54,8 @@ All app code lives in **`src/`**.
 | `src/js/telemetry.js` | Anonymous usage telemetry (opt-out, localStorage) |
 | `src/js/themes-data.js` | Loads the default-themes JSON, `logoSrc`, default accent, `parseRebrickableThemeId` |
 | `src/js/storage.js` | IndexedDB cards + **custom** themes, `.brickcard` import; `createRebrickableCardId` / `createRebrickableThemeId` |
-| `src/js/sets-presets.js` | Loads `sets-presets.json`; `cardDraftFromRebrickableSet`, `findThemeByRebrickableId`, `resolveOrCreateThemeFromRebrickable` (lazy; not imported at boot) |
+| `src/js/sets-presets.js` | Loads `sets-presets.json`; `searchCatalogSets`, `cardDraftFromRebrickableSet`, `findThemeByRebrickableId`, `resolveOrCreateThemeFromRebrickable` (lazy; not imported at boot) |
+| `src/js/set-search.js` | Set-catalog search combobox (`search-bar--suggest`, `bindSetSearch`); `#developer/search` demo, later card editor |
 | `src/js/backup.js` | `.brickcard` format / parse / migrations / export (`version` = `APP_VERSION`) |
 | `src/js/backup-dialog.js` | Backup modal (`#backup`) |
 | `src/js/import-dialog.js` | Import modal (`#import`); auto demo import (`openDemoBackupDialog`) |
@@ -72,7 +73,7 @@ All app code lives in **`src/`**.
 | `src/js/link.js` | Link markup (`a.link` / external / icon) |
 | `src/js/tile.js` | Tile markup (`ul.tile-list` / `a.tile`) |
 | `src/js/empty-view.js` | Empty / loading markup (`section.empty-view`, CSS brick, `welcomeViewMarkup`, `loadingViewMarkup`) |
-| `src/js/includes-ci.js` | Search comparison (`includesCI`): case and accents ignored |
+| `src/js/includes-ci.js` | Search comparison (`includesCI` / `foldCI`): case and accents ignored |
 | `src/js/confirm-dialog.js` | `modal--sm` dialogs (`openConfirmDialog` / `confirmDialog` / `alertDialog`, optional `icon`) — no `alert()` / `confirm()` / `prompt()` |
 | `src/js/toast.js` | Stackable toasts: normal / success / error, header/body, 7 s delay (15 s collection import/backup); `toast()` / `dismissToast()` |
 | `src/js/developer-access.js` | Developer space access (always on locally; off-local, `localStorage` flag after `#developer` confirmation) |
@@ -147,7 +148,7 @@ Developer tool `#developer/theme-presets`: isolated local copy (IndexedDB `brick
 
 ## Set catalog (`src/data/sets-presets.json`)
 
-Compiled from the daily [Rebrickable downloads](https://rebrickable.com/downloads/) (CSV dumps, no API key, no images). The app precaches the file offline. [`src/js/sets-presets.js`](src/js/sets-presets.js) loads it on demand (not at boot). No editor autocomplete yet.
+Compiled from the daily [Rebrickable downloads](https://rebrickable.com/downloads/) (CSV dumps, no API key, no images). The app precaches the file offline. [`src/js/sets-presets.js`](src/js/sets-presets.js) loads it on demand (not at boot). Card-editor autocomplete is not wired yet; `#developer/search` has a catalog suggest demo (`bindSetSearch`).
 
 ```
 python3 -B scripts/build-sets-presets-from-rebrickable.py
@@ -169,6 +170,7 @@ Helpers (catalog creation / matching only; the card ↔ theme link stays `brickc
 - `findThemeByRebrickableId(themeId)` — default themes first, then custom; match on the `rebrickableThemeId` field (not the Brickcard id)
 - `resolveOrCreateThemeFromRebrickable(themeId)` — reuse if found; else create a custom theme (catalog name only, prefixed id). Call when persisting a card, not while browsing
 - `cardDraftFromRebrickableSet(setId)` — card fields, not persisted; does not create a theme (`brickcardThemeId` empty if none matches yet)
+- `searchCatalogSets(query, { limit })` — `includesCI` on set `id`, `name`, and catalog theme name (leading `#` on a token stripped); space-separated tokens are AND; A–Z `name` then `id` (`localeCompare` + `getLocale()`); `items` capped at `limit` (default 50), `matchCount` is the full hit count; returns `generatedAt` from `meta`
 
 JSON shape: `meta` (`generatedAt`, `source`, `numThemes`, `themesKeys`, `numSets`, `setsKeys`); `themes` and `sets` are **positional rows** (`themesKeys` = `id`, `name`; `setsKeys` = `id`, `name`, `numPieces`, `numFigurines`, `releaseYear`, `themeId`). Read with `Object.fromEntries(keys.map((k, i) => [k, row[i]]))`. GitHub Actions `.github/workflows/refresh-sets-presets-from-rebrickable.yml` runs the script daily (`07:30` UTC) and on `workflow_dispatch`, then commits when the catalog changed (`chore: refresh sets-presets.json`) and triggers **Deploy Brickcard to GitHub Pages** (`workflow_dispatch`; a bot `push` does not start `pages.yml`). The Actions app needs write access to the default branch (contents + actions).
 
@@ -372,16 +374,17 @@ Center bar (list): `search-bar` block in the `topbar-search` slot.
 
 | Axis | Options |
 |------|---------|
-| Block | `search-bar` (+ `search-bar--input-only` if no trail) |
+| Block | `search-bar` (+ `search-bar--input-only` if no trail; `search-bar--suggest` for catalog autocomplete) |
 | Icon | optional — `form-control-icon` (default search: `ri-search-line`) |
 | Control | `input.form-control` `type="search"` (same look as a text field) |
-| Trail | `search-bar-trail` (absolute, right) — visible only if ≥ 2 items (`[hidden]` otherwise) |
+| Trail | `search-bar-trail` (absolute, right) — visible only if ≥ 2 items (`[hidden]` otherwise); catalog suggest always shows count ` · ` catalog date |
 | Results | `search-num-results` (empty → hidden) |
 | Sort | `search-sort` + `btn ghost sm icon-only` (`ri-filter-3-fill`) + `search-sort-menu form-select-list` menu (child of `search-bar`, no top border, aligned to the focus frame) / `form-select-option` options; right icon `ri-sort-asc` / `ri-sort-desc` on the active option |
+| Suggest | catalog combobox (`bindSetSearch` in `set-search.js`): list opens after 1 character (configurable); max 50 results (configurable); matches `id` / `name` / catalog theme (AND on spaces); `form-select-list` + `form-select-option--multiline` (`ri-hashtag` + id, year/pieces/figurines badges, theme + `ri-palette-fill`, set name; query hits wrapped in `<b>`; reserved `.form-select-option-media` for a later thumbnail); blur hides the list, focus reopens it (scroll reset to the top on input and focus) |
 
 Opening the sort menu: **click** only (not hover or focus alone); once the button is focused, keyboard like `form-select` (↑↓ Enter/Space Home/End Escape, `aria-activedescendant`). The menu **stays open** after a criterion choice or direction flip (close: outside click, Escape, or click the button again).
 
-Applied: list topbar · themes modal (results + sort: `numCards`, title, date modified if ≥ 2 custom themes — default themes not involved; default `numCards` descending) · `#developer` home and `#settings` (`search-bar--input-only`, no results or sort). Matching: `includesCI` (`includes-ci.js`), case- and accent-insensitive. Gallery: `#developer/search`.
+Applied: list topbar · themes modal (results + sort: `numCards`, title, date modified if ≥ 2 custom themes — default themes not involved; default `numCards` descending) · `#developer` home and `#settings` (`search-bar--input-only`, no results or sort) · `#developer/search` set-catalog demo (`search-bar--suggest`, `sets-presets.json`). Matching: `includesCI` (`includes-ci.js`), case- and accent-insensitive. Gallery: `#developer/search`.
 
 ## Titles (design system)
 

@@ -5,6 +5,7 @@ import {
   ICON_SORT_DESC,
 } from "../../icons.js";
 import { linkMarkup } from "../../link.js";
+import { bindSetSearch } from "../../set-search.js";
 
 /**
  * @param {string} svg
@@ -37,6 +38,10 @@ export function renderDeveloperSearch(host) {
         Topbar slot&nbsp;: <code>topbar-search</code> centers the block.
         Results + sort&nbsp;: visible only when there are <strong>at least 2</strong>
         items. Label is always “&nbsp;cards&nbsp;”.
+        Catalog suggest (<code>search-bar--suggest</code>)&nbsp;: trail is
+        set count <code>·</code> catalog date; list uses <code>form-select</code>
+        look with multi-line options (<code>bindSetSearch</code>,
+        <code>sets-presets.json</code>).
         Used: card list (topbar) · themes modal (num results + sort) ·
         developer home and settings (<code>search-bar--input-only</code>).
       </p>
@@ -59,6 +64,30 @@ export function renderDeveloperSearch(host) {
               <div class="search-bar search-bar--input-only">
                 <input class="form-control" type="search" id="demo-search-plain-noicon" placeholder="Search…" autocomplete="off" aria-label="Search without icon" />
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="styleguide-section">
+        <h2 class="styleguide-section-title">Set catalog</h2>
+        <p class="form-hint" style="margin-bottom: 0.65rem">
+          Autocomplete from <code>sets-presets.json</code>
+          (<code>search-bar--suggest</code>, <code>bindSetSearch</code>).
+          The list opens after 1 character. Matches set <code>name</code>,
+          <code>id</code>, and catalog theme name (case and accents ignored).
+          Several words are AND. At most 50 results, A–Z by
+          name then id. Trail: matching count <code>·</code> catalog date (UI locale).
+          Options use the <code>form-select</code> list look, on several lines
+          (id + year / pieces / figurines, theme, name). Pick a set to fill the
+          field with its name.
+        </p>
+        <div class="styleguide-search-demo" style="max-width: 36rem">
+          <div class="search-bar search-bar--suggest" data-demo-set-search>
+            ${controlIconMarkup(ICON_SEARCH_LINE)}
+            <input class="form-control" type="search" id="demo-set-search" placeholder="Search for a set…" autocomplete="off" aria-label="Search for a set" />
+            <div class="search-bar-trail">
+              <span class="search-num-results" id="demo-set-search-num-results" aria-live="polite"></span>
             </div>
           </div>
         </div>
@@ -376,7 +405,15 @@ export function renderDeveloperSearch(host) {
   document.addEventListener("click", onDocClick);
   document.addEventListener("keydown", onDocKey);
 
+  const setSearchBar = /** @type {HTMLElement|null} */ (
+    host.querySelector("[data-demo-set-search]")
+  );
+  const unbindSetSearch = setSearchBar
+    ? bindSetSearch(setSearchBar)
+    : () => {};
+
   return () => {
+    unbindSetSearch();
     countInput?.removeEventListener("input", onCountInput);
     fullInput?.removeEventListener("input", onFullInput);
     sortBtn?.removeEventListener("click", onSortBtn);
