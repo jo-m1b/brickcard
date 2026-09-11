@@ -3,7 +3,7 @@
  */
 
 /** @param {string} s */
-function fold(s) {
+export function foldCI(s) {
   return String(s || "")
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
@@ -12,5 +12,5 @@ function fold(s) {
 
 /** @param {string} hay @param {string} needle */
 export function includesCI(hay, needle) {
-  return fold(hay).includes(fold(needle));
+  return foldCI(hay).includes(foldCI(needle));
 }

@@ -4,7 +4,8 @@
  * Card ↔ theme link stays `brickcardThemeId`; Rebrickable ids are origin only.
  */
 
-import { _t } from "./i18n.js";
+import { _t, getLocale } from "./i18n.js";
+import { foldCI } from "./includes-ci.js";
 import {
   createRebrickableCardId,
   createRebrickableThemeId,
@@ -33,10 +34,35 @@ const CATALOG_URL = "data/sets-presets.json";
  */
 
 /**
+ * @typedef {CatalogSet & { themeName: string }} CatalogSetMatch
+ */
+
+/**
+ * @typedef {{
+ *   set: CatalogSet,
+ *   foldId: string,
+ *   foldName: string,
+ *   foldTheme: string,
+ * }} CatalogSetRecord
+ */
+
+/**
  * @typedef {{
  *   themes: Map<string, CatalogTheme>,
  *   sets: Map<string, CatalogSet>,
+ *   generatedAt: string,
+ *   setRecords: CatalogSetRecord[],
  * }} CatalogIndex
+ */
+
+/**
+ * @typedef {{
+ *   items: CatalogSetMatch[],
+ *   matchCount: number,
+ *   total: number,
+ *   generatedAt: string,
+ *   needles: string[],
+ * }} CatalogSetSearch
  */
 
 /** @type {Promise<CatalogIndex>|null} */
@@ -105,21 +131,34 @@ export async function loadSetsPresets() {
 
       /** @type {Map<string, CatalogSet>} */
       const sets = new Map();
+      /** @type {CatalogSetRecord[]} */
+      const setRecords = [];
       for (const row of setRows) {
         const obj = rowToObject(setsKeys, row);
         const id = parseRebrickableSetId(obj?.id);
         if (!id) continue;
-        sets.set(id, {
+        const set = {
           id,
           name: String(obj?.name ?? "").trim(),
           numPieces: catalogCount(obj?.numPieces),
           numFigurines: catalogCount(obj?.numFigurines),
           releaseYear: catalogCount(obj?.releaseYear),
           themeId: parseRebrickableThemeId(obj?.themeId),
+        };
+        sets.set(id, set);
+        const theme = set.themeId ? themes.get(String(set.themeId)) : null;
+        setRecords.push({
+          set,
+          foldId: foldCI(id),
+          foldName: foldCI(set.name),
+          foldTheme: foldCI(theme?.name || ""),
         });
       }
 
-      return { themes, sets };
+      const generatedAt =
+        typeof data?.meta?.generatedAt === "string" ? data.meta.generatedAt : "";
+
+      return { themes, sets, generatedAt, setRecords };
     })
     .catch((err) => {
       catalogPromise = null;
@@ -132,6 +171,74 @@ export async function loadSetsPresets() {
 /** Drop the in-memory catalog (tests / local reset). */
 export function clearSetsPresetsCache() {
   catalogPromise = null;
+}
+
+/** Folded tokens (AND). Leading `#` on a token is ignored. */
+function catalogQueryNeedles(query) {
+  const parts = String(query || "")
+    .trim()
+    .split(/\s+/)
+    .map((t) => foldCI(t.replace(/^#+/, "")))
+    .filter(Boolean);
+  return [...new Set(parts)];
+}
+
+/** @param {CatalogSetRecord} rec @param {string[]} needles */
+function recordMatchesNeedles(rec, needles) {
+  return needles.every(
+    (n) =>
+      rec.foldId.includes(n) || rec.foldName.includes(n) || rec.foldTheme.includes(n)
+  );
+}
+
+/**
+ * Search the offline catalog (`id`, `name`, and catalog theme name).
+ * Space-separated tokens are AND (each must match at least one field).
+ * Case and accents ignored; leading `#` on a token is stripped.
+ * `items` is the alphabetical prefix (`name`, then `id`); `matchCount` is the
+ * full hit count. Empty / whitespace query → no items.
+ * @param {unknown} query
+ * @param {{ limit?: number }} [opts]
+ * @returns {Promise<CatalogSetSearch>}
+ */
+export async function searchCatalogSets(query, opts = {}) {
+  const catalog = await loadSetsPresets();
+  const total = catalog.sets.size;
+  const generatedAt = catalog.generatedAt;
+  const rawLimit = Number(opts.limit);
+  const limit = Number.isFinite(rawLimit) ? Math.max(0, Math.round(rawLimit)) : 50;
+  const needles = catalogQueryNeedles(query);
+  if (!needles.length) {
+    return { items: [], matchCount: 0, total, generatedAt, needles };
+  }
+
+  /** @type {CatalogSet[]} */
+  const matches = [];
+  for (const rec of catalog.setRecords) {
+    if (recordMatchesNeedles(rec, needles)) matches.push(rec.set);
+  }
+  const locale = getLocale();
+  matches.sort((a, b) => {
+    const byName = a.name.localeCompare(b.name, locale, { sensitivity: "base" });
+    if (byName) return byName;
+    return a.id.localeCompare(b.id, locale, { sensitivity: "base" });
+  });
+
+  const matchCount = matches.length;
+  /** @type {CatalogSetMatch[]} */
+  const items = matches.slice(0, limit).map((set) => {
+    const theme = set.themeId ? catalog.themes.get(String(set.themeId)) : null;
+    return {
+      id: set.id,
+      name: set.name,
+      numPieces: set.numPieces,
+      numFigurines: set.numFigurines,
+      releaseYear: set.releaseYear,
+      themeId: set.themeId,
+      themeName: theme?.name || "",
+    };
+  });
+  return { items, matchCount, total, generatedAt, needles };
 }
 
 /** @param {unknown} id @returns {Promise<CatalogSet|null>} */
