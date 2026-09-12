@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### ➕ Added
 
-- Card photos and theme logos: **Load from a URL** can keep an `https:` URL (vertical radios: import into the collection, or use the remote URL) when CORS blocks `fetch`; stored in `imageDataUrl` / `logoDataUrl`
+- Card photos and theme logos: **Load from a URL** can keep an `https:` URL (vertical radios: import into the collection, or use the remote URL) when CORS blocks `fetch`; stored in `imageDataUrl` / `logoDataUrl`; import radio hint: always displayed even offline
 - Optional Rebrickable origin refs on cards (`rebrickableSetId`, `rebrickableThemeId`) and themes (`rebrickableThemeId`); catalog-created ids use the `rebrickable-{id}-` + UUID prefix; `sets-presets.js` drafts a card from the offline catalog and reuses or creates a custom theme by `rebrickableThemeId` (`brickcardThemeId` stays the card ↔ theme link)
 - Search gallery (`#developer/search`): set-catalog autocomplete demo (`search-bar--suggest`, `sets-presets.json`); multi-line `form-select` options (id, year / pieces / figurines, theme, name)
 - Collection backup (`.brickcard`): optional `exportedFrom` (page origin + path, no hash / query) when exporting from a DNS host; omitted on localhost, IP addresses, and `.local` / `.localhost`; ignored on import

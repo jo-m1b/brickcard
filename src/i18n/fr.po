@@ -184,6 +184,9 @@ msgstr "Comment ajouter l’image"
 msgid "Import the image into the collection"
 msgstr "Importer l’image dans la collection"
 
+msgid "Always displayed, even offline"
+msgstr "Toujours affichée, même hors-ligne"
+
 msgid "Use the remote URL"
 msgstr "Utiliser l’URL distante"
 

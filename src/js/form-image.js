@@ -310,6 +310,7 @@ function openImageUrlDialog(host, opts) {
                 name: modeName,
                 value: "import",
                 label: _t("Import the image into the collection"),
+                hint: _t("Always displayed, even offline"),
                 checked: true,
               })}
               ${formRadioMarkup({

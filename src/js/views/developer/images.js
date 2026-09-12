@@ -18,8 +18,8 @@ export function renderDeveloperImages(host) {
       <p class="styleguide-intro">
         Control&nbsp;: <code>form-image</code> wrapper.
         Empty&nbsp;: text + file / URL buttons.
-        URL modal&nbsp;: import into the collection (default) or keep the remote
-        <code>https:</code> URL (no CORS <code>fetch</code>).
+        URL modal&nbsp;: import into the collection (default, offline) or keep the remote
+        <code>https:</code> URL (needs Internet, no CORS <code>fetch</code>).
         With image&nbsp;: background color (no hint) then crop preview
         (zoom / alignment badges, reset, delete, save).
         Crop&nbsp;: focus or click, then drag / wheel / arrows / <code>+</code> <code>−</code>.
