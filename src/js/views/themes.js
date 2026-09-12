@@ -11,13 +11,13 @@ import {
 } from "../icons.js";
 import { confirmDialog } from "../confirm-dialog.js";
 import { toast } from "../toast.js";
-import { deleteAllCustomThemes, loadCards, loadThemes } from "../storage.js";
+import { deleteAllCustomThemes, isRemoteImageSrc, loadCards, loadThemes } from "../storage.js";
 import { partitionThemes } from "../themes-data.js";
 import { resolveCardAccent, resolveCardAccentFg } from "../card-design.js";
 import {
   applyThemeLogoTransform,
   brandLogoMarkup,
-  fallbackThemeTileToBrandLogo,
+  fallbackThemeTileToImageError,
 } from "../card-render.js";
 import { emptyViewMarkup } from "../empty-view.js";
 import { setAppDocumentTitle } from "../document-title.js";
@@ -518,7 +518,21 @@ export async function renderThemesModal(host, opts) {
   function bindThemeTileLogos(root) {
     if (!root) return;
     root.querySelectorAll("img.theme-tile-logo").forEach((img) => {
-      img.onerror = () => fallbackThemeTileToBrandLogo(img);
+      img.onerror = () => {
+        const tile = img.closest(".theme-tile");
+        const accent =
+          (tile instanceof HTMLElement && tile.style.getPropertyValue("--theme-accent")) ||
+          "#6e6e6e";
+        fallbackThemeTileToImageError(img, accent);
+      };
+      if (
+        !img.classList.contains("is-brand") &&
+        img.complete &&
+        !img.naturalWidth &&
+        img.getAttribute("src")
+      ) {
+        img.onerror?.(new Event("error"));
+      }
       if (img.classList.contains("is-brand")) return;
       const wrap = img.closest(".theme-tile-logo-wrap--crop");
       const apply = () => {
@@ -870,7 +884,9 @@ function themeTileMarkup(theme, count, action) {
     ? ` data-logo-zoom="${escapeAttr(String(theme.logoZoom || 1))}" data-logo-offset-x="${escapeAttr(String(theme.logoOffsetX || 0))}" data-logo-offset-y="${escapeAttr(String(theme.logoOffsetY || 0))}" style="--logo-zoom:${escapeAttr(String(theme.logoZoom || 1))};--logo-offset-x:${escapeAttr(String(theme.logoOffsetX || 0))};--logo-offset-y:${escapeAttr(String(theme.logoOffsetY || 0))}"`
     : "";
   const logoInner = hasThemeLogo
-    ? `<img class="theme-tile-logo" src="${escapeAttr(theme.logoDataUrl)}" alt="" />`
+    ? `<img class="theme-tile-logo" src="${escapeAttr(theme.logoDataUrl)}" alt=""${
+        isRemoteImageSrc(theme.logoDataUrl) ? ' referrerpolicy="no-referrer"' : ""
+      } />`
     : brandLogoMarkup("theme-tile-logo is-brand");
   const logo = `<div class="${wrapClass}"${cropAttrs}>${logoInner}</div>`;
   let named = theme.name;

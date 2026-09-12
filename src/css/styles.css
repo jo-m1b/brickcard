@@ -1311,57 +1311,136 @@ html:not([data-theme]) .btn .icon-system {
   justify-items: center;
 }
 
-.empty-view .brick {
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
+.brick {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 56px;
   height: 40px;
-  margin: 0 0 0.75rem;
-  background: var(--brick-red);
+  background: var(--image-error-brick, var(--brick-red));
   border: 1px solid var(--line-strong);
 }
 
-.empty-view .brick::before,
-.empty-view .brick::after {
+.brick::before,
+.brick::after {
   content: "";
   position: absolute;
   top: -9px;
   width: 14px;
   height: 9px;
-  background: var(--brick-red);
+  background: var(--image-error-brick, var(--brick-red));
   border: 1px solid var(--line-strong);
   border-bottom: none;
 }
 
-.empty-view .brick::before {
+.brick::before {
   left: 8px;
 }
 
-.empty-view .brick::after {
+.brick::after {
   right: 8px;
 }
 
-.empty-view .brick-error-icon {
+.brick-error-icon {
   display: none;
   flex: 0 0 auto;
   width: 28px;
   height: 28px;
-  color: var(--panel);
+  color: var(--image-error-brick-icon, var(--panel));
 }
 
-.empty-view .brick-error-icon svg {
+.brick-error-icon svg {
   display: block;
   width: 100%;
   height: 100%;
 }
 
-.empty-view:has(.empty-view-error:not([hidden])) .brick-error-icon {
+.empty-view .brick {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0 0 0.75rem;
+}
+
+.empty-view:has(.empty-view-error:not([hidden])) .brick-error-icon,
+.brick--image-error .brick-error-icon {
   display: block;
+}
+
+.brick--image-error .brick-error-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.image-error {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 12px 0.65rem 0.65rem;
+  pointer-events: none;
+}
+
+.image-error-caption {
+  margin: 0;
+  max-width: 100%;
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: 0;
+  text-align: center;
+  text-transform: none;
+  color: var(--image-error-caption, var(--image-error-brick, var(--ink)));
+}
+
+.card .image-error-caption,
+.card-back .image-error-caption {
+  font-size: 7pt;
+}
+
+.theme-tile .image-error-caption {
+  display: none;
+}
+
+.theme-tile .brick--image-error {
+  width: 40px;
+  height: 28px;
+}
+
+.theme-tile .brick--image-error::before,
+.theme-tile .brick--image-error::after {
+  top: -6px;
+  width: 10px;
+  height: 6px;
+}
+
+.theme-tile .brick--image-error::before {
+  left: 6px;
+}
+
+.theme-tile .brick--image-error::after {
+  right: 6px;
+}
+
+.theme-tile .brick--image-error .brick-error-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.theme-tile .image-error {
+  padding: 8px 0.3rem 0.3rem;
+}
+
+.image-error[hidden] {
+  display: none !important;
 }
 
 .empty-view .view-title:has(.loading-dots) {
@@ -2396,6 +2475,16 @@ html:not([data-theme]) .btn .icon-system {
 
 .form-image-crop-img[hidden] {
   display: none !important;
+}
+
+.form-image-crop.is-image-error {
+  cursor: default;
+}
+
+.form-image-crop.is-image-error:focus,
+.form-image-crop.is-image-error.is-editing {
+  outline: none;
+  cursor: default;
 }
 
 .form-image-crop-badges {
@@ -4664,6 +4753,11 @@ textarea {
 
   .card-brand-logo {
     opacity: 1;
+  }
+
+  /* Error brick is screen-only; print treats a failed image as missing. */
+  .image-error {
+    display: none !important;
   }
 
   /*

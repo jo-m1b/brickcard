@@ -151,6 +151,9 @@ export const RI = {
   /** ri-file-line */
   fileLine:
     "M9 2.003V2h10.995C20.55 2 21 2.455 21 2.992v18.016a.993.993 0 0 1-.993.992H3.993A1 1 0 0 1 3 20.993V8l6-5.997zM5.83 8H9V4.83L5.83 8zM11 4v5a1 1 0 0 1-1 1H5v10h14V4z",
+  /** ri-file-damage-fill */
+  fileDamage:
+    "M3 14L7 16.5L10 13L13 17L15 14.5L18 15L15 12L13 14.5L10 9.5L6.5 13.25L3 10V2.9918C3 2.45531 3.44694 2 3.99826 2H14V8C14 8.55228 14.4477 9 15 9H21V20.9925C21 21.5511 20.5552 22 20.0066 22H3.9934C3.44495 22 3 21.556 3 21.0082V14ZM21 7H16V2.00318L21 7Z",
   /** ri-link */
   link:
     "M18.364 15.536L16.95 14.12l1.414-1.414a5 5 0 0 0-7.071-7.071L9.878 7.05 8.464 5.636 9.88 4.222a7 7 0 0 1 9.9 9.9l-1.415 1.414zm-2.828 2.828l-1.415 1.414a7 7 0 0 1-9.9-9.9l1.415-1.414L7.05 9.88l-1.414 1.414a5 5 0 0 0 7.071 7.071l1.414-1.414 1.415 1.414zm-.708-10.607l1.415 1.415-7.071 7.07-1.415-1.414 7.071-7.07z",
@@ -215,6 +218,7 @@ export const ICON_DELETE_BIN = remixIcon(RI.deleteBin);
 export const ICON_DELETE_BIN_2 = remixIcon(RI.deleteBin2);
 export const ICON_SAVE = remixIcon(RI.save);
 export const ICON_FILE_LINE = remixIcon(RI.fileLine);
+export const ICON_FILE_DAMAGE = remixIcon(RI.fileDamage);
 export const ICON_ZOOM_IN = remixIcon(RI.zoomIn);
 export const ICON_ALIGN_ITEM_HORIZONTAL_CENTER = remixIcon(RI.alignItemHorizontalCenter);
 export const ICON_ALIGN_ITEM_VERTICAL_CENTER = remixIcon(RI.alignItemVerticalCenter);

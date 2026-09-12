@@ -9,12 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### ➕ Added
 
+- Card photos and theme logos: **Load from a URL** can keep an `https:` URL (vertical radios: import into the collection, or use the remote URL) when CORS blocks `fetch`; stored in `imageDataUrl` / `logoDataUrl`
 - Optional Rebrickable origin refs on cards (`rebrickableSetId`, `rebrickableThemeId`) and themes (`rebrickableThemeId`); catalog-created ids use the `rebrickable-{id}-` + UUID prefix; `sets-presets.js` drafts a card from the offline catalog and reuses or creates a custom theme by `rebrickableThemeId` (`brickcardThemeId` stays the card ↔ theme link)
 - Search gallery (`#developer/search`): set-catalog autocomplete demo (`search-bar--suggest`, `sets-presets.json`); multi-line `form-select` options (id, year / pieces / figurines, theme, name)
 - Collection backup (`.brickcard`): optional `exportedFrom` (page origin + path, no hash / query) when exporting from a DNS host; omitted on localhost, IP addresses, and `.local` / `.localhost`; ignored on import
 
 ### ✏️ Changed
 
+- Image **Download**: a `data:` src saves as a file; any other src (`http:`, `https:`, path) opens in a new tab (`target=_blank`)
+- Failed card photo / theme logo: 404-style brick with `ri-file-damage-fill` (black or white on the frame / theme color) and a centered **Remote image unavailable** caption instead of hiding the slot or falling back to the Brickcard mark; theme mini-cards use a smaller brick; print treats a failed image as missing (no error brick)
 - Search gallery set-catalog suggest: also match catalog theme names; space-separated words are AND; query hits in id / name / theme are wrapped in `<b>`; set id uses `ri-hashtag` (no `#` prefix); theme size matches the id; set name is slightly larger
 - Search gallery set-catalog suggest: search starts from 1 character; at most 50 results
 - Collection backup (`.brickcard`): omit `null`, empty-string, and default fields on cards and themes (card crop `1` / `0` / `0`; theme logo crop `1` / `0` / `0`); `themes` is written before `cards`
@@ -22,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### 🔧 Fixed
 
+- Image error brick: use the official Remix `ri-file-damage-fill` path (the previous `d` was not that icon)
 - Search gallery set-catalog suggest: focusing the field again reopens the result list (blur still hides it)
 - Search gallery set-catalog suggest: list scroll resets to the top on each character and on focus
 

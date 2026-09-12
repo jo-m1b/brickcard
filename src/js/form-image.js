@@ -3,12 +3,18 @@
  * Two views: empty (file / URL) and image (optional background + crop preview).
  */
 
-import { applyImageTransform, applyThemeLogoTransform } from "./card-render.js";
+import {
+  applyImageErrorTone,
+  applyImageTransform,
+  applyThemeLogoTransform,
+  imageErrorHostMarkup,
+} from "./card-render.js";
 import { downloadCardPhoto } from "./card-export.js";
 import { confirmDialog } from "./confirm-dialog.js";
 import { popModalDocumentTitle, pushModalDocumentTitle } from "./document-title.js";
 import { bindFormColor, formColorMarkup } from "./form-color.js";
 import { loadingViewMarkup } from "./empty-view.js";
+import { formRadioMarkup } from "./form-radio.js";
 import { focusTopModal } from "./modal-focus.js";
 import {
   ICON_ALIGN_ITEM_HORIZONTAL_CENTER,
@@ -25,7 +31,10 @@ import {
   modalTitleMarkup,
 } from "./icons.js";
 import {
+  applyImageSrc,
   fetchImageAsFile,
+  isRemoteImageSrc,
+  probeRemoteImage,
   resolveImageBackground,
   IMAGE_FILE_ACCEPT,
   IMAGE_LOAD_ERROR,
@@ -204,8 +213,13 @@ export function formImageMarkup(opts) {
           style="background-color:${escapeAttr(bgDisplay)}"
         >
           <img class="form-image-crop-img" alt="" ${
-            hasImage ? `src="${escapeAttr(dataUrl)}"` : "hidden"
+            hasImage
+              ? `src="${escapeAttr(dataUrl)}"${
+                  isRemoteImageSrc(dataUrl) ? ' referrerpolicy="no-referrer"' : ""
+                }`
+              : "hidden"
           } />
+          ${imageErrorHostMarkup()}
           <div class="form-image-crop-badges" aria-hidden="true">
             <span class="btn primary sm form-image-crop-badge" data-form-image-badge="zoom">${ICON_ZOOM_IN}<span>${formatZoomPercent(zoom)}</span></span>
             <span class="btn primary sm form-image-crop-badge" data-form-image-badge="x">${ICON_ALIGN_ITEM_HORIZONTAL_CENTER}<span>${formatOffsetPercent(offsetX)}</span></span>
@@ -257,6 +271,7 @@ function openImageUrlDialog(host, opts) {
 
     const inputId = `${uid}-input`;
     const errorId = `${uid}-error`;
+    const modeName = `${uid}-mode`;
 
     backdrop.innerHTML = `
       <div class="modal modal--sm" role="dialog" aria-modal="true" aria-labelledby="${uid}-title">
@@ -287,6 +302,25 @@ function openImageUrlDialog(host, opts) {
             </div>
             <p class="form-error" id="${errorId}" role="alert"></p>
           </div>
+          <fieldset class="form-check-group">
+            <legend class="visually-hidden">${_t("How to add the image")}</legend>
+            <div class="form-check-list">
+              ${formRadioMarkup({
+                id: `${uid}-mode-import`,
+                name: modeName,
+                value: "import",
+                label: _t("Import the image into the collection"),
+                checked: true,
+              })}
+              ${formRadioMarkup({
+                id: `${uid}-mode-remote`,
+                name: modeName,
+                value: "remote",
+                label: _t("Use the remote URL"),
+                hint: _t("Requires Internet access to display"),
+              })}
+            </div>
+          </fieldset>
           <div class="url-dialog-loading" id="${uid}-loading" hidden>
             ${loadingViewMarkup({ titleTag: "p" })}
           </div>
@@ -307,6 +341,7 @@ function openImageUrlDialog(host, opts) {
     const loadBtn = /** @type {HTMLButtonElement|null} */ (backdrop.querySelector("[data-url-load]"));
     const loadingEl = backdrop.querySelector(`#${uid}-loading`);
     const dismissBtns = backdrop.querySelectorAll("[data-url-dismiss]");
+    const modeInputs = backdrop.querySelectorAll(`input[name="${modeName}"]`);
 
     let settled = false;
     let loading = false;
@@ -341,8 +376,16 @@ function openImageUrlDialog(host, opts) {
       loading = on;
       if (loadBtn) loadBtn.disabled = on;
       if (input) input.disabled = on;
+      modeInputs.forEach((el) => {
+        if (el instanceof HTMLInputElement) el.disabled = on;
+      });
       backdrop.setAttribute("aria-busy", on ? "true" : "false");
       if (loadingEl instanceof HTMLElement) loadingEl.hidden = !on;
+    }
+
+    function selectedMode() {
+      const checked = backdrop.querySelector(`input[name="${modeName}"]:checked`);
+      return checked instanceof HTMLInputElement ? checked.value : "import";
     }
 
     async function loadFromUrl() {
@@ -356,6 +399,11 @@ function openImageUrlDialog(host, opts) {
       setError("");
       setLoading(true);
       try {
+        if (selectedMode() === "remote") {
+          const probed = await probeRemoteImage(url);
+          finish(probed.href);
+          return;
+        }
         const file = await fetchImageAsFile(url);
         const dataUrl = await processFile(file);
         if (!dataUrl) throw new Error(_t(IMAGE_LOAD_ERROR));
@@ -456,6 +504,8 @@ export function bindFormImage(root, opts = {}) {
   const urlBtn = /** @type {HTMLButtonElement|null} */ (root.querySelector("[data-form-image-url]"));
   const crop = /** @type {HTMLElement|null} */ (root.querySelector(".form-image-crop"));
   const cropImg = /** @type {HTMLImageElement|null} */ (root.querySelector(".form-image-crop-img"));
+  const errorHost = /** @type {HTMLElement|null} */ (root.querySelector(".form-image-crop .image-error"));
+  const badgesEl = /** @type {HTMLElement|null} */ (root.querySelector(".form-image-crop-badges"));
   const resetBtn = /** @type {HTMLButtonElement|null} */ (root.querySelector(".form-image-crop-reset"));
   const deleteBtn = /** @type {HTMLButtonElement|null} */ (root.querySelector("[data-form-image-delete]"));
   const downloadBtn = /** @type {HTMLButtonElement|null} */ (root.querySelector("[data-form-image-download]"));
@@ -469,7 +519,7 @@ export function bindFormImage(root, opts = {}) {
   if (opts.fit === "logo") crop?.classList.add("form-image-crop--logo");
   const zoomMax = opts.fit === "logo" ? ZOOM_MAX_LOGO : ZOOM_MAX;
 
-  /** @type {FormImageValue & { imageNaturalWidth: number, imageNaturalHeight: number }} */
+  /** @type {FormImageValue & { imageNaturalWidth: number, imageNaturalHeight: number, imageBroken: boolean }} */
   const state = {
     dataUrl: cropImg?.getAttribute("src") || "",
     backgroundColor: "",
@@ -478,6 +528,7 @@ export function bindFormImage(root, opts = {}) {
     offsetY: Number(root.getAttribute("data-offset-y")) || 0,
     imageNaturalWidth: 0,
     imageNaturalHeight: 0,
+    imageBroken: false,
   };
 
   let dragging = false;
@@ -504,15 +555,34 @@ export function bindFormImage(root, opts = {}) {
 
   function paintCropBackground() {
     if (!crop) return;
-    crop.style.backgroundColor = withBackgroundColor
-      ? resolveImageBackground(state.backgroundColor)
-      : previewBackground || "#ffffff";
+    crop.style.backgroundColor = cropSurfaceHex();
+    if (state.imageBroken && errorHost) applyImageErrorTone(errorHost, cropSurfaceHex());
   }
 
   function setPreviewBackground(hex) {
     if (destroyed || withBackgroundColor) return;
     previewBackground = String(hex || "");
     paintCropBackground();
+  }
+
+  function cropSurfaceHex() {
+    return withBackgroundColor
+      ? resolveImageBackground(state.backgroundColor)
+      : previewBackground || "#ffffff";
+  }
+
+  function setCropError(on) {
+    state.imageBroken = Boolean(on);
+    if (errorHost) {
+      if (on) applyImageErrorTone(errorHost, cropSurfaceHex());
+      errorHost.hidden = !on;
+    }
+    if (badgesEl) badgesEl.hidden = on;
+    crop?.classList.toggle("is-image-error", on);
+    if (crop && !readOnly) {
+      crop.tabIndex = on ? -1 : 0;
+      if (on) crop.classList.remove("is-editing");
+    }
   }
 
   function syncBadges() {
@@ -522,12 +592,14 @@ export function bindFormImage(root, opts = {}) {
     if (resetBtn) {
       resetBtn.hidden =
         readOnly ||
+        state.imageBroken ||
         !state.dataUrl ||
         isDefaultCrop(state.zoom, state.offsetX, state.offsetY);
     }
   }
 
   function applyCrop() {
+    if (state.imageBroken) return;
     if (!crop || !cropImg || !state.dataUrl || !state.imageNaturalWidth) return;
     if (opts.fit === "logo") {
       applyThemeLogoTransform(cropImg, crop, {
@@ -577,9 +649,9 @@ export function bindFormImage(root, opts = {}) {
   function loadDataUrl(dataUrl, flags = {}) {
     const resetCrop = flags.resetCrop !== false;
     const emitChange = Boolean(flags.emitChange);
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const img = new Image();
-      img.onload = () => {
+      const showOk = () => {
         if (destroyed) {
           resolve();
           return;
@@ -593,17 +665,39 @@ export function bindFormImage(root, opts = {}) {
           state.offsetY = 0;
         }
         if (cropImg) {
-          cropImg.src = dataUrl;
+          applyImageSrc(cropImg, dataUrl);
           cropImg.hidden = false;
         }
+        setCropError(false);
         showFilled();
         requestAnimationFrame(() => {
           applyCrop();
+          syncBadges();
           if (emitChange) emit();
           resolve();
         });
       };
-      img.onerror = () => reject(new Error(_t(IMAGE_LOAD_ERROR)));
+      const showBroken = () => {
+        if (destroyed) {
+          resolve();
+          return;
+        }
+        state.dataUrl = dataUrl;
+        state.imageNaturalWidth = 0;
+        state.imageNaturalHeight = 0;
+        if (cropImg) {
+          applyImageSrc(cropImg, dataUrl);
+          cropImg.hidden = true;
+        }
+        setCropError(true);
+        showFilled();
+        syncBadges();
+        if (emitChange) emit();
+        resolve();
+      };
+      img.onload = showOk;
+      img.onerror = showBroken;
+      if (isRemoteImageSrc(dataUrl)) img.referrerPolicy = "no-referrer";
       img.src = dataUrl;
     });
   }
@@ -617,8 +711,10 @@ export function bindFormImage(root, opts = {}) {
     state.offsetY = 0;
     if (cropImg) {
       cropImg.removeAttribute("src");
+      cropImg.removeAttribute("referrerpolicy");
       cropImg.hidden = true;
     }
+    setCropError(false);
     if (fileInput) fileInput.value = "";
     syncBadges();
     showEmpty();
@@ -639,9 +735,7 @@ export function bindFormImage(root, opts = {}) {
   paintCropBackground();
 
   if (state.dataUrl) {
-    loadDataUrl(state.dataUrl, { resetCrop: false }).catch(() => {
-      clearImage(false);
-    });
+    loadDataUrl(state.dataUrl, { resetCrop: false });
   } else {
     syncBadges();
   }
@@ -700,12 +794,6 @@ export function bindFormImage(root, opts = {}) {
     setBusy(true);
     try {
       await loadDataUrl(dataUrl, { resetCrop: true, emitChange: true });
-    } catch (err) {
-      const message =
-        err && typeof err === "object" && "message" in err && err.message
-          ? String(err.message)
-          : _t(IMAGE_LOAD_ERROR);
-      setEmptyError(message);
     } finally {
       setBusy(false);
     }
@@ -740,7 +828,7 @@ export function bindFormImage(root, opts = {}) {
     if (!state.dataUrl) return;
     try {
       await downloadCardPhoto(state.dataUrl, resolveDownloadBasename());
-      toastImageSaved();
+      if (/^data:/i.test(String(state.dataUrl || "").trim())) toastImageSaved();
       opts.onDownload?.();
     } catch {
       /* src expected; fail silently */
@@ -749,7 +837,7 @@ export function bindFormImage(root, opts = {}) {
 
   /** @param {PointerEvent} e */
   function onCropPointerDown(e) {
-    if (!state.dataUrl || !crop) return;
+    if (!state.dataUrl || state.imageBroken || !crop) return;
     if (e.target instanceof Element && e.target.closest("button")) return;
     crop.focus();
     dragging = true;
@@ -760,7 +848,7 @@ export function bindFormImage(root, opts = {}) {
 
   /** @param {PointerEvent} e */
   function onCropPointerMove(e) {
-    if (!dragging || !state.dataUrl || !crop) return;
+    if (!dragging || !state.dataUrl || state.imageBroken || !crop) return;
     const rect = crop.getBoundingClientRect();
     if (!rect.width || !rect.height) return;
     state.offsetX += (e.clientX - lastX) / rect.width;
@@ -800,7 +888,7 @@ export function bindFormImage(root, opts = {}) {
 
   /** @param {WheelEvent} e */
   function onCropWheel(e) {
-    if (!state.dataUrl || !crop) return;
+    if (!state.dataUrl || state.imageBroken || !crop) return;
     if (document.activeElement !== crop) return;
     e.preventDefault();
     nudgeZoom(e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP);
@@ -808,7 +896,7 @@ export function bindFormImage(root, opts = {}) {
 
   /** @param {KeyboardEvent} e */
   function onCropKeyDown(e) {
-    if (!state.dataUrl || document.activeElement !== crop) return;
+    if (!state.dataUrl || state.imageBroken || document.activeElement !== crop) return;
     const key = e.key;
     if (key === "ArrowLeft") {
       e.preventDefault();
@@ -943,9 +1031,7 @@ export function bindFormImage(root, opts = {}) {
           clearImage(false);
           return;
         }
-        loadDataUrl(next, { resetCrop: false }).catch(() => {
-          clearImage(false);
-        });
+        loadDataUrl(next, { resetCrop: false });
         return;
       }
       applyCrop();

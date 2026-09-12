@@ -178,6 +178,18 @@ msgstr "Charger"
 msgid "https://…/image.png"
 msgstr "https://…/image.png"
 
+msgid "How to add the image"
+msgstr "Comment ajouter l’image"
+
+msgid "Import the image into the collection"
+msgstr "Importer l’image dans la collection"
+
+msgid "Use the remote URL"
+msgstr "Utiliser l’URL distante"
+
+msgid "Requires Internet access to display"
+msgstr "Nécessite un accès à Internet pour s’afficher"
+
 msgid "Delete the image?"
 msgstr "Supprimer l’image ?"
 
@@ -231,6 +243,12 @@ msgstr "Erreur de chargement de l’image ! Réseau ou CORS - le site source ref
 
 msgid "The image URL is invalid."
 msgstr "L’URL de l’image est invalide."
+
+msgid "Only HTTPS image URLs are allowed."
+msgstr "Seules les URL d’image en HTTPS sont autorisées."
+
+msgid "Remote image unavailable"
+msgstr "Image distante indisponible"
 
 msgid "Image loading error! HTTP %(status)s."
 msgstr "Erreur de chargement de l’image ! HTTP %(status)s."

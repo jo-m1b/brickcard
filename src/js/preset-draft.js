@@ -10,6 +10,7 @@ import {
   mimeFromDataUrl,
   slugifyFilename,
 } from "./card-export.js";
+import { isRemoteImageSrc } from "./storage.js";
 import {
   clampLogoZoom,
   clearPresetCache,
@@ -331,11 +332,24 @@ export function presetDraftLogoExt(theme) {
 }
 
 /** @param {PresetDraftTheme} theme */
+function remotePresetLogoSrc(theme) {
+  const data = String(theme.logoDataUrl || "").trim();
+  if (isRemoteImageSrc(data)) return data;
+  const src = String(theme.logoSrc || "").trim();
+  if (isRemoteImageSrc(src)) return src;
+  return "";
+}
+
 function toPresetMeta(theme) {
   /** @type {import("./themes-data.js").PresetMeta} */
   const out = { id: theme.id, name: theme.name };
-  const ext = presetDraftLogoExt(theme);
-  if (ext) out.logoSrc = `${PRESET_LOGO_DIR}/theme-logo-${theme.id}.${ext}`;
+  const remote = remotePresetLogoSrc(theme);
+  if (remote) {
+    out.logoSrc = remote;
+  } else {
+    const ext = presetDraftLogoExt(theme);
+    if (ext) out.logoSrc = `${PRESET_LOGO_DIR}/theme-logo-${theme.id}.${ext}`;
+  }
   if (theme.color) out.color = theme.color;
   if (theme.secondaryColor) out.secondaryColor = theme.secondaryColor;
   const zoom = clampLogoZoom(theme.logoZoom);
@@ -391,6 +405,10 @@ export async function downloadPresetDraftLogos() {
   for (const theme of themes) {
     const src = presetDraftLogoUrl(theme);
     const ext = presetDraftLogoExt(theme);
+    if (isRemoteImageSrc(src)) {
+      skipped += 1;
+      continue;
+    }
     if (!src || !ext) {
       if (src || ext) skipped += 1;
       continue;

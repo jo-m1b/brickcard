@@ -27,7 +27,7 @@ const STORE_THEMES = "themes";
  * @property {number|null} numPieces Piece count
  * @property {number|null} numFigurines Figurine count (optional)
  * @property {number|null} releaseYear Release year (optional)
- * @property {string} imageDataUrl Photo (JPEG/PNG/SVG/WebP data URL)
+ * @property {string} imageDataUrl Photo (data URL, same-origin path, or https URL)
  * @property {string} imageBackgroundColor Image-area background (hex); empty = white on screen
  * @property {number} imageZoom Photo crop zoom (1 = cover / 100%; < 1 = zoom out)
  * @property {number} imageOffsetX Photo horizontal offset (fraction)
@@ -45,6 +45,10 @@ export const IMAGE_LOAD_ERROR_FORMAT =
 export const IMAGE_LOAD_ERROR_CORS =
   "Image loading error! Network or CORS - the source site refuses the load.";
 export const IMAGE_URL_INVALID = "The image URL is invalid.";
+export const IMAGE_URL_HTTPS_ONLY = "Only HTTPS image URLs are allowed.";
+
+/** Probe timeout for a remote image (`<img>`, no fetch). */
+const REMOTE_IMAGE_PROBE_MS = 15000;
 
 /** Max side of imported rasters (cards and logos). */
 export const IMAGE_MAX_SIDE = 2000;
@@ -969,12 +973,11 @@ function encodeSvgFile(file) {
 }
 
 /**
- * Download an image from an http(s) URL and return a File
- * (the URL is not kept — import only).
+ * Parse an image URL: absolute `https:` only.
  * @param {string} urlString
- * @returns {Promise<File>}
+ * @returns {URL}
  */
-export async function fetchImageAsFile(urlString) {
+export function parseHttpsImageUrl(urlString) {
   const raw = String(urlString || "").trim();
   if (!raw) throw new Error(_t(IMAGE_URL_INVALID));
 
@@ -984,9 +987,92 @@ export async function fetchImageAsFile(urlString) {
   } catch {
     throw new Error(_t(IMAGE_URL_INVALID));
   }
-  if (url.protocol !== "http:" && url.protocol !== "https:") {
-    throw new Error(_t(IMAGE_URL_INVALID));
+  if (url.protocol !== "https:") {
+    throw new Error(_t(IMAGE_URL_HTTPS_ONLY));
   }
+  return url;
+}
+
+/** @param {string} s */
+export function isHttpsImageUrl(s) {
+  try {
+    return new URL(String(s || "").trim()).protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Remote image kept as an `https:` URL (not a data URL or app path).
+ * @param {string} s
+ */
+export function isRemoteImageSrc(s) {
+  return isHttpsImageUrl(s);
+}
+
+/**
+ * Set `src` and `referrerpolicy="no-referrer"` on remote images.
+ * @param {HTMLImageElement|null|undefined} img
+ * @param {string} src
+ */
+export function applyImageSrc(img, src) {
+  if (!(img instanceof HTMLImageElement)) return;
+  const raw = String(src || "").trim();
+  if (isRemoteImageSrc(raw)) {
+    img.referrerPolicy = "no-referrer";
+  } else {
+    img.removeAttribute("referrerpolicy");
+  }
+  if (raw) img.src = raw;
+  else img.removeAttribute("src");
+}
+
+/**
+ * Decode a remote HTTPS image with `<img>` (no CORS / fetch).
+ * @param {string} urlString
+ * @returns {Promise<{ width: number, height: number, href: string }>}
+ */
+export function probeRemoteImage(urlString) {
+  const url = parseHttpsImageUrl(urlString);
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    let done = false;
+    const finish = (err, dims) => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      img.onload = null;
+      img.onerror = null;
+      img.src = "";
+      if (err) reject(err);
+      else resolve(dims);
+    };
+    const timer = setTimeout(() => {
+      finish(new Error(_t(IMAGE_LOAD_ERROR)));
+    }, REMOTE_IMAGE_PROBE_MS);
+    img.referrerPolicy = "no-referrer";
+    img.onload = () => {
+      const width = img.naturalWidth || img.width;
+      const height = img.naturalHeight || img.height;
+      if (!width || !height) {
+        finish(new Error(_t(IMAGE_LOAD_ERROR)));
+        return;
+      }
+      finish(null, { width, height, href: url.href });
+    };
+    img.onerror = () => finish(new Error(_t(IMAGE_LOAD_ERROR)));
+    img.src = url.href;
+  });
+}
+
+/**
+ * Download an image from an HTTPS URL and return a File
+ * (the URL is not kept — import only).
+ * @param {string} urlString
+ * @returns {Promise<File>}
+ */
+export async function fetchImageAsFile(urlString) {
+  const url = parseHttpsImageUrl(urlString);
 
   let res;
   try {

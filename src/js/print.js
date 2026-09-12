@@ -4,7 +4,14 @@
  * Face/back alignment: horizontal mirror (long-edge flip in portrait).
  */
 
-import { renderCardFace, renderCardBack, applyImageTransform, applyThemeLogoTransform } from "./card-render.js";
+import {
+  renderCardFace,
+  renderCardBack,
+  applyImageTransform,
+  applyThemeLogoTransform,
+  hideCardPhotoAsMissing,
+  hideThemeLogoAsMissing,
+} from "./card-render.js";
 import { loadThemes } from "./storage.js";
 import {
   computePrintLayout,
@@ -214,6 +221,47 @@ async function waitForImages(root) {
  * If `onload` has not yet revealed an already-decoded logo, show it now.
  * @param {HTMLElement} root
  */
+/**
+ * @param {HTMLImageElement|null|undefined} img
+ * @param {HTMLElement|null|undefined} errorHost
+ */
+function isFailedPrintImage(img, errorHost) {
+  if (errorHost instanceof HTMLElement && !errorHost.hidden) return true;
+  if (!(img instanceof HTMLImageElement) || !img.getAttribute("src")) return false;
+  return img.complete && !img.naturalWidth;
+}
+
+/**
+ * Failed remote photo / logo: print as if the card or theme had no image.
+ * @param {HTMLElement} root
+ */
+function collapseFailedPrintImages(root) {
+  root.querySelectorAll(".card").forEach((cardEl) => {
+    const img = cardEl.querySelector(".card-photo-img");
+    const errorHost = cardEl.querySelector(".card-photo-frame .image-error");
+    if (
+      isFailedPrintImage(
+        img instanceof HTMLImageElement ? img : null,
+        errorHost instanceof HTMLElement ? errorHost : null
+      )
+    ) {
+      hideCardPhotoAsMissing(cardEl);
+    }
+  });
+  root.querySelectorAll(".card-back").forEach((back) => {
+    const img = back.querySelector(".card-theme-logo");
+    const errorHost = back.querySelector(".card-theme .image-error");
+    if (
+      isFailedPrintImage(
+        img instanceof HTMLImageElement ? img : null,
+        errorHost instanceof HTMLElement ? errorHost : null
+      )
+    ) {
+      hideThemeLogoAsMissing(back);
+    }
+  });
+}
+
 function revealLoadedThemeLogos(root) {
   root.querySelectorAll(".card-back").forEach((back) => {
     const img = back.querySelector(".card-theme-logo");
@@ -286,12 +334,14 @@ export async function printCards(cards, opts = {}) {
 
   await waitForImages(printRoot);
   revealLoadedThemeLogos(printRoot);
+  collapseFailedPrintImages(printRoot);
   await waitLayout();
   reapplyTransforms(printRoot);
 
   const onBeforePrint = () => {
     document.title = pdfName;
     revealLoadedThemeLogos(printRoot);
+    collapseFailedPrintImages(printRoot);
     reapplyTransforms(printRoot);
   };
 

@@ -143,8 +143,8 @@ export function downloadBlob(blob, filename) {
 }
 
 /**
- * Download a data URL, a same-origin path, or a URL.
- * Always via `blob:`: a data URL `href` ignores `download` for WebP (new tab).
+ * `data:` image → save as a file (`blob:` — a data URL `href` ignores `download` for WebP).
+ * Anything else (http, https, same-origin path) → open in a new tab.
  * @param {string} src
  * @param {string} [basename] No extension
  * @returns {Promise<void>}
@@ -155,14 +155,23 @@ export async function downloadCardPhoto(src, basename = "brickcard-photo") {
     throw new Error(_t("No photo to download."));
   }
 
+  if (!/^data:/i.test(raw)) {
+    const a = document.createElement("a");
+    a.href = raw;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    return;
+  }
+
   const base = slugifyFilename(basename);
-  const isData = raw.startsWith("data:");
-  const fetchUrl = isData ? raw : raw.split("?")[0];
-  const res = await fetch(fetchUrl, isData ? undefined : { cache: "no-store" });
+  const res = await fetch(raw);
   if (!res.ok) {
     throw new Error(_t("Download failed."));
   }
   const blob = await res.blob();
-  const ext = (isData ? mimeFromDataUrl(raw).ext : "") || extFromMime(blob.type) || extFromSrc(raw) || "png";
+  const ext = mimeFromDataUrl(raw).ext || extFromMime(blob.type) || extFromSrc(raw) || "png";
   downloadBlob(blob, `${base}.${ext}`);
 }

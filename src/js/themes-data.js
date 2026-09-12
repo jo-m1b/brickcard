@@ -12,7 +12,7 @@ import { _t } from "./i18n.js";
  * @property {string} name Display (e.g. "Aquazone", "CITY")
  * @property {string} color Theme color (cards), hex #rrggbb or "" if unset
  * @property {string} secondaryColor Texts / icons / Brickcard logo, hex #rrggbb or "" (auto contrast)
- * @property {string} logoDataUrl JPEG/PNG/SVG/WebP logo (data URL or relative path), optional
+ * @property {string} logoDataUrl JPEG/PNG/SVG/WebP logo (data URL, same-origin path, or https URL), optional
  * @property {number} logoZoom Logo width zoom (1 = 75% of the card width)
  * @property {number} logoOffsetX Horizontal logo offset (box fraction)
  * @property {number} logoOffsetY Vertical logo offset (box fraction)

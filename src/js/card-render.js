@@ -1,9 +1,9 @@
 /** Card render (face / back) + image transform */
 
-import { parseHexColor } from "./themes-data.js";
+import { contrastText, parseHexColor } from "./themes-data.js";
 import { resolveCardAccent, resolveCardAccentFg } from "./card-design.js";
-import { resolveImageBackground } from "./storage.js";
-import { ICON_APPS_2, ICON_CALENDAR_TODO, ICON_USER_3 } from "./icons.js";
+import { applyImageSrc, resolveImageBackground } from "./storage.js";
+import { ICON_APPS_2, ICON_CALENDAR_TODO, ICON_FILE_DAMAGE, ICON_USER_3 } from "./icons.js";
 import { _t } from "./i18n.js";
 
 /** Brickcard logo path (`brickcard-logo.svg`, viewBox 2000²). */
@@ -19,23 +19,71 @@ export function brandLogoMarkup(className = "card-brand-logo") {
   return `<svg class="${className}" viewBox="0 0 2000 2000" aria-hidden="true" focusable="false"><path fill="currentColor" d="${BRAND_LOGO_PATH}"/></svg>`;
 }
 
+/** @param {string} s */
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 /**
- * Replace a failed theme logo with the Brickcard mark (tiles).
- * @param {HTMLImageElement} img
+ * Compact 404-style brick for a failed card photo / theme logo.
+ * @returns {string}
  */
-export function fallbackThemeTileToBrandLogo(img) {
+export function imageErrorBrickMarkup() {
+  return `<div class="brick brick--image-error" aria-hidden="true"><span class="brick-error-icon">${ICON_FILE_DAMAGE}</span></div>`;
+}
+
+/**
+ * Host for `imageErrorBrickMarkup()` (hidden until `onerror`).
+ * @returns {string}
+ */
+export function imageErrorHostMarkup() {
+  return `<div class="image-error" hidden>${imageErrorBrickMarkup()}<p class="image-error-caption">${escapeHtml(_t("Remote image unavailable"))}</p></div>`;
+}
+
+/**
+ * Black or white brick from the surface behind it.
+ * @param {HTMLElement|null|undefined} host
+ * @param {string} [surfaceHex]
+ */
+export function applyImageErrorTone(host, surfaceHex) {
+  if (!(host instanceof HTMLElement)) return;
+  const brick = contrastText(surfaceHex);
+  const icon = brick === "#141414" ? "#ffffff" : "#141414";
+  host.style.setProperty("--image-error-brick", brick);
+  host.style.setProperty("--image-error-brick-icon", icon);
+  host.style.setProperty("--image-error-caption", brick);
+}
+
+/**
+ * Replace a failed theme-tile logo with the error brick.
+ * Empty logos stay the Brickcard mark (`is-brand`).
+ * @param {HTMLImageElement} img
+ * @param {string} [surfaceHex]
+ */
+export function fallbackThemeTileToImageError(img, surfaceHex) {
   if (!(img instanceof HTMLImageElement)) return;
   if (img.classList.contains("is-brand")) {
     img.remove();
     return;
   }
-  img.closest(".theme-tile-logo-wrap")?.classList.remove("theme-tile-logo-wrap--crop");
-  const wrap = document.createElement("div");
-  wrap.innerHTML = brandLogoMarkup("theme-tile-logo is-brand");
-  const mark = wrap.firstElementChild;
-  if (mark) img.replaceWith(mark);
-  else img.remove();
+  const wrap = img.closest(".theme-tile-logo-wrap");
+  wrap?.classList.remove("theme-tile-logo-wrap--crop");
+  const host = document.createElement("div");
+  host.innerHTML = imageErrorHostMarkup();
+  const error = host.firstElementChild;
+  if (!(error instanceof HTMLElement)) {
+    img.remove();
+    return;
+  }
+  applyImageErrorTone(error, surfaceHex);
+  error.hidden = false;
+  img.replaceWith(error);
 }
+
 
 /** Short name shown under the logo on cards. */
 export const BRAND_NAME = "Brickcard";
@@ -69,15 +117,94 @@ export function applyImageTransform(imgEl, boxEl, crop) {
 }
 
 /**
+ * @param {ParentNode|null|undefined} root
+ * @returns {HTMLElement|null}
+ */
+function cardPhotoErrorHost(root) {
+  const el = root?.querySelector?.(".card-photo-frame .image-error");
+  return el instanceof HTMLElement ? el : null;
+}
+
+/**
+ * @param {ParentNode|null|undefined} root
+ * @returns {HTMLElement|null}
+ */
+function themeLogoErrorHost(root) {
+  const el = root?.querySelector?.(".card-theme .image-error");
+  return el instanceof HTMLElement ? el : null;
+}
+
+/**
+ * @param {HTMLImageElement} imgEl
+ * @param {HTMLElement|null} errorHost
+ * @param {Pick<import("./storage.js").Card, "imageBackgroundColor">} card
+ */
+function showCardPhotoError(imgEl, errorHost, card) {
+  imgEl.hidden = true;
+  if (errorHost) {
+    applyImageErrorTone(errorHost, resolveImageBackground(card.imageBackgroundColor));
+    errorHost.hidden = false;
+  }
+}
+
+/**
+ * Face: hide the photo (and error brick) and show the Brickcard mark.
+ * Print uses this when a remote image failed to load.
+ * @param {HTMLElement} root `.card`
+ */
+export function hideCardPhotoAsMissing(root) {
+  const img = root.querySelector(".card-photo-img");
+  const frame = root.querySelector(".card-photo-frame");
+  const brand = root.querySelector(".card-photo .card-brand");
+  const errorHost = cardPhotoErrorHost(root);
+  if (img instanceof HTMLImageElement) img.hidden = true;
+  if (errorHost) errorHost.hidden = true;
+  if (frame instanceof HTMLElement) {
+    frame.hidden = true;
+    frame.style.backgroundColor = "";
+  }
+  if (brand instanceof HTMLElement) brand.hidden = false;
+}
+
+/**
+ * Back: hide the theme logo (and error brick); brand only.
+ * Print uses this when a remote logo failed to load.
+ * @param {HTMLElement} root `.card-back`
+ */
+export function hideThemeLogoAsMissing(root) {
+  const themeWrap = root.querySelector(".card-theme");
+  const themeLogo = root.querySelector(".card-theme-logo");
+  const errorHost = themeLogoErrorHost(root);
+  if (themeLogo instanceof HTMLImageElement) themeLogo.hidden = true;
+  if (errorHost) errorHost.hidden = true;
+  if (themeWrap instanceof HTMLElement) themeWrap.hidden = true;
+  root.classList.remove("card-back--has-theme-logo");
+  delete root.dataset.logoZoom;
+  delete root.dataset.logoOffsetX;
+  delete root.dataset.logoOffsetY;
+  root.style.removeProperty("--logo-zoom");
+  root.style.removeProperty("--logo-offset-x");
+  root.style.removeProperty("--logo-offset-y");
+}
+
+/**
  * @param {HTMLImageElement} imgEl
  * @param {HTMLElement} boxEl
- * @param {Pick<import("./storage.js").Card, "imageDataUrl"|"imageZoom"|"imageOffsetX"|"imageOffsetY"|"title">} card
+ * @param {Pick<import("./storage.js").Card, "imageDataUrl"|"imageBackgroundColor"|"imageZoom"|"imageOffsetX"|"imageOffsetY"|"title">} card
  */
 export function bindCardImage(imgEl, boxEl, card) {
   if (!card?.imageDataUrl) return Promise.resolve();
 
+  const frame =
+    (boxEl instanceof HTMLElement && boxEl.closest(".card")?.querySelector(".card-photo-frame")) ||
+    (boxEl instanceof HTMLElement && boxEl.querySelector(".card-photo-frame")) ||
+    boxEl;
+  const errorHost = cardPhotoErrorHost(frame) || cardPhotoErrorHost(boxEl);
+
   return new Promise((resolve) => {
-    const apply = () => {
+    const showPhoto = () => {
+      if (errorHost) errorHost.hidden = true;
+      imgEl.hidden = false;
       applyImageTransform(imgEl, boxEl, {
         imageNaturalWidth: imgEl.naturalWidth,
         imageNaturalHeight: imgEl.naturalHeight,
@@ -88,14 +215,18 @@ export function bindCardImage(imgEl, boxEl, card) {
       resolve();
     };
 
+    const showError = () => {
+      showCardPhotoError(imgEl, errorHost, card);
+      resolve();
+    };
+
     imgEl.alt = card.title || BRAND_NAME;
-    if (imgEl.complete && imgEl.naturalWidth) {
-      apply();
-    } else {
-      imgEl.onload = apply;
-    }
-    imgEl.src = card.imageDataUrl;
-    imgEl.hidden = false;
+    imgEl.onload = showPhoto;
+    imgEl.onerror = showError;
+    applyImageSrc(imgEl, card.imageDataUrl);
+    if (imgEl.complete && imgEl.naturalWidth) showPhoto();
+    else if (imgEl.complete) showError();
+    else imgEl.hidden = false;
   });
 }
 
@@ -137,6 +268,7 @@ function cardThemeMarkup() {
   return `
     <div class="card-theme" hidden>
       <img class="card-theme-logo" alt="" hidden />
+      ${imageErrorHostMarkup()}
     </div>
   `;
 }
@@ -149,13 +281,16 @@ function cardThemeMarkup() {
 function applyThemeLogo(root, legoTheme) {
   const themeWrap = root.querySelector(".card-theme");
   const themeLogo = root.querySelector(".card-theme-logo");
+  const errorHost = themeLogoErrorHost(root);
   if (!themeWrap || !themeLogo) return;
 
   const logoUrl = String(legoTheme?.logoDataUrl || "").trim();
   const hideThemeLogo = () => {
     themeLogo.removeAttribute("src");
+    themeLogo.removeAttribute("referrerpolicy");
     themeLogo.hidden = true;
     themeLogo.alt = "";
+    if (errorHost) errorHost.hidden = true;
     themeWrap.hidden = true;
     root.classList.remove("card-back--has-theme-logo");
     delete root.dataset.logoZoom;
@@ -166,14 +301,28 @@ function applyThemeLogo(root, legoTheme) {
     root.style.removeProperty("--logo-offset-y");
   };
 
-  const showThemeLogo = () => {
+  const layoutThemeSlot = () => {
     root.classList.add("card-back--has-theme-logo");
     root.dataset.logoZoom = String(legoTheme?.logoZoom || 1);
     root.dataset.logoOffsetX = String(legoTheme?.logoOffsetX || 0);
     root.dataset.logoOffsetY = String(legoTheme?.logoOffsetY || 0);
+    themeWrap.hidden = false;
+  };
+
+  const showThemeLogo = () => {
+    if (errorHost) errorHost.hidden = true;
+    layoutThemeSlot();
     applyThemeLogoTransform(themeLogo, themeWrap, legoTheme);
     themeLogo.hidden = false;
-    themeWrap.hidden = false;
+  };
+
+  const showThemeLogoError = () => {
+    themeLogo.hidden = true;
+    layoutThemeSlot();
+    if (errorHost) {
+      applyImageErrorTone(errorHost, resolveCardAccent(legoTheme));
+      errorHost.hidden = false;
+    }
   };
 
   if (!logoUrl) {
@@ -188,16 +337,18 @@ function applyThemeLogo(root, legoTheme) {
   applyThemeLogoTransform(themeLogo, themeWrap, legoTheme);
 
   themeLogo.onload = showThemeLogo;
-  themeLogo.onerror = hideThemeLogo;
+  themeLogo.onerror = showThemeLogoError;
   themeLogo.alt = legoTheme?.name || "";
   if (themeLogo.getAttribute("src") !== logoUrl) {
     themeLogo.hidden = true;
+    if (errorHost) errorHost.hidden = true;
     themeWrap.hidden = true;
     root.classList.remove("card-back--has-theme-logo");
-    themeLogo.src = logoUrl;
+    applyImageSrc(themeLogo, logoUrl);
   }
   // Browser cache: `complete` can be true without `onload`.
   if (themeLogo.complete && themeLogo.naturalWidth) showThemeLogo();
+  else if (themeLogo.complete && themeLogo.getAttribute("src")) showThemeLogoError();
 }
 
 /** Meta icons (header) — values only, no label. */
@@ -226,6 +377,7 @@ export function cardFaceMarkup() {
       ${cardBrandMarkup()}
       <div class="card-photo-frame" hidden>
         <img class="card-photo-img" alt="" hidden />
+        ${imageErrorHostMarkup()}
       </div>
     </div>
     <footer class="card-footer">
@@ -345,6 +497,9 @@ export function renderCardFace(card, opts = {}) {
   } else if (img) {
     img.hidden = true;
     img.removeAttribute("src");
+    img.removeAttribute("referrerpolicy");
+    const errorHost = cardPhotoErrorHost(el);
+    if (errorHost) errorHost.hidden = true;
   }
 
   return el;
@@ -457,14 +612,19 @@ export function updateCardFace(root, card, opts = {}) {
   const photo = root.querySelector(".card-photo");
   const img = root.querySelector(".card-photo-img");
 
+  const errorHost = cardPhotoErrorHost(root);
   if (card.imageDataUrl) {
+    if (errorHost) errorHost.hidden = true;
     img.hidden = false;
+    img.onerror = () => showCardPhotoError(img, errorHost, card);
     if (img.getAttribute("src") !== card.imageDataUrl) {
-      img.setAttribute("src", card.imageDataUrl);
+      applyImageSrc(img, card.imageDataUrl);
     }
     const imageNaturalWidth = opts.imageNaturalWidth || img.naturalWidth;
     const imageNaturalHeight = opts.imageNaturalHeight || img.naturalHeight;
-    if (imageNaturalWidth && imageNaturalHeight) {
+    if (img.complete && !img.naturalWidth && img.getAttribute("src")) {
+      showCardPhotoError(img, errorHost, card);
+    } else if (imageNaturalWidth && imageNaturalHeight) {
       applyImageTransform(img, photo, {
         imageNaturalWidth,
         imageNaturalHeight,
@@ -472,9 +632,13 @@ export function updateCardFace(root, card, opts = {}) {
         imageOffsetX: card.imageOffsetX || 0,
         imageOffsetY: card.imageOffsetY || 0,
       });
+    } else {
+      bindCardImage(img, photo, card);
     }
   } else {
     img.hidden = true;
     img.removeAttribute("src");
+    img.removeAttribute("referrerpolicy");
+    if (errorHost) errorHost.hidden = true;
   }
 }
