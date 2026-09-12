@@ -1,11 +1,12 @@
 {
   "meta": {
-    "generatedAt": "2026-09-10T12:19:59Z",
+    "generatedAt": "2026-09-12T10:13:37Z",
     "source": "https://rebrickable.com/downloads/",
     "numThemes": 461,
     "themesKeys": ["id", "name"],
     "numSets": 16538,
-    "setsKeys": ["id", "name", "numPieces", "numFigurines", "releaseYear", "themeId"]
+    "setsKeys": ["id", "name", "numPieces", "numFigurines", "releaseYear", "themeId"],
+    "setsImageUrl": "https://cdn.rebrickable.com/media/sets/{id}.jpg"
   },
   "themes": [
     [1,"Technic"],
@@ -10083,7 +10084,7 @@
     ["6380-1","Emergency Treatment Center",293,5,1987,67],
     ["6381-1","Motor Speedway",206,5,1987,67],
     ["6382-1","Fire Station",396,4,1981,67],
-    ["6382975-1","Tantive IV",56,null,2021,158],
+    ["6382975-1","Tantive IV",56,null,2019,158],
     ["6383-1","Public Works Center",419,4,1981,67],
     ["6384-1","Police Station",399,4,1983,67],
     ["6384212-1","Stuttgart Brand Store Opening Associate Figure",129,null,2021,408],
@@ -11003,7 +11004,7 @@
     ["698-2","1:87 12 Cars",12,null,1966,368],
     ["6980-1","Galaxy Commander",443,5,1983,130],
     ["6981-1","Aerial Intruder",267,2,1991,129],
-    ["6982-1","Explorien Starship",663,4,1996,131],
+    ["6982-1","Explorien Starship",662,4,1996,131],
     ["6983-1","Ice Station Odyssey",344,3,1993,133],
     ["6984-1","Galactic Mediator",406,3,1992,140],
     ["6985-1","Cosmic Fleet Voyager",413,4,1986,130],
@@ -15361,7 +15362,7 @@
     ["910002-1","Studgate Train Station",4074,11,2023,719],
     ["910003-1","Mountain Windmill",2087,null,2022,719],
     ["910004-1","Winter Chalet",2708,7,2023,719],
-    ["910008-1","Modular Construction Site",3374,6,2023,719],
+    ["910008-1","Modular Construction Site",3375,6,2023,719],
     ["910009-1","Modular LEGO Store",2124,6,2022,719],
     ["910010-1","Great Fishing Boat",1609,3,2021,719],
     ["910011-1","1950s Diner",1381,4,2023,719],

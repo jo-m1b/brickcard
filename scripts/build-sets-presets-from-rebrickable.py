@@ -11,9 +11,10 @@ import json
 import sys
 import urllib.error
 import urllib.request
-from collections import defaultdict
+from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import urlsplit, urlunsplit
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DOWNLOAD_BASE = "https://cdn.rebrickable.com/media/downloads"
@@ -31,6 +32,8 @@ SETS_KEYS = (
     "releaseYear",
     "themeId",
 )
+SETS_IMAGE_URL_PLACEHOLDER = "{id}"
+SETS_IMAGE_URL_WARNING_EXAMPLES = 10
 
 CSV_FILES = (
     "themes.csv.gz",
@@ -156,6 +159,87 @@ def load_existing_payload(path: Path) -> dict | None:
     return data if isinstance(data, dict) else None
 
 
+def image_url_template(img_url: str, set_id: str) -> str | None:
+    """Turn a set img_url into a template if the filename stem is set_id.lower()."""
+    url = str(img_url or "").strip()
+    token = set_id.lower()
+    if not url or not token:
+        return None
+    parts = urlsplit(url)
+    path = parts.path
+    if "/" in path:
+        dir_path, filename = path.rsplit("/", 1)
+        dir_path += "/"
+    else:
+        dir_path, filename = "", path
+    stem, dot, ext = filename.rpartition(".")
+    if not dot or stem != token:
+        return None
+    new_path = f"{dir_path}{SETS_IMAGE_URL_PLACEHOLDER}.{ext}"
+    return urlunsplit((parts.scheme, parts.netloc, new_path, parts.query, parts.fragment))
+
+
+class ImageUrlScan:
+    """Collect img_url templates from kept sets (most common wins)."""
+
+    def __init__(self) -> None:
+        self.template_counts: Counter[str] = Counter()
+        self.empty_count = 0
+        self.off_schema: list[tuple[str, str]] = []
+        self.valid: list[tuple[str, str, str]] = []
+
+    def add(self, set_num: str, img_url: object) -> None:
+        url = str(img_url or "").strip()
+        if not url:
+            self.empty_count += 1
+            return
+        template = image_url_template(url, set_num)
+        if template is None:
+            self.off_schema.append((set_num, url))
+            return
+        self.template_counts[template] += 1
+        self.valid.append((set_num, url, template))
+
+
+def existing_sets_image_url(existing_meta: object) -> str | None:
+    if not isinstance(existing_meta, dict):
+        return None
+    raw = existing_meta.get("setsImageUrl")
+    if not isinstance(raw, str):
+        return None
+    text = raw.strip()
+    return text or None
+
+
+def resolve_sets_image_url(scan: ImageUrlScan, existing_template: str | None) -> str | None:
+    """Pick the most used template; warn on stderr; never fail the build."""
+    if scan.empty_count:
+        log(f"WARNING: {scan.empty_count} kept set(s) have an empty img_url")
+    if not scan.template_counts:
+        if existing_template:
+            log(
+                "WARNING: no usable set img_url — keeping existing setsImageUrl "
+                + existing_template
+            )
+            return existing_template
+        log("WARNING: no usable set img_url — omitting setsImageUrl")
+        return None
+    winner = min(scan.template_counts, key=lambda t: (-scan.template_counts[t], t))
+    minority = [(set_num, url) for set_num, url, template in scan.valid if template != winner]
+    outliers = scan.off_schema + minority
+    if outliers:
+        log(
+            f"WARNING: {len(outliers)} set image URL(s) do not match "
+            f"{winner}"
+        )
+        for set_num, url in outliers[:SETS_IMAGE_URL_WARNING_EXAMPLES]:
+            log(f"  {set_num}: {url}")
+        extra = len(outliers) - SETS_IMAGE_URL_WARNING_EXAMPLES
+        if extra > 0:
+            log(f"  … {extra} more")
+    return winner
+
+
 def trim_trailing_none(values: list) -> list:
     while values and values[-1] is None:
         values.pop()
@@ -192,6 +276,10 @@ def encode_json(meta: dict, themes: list[list], sets: list[list]) -> str:
     lines.append(f'    "themesKeys": {json.dumps(list(THEMES_KEYS))},')
     lines.append(f'    "numSets": {meta["numSets"]},')
     lines.append(f'    "setsKeys": {json.dumps(list(SETS_KEYS))}')
+    sets_image_url = meta.get("setsImageUrl")
+    if sets_image_url:
+        lines[-1] += ","
+        lines.append(f'    "setsImageUrl": {json.dumps(sets_image_url)}')
     lines.append("  },")
     lines.append('  "themes": [')
     for index, theme in enumerate(themes):
@@ -243,7 +331,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def build_catalog(args: argparse.Namespace) -> tuple[list[list], list[list]]:
+def build_catalog(args: argparse.Namespace) -> tuple[list[list], list[list], ImageUrlScan]:
     rows = {name: download_csv_rows(name) for name in CSV_FILES}
     theme_names, theme_parents = theme_parent_map(rows["themes.csv.gz"])
     exclude_roots = (
@@ -264,6 +352,7 @@ def build_catalog(args: argparse.Namespace) -> tuple[list[list], list[list]]:
 
     sets: list[list] = []
     used_theme_ids: set[int] = set()
+    image_scan = ImageUrlScan()
 
     for row in rows["sets.csv.gz"]:
         set_num = str(row.get("set_num") or "").strip()
@@ -287,6 +376,7 @@ def build_catalog(args: argparse.Namespace) -> tuple[list[list], list[list]]:
 
         if theme_id is not None:
             used_theme_ids.add(theme_id)
+        image_scan.add(set_num, row.get("img_url"))
         sets.append(
             set_row(
                 set_id=set_num,
@@ -310,19 +400,21 @@ def build_catalog(args: argparse.Namespace) -> tuple[list[list], list[list]]:
         for theme_id in sorted(used_theme_ids)
         if (name := theme_names.get(theme_id, ""))
     ]
-    return themes, sets
+    return themes, sets, image_scan
 
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     output_path = resolve_path(args.output)
-    themes, sets = build_catalog(args)
+    themes, sets, image_scan = build_catalog(args)
     existing = load_existing_payload(output_path)
     existing_meta = existing.get("meta") if existing else None
+    sets_image_url = resolve_sets_image_url(image_scan, existing_sets_image_url(existing_meta))
     same_schema = (
         isinstance(existing_meta, dict)
         and existing_meta.get("themesKeys") == list(THEMES_KEYS)
         and existing_meta.get("setsKeys") == list(SETS_KEYS)
+        and existing_meta.get("setsImageUrl") == sets_image_url
     )
     if existing and same_schema and existing.get("themes") == themes and existing.get("sets") == sets:
         log(f"Unchanged ({len(sets)} sets, {len(themes)} themes) — {output_path}")
@@ -336,6 +428,8 @@ def main(argv: list[str] | None = None) -> int:
         "numSets": len(sets),
         "setsKeys": list(SETS_KEYS),
     }
+    if sets_image_url:
+        meta["setsImageUrl"] = sets_image_url
     output_path.parent.mkdir(parents=True, exist_ok=True)
     tmp_path = output_path.with_name(f".{output_path.name}.tmp")
     tmp_path.write_text(encode_json(meta, themes, sets), encoding="utf-8")

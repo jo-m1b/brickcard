@@ -51,6 +51,7 @@ const CATALOG_URL = "data/sets-presets.json";
  *   themes: Map<string, CatalogTheme>,
  *   sets: Map<string, CatalogSet>,
  *   generatedAt: string,
+ *   setsImageUrl: string,
  *   setRecords: CatalogSetRecord[],
  * }} CatalogIndex
  */
@@ -61,6 +62,7 @@ const CATALOG_URL = "data/sets-presets.json";
  *   matchCount: number,
  *   total: number,
  *   generatedAt: string,
+ *   setsImageUrl: string,
  *   needles: string[],
  * }} CatalogSetSearch
  */
@@ -71,6 +73,19 @@ let catalogPromise = null;
 /** Printed set number: drop the Rebrickable `-\d+` suffix (`75192-1` → `75192`). */
 export function catalogSetRef(setId) {
   return parseRebrickableSetId(setId).replace(/-\d+$/, "");
+}
+
+/**
+ * Remote set image URL from `meta.setsImageUrl`.
+ * `{id}` is the catalog `set_num` in lowercase (`75192-1`, `k10124-1`).
+ * @param {unknown} setId
+ * @param {string} [template]
+ */
+export function catalogSetImageUrl(setId, template = "") {
+  const id = parseRebrickableSetId(setId);
+  const pattern = typeof template === "string" ? template : "";
+  if (!id || !pattern.includes("{id}")) return "";
+  return pattern.replaceAll("{id}", id.toLowerCase());
 }
 
 /** @param {string[]} keys @param {unknown} row */
@@ -157,8 +172,10 @@ export async function loadSetsPresets() {
 
       const generatedAt =
         typeof data?.meta?.generatedAt === "string" ? data.meta.generatedAt : "";
+      const setsImageUrl =
+        typeof data?.meta?.setsImageUrl === "string" ? data.meta.setsImageUrl : "";
 
-      return { themes, sets, generatedAt, setRecords };
+      return { themes, sets, generatedAt, setsImageUrl, setRecords };
     })
     .catch((err) => {
       catalogPromise = null;
@@ -205,11 +222,12 @@ export async function searchCatalogSets(query, opts = {}) {
   const catalog = await loadSetsPresets();
   const total = catalog.sets.size;
   const generatedAt = catalog.generatedAt;
+  const setsImageUrl = catalog.setsImageUrl;
   const rawLimit = Number(opts.limit);
   const limit = Number.isFinite(rawLimit) ? Math.max(0, Math.round(rawLimit)) : 50;
   const needles = catalogQueryNeedles(query);
   if (!needles.length) {
-    return { items: [], matchCount: 0, total, generatedAt, needles };
+    return { items: [], matchCount: 0, total, generatedAt, setsImageUrl, needles };
   }
 
   /** @type {CatalogSet[]} */
@@ -238,7 +256,7 @@ export async function searchCatalogSets(query, opts = {}) {
       themeName: theme?.name || "",
     };
   });
-  return { items, matchCount, total, generatedAt, needles };
+  return { items, matchCount, total, generatedAt, setsImageUrl, needles };
 }
 
 /** @param {unknown} id @returns {Promise<CatalogSet|null>} */
