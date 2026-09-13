@@ -12,7 +12,11 @@ import {
 } from "./icons.js";
 import { _t, getLocale } from "./i18n.js";
 import { foldCI } from "./includes-ci.js";
-import { searchCatalogSets, loadSetsPresets } from "./sets-presets.js";
+import {
+  catalogSetImageUrl,
+  loadSetsPresets,
+  searchCatalogSets,
+} from "./sets-presets.js";
 import { toast } from "./toast.js";
 
 /**
@@ -140,8 +144,9 @@ function metaBadge(svg, value, title) {
  * @param {string} listId
  * @param {number} index
  * @param {string[]} needles
+ * @param {string} [imageUrl]
  */
-function makeOption(set, listId, index, needles) {
+function makeOption(set, listId, index, needles, imageUrl = "") {
   const li = document.createElement("li");
   li.className = "form-select-option form-select-option--multiline";
   li.setAttribute("role", "option");
@@ -150,8 +155,22 @@ function makeOption(set, listId, index, needles) {
 
   const media = document.createElement("span");
   media.className = "form-select-option-media";
-  media.hidden = true;
   media.setAttribute("aria-hidden", "true");
+  const src = String(imageUrl || "").trim();
+  if (!src) {
+    media.hidden = true;
+  } else {
+    const img = document.createElement("img");
+    img.alt = "";
+    img.decoding = "async";
+    img.loading = "lazy";
+    img.draggable = false;
+    img.src = src;
+    img.addEventListener("error", () => {
+      img.remove();
+    });
+    media.append(img);
+  }
 
   const body = document.createElement("span");
   body.className = "form-select-option-body";
@@ -253,6 +272,7 @@ export function bindSetSearch(searchBar, opts = {}) {
   let activeIndex = -1;
   let total = 0;
   let generatedAt = "";
+  let setsImageUrl = "";
   let ready = false;
   let cancelled = false;
   let seq = 0;
@@ -324,7 +344,13 @@ export function bindSetSearch(searchBar, opts = {}) {
     items = next;
     list.replaceChildren();
     optionEls = items.map((set, i) => {
-      const li = makeOption(set, listId, i, needles);
+      const li = makeOption(
+        set,
+        listId,
+        i,
+        needles,
+        catalogSetImageUrl(set.id, setsImageUrl)
+      );
       li.addEventListener("pointerenter", () => {
         if (!isOpen()) return;
         setActive(i);
@@ -370,6 +396,7 @@ export function bindSetSearch(searchBar, opts = {}) {
     if (cancelled || token !== seq) return;
     total = result.total;
     generatedAt = result.generatedAt;
+    setsImageUrl = result.setsImageUrl;
     renderOptions(result.items, result.needles);
     syncTrail({ querying: true, matchCount: result.matchCount });
     if (flags.openList && result.items.length && !skipOpenUntilInput) open();
@@ -443,6 +470,7 @@ export function bindSetSearch(searchBar, opts = {}) {
       ready = true;
       total = catalog.sets.size;
       generatedAt = catalog.generatedAt;
+      setsImageUrl = catalog.setsImageUrl;
       void refresh({
         openList: document.activeElement === input,
       });

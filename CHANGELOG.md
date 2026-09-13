@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Search gallery (`#developer/search`): set-catalog autocomplete demo (`search-bar--suggest`, `sets-presets.json`); multi-line `form-select` options (id, year / pieces / figurines, theme, name)
 - Collection backup (`.brickcard`): optional `exportedFrom` (page origin + path, no hash / query) when exporting from a DNS host; omitted on localhost, IP addresses, and `.local` / `.localhost`; ignored on import
 - Set catalog `data/sets-presets.json`: `meta.setsImageUrl` template (inferred from Rebrickable `img_url`, `{id}` = lowercase `set_num`) so remote set photos can be built without storing a URL per set; `catalogSetImageUrl()` in `sets-presets.js`
+- Search gallery set-catalog suggest: square set photo on the left (`meta.setsImageUrl`, centered cover crop in `.form-select-option-media`)
 
 ### ✏️ Changed
 

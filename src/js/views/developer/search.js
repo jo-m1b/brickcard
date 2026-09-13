@@ -40,8 +40,8 @@ export function renderDeveloperSearch(host) {
         items. Label is always “&nbsp;cards&nbsp;”.
         Catalog suggest (<code>search-bar--suggest</code>)&nbsp;: trail is
         set count <code>·</code> catalog date; list uses <code>form-select</code>
-        look with multi-line options (<code>bindSetSearch</code>,
-        <code>sets-presets.json</code>).
+        look with multi-line options and a square set photo
+        (<code>bindSetSearch</code>, <code>sets-presets.json</code>).
         Used: card list (topbar) · themes modal (num results + sort) ·
         developer home and settings (<code>search-bar--input-only</code>).
       </p>
@@ -79,8 +79,8 @@ export function renderDeveloperSearch(host) {
           Several words are AND. At most 50 results, A–Z by
           name then id. Trail: matching count <code>·</code> catalog date (UI locale).
           Options use the <code>form-select</code> list look, on several lines
-          (id + year / pieces / figurines, theme, name). Pick a set to fill the
-          field with its name.
+          (square photo, id + year / pieces / figurines, theme, name). Pick a set
+          to fill the field with its name.
         </p>
         <div class="styleguide-search-demo" style="max-width: 36rem">
           <div class="search-bar search-bar--suggest" data-demo-set-search>
