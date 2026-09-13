@@ -212,8 +212,9 @@ function recordMatchesNeedles(rec, needles) {
  * Search the offline catalog (`id`, `name`, and catalog theme name).
  * Space-separated tokens are AND (each must match at least one field).
  * Case and accents ignored; leading `#` on a token is stripped.
- * `items` is the alphabetical prefix (`name`, then `id`); `matchCount` is the
- * full hit count. Empty / whitespace query → no items.
+ * `items` is the alphabetical list (`name`, then `id`); `matchCount` is the
+ * full hit count. `limit` caps `items` when given; omitted → all hits.
+ * Empty / whitespace query → no items.
  * @param {unknown} query
  * @param {{ limit?: number }} [opts]
  * @returns {Promise<CatalogSetSearch>}
@@ -224,7 +225,9 @@ export async function searchCatalogSets(query, opts = {}) {
   const generatedAt = catalog.generatedAt;
   const setsImageUrl = catalog.setsImageUrl;
   const rawLimit = Number(opts.limit);
-  const limit = Number.isFinite(rawLimit) ? Math.max(0, Math.round(rawLimit)) : 50;
+  const limit = Number.isFinite(rawLimit)
+    ? Math.max(0, Math.round(rawLimit))
+    : Infinity;
   const needles = catalogQueryNeedles(query);
   if (!needles.length) {
     return { items: [], matchCount: 0, total, generatedAt, setsImageUrl, needles };

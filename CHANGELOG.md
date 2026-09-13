@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Image **Download**: a `data:` src saves as a file; any other src (`http:`, `https:`, path) opens in a new tab (`target=_blank`)
 - Failed card photo / theme logo: 404-style brick with `ri-file-damage-fill` (black or white on the frame / theme color) and a centered **Remote image unavailable** caption instead of hiding the slot or falling back to the Brickcard mark; theme mini-cards use a smaller brick; print treats a failed image as missing (no error brick)
 - Search gallery set-catalog suggest: also match catalog theme names; space-separated words are AND; query hits in id / name / theme are wrapped in `<b>`; set id uses `ri-hashtag` (no `#` prefix); theme size matches the id; set name is slightly larger
-- Search gallery set-catalog suggest: search starts from 1 character; at most 50 results
+- Search gallery set-catalog suggest: search starts from 1 character; first 25 hits, then 25 more on scroll (no 50-cap)
 - Collection backup (`.brickcard`): omit `null`, empty-string, and default fields on cards and themes (card crop `1` / `0` / `0`; theme logo crop `1` / `0` / `0`); `themes` is written before `cards`
 - Settings **Optimize images** hint: “imported into the collection” instead of “added to the collection”
 

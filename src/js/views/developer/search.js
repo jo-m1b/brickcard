@@ -76,8 +76,9 @@ export function renderDeveloperSearch(host) {
           (<code>search-bar--suggest</code>, <code>bindSetSearch</code>).
           The list opens after 1 character. Matches set <code>name</code>,
           <code>id</code>, and catalog theme name (case and accents ignored).
-          Several words are AND. At most 50 results, A–Z by
-          name then id. Trail: matching count <code>·</code> catalog date (UI locale).
+          Several words are AND. A–Z by name then id. First 25 hits, then 25
+          more as you scroll. Trail: matching count <code>·</code> catalog date
+          (UI locale).
           Options use the <code>form-select</code> list look, on several lines
           (square photo, id + year / pieces / figurines, theme, name). Pick a set
           to fill the field with its name.

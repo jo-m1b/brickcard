@@ -19,10 +19,13 @@ import {
 } from "./sets-presets.js";
 import { toast } from "./toast.js";
 
+/** First paint + each scroll page. */
+const SET_SEARCH_PAGE = 25;
+
 /**
  * @typedef {object} SetSearchOptions
  * @property {number} [minChars=1]
- * @property {number} [maxResults=50]
+ * @property {number} [maxResults] Cap on hits (omitted = no cap)
  * @property {(set: import("./sets-presets.js").CatalogSetMatch) => void} [onSelect]
  */
 
@@ -244,7 +247,7 @@ export function bindSetSearch(searchBar, opts = {}) {
     : 1;
   const maxResults = Number.isFinite(Number(opts.maxResults))
     ? Math.max(0, Math.round(Number(opts.maxResults)))
-    : 50;
+    : 0;
   const onSelect = opts.onSelect;
 
   const listId =
@@ -267,6 +270,8 @@ export function bindSetSearch(searchBar, opts = {}) {
 
   /** @type {import("./sets-presets.js").CatalogSetMatch[]} */
   let items = [];
+  /** @type {string[]} */
+  let optionNeedles = [];
   /** @type {HTMLElement[]} */
   let optionEls = [];
   let activeIndex = -1;
@@ -302,6 +307,7 @@ export function bindSetSearch(searchBar, opts = {}) {
     list.hidden = false;
     input.setAttribute("aria-expanded", "true");
     list.scrollTop = 0;
+    maybeLoadMore();
   }
 
   /**
@@ -339,32 +345,55 @@ export function bindSetSearch(searchBar, opts = {}) {
     });
   }
 
+  /** @param {import("./sets-presets.js").CatalogSetMatch} set @param {number} i */
+  function addOption(set, i) {
+    const li = makeOption(
+      set,
+      listId,
+      i,
+      optionNeedles,
+      catalogSetImageUrl(set.id, setsImageUrl)
+    );
+    li.addEventListener("pointerenter", () => {
+      if (!isOpen()) return;
+      setActive(i);
+    });
+    li.addEventListener("mousedown", (e) => {
+      e.preventDefault();
+    });
+    li.addEventListener("click", (e) => {
+      e.preventDefault();
+      choose(set);
+    });
+    list.append(li);
+    optionEls.push(li);
+  }
+
+  /** Next page of already-found hits. @returns {boolean} */
+  function loadMore() {
+    if (optionEls.length >= items.length) return false;
+    const to = Math.min(items.length, optionEls.length + SET_SEARCH_PAGE);
+    for (let i = optionEls.length; i < to; i++) addOption(items[i], i);
+    return true;
+  }
+
+  /** Prefetch when less than one viewport remains (or the list does not overflow). */
+  function maybeLoadMore() {
+    if (!isOpen() || optionEls.length >= items.length) return;
+    if (list.clientHeight === 0) return;
+    const remaining = list.scrollHeight - list.scrollTop - list.clientHeight;
+    if (remaining > list.clientHeight) return;
+    if (!loadMore()) return;
+    maybeLoadMore();
+  }
+
   /** @param {import("./sets-presets.js").CatalogSetMatch[]} next @param {string[]} [needles] */
   function renderOptions(next, needles = []) {
     items = next;
+    optionNeedles = needles;
     list.replaceChildren();
-    optionEls = items.map((set, i) => {
-      const li = makeOption(
-        set,
-        listId,
-        i,
-        needles,
-        catalogSetImageUrl(set.id, setsImageUrl)
-      );
-      li.addEventListener("pointerenter", () => {
-        if (!isOpen()) return;
-        setActive(i);
-      });
-      li.addEventListener("mousedown", (e) => {
-        e.preventDefault();
-      });
-      li.addEventListener("click", (e) => {
-        e.preventDefault();
-        choose(set);
-      });
-      list.append(li);
-      return li;
-    });
+    optionEls = [];
+    loadMore();
     clearActive();
     list.scrollTop = 0;
   }
@@ -392,7 +421,10 @@ export function bindSetSearch(searchBar, opts = {}) {
       return;
     }
     const token = ++seq;
-    const result = await searchCatalogSets(raw, { limit: maxResults });
+    const result = await searchCatalogSets(
+      raw,
+      maxResults ? { limit: maxResults } : {}
+    );
     if (cancelled || token !== seq) return;
     total = result.total;
     generatedAt = result.generatedAt;
@@ -411,7 +443,14 @@ export function bindSetSearch(searchBar, opts = {}) {
       const go = () => {
         if (!optionEls.length) return;
         if (e.key === "ArrowDown") {
-          setActive(activeIndex < 0 ? 0 : activeIndex + 1, true);
+          if (activeIndex < 0) {
+            setActive(0, true);
+          } else if (activeIndex >= optionEls.length - 1) {
+            if (loadMore()) setActive(activeIndex + 1, true);
+            else setActive(0, true);
+          } else {
+            setActive(activeIndex + 1, true);
+          }
         } else {
           setActive(activeIndex < 0 ? optionEls.length - 1 : activeIndex - 1, true);
         }
@@ -457,6 +496,10 @@ export function bindSetSearch(searchBar, opts = {}) {
     close();
   }
 
+  function onListScroll() {
+    maybeLoadMore();
+  }
+
   /** @param {PointerEvent} e */
   function onDocPointer(e) {
     if (!isOpen()) return;
@@ -484,6 +527,7 @@ export function bindSetSearch(searchBar, opts = {}) {
   input.addEventListener("focus", onFocus);
   input.addEventListener("focusout", onFocusOut);
   input.addEventListener("keydown", onKeydown);
+  list.addEventListener("scroll", onListScroll);
   document.addEventListener("pointerdown", onDocPointer);
 
   return () => {
@@ -493,6 +537,7 @@ export function bindSetSearch(searchBar, opts = {}) {
     input.removeEventListener("focus", onFocus);
     input.removeEventListener("focusout", onFocusOut);
     input.removeEventListener("keydown", onKeydown);
+    list.removeEventListener("scroll", onListScroll);
     document.removeEventListener("pointerdown", onDocPointer);
     input.removeAttribute("role");
     input.removeAttribute("aria-autocomplete");
