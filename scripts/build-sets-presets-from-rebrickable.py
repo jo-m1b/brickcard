@@ -21,8 +21,19 @@ DOWNLOAD_BASE = "https://cdn.rebrickable.com/media/downloads"
 SOURCE_URL = "https://rebrickable.com/downloads/"
 USER_AGENT = "Brickcard/sets-presets (+https://brickcard.org)"
 DOWNLOAD_TIMEOUT_S = 120
-# Rebrickable “Database Sets” — not physical boxed sets
-DEFAULT_EXCLUDE_THEME_IDS = (746,)
+# Rebrickable themes that are not physical boxed sets (each includes children)
+DEFAULT_EXCLUDE_THEME_IDS = (
+    254,  # Bulk Bricks
+    438,  # Power Functions
+    443,  # Service Packs
+    497,  # Books
+    501,  # Gear
+    524,  # Service Packs (Educational and Dacta)
+    535,  # Collectible Minifigures
+    646,  # Xtra
+    683,  # LEGO Originals
+    746,  # Database Sets
+)
 THEMES_KEYS = ("id", "name")
 SETS_KEYS = (
     "id",
@@ -325,7 +336,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         metavar="ID",
         help=(
             "Exclude a Rebrickable theme id and all sets in that theme "
-            "(including child themes). Repeatable. Default: 746 (Database Sets)"
+            "(including child themes). Repeatable. "
+            "Default: 254 (Bulk Bricks), 438 (Power Functions), "
+            "443 and 524 (Service Packs), 497 (Books), 501 (Gear), "
+            "535 (Collectible Minifigures), 646 (Xtra), "
+            "683 (LEGO Originals), 746 (Database Sets); "
+            "each includes child themes"
         ),
     )
     return parser.parse_args(argv)

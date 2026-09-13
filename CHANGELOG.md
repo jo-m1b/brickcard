@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### ✏️ Changed
 
+- Set catalog build: also exclude non-boxed Rebrickable themes by default (including children): Books (`497`), Gear (`501`), Database Sets (`746`), Bulk Bricks (`254`), Power Functions (`438`), Service Packs (`443`, `524`), Collectible Minifigures (`535`), Xtra (`646`), LEGO Originals (`683`)
 - Image **Download**: a `data:` src saves as a file; any other src (`http:`, `https:`, path) opens in a new tab (`target=_blank`)
 - Failed card photo / theme logo: 404-style brick with `ri-file-damage-fill` (black or white on the frame / theme color) and a centered **Remote image unavailable** caption instead of hiding the slot or falling back to the Brickcard mark; theme mini-cards use a smaller brick; print treats a failed image as missing (no error brick)
 - Search gallery set-catalog suggest: also match catalog theme names; space-separated words are AND; query hits in id / name / theme are wrapped in `<b>`; set id uses `ri-hashtag` (no `#` prefix); theme size matches the id; set name is slightly larger
