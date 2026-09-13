@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Set catalog `data/sets-presets.json`: `meta.setsImageUrl` template (inferred from Rebrickable `img_url`, `{id}` = lowercase `set_num`) so remote set photos can be built without storing a URL per set; `catalogSetImageUrl()` in `sets-presets.js`
 - Search gallery set-catalog suggest: square set photo on the left (`meta.setsImageUrl`, centered cover crop in `.form-select-option-media`)
 - Set catalog `data/sets-presets.json`: optional theme `parentId` (Rebrickable parent theme id; omitted when unset); `meta.numParentThemes` counts catalog root themes (rows with no `parentId`)
+- Default themes (`data/themes-presets.json`): `rebrickableThemeId` on unambiguous catalog matches so autocomplete can reuse the preset instead of creating a custom theme
 
 ### ✏️ Changed
 
