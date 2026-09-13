@@ -21,6 +21,7 @@ const CATALOG_URL = "data/sets-presets.json";
  * @typedef {Object} CatalogTheme
  * @property {number} id
  * @property {string} name
+ * @property {number|null} parentId Rebrickable parent theme id; null if unset
  */
 
 /**
@@ -141,7 +142,11 @@ export async function loadSetsPresets() {
         const id = parseRebrickableThemeId(obj?.id);
         const name = String(obj?.name ?? "").trim();
         if (!id || !name) continue;
-        themes.set(String(id), { id, name });
+        themes.set(String(id), {
+          id,
+          name,
+          parentId: parseRebrickableThemeId(obj?.parentId),
+        });
       }
 
       /** @type {Map<string, CatalogSet>} */

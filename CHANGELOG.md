@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Collection backup (`.brickcard`): optional `exportedFrom` (page origin + path, no hash / query) when exporting from a DNS host; omitted on localhost, IP addresses, and `.local` / `.localhost`; ignored on import
 - Set catalog `data/sets-presets.json`: `meta.setsImageUrl` template (inferred from Rebrickable `img_url`, `{id}` = lowercase `set_num`) so remote set photos can be built without storing a URL per set; `catalogSetImageUrl()` in `sets-presets.js`
 - Search gallery set-catalog suggest: square set photo on the left (`meta.setsImageUrl`, centered cover crop in `.form-select-option-media`)
+- Set catalog `data/sets-presets.json`: optional theme `parentId` (Rebrickable parent theme id; omitted when unset); `meta.numParentThemes` counts catalog root themes (rows with no `parentId`)
 
 ### ✏️ Changed
 

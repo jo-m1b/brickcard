@@ -34,7 +34,7 @@ DEFAULT_EXCLUDE_THEME_IDS = (
     683,  # LEGO Originals
     746,  # Database Sets
 )
-THEMES_KEYS = ("id", "name")
+THEMES_KEYS = ("id", "name", "parentId")
 SETS_KEYS = (
     "id",
     "name",
@@ -91,7 +91,7 @@ def theme_parent_map(rows: list[dict[str, str]]) -> tuple[dict[int, str], dict[i
             continue
         names[theme_id] = str(row.get("name") or "").strip()
         parent_id = parse_optional_int(row.get("parent_id"))
-        if parent_id is not None:
+        if parent_id is not None and parent_id > 0:
             parents[theme_id] = parent_id
     return names, parents
 
@@ -278,6 +278,11 @@ def set_row(
     )
 
 
+def theme_row(*, theme_id: int, name: str, parent_id: int | None) -> list:
+    parent = parent_id if parent_id is not None and parent_id > 0 else None
+    return trim_trailing_none([theme_id, name, parent])
+
+
 def encode_json(meta: dict, themes: list[list], sets: list[list]) -> str:
     lines = ["{"]
     lines.append('  "meta": {')
@@ -285,6 +290,7 @@ def encode_json(meta: dict, themes: list[list], sets: list[list]) -> str:
     lines.append(f'    "source": {json.dumps(meta["source"])},')
     lines.append(f'    "numThemes": {meta["numThemes"]},')
     lines.append(f'    "themesKeys": {json.dumps(list(THEMES_KEYS))},')
+    lines.append(f'    "numParentThemes": {meta["numParentThemes"]},')
     lines.append(f'    "numSets": {meta["numSets"]},')
     lines.append(f'    "setsKeys": {json.dumps(list(SETS_KEYS))}')
     sets_image_url = meta.get("setsImageUrl")
@@ -412,7 +418,11 @@ def build_catalog(args: argparse.Namespace) -> tuple[list[list], list[list], Ima
         )
     )
     themes = [
-        [theme_id, name]
+        theme_row(
+            theme_id=theme_id,
+            name=name,
+            parent_id=theme_parents.get(theme_id),
+        )
         for theme_id in sorted(used_theme_ids)
         if (name := theme_names.get(theme_id, ""))
     ]
@@ -441,6 +451,7 @@ def main(argv: list[str] | None = None) -> int:
         "source": SOURCE_URL,
         "numThemes": len(themes),
         "themesKeys": list(THEMES_KEYS),
+        "numParentThemes": sum(1 for row in themes if len(row) < 3),
         "numSets": len(sets),
         "setsKeys": list(SETS_KEYS),
     }
