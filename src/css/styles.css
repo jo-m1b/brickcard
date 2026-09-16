@@ -3144,7 +3144,7 @@ button.form-select-trigger.sm {
   cursor: pointer;
   position: relative;
   transform-origin: center center;
-  transition: transform 0.15s ease;
+  transition: transform 0.08s ease;
 }
 
 /* Print selection: frame on the card only */
@@ -3153,10 +3153,14 @@ button.form-select-trigger.sm {
   outline-offset: 3px;
 }
 
+.card-tile:hover,
+.card-tile:focus-visible {
+  z-index: 2;
+}
+
 .card-tile:hover .card-tile-preview,
 .card-tile:focus-visible .card-tile-preview {
-  transform: scale(1.04);
-  z-index: 2;
+  transform: scale(1.06);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -3977,14 +3981,19 @@ textarea {
   color: var(--theme-accent-fg, #ffffff);
   font-family: var(--font-card);
   text-transform: uppercase;
+  position: relative;
   transform-origin: center center;
-  transition: transform 0.15s ease;
+  transition: transform 0.08s ease;
+}
+
+.theme-tile.is-editable:hover,
+.theme-tile.is-editable:focus-visible {
+  z-index: 2;
 }
 
 .theme-tile.is-editable:hover .theme-tile-face,
 .theme-tile.is-editable:focus-visible .theme-tile-face {
-  transform: scale(1.04);
-  z-index: 2;
+  transform: scale(1.06);
 }
 
 @media (prefers-reduced-motion: reduce) {
