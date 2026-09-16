@@ -98,7 +98,7 @@ export async function renderThemeEditor(host, opts) {
             <div>
               ${
                 isPresetOverride
-                  ? `<p class="view-desc">${escapeHtml(_t("This is a customization of the default “%(name)s” theme.", { name: preset.name }))}</p>
+                  ? `<p class="view-desc">${escapeHtml(_t("Customization of the default “%(name)s” theme.", { name: preset.name }))}</p>
               <div class="form-field">
                 <label class="form-label" for="theme-id">${_t("Identifier")}</label>
                 <input class="form-control" type="text" id="theme-id" autocomplete="off" spellcheck="false" readonly />
@@ -336,6 +336,10 @@ export async function renderThemeEditor(host, opts) {
         isBuiltin: false,
       });
       const becameOverride = Boolean(preset && existing?.isBuiltin && !saved.isBuiltin);
+      if (preset && existing?.isBuiltin && saved.isBuiltin) {
+        onClose();
+        return true;
+      }
       onSaved(name, {
         isNew: !isEdit || becameOverride,
         theme: saved,

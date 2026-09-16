@@ -446,7 +446,7 @@ async function showOverlay(routeInfo) {
       onSaved: (name, meta) => {
         toast({
           type: "success",
-          title: _t("Theme saved"),
+          title: meta?.presetOverride ? _t("Customization saved") : _t("Theme saved"),
           message: name,
           icon: "palette",
         });

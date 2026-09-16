@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### ✏️ Changed
 
+- Theme editor: overlay note **Customization of the default “%(name)s” theme.**; saving a default-theme customization toasts **Customization saved** (UUID custom themes still **Theme saved**)
 - Themes (`#themes`): clicking a default theme opens the editor (no read-only view); `#themes/view/:id` redirects to edit; collection backup exports overlay diffs only (empty cleared fields kept); import accepts preset ids as customizations
 - Set catalog build: also exclude non-boxed Rebrickable themes by default (including children): Books (`497`), Gear (`501`), Database Sets (`746`), Bulk Bricks (`254`), Power Functions (`438`), Service Packs (`443`, `524`), Collectible Minifigures (`535`), Xtra (`646`), LEGO Originals (`683`)
 - Image **Download**: a `data:` src saves as a file; any other src (`http:`, `https:`, path) opens in a new tab (`target=_blank`)
@@ -32,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### 🔧 Fixed
 
+- Theme editor: saving an unchanged default theme no longer shows a **Theme saved** toast
 - Image error brick: use the official Remix `ri-file-damage-fill` path (the previous `d` was not that icon)
 - Search gallery set-catalog suggest: focusing the field again reopens the result list (blur still hides it)
 - Search gallery set-catalog suggest: list scroll resets to the top on each character and on focus
