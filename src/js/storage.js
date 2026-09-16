@@ -1,10 +1,10 @@
 /**
- * IndexedDB persistence (cards + custom themes) + `.brickcard` import.
- * Default themes come from the JSON, not IndexedDB.
+ * IndexedDB persistence (cards + custom themes / default-theme overlays) + `.brickcard` import.
+ * Default themes come from the JSON; a sparse overlay with the same id customizes one.
  * Format / export: `backup.js`.
  */
 
-import { getPresetThemes, getPresetTheme, parseHexColor, parseRebrickableThemeId, clearPresetCache, clampLogoZoom, roundCropCoord, resolvePresetThemeId } from "./themes-data.js";
+import { getPresetThemes, getPresetTheme, parseHexColor, parseRebrickableThemeId, clearPresetCache, clampLogoZoom, roundCropCoord, resolvePresetThemeId, readThemeOverride, themeOverrideDiff, themeOverrideHasFields, mergePresetOverride } from "./themes-data.js";
 import { applyCardAppearanceSettings } from "./card-design.js";
 import { getOptimizeImages } from "./image-optimize.js";
 import { APP_ID } from "./version.js";
@@ -171,7 +171,7 @@ function isValidCard(card) {
 
 /** @param {object} theme */
 function isValidTheme(theme) {
-  if (!theme || typeof theme.id !== "string") return false;
+  if (!theme || typeof theme.id !== "string" || !theme.id) return false;
   const hasName =
     typeof theme.name === "string" || typeof theme.themeName === "string";
   const hasLogoField =
@@ -179,6 +179,23 @@ function isValidTheme(theme) {
     typeof theme.image === "string" ||
     theme.logoDataUrl === undefined;
   return hasName && hasLogoField;
+}
+
+/**
+ * Sanitize overlay logo fields then resolve against a preset.
+ * @param {import("./themes-data.js").LegoTheme} preset
+ * @param {object|null|undefined} row
+ * @returns {import("./themes-data.js").LegoTheme|null}
+ */
+function resolveSanitizedPresetOverride(preset, row) {
+  const overlay = readThemeOverride(row);
+  if (Object.hasOwn(overlay, "logoDataUrl")) {
+    overlay.logoDataUrl = sanitizeSvgDataUrl(String(overlay.logoDataUrl ?? ""));
+  }
+  if (!themeOverrideHasFields(overlay)) return null;
+  const merged = mergePresetOverride(preset, overlay);
+  if (!themeOverrideHasFields(themeOverrideDiff(merged, preset))) return null;
+  return merged;
 }
 
 /** @returns {Promise<IDBDatabase>} */
@@ -383,8 +400,8 @@ async function presetIdSet() {
 }
 
 /**
- * Purge default themes still stored in IndexedDB
- * (they are now read from the JSON only).
+ * Purge old full copies of default themes (`isBuiltin`).
+ * Sparse overlays that share a preset id are kept.
  */
 async function seedThemesIfNeeded() {
   if (seedPromise) return seedPromise;
@@ -394,10 +411,7 @@ async function seedThemesIfNeeded() {
     const existing = await reqToPromise(
       db.transaction(STORE_THEMES, "readonly").objectStore(STORE_THEMES).getAll()
     );
-    const presetIds = await presetIdSet();
-    const stale = (existing || []).filter(
-      (row) => row && (row.isBuiltin || row.builtin || presetIds.has(row.id))
-    );
+    const stale = (existing || []).filter((row) => row && (row.isBuiltin || row.builtin));
     if (!stale.length) return;
 
     const tx = db.transaction(STORE_THEMES, "readwrite");
@@ -605,46 +619,71 @@ export async function getCard(id) {
   return isValidCard(card) ? normalizeCard(card) : null;
 }
 
-/** @returns {Promise<LegoTheme[]>} custom IndexedDB themes (without default themes) */
+/** @returns {Promise<LegoTheme[]>} custom IndexedDB themes (UUID + preset overlays) */
 export async function loadCustomThemes() {
   await ready();
   const db = await openDb();
   const rows = await reqToPromise(
     db.transaction(STORE_THEMES, "readonly").objectStore(STORE_THEMES).getAll()
   );
-  const presetIds = await presetIdSet();
-  return sortThemesByName(
-    (rows || [])
-      .filter(isValidTheme)
-      .map(normalizeTheme)
-      .filter((t) => !t.isBuiltin && !presetIds.has(t.id))
-      .map((t) => ({ ...t, isBuiltin: false }))
-  );
+  const presets = await getPresetThemes();
+  const presetById = new Map(presets.map((t) => [t.id, t]));
+  /** @type {LegoTheme[]} */
+  const out = [];
+  for (const row of rows || []) {
+    if (!row || row.isBuiltin || row.builtin) continue;
+    const preset = presetById.get(row.id);
+    if (preset) {
+      const merged = resolveSanitizedPresetOverride(preset, row);
+      if (merged) out.push(merged);
+      continue;
+    }
+    if (!isValidTheme(row)) continue;
+    out.push({ ...normalizeTheme(row), isBuiltin: false });
+  }
+  return sortThemesByName(out);
 }
 
-/** Custom (alpha) then default themes (alpha). */
+/** Custom (alpha) then remaining default themes (alpha). */
 export async function loadThemes() {
   const [custom, presets] = await Promise.all([
     loadCustomThemes(),
     getPresetThemes(),
   ]);
-  return [...custom, ...sortThemesByName([...presets])];
+  const overridden = new Set(custom.map((t) => t.id));
+  return [
+    ...custom,
+    ...sortThemesByName(presets.filter((t) => !overridden.has(t.id))),
+  ];
 }
 
 /** @param {string} id @returns {Promise<LegoTheme|null>} */
 export async function getTheme(id) {
   if (!id) return null;
   const preset = await getPresetTheme(id);
-  if (preset) return preset;
   await ready();
   const db = await openDb();
-  const theme = await reqToPromise(
+  const row = await reqToPromise(
     db.transaction(STORE_THEMES, "readonly").objectStore(STORE_THEMES).get(id)
   );
-  if (!isValidTheme(theme)) return null;
-  const normalized = normalizeTheme(theme);
+  if (preset) {
+    if (row && !row.isBuiltin && !row.builtin) {
+      const merged = resolveSanitizedPresetOverride(preset, row);
+      if (merged) return merged;
+    }
+    return preset;
+  }
+  if (!isValidTheme(row)) return null;
+  const normalized = normalizeTheme(row);
   if (normalized.isBuiltin) return null;
   return { ...normalized, isBuiltin: false };
+}
+
+async function deleteThemeRow(id) {
+  const db = await openDb();
+  const tx = db.transaction(STORE_THEMES, "readwrite");
+  tx.objectStore(STORE_THEMES).delete(id);
+  await txDone(tx);
 }
 
 /**
@@ -653,10 +692,45 @@ export async function getTheme(id) {
  */
 export async function upsertTheme(input) {
   await ready();
-  const presetIds = await presetIdSet();
   const id = input.id || createId();
-  if (presetIds.has(id)) {
-    throw new Error(_t("Default themes cannot be modified."));
+  const preset = await getPresetTheme(id);
+
+  const logoDataUrl = sanitizeSvgDataUrl(String(input.logoDataUrl ?? input.image ?? ""));
+  const color = parseHexColor(input.color ?? input.accentColor);
+  const secondaryColor = parseHexColor(input.secondaryColor);
+  const now = new Date().toISOString();
+
+  if (preset) {
+    const desired = {
+      id,
+      name: String(input.name ?? input.themeName ?? "").trim(),
+      color,
+      secondaryColor,
+      logoDataUrl,
+      logoZoom: clampLogoZoom(input.logoZoom),
+      logoOffsetX: roundCropCoord(input.logoOffsetX),
+      logoOffsetY: roundCropCoord(input.logoOffsetY),
+    };
+    const mergedName = desired.name || preset.name;
+    if (!mergedName) {
+      throw new Error(_t("The theme name is required."));
+    }
+    desired.name = mergedName;
+    const diff = themeOverrideDiff(desired, preset);
+    if (!themeOverrideHasFields(diff)) {
+      await deleteThemeRow(id);
+      return preset;
+    }
+    const overlay = {
+      id,
+      ...diff,
+      updatedAt: now,
+    };
+    const db = await openDb();
+    const tx = db.transaction(STORE_THEMES, "readwrite");
+    tx.objectStore(STORE_THEMES).put(overlay);
+    await txDone(tx);
+    return mergePresetOverride(preset, overlay);
   }
 
   const db = await openDb();
@@ -666,11 +740,6 @@ export async function upsertTheme(input) {
   if (existing && (existing.isBuiltin || existing.builtin)) {
     throw new Error(_t("Default themes cannot be modified."));
   }
-
-  const logoDataUrl = String(input.logoDataUrl ?? input.image ?? "");
-  const color = parseHexColor(input.color ?? input.accentColor);
-  const secondaryColor = parseHexColor(input.secondaryColor);
-  const now = new Date().toISOString();
 
   const theme = normalizeTheme({
     ...input,
@@ -712,38 +781,46 @@ async function clearCardsThemeAssociation(themeIds) {
   await txDone(tx);
 }
 
-/** Delete a custom theme only. */
+/** Delete a custom theme, or the overlay of a default theme. */
 export async function deleteTheme(id) {
   await ready();
-  if (await getPresetTheme(id)) {
-    throw new Error(_t("Default themes cannot be deleted."));
-  }
+  const preset = await getPresetTheme(id);
   const db = await openDb();
   const existing = await reqToPromise(
     db.transaction(STORE_THEMES, "readonly").objectStore(STORE_THEMES).get(id)
   );
+  if (preset) {
+    if (!existing || existing.isBuiltin || existing.builtin) {
+      throw new Error(_t("Default themes cannot be deleted."));
+    }
+    await deleteThemeRow(id);
+    return;
+  }
   if (!existing) return;
   if (existing.isBuiltin || existing.builtin) {
     throw new Error(_t("Default themes cannot be deleted."));
   }
-  const tx = db.transaction(STORE_THEMES, "readwrite");
-  tx.objectStore(STORE_THEMES).delete(id);
-  await txDone(tx);
+  await deleteThemeRow(id);
   await clearCardsThemeAssociation([id]);
 }
 
-/** Delete all custom themes and detach associated cards. */
+/**
+ * Delete all custom themes and default-theme overlays.
+ * Cards of UUID themes are detached; cards of overlays keep the default theme.
+ */
 export async function deleteAllCustomThemes() {
   await ready();
   const custom = await loadCustomThemes();
   if (!custom.length) return;
+  const presetIds = await presetIdSet();
   const ids = custom.map((t) => t.id);
+  const detachIds = ids.filter((themeId) => !presetIds.has(themeId));
   const db = await openDb();
   const tx = db.transaction(STORE_THEMES, "readwrite");
   const store = tx.objectStore(STORE_THEMES);
-  for (const id of ids) store.delete(id);
+  for (const themeId of ids) store.delete(themeId);
   await txDone(tx);
-  await clearCardsThemeAssociation(ids);
+  await clearCardsThemeAssociation(detachIds);
 }
 
 /**
@@ -802,41 +879,53 @@ export async function importBackup(input, modeOrOpts = "merge") {
     result = await loadCards();
   }
 
-  const presetIds = await presetIdSet();
-  const validThemes = incomingThemes
-    .filter(isValidTheme)
-    .map(normalizeTheme)
-    .filter((t) => !t.isBuiltin && !presetIds.has(t.id))
-    .map((t) => ({ ...t, isBuiltin: false }));
+  /** @type {LegoTheme[]} */
+  const validThemes = [];
+  for (const raw of incomingThemes) {
+    if (!raw || typeof raw !== "object") continue;
+    if (raw.isBuiltin || raw.builtin) continue;
+    const id = typeof raw.id === "string" ? raw.id : "";
+    if (!id) continue;
+    const preset = await getPresetTheme(id);
+    if (preset) {
+      const overlay = readThemeOverride(raw);
+      if (Object.hasOwn(overlay, "logoDataUrl")) {
+        overlay.logoDataUrl = sanitizeSvgDataUrl(String(overlay.logoDataUrl ?? ""));
+      }
+      if (!themeOverrideHasFields(overlay)) continue;
+      const desired = mergePresetOverride(preset, overlay);
+      if (!desired.name) continue;
+      validThemes.push(desired);
+      continue;
+    }
+    if (!isValidTheme(raw)) continue;
+    validThemes.push({ ...normalizeTheme(raw), isBuiltin: false });
+  }
 
   let themesImported = 0;
   if (mode === "replace") {
     await ready();
     const db = await openDb();
     const tx = db.transaction(STORE_THEMES, "readwrite");
-    const store = tx.objectStore(STORE_THEMES);
-    store.clear();
-    for (const theme of validThemes) store.put(theme);
+    tx.objectStore(STORE_THEMES).clear();
     await txDone(tx);
-    themesImported = validThemes.length;
-  } else {
-    for (const theme of validThemes) {
-      let next = theme;
-      if (!includeThemeLogos) {
-        const existing = await getTheme(theme.id);
-        if (existing && !existing.isBuiltin) {
-          next = {
-            ...theme,
-            logoDataUrl: existing.logoDataUrl,
-            logoZoom: existing.logoZoom,
-            logoOffsetX: existing.logoOffsetX,
-            logoOffsetY: existing.logoOffsetY,
-          };
-        }
+  }
+  for (const theme of validThemes) {
+    let next = theme;
+    if (!includeThemeLogos && mode !== "replace") {
+      const existing = await getTheme(theme.id);
+      if (existing) {
+        next = {
+          ...theme,
+          logoDataUrl: existing.logoDataUrl,
+          logoZoom: existing.logoZoom,
+          logoOffsetX: existing.logoOffsetX,
+          logoOffsetY: existing.logoOffsetY,
+        };
       }
-      await upsertTheme(next);
-      themesImported += 1;
     }
+    await upsertTheme(next);
+    themesImported += 1;
   }
 
   const settingsApplied = Boolean(data.settings?.cardAppearance);

@@ -673,6 +673,24 @@ msgstr "¿Eliminar todos los temas personalizados?"
 msgid "All custom themes will be permanently deleted. Cards from the deleted themes are kept but will no longer be associated with a theme."
 msgstr "Todos los temas personalizados se eliminarán de forma definitiva. Las tarjetas de los temas eliminados se conservan, pero ya no estarán asociadas a un tema."
 
+msgid "All custom themes and default-theme customizations will be deleted. Cards from a deleted custom theme are kept but will no longer have a theme. Cards from a customized default theme keep that default theme."
+msgstr "Se eliminarán todos los temas personalizados y las personalizaciones de temas predeterminados. Las tarjetas de un tema personalizado eliminado se conservan, pero ya no tendrán tema. Las tarjetas de un tema predeterminado personalizado siguen con ese tema predeterminado."
+
+msgid "This is a customization of the default “%(name)s” theme."
+msgstr "Esta es una personalización del tema predeterminado “%(name)s”."
+
+msgid "Remove customization"
+msgstr "Quitar la personalización"
+
+msgid "Remove the customization of “%(name)s”?"
+msgstr "¿Quitar la personalización de “%(name)s”?"
+
+msgid "This only removes your changes. The default theme is kept, and cards stay linked to it."
+msgstr "Esto solo quita tus cambios. El tema predeterminado se conserva y las tarjetas siguen asociadas a él."
+
+msgid "Customization removed"
+msgstr "Personalización eliminada"
+
 msgid "Unable to delete the custom themes"
 msgstr "No se pudieron eliminar los temas personalizados"
 

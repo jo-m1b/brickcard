@@ -19,7 +19,7 @@ import { popModalDocumentTitle, pushModalDocumentTitle, setAppDocumentTitle } fr
 import { _t } from "./i18n.js";
 import { formCheckboxMarkup } from "./form-checkbox.js";
 import { focusTopModal } from "./modal-focus.js";
-import { getPresetThemes } from "./themes-data.js";
+import { getPresetThemes, mergePresetOverride, readThemeOverride } from "./themes-data.js";
 import { importBackup } from "./storage.js";
 import { loadingViewMarkup } from "./empty-view.js";
 import { linkMarkup } from "./link.js";
@@ -504,6 +504,7 @@ export async function renderImportDialog(host, opts) {
     }
     return buildImportPayload(backup, {
       themes: themesForGrouping,
+      presetThemes: presets,
       selectedThemeIds: [...selectedThemeIds],
       includeSettings: hasSettings && includeSettings,
       includeImages: !hasCardImages || includeImages,
@@ -608,11 +609,15 @@ export async function renderImportDialog(host, opts) {
     const customThemes = /** @type {import("./themes-data.js").LegoTheme[]} */ (
       (data.themes || []).map((t) => {
         const theme = /** @type {Record<string, unknown>} */ (t || {});
-        return {
-          ...theme,
-          id: String(theme.id || ""),
-          name: String(theme.name ?? theme.themeName ?? "").trim() || _t("THEME"),
-        };
+        const id = String(theme.id || "");
+        const name = String(theme.name ?? theme.themeName ?? "").trim();
+        const isOverlay = presets.some((p) => p.id === id);
+        /** @type {Record<string, unknown>} */
+        const next = { ...theme, id };
+        if (name) next.name = name;
+        else if (!isOverlay) next.name = _t("THEME");
+        else delete next.name;
+        return next;
       })
     );
     backup = {
@@ -621,11 +626,25 @@ export async function renderImportDialog(host, opts) {
     };
     sourceLabel = source.label;
     sourceHref = String(source.href || "").trim();
-    themesForGrouping = [...presets, ...customThemes];
+    const overlayById = new Map();
+    /** @type {import("./themes-data.js").LegoTheme[]} */
+    const uuidThemes = [];
+    for (const theme of customThemes) {
+      const preset = presets.find((p) => p.id === theme.id);
+      if (preset) {
+        overlayById.set(theme.id, mergePresetOverride(preset, readThemeOverride(theme)));
+      } else {
+        uuidThemes.push(theme);
+      }
+    }
+    themesForGrouping = [
+      ...presets.map((p) => overlayById.get(p.id) || p),
+      ...uuidThemes,
+    ];
     themeChoices = listImportThemeChoices(
       /** @type {import("./storage.js").Card[]} */ (backup.cards || []),
       themesForGrouping,
-      customThemes
+      [...overlayById.values(), ...uuidThemes]
     );
     selectedThemeIds.clear();
     themeChoices.forEach((choice) => selectedThemeIds.add(choice.id));

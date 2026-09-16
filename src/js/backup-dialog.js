@@ -11,6 +11,7 @@ import { setAppDocumentTitle } from "./document-title.js";
 import { formRadioMarkup } from "./form-radio.js";
 import { formCheckboxMarkup } from "./form-checkbox.js";
 import { loadCards, loadCustomThemes, loadThemes } from "./storage.js";
+import { getPresetThemes } from "./themes-data.js";
 import {
   CARD_APPEARANCE_NUM_SETTINGS,
   UNTHEMED_BACKUP_THEME_ID,
@@ -38,10 +39,11 @@ const UNTHEMED_VALUE = "none";
  */
 export async function renderBackupDialog(host, opts) {
   const { onClose, toast } = opts;
-  const [cards, themes, customThemes] = await Promise.all([
+  const [cards, themes, customThemes, presetThemes] = await Promise.all([
     loadCards(),
     loadThemes(),
     loadCustomThemes(),
+    getPresetThemes(),
   ]);
   const themeChoices = listBackupThemeChoices(cards, themes);
   const cardsByTheme = groupCardsForBackup(cards, themes);
@@ -196,6 +198,7 @@ export async function renderBackupDialog(host, opts) {
       cards,
       themes,
       customThemes,
+      presetThemes,
       selectedThemeIds: [...selectedThemeIds],
       includeSettings,
       includeImages,
@@ -305,6 +308,7 @@ export async function renderBackupDialog(host, opts) {
         cards,
         themes,
         customThemes,
+        presetThemes,
         selectedThemeIds: [...selectedThemeIds],
         includeSettings,
         includeImages,

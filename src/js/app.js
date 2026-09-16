@@ -392,7 +392,6 @@ async function showOverlay(routeInfo) {
           onClose: overlayOnClose("themes"),
           onCreate: () => navigate("#themes/new"),
           onEdit: (id) => navigate(`#themes/edit/${encodeURIComponent(id)}`),
-          onView: (id) => navigate(`#themes/view/${encodeURIComponent(id)}`),
           onClearedCustomThemes: () => {
             toast({
               type: "success",
@@ -412,18 +411,15 @@ async function showOverlay(routeInfo) {
       return;
     }
 
-    if (routeInfo.page === "edit" || routeInfo.page === "view") {
+    if (routeInfo.page === "view" && routeInfo.themeId) {
+      navigate(`#themes/edit/${encodeURIComponent(routeInfo.themeId)}`, { replace: true });
+      return;
+    }
+
+    if (routeInfo.page === "edit") {
       const theme = await getTheme(routeInfo.themeId);
       if (!theme) {
         navigate("#themes", { replace: true });
-        return;
-      }
-      if (routeInfo.page === "edit" && theme.isBuiltin) {
-        navigate(`#themes/view/${encodeURIComponent(theme.id)}`, { replace: true });
-        return;
-      }
-      if (routeInfo.page === "view" && !theme.isBuiltin) {
-        navigate(`#themes/edit/${encodeURIComponent(theme.id)}`, { replace: true });
         return;
       }
     }
@@ -440,7 +436,6 @@ async function showOverlay(routeInfo) {
     const editorThemeId = routeInfo.page === "new" ? null : routeInfo.themeId;
     cleanupThemeEditor = await themeEditor.renderThemeEditor(modalRoot, {
       themeId: editorThemeId,
-      readOnly: routeInfo.page === "view",
       onClose: () => {
         const id = editorThemeId;
         if (parseRoute().name === "themes") {
@@ -468,15 +463,16 @@ async function showOverlay(routeInfo) {
         }
         themes.focusThemeInList(meta?.theme?.id);
       },
-      onDeleted: (name, themeId) => {
+      onDeleted: (name, themeId, meta) => {
+        const presetOverride = Boolean(meta?.presetOverride);
         toast({
           type: "success",
-          title: _t("Theme deleted"),
+          title: presetOverride ? _t("Customization removed") : _t("Theme deleted"),
           message: name,
           icon: "delete-bin-2",
         });
         underlayStale = true;
-        themes.removeThemeFromList(themeId);
+        themes.removeThemeFromList(themeId, meta?.restoredPreset);
         if (parseRoute().name === "themes") {
           navigate("#themes", { replace: true });
         }

@@ -673,6 +673,24 @@ msgstr "Alle eigenen Themen löschen?"
 msgid "All custom themes will be permanently deleted. Cards from the deleted themes are kept but will no longer be associated with a theme."
 msgstr "Alle eigenen Themen werden endgültig gelöscht. Die Karten der gelöschten Themen bleiben erhalten, sind aber keinem Thema mehr zugeordnet."
 
+msgid "All custom themes and default-theme customizations will be deleted. Cards from a deleted custom theme are kept but will no longer have a theme. Cards from a customized default theme keep that default theme."
+msgstr "Alle eigenen Themen und Anpassungen von Standardthemen werden gelöscht. Karten eines gelöschten eigenen Themas bleiben erhalten, sind aber keinem Thema mehr zugeordnet. Karten eines angepassten Standardthemas behalten dieses Standardthema."
+
+msgid "This is a customization of the default “%(name)s” theme."
+msgstr "Dies ist eine Anpassung des Standardthemas „%(name)s“."
+
+msgid "Remove customization"
+msgstr "Anpassung entfernen"
+
+msgid "Remove the customization of “%(name)s”?"
+msgstr "Anpassung von „%(name)s“ entfernen?"
+
+msgid "This only removes your changes. The default theme is kept, and cards stay linked to it."
+msgstr "Es werden nur Ihre Änderungen entfernt. Das Standardthema bleibt erhalten, und die Karten bleiben damit verknüpft."
+
+msgid "Customization removed"
+msgstr "Anpassung entfernt"
+
 msgid "Unable to delete the custom themes"
 msgstr "Die eigenen Themen konnten nicht gelöscht werden"
 

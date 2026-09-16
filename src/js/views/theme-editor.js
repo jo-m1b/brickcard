@@ -1,4 +1,4 @@
-import { ICON_ADD, ICON_CLOSE, ICON_DELETE_BIN_2, ICON_PALETTE, ICON_PENCIL, ICON_SAVE, modalTitleMarkup } from "../icons.js";
+import { ICON_ADD, ICON_CLOSE, ICON_DELETE_BIN_2, ICON_PENCIL, ICON_SAVE, modalTitleMarkup } from "../icons.js";
 import { bindFormColor, formColorMarkup } from "../form-color.js";
 import { bindFormImage, formImageMarkup } from "../form-image.js";
 import { formatThemeLogoBasename } from "../card-export.js";
@@ -10,35 +10,32 @@ import {
   getTheme,
 } from "../storage.js";
 import { mountCardBackPreview, refreshCardBackPreview } from "../card-render.js";
-import { contrastText, DEFAULT_THEME_COLOR } from "../themes-data.js";
+import { contrastText, DEFAULT_THEME_COLOR, getPresetTheme } from "../themes-data.js";
 import { resolveCardAccent } from "../card-design.js";
 import { confirmDialog, confirmUnsavedClose } from "../confirm-dialog.js";
 import { setAppDocumentTitle } from "../document-title.js";
 import { _t } from "../i18n.js";
 
 /**
- * Custom theme editor modal (`#themes/new`, `#themes/edit/:id`)
- * or read-only view of a default theme (`#themes/view/:id`).
+ * Theme editor modal (`#themes/new`, `#themes/edit/:id`).
+ * Default themes are editable; saving a change stores a sparse overlay.
  * @param {HTMLElement} host
  * @param {{
  *   themeId?: string|null,
- *   readOnly?: boolean,
  *   onClose: () => void,
- *   onSaved: (name: string, meta: { isNew: boolean, theme: import("../themes-data.js").LegoTheme }) => void,
- *   onDeleted?: (name: string, themeId: string) => void,
+ *   onSaved: (name: string, meta: { isNew: boolean, theme: import("../themes-data.js").LegoTheme, presetOverride?: boolean }) => void,
+ *   onDeleted?: (name: string, themeId: string, meta?: { presetOverride?: boolean, restoredPreset?: import("../themes-data.js").LegoTheme }) => void,
  * }} opts
- * @returns {Promise<(() => void)|null>} cleanup, or null if id invalid / mode mismatch
+ * @returns {Promise<(() => void)|null>} cleanup, or null if id invalid
  */
 export async function renderThemeEditor(host, opts) {
   const { onClose, onSaved, onDeleted } = opts;
-  const readOnly = Boolean(opts.readOnly);
   const isEdit = Boolean(opts.themeId);
   const existing = isEdit ? await getTheme(opts.themeId) : null;
-  if (readOnly) {
-    if (!existing || !existing.isBuiltin) return null;
-  } else if (isEdit && (!existing || existing.isBuiltin)) {
-    return null;
-  }
+  if (isEdit && !existing) return null;
+  const preset = existing ? await getPresetTheme(existing.id) : null;
+  const isPresetOverride = Boolean(preset && existing && !existing.isBuiltin);
+  const canDelete = Boolean(existing && !existing.isBuiltin);
 
   document.body.classList.add("modal-open");
 
@@ -64,12 +61,10 @@ export async function renderThemeEditor(host, opts) {
   };
 
   const colorDisplay = draft.color || resolveCardAccent(existing);
-  const dialogTitle = readOnly
-    ? _t("Theme “%(name)s”", { name: existing.name })
-    : existing
-      ? _t("Edit “%(name)s”", { name: existing.name })
-      : _t("New theme");
-  const dialogIcon = readOnly ? ICON_PALETTE : existing ? ICON_PENCIL : ICON_ADD;
+  const dialogTitle = existing
+    ? _t("Edit “%(name)s”", { name: existing.name })
+    : _t("New theme");
+  const dialogIcon = existing ? ICON_PENCIL : ICON_ADD;
 
   function themeCropBackground() {
     return resolveCardAccent({ color: draft.color });
@@ -102,23 +97,18 @@ export async function renderThemeEditor(host, opts) {
             </aside>
             <div>
               ${
-                readOnly
-                  ? `<div class="form-field">
+                isPresetOverride
+                  ? `<p class="view-desc">${escapeHtml(_t("This is a customization of the default “%(name)s” theme.", { name: preset.name }))}</p>
+              <div class="form-field">
                 <label class="form-label" for="theme-id">${_t("Identifier")}</label>
                 <input class="form-control" type="text" id="theme-id" autocomplete="off" spellcheck="false" readonly />
               </div>`
                   : ""
               }
               <div class="form-field">
-                <label class="form-label${readOnly ? "" : " form-label--required"}" for="theme-name">${_t("Name")}</label>
-                <input class="form-control" type="text" id="theme-name" placeholder="CITY" autocomplete="off"${
-                  readOnly ? " readonly" : ""
-                } />
-                ${
-                  readOnly
-                    ? ""
-                    : `<p class="form-error" id="theme-name-error" role="alert" hidden></p>`
-                }
+                <label class="form-label form-label--required" for="theme-name">${_t("Name")}</label>
+                <input class="form-control" type="text" id="theme-name" placeholder="CITY" autocomplete="off" />
+                <p class="form-error" id="theme-name-error" role="alert" hidden></p>
               </div>
               <div class="form-field">
                 <label class="form-label" for="theme-color-hex">${_t("Color")}</label>
@@ -129,7 +119,6 @@ export async function renderThemeEditor(host, opts) {
                   fallback: DEFAULT_THEME_COLOR,
                   placeholder: DEFAULT_THEME_COLOR,
                   describedBy: "theme-color-hint",
-                  disabled: readOnly,
                 })}
               </div>
               <div class="form-field">
@@ -141,7 +130,6 @@ export async function renderThemeEditor(host, opts) {
                   fallback: autoAccentFg(),
                   placeholder: autoAccentFg(),
                   describedBy: "theme-secondary-color-hint",
-                  disabled: readOnly,
                 })}
               </div>
               <div class="form-field" style="--form-image-aspect: 63 / 44">
@@ -156,34 +144,25 @@ export async function renderThemeEditor(host, opts) {
                   withBackgroundColor: false,
                   previewBackground: colorDisplay,
                   fit: "logo",
-                  readOnly,
                 })}
               </div>
-              ${readOnly ? "" : `<p class="form-error" id="theme-error" role="alert"></p>`}
+              <p class="form-error" id="theme-error" role="alert"></p>
             </div>
           </div>
         </div>
-        ${
-          readOnly
-            ? `<div class="modal-footer">
-          <div class="modal-footer-end">
-            <button type="button" class="btn secondary" id="theme-cancel">${_t("Close")}</button>
-          </div>
-        </div>`
-            : `<div class="modal-footer modal-footer--primary-first">
+        <div class="modal-footer modal-footer--primary-first">
           <div class="modal-footer-end">
             <button type="button" class="btn primary" id="theme-save">${ICON_SAVE}<span>${_t("Save")}</span></button>
             <button type="button" class="btn secondary sm" id="theme-cancel">${_t("Cancel")}</button>
           </div>
           ${
-            existing
+            canDelete
               ? `<div class="modal-footer-start">
-            <button type="button" class="btn danger" id="theme-delete">${ICON_DELETE_BIN_2}<span>${_t("Delete")}</span></button>
+            <button type="button" class="btn danger" id="theme-delete">${ICON_DELETE_BIN_2}<span>${_t(isPresetOverride ? "Remove customization" : "Delete")}</span></button>
           </div>`
               : ""
           }
-        </div>`
-        }
+        </div>
       </div>
     </div>
   `.trim();
@@ -241,9 +220,7 @@ export async function renderThemeEditor(host, opts) {
   if (colorRoot) {
     themeColorField = bindFormColor(colorRoot, {
       fallbackColor: DEFAULT_THEME_COLOR,
-      onChange: readOnly
-        ? undefined
-        : (value) => {
+      onChange: (value) => {
             draft.color = value || "";
             if (!value) {
               themeColorField?.setValue("", resolveCardAccent(null));
@@ -262,9 +239,7 @@ export async function renderThemeEditor(host, opts) {
   if (secondaryRoot) {
     secondaryColorField = bindFormColor(secondaryRoot, {
       fallbackColor: autoAccentFg(),
-      onChange: readOnly
-        ? undefined
-        : (value) => {
+      onChange: (value) => {
             draft.secondaryColor = value || "";
             if (!value) {
               secondaryColorField?.setValue("", autoAccentFg());
@@ -277,19 +252,16 @@ export async function renderThemeEditor(host, opts) {
 
   if (logoRoot) {
     logoField = bindFormImage(logoRoot, {
-      processFile: readOnly ? undefined : compressImage,
+      processFile: compressImage,
       dialogHost: host,
       previewBackground: colorDisplay,
       fit: "logo",
-      readOnly,
       downloadBasename: () =>
         formatThemeLogoBasename({
           name: nameInput.value,
           themeId: draft.id,
         }),
-      onChange: readOnly
-        ? undefined
-        : (value) => {
+      onChange: (value) => {
             draft.logoDataUrl = value.dataUrl || "";
             if (draft.logoDataUrl) {
               draft.logoZoom = value.zoom;
@@ -333,12 +305,10 @@ export async function renderThemeEditor(host, opts) {
     else nameInput.removeAttribute("aria-describedby");
   }
 
-  if (!readOnly) {
-    nameInput.addEventListener("input", () => {
-      if (nameError?.textContent) setNameError("");
-      syncPreview();
-    });
-  }
+  nameInput.addEventListener("input", () => {
+    if (nameError?.textContent) setNameError("");
+    syncPreview();
+  });
 
   let closeBusy = false;
 
@@ -365,7 +335,12 @@ export async function renderThemeEditor(host, opts) {
         rebrickableThemeId: existing?.rebrickableThemeId ?? null,
         isBuiltin: false,
       });
-      onSaved(name, { isNew: !isEdit, theme: saved });
+      const becameOverride = Boolean(preset && existing?.isBuiltin && !saved.isBuiltin);
+      onSaved(name, {
+        isNew: !isEdit || becameOverride,
+        theme: saved,
+        presetOverride: Boolean(preset && !saved.isBuiltin),
+      });
       return true;
     } catch (ex) {
       if (errEl) errEl.textContent = ex.message || _t("Unable to save.");
@@ -374,7 +349,7 @@ export async function renderThemeEditor(host, opts) {
   }
 
   async function requestClose(optsClose = {}) {
-    if (readOnly || optsClose.skipConfirm) {
+    if (optsClose.skipConfirm) {
       onClose();
       return;
     }
@@ -415,18 +390,27 @@ export async function renderThemeEditor(host, opts) {
   if (deleteBtn) {
     deleteBtn.onclick = async () => {
       const ok = await confirmDialog(host, {
-        title: _t("Delete the theme “%(name)s”?", { name: existing.name }),
+        title: isPresetOverride
+          ? _t("Remove the customization of “%(name)s”?", { name: existing.name })
+          : _t("Delete the theme “%(name)s”?", { name: existing.name }),
         icon: "delete-bin-2",
-        message: _t(
-          "Warning, deletion is permanent and cannot be undone! Do you want to continue?"
-        ),
-        okLabel: _t("Delete"),
+        message: isPresetOverride
+          ? _t(
+              "This only removes your changes. The default theme is kept, and cards stay linked to it."
+            )
+          : _t(
+              "Warning, deletion is permanent and cannot be undone! Do you want to continue?"
+            ),
+        okLabel: isPresetOverride ? _t("Remove customization") : _t("Delete"),
         danger: true,
       });
       if (!ok) return;
       try {
         await deleteTheme(existing.id);
-        onDeleted?.(existing.name, existing.id);
+        onDeleted?.(existing.name, existing.id, {
+          presetOverride: Boolean(preset),
+          restoredPreset: preset || undefined,
+        });
       } catch (ex) {
         if (errEl) errEl.textContent = ex.message || _t("Unable to delete.");
       }
@@ -441,4 +425,12 @@ export async function renderThemeEditor(host, opts) {
     window.removeEventListener("resize", syncPreview);
     backdrop.remove();
   };
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }

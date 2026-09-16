@@ -9,11 +9,12 @@ import { foldCI } from "./includes-ci.js";
 import {
   createRebrickableCardId,
   createRebrickableThemeId,
+  getTheme,
   loadThemes,
   parseRebrickableSetId,
   upsertTheme,
 } from "./storage.js";
-import { isLocalDevHost, parseRebrickableThemeId } from "./themes-data.js";
+import { getPresetThemes, isLocalDevHost, parseRebrickableThemeId } from "./themes-data.js";
 
 const CATALOG_URL = "data/sets-presets.json";
 
@@ -284,22 +285,25 @@ export async function getCatalogTheme(id) {
 }
 
 /**
- * First Brickcard theme with this catalog theme id (default themes, then custom).
+ * First Brickcard theme with this catalog theme id (default theme, possibly
+ * customized, then a custom UUID theme).
  * @param {unknown} themeId
  * @returns {Promise<import("./themes-data.js").LegoTheme|null>}
  */
 export async function findThemeByRebrickableId(themeId) {
   const id = parseRebrickableThemeId(themeId);
   if (!id) return null;
-  const themes = await loadThemes();
-  /** @type {import("./themes-data.js").LegoTheme|null} */
-  let custom = null;
-  for (const theme of themes) {
-    if (theme.rebrickableThemeId !== id) continue;
-    if (theme.isBuiltin) return theme;
-    if (!custom) custom = theme;
+  const presets = await getPresetThemes();
+  for (const preset of presets) {
+    if (preset.rebrickableThemeId !== id) continue;
+    return (await getTheme(preset.id)) || preset;
   }
-  return custom;
+  const themes = await loadThemes();
+  for (const theme of themes) {
+    if (theme.isBuiltin) continue;
+    if (theme.rebrickableThemeId === id) return theme;
+  }
+  return null;
 }
 
 /**

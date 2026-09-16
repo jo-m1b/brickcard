@@ -12,7 +12,7 @@ import {
 import { confirmDialog } from "../confirm-dialog.js";
 import { toast } from "../toast.js";
 import { deleteAllCustomThemes, isRemoteImageSrc, loadCards, loadThemes } from "../storage.js";
-import { partitionThemes } from "../themes-data.js";
+import { getPresetThemes, partitionThemes } from "../themes-data.js";
 import { resolveCardAccent, resolveCardAccentFg } from "../card-design.js";
 import {
   applyThemeLogoTransform,
@@ -96,7 +96,7 @@ export function prepareThemesAfterThemeCreate() {
 let mountedRefreshThemesAfterCreate = null;
 /** @type {((theme: import("../themes-data.js").LegoTheme) => boolean) | null} */
 let mountedPatchThemeInList = null;
-/** @type {((id: string) => boolean) | null} */
+/** @type {((id: string, restoredPreset?: import("../themes-data.js").LegoTheme) => boolean) | null} */
 let mountedRemoveThemeFromList = null;
 /** @type {((id: string) => boolean) | null} */
 let mountedFocusThemeInList = null;
@@ -158,11 +158,12 @@ function applyThemeTileFocus(tile) {
 /**
  * Removes a theme from the mounted list (tile + memory + counters), without rebuilding the grid.
  * @param {string} id
+ * @param {import("../themes-data.js").LegoTheme} [restoredPreset] Default theme to put back after removing an overlay
  * @returns {boolean} false if the list is not mounted
  */
-export function removeThemeFromList(id) {
+export function removeThemeFromList(id, restoredPreset) {
   if (!mountedRemoveThemeFromList || !id) return false;
-  return mountedRemoveThemeFromList(id);
+  return mountedRemoveThemeFromList(id, restoredPreset);
 }
 
 /**
@@ -190,13 +191,12 @@ let rememberedQuery = "";
  *   onClose: () => void,
  *   onCreate: () => void,
  *   onEdit: (id: string) => void,
- *   onView: (id: string) => void,
  *   onClearedCustomThemes?: () => void,
  * }} opts
  * @returns {Promise<() => void>} cleanup
  */
 export async function renderThemesModal(host, opts) {
-  const { onClose, onCreate, onEdit, onView, onClearedCustomThemes } = opts;
+  const { onClose, onCreate, onEdit, onClearedCustomThemes } = opts;
   const [allThemes, cards] = await Promise.all([loadThemes(), loadCards()]);
   let { custom, builtin } = partitionThemes(allThemes);
 
@@ -561,7 +561,7 @@ export async function renderThemesModal(host, opts) {
       .map((t) => themeTileMarkup(t, usage.get(t.id) || 0, "edit"))
       .join("");
     builtinGrid.innerHTML = builtinShown
-      .map((t) => themeTileMarkup(t, usage.get(t.id) || 0, "view"))
+      .map((t) => themeTileMarkup(t, usage.get(t.id) || 0, "edit"))
       .join("");
 
     customSection.hidden = customShown.length === 0;
@@ -582,7 +582,7 @@ export async function renderThemesModal(host, opts) {
   function queryThemeTile(id) {
     return (
       queryCustomTile(id) ||
-      builtinGrid.querySelector(`[data-view="${CSS.escape(id)}"]`)
+      builtinGrid.querySelector(`[data-edit="${CSS.escape(id)}"]`)
     );
   }
 
@@ -731,16 +731,13 @@ export async function renderThemesModal(host, opts) {
     const editId = tile.getAttribute("data-edit");
     if (editId) {
       onEdit(editId);
-      return;
     }
-    const viewId = tile.getAttribute("data-view");
-    if (viewId) onView?.(viewId);
   }
 
   /** @param {MouseEvent} e */
   function onGridClick(e) {
     const t = /** @type {HTMLElement} */ (e.target);
-    const tile = t.closest("[data-edit], [data-view]");
+    const tile = t.closest("[data-edit]");
     if (!tile) return;
     openThemeTile(tile);
   }
@@ -749,7 +746,7 @@ export async function renderThemesModal(host, opts) {
   function onGridKeydown(e) {
     if (e.key !== "Enter" && e.key !== " ") return;
     const t = /** @type {HTMLElement} */ (e.target);
-    const tile = t.closest("[data-edit], [data-view]");
+    const tile = t.closest("[data-edit]");
     if (!tile) return;
     e.preventDefault();
     openThemeTile(tile);
@@ -760,6 +757,8 @@ export async function renderThemesModal(host, opts) {
   mountedFocusThemeInList = (id) => applyThemeTileFocus(queryThemeTile(id));
 
   mountedRefreshThemesAfterCreate = (theme) => {
+    const bidx = builtin.findIndex((t) => t.id === theme.id);
+    if (bidx >= 0) builtin.splice(bidx, 1);
     const idx = custom.findIndex((t) => t.id === theme.id);
     if (idx >= 0) custom[idx] = theme;
     else custom.push(theme);
@@ -777,11 +776,25 @@ export async function renderThemesModal(host, opts) {
   };
 
   mountedPatchThemeInList = (theme) => {
+    if (theme.isBuiltin) {
+      const cidx = custom.findIndex((t) => t.id === theme.id);
+      if (cidx >= 0) custom.splice(cidx, 1);
+      const bidx = builtin.findIndex((t) => t.id === theme.id);
+      if (bidx >= 0) builtin[bidx] = theme;
+      else builtin.push(theme);
+      paint();
+      return true;
+    }
+    const bidx = builtin.findIndex((t) => t.id === theme.id);
+    if (bidx >= 0) builtin.splice(bidx, 1);
     const idx = custom.findIndex((t) => t.id === theme.id);
     if (idx >= 0) custom[idx] = theme;
     else custom.push(theme);
     const tile = queryCustomTile(theme.id);
-    if (!(tile instanceof HTMLElement)) return true;
+    if (!(tile instanceof HTMLElement)) {
+      paint();
+      return true;
+    }
     const wrap = document.createElement("div");
     wrap.innerHTML = themeTileMarkup(theme, usage.get(theme.id) || 0, "edit").trim();
     const next = wrap.firstElementChild;
@@ -791,10 +804,17 @@ export async function renderThemesModal(host, opts) {
     return true;
   };
 
-  mountedRemoveThemeFromList = (id) => {
-    const idx = custom.findIndex((t) => t.id === id);
-    if (idx >= 0) custom.splice(idx, 1);
+  mountedRemoveThemeFromList = (id, restoredPreset) => {
+    const cidx = custom.findIndex((t) => t.id === id);
+    if (cidx >= 0) custom.splice(cidx, 1);
     queryCustomTile(id)?.remove();
+    if (restoredPreset) {
+      const bidx = builtin.findIndex((t) => t.id === restoredPreset.id);
+      if (bidx >= 0) builtin[bidx] = restoredPreset;
+      else builtin.push(restoredPreset);
+      paint();
+      return true;
+    }
     syncThemesChrome();
     return true;
   };
@@ -807,7 +827,7 @@ export async function renderThemesModal(host, opts) {
         title: _t("Delete all custom themes?"),
         icon: "delete-bin-2",
         message: _t(
-          "All custom themes will be permanently deleted. Cards from the deleted themes are kept but will no longer be associated with a theme."
+          "All custom themes and default-theme customizations will be deleted. Cards from a deleted custom theme are kept but will no longer have a theme. Cards from a customized default theme keep that default theme."
         ),
         okLabel: _t("Delete"),
         danger: true,
@@ -817,8 +837,10 @@ export async function renderThemesModal(host, opts) {
       try {
         await deleteAllCustomThemes();
         custom.length = 0;
-        customGrid.innerHTML = "";
-        syncThemesChrome();
+        const presets = await getPresetThemes();
+        builtin.length = 0;
+        builtin.push(...presets);
+        paint();
         onClearedCustomThemes?.();
         btnAddTheme?.focus();
       } catch (ex) {
@@ -890,15 +912,9 @@ function themeTileMarkup(theme, count, action) {
     : brandLogoMarkup("theme-tile-logo is-brand");
   const logo = `<div class="${wrapClass}"${cropAttrs}>${logoInner}</div>`;
   let named = theme.name;
-  if (action === "edit") named = _t("Edit “%(name)s”", { name: theme.name });
-  else if (action === "view") named = _t("View “%(name)s”", { name: theme.name });
+  if (action) named = _t("Edit “%(name)s”", { name: theme.name });
   const label = escapeAttr(count > 0 ? `${named}, ${countLabel}` : named);
-  const dataAttr =
-    action === "edit"
-      ? `data-edit="${escapeAttr(theme.id)}"`
-      : action === "view"
-        ? `data-view="${escapeAttr(theme.id)}"`
-        : "";
+  const dataAttr = action ? `data-edit="${escapeAttr(theme.id)}"` : "";
   const attrs = dataAttr ? `role="button" tabindex="0" ${dataAttr}` : "";
 
   return `

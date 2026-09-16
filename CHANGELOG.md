@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### ➕ Added
 
+- Default themes can be customized (name, colors, logo): saving stores a sparse overlay in IndexedDB with the same id as the preset; the theme moves to **Custom themes**; **Remove customization** restores the default without detaching cards
 - Card photos and theme logos: **Load from a URL** can keep an `https:` URL (vertical radios: import into the collection, or use the remote URL) when CORS blocks `fetch`; stored in `imageDataUrl` / `logoDataUrl`; import radio hint: always displayed even offline
 - Optional Rebrickable origin refs on cards (`rebrickableSetId`, `rebrickableThemeId`) and themes (`rebrickableThemeId`); catalog-created ids use the `rebrickable-{id}-` + UUID prefix; `sets-presets.js` drafts a card from the offline catalog and reuses or creates a custom theme by `rebrickableThemeId` (`brickcardThemeId` stays the card ↔ theme link)
 - Search gallery (`#developer/search`): set-catalog autocomplete demo (`search-bar--suggest`, `sets-presets.json`); multi-line `form-select` options (id, year / pieces / figurines, theme, name)
@@ -20,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### ✏️ Changed
 
+- Themes (`#themes`): clicking a default theme opens the editor (no read-only view); `#themes/view/:id` redirects to edit; collection backup exports overlay diffs only (empty cleared fields kept); import accepts preset ids as customizations
 - Set catalog build: also exclude non-boxed Rebrickable themes by default (including children): Books (`497`), Gear (`501`), Database Sets (`746`), Bulk Bricks (`254`), Power Functions (`438`), Service Packs (`443`, `524`), Collectible Minifigures (`535`), Xtra (`646`), LEGO Originals (`683`)
 - Image **Download**: a `data:` src saves as a file; any other src (`http:`, `https:`, path) opens in a new tab (`target=_blank`)
 - Failed card photo / theme logo: 404-style brick with `ri-file-damage-fill` (black or white on the frame / theme color) and a centered **Remote image unavailable** caption instead of hiding the slot or falling back to the Brickcard mark; theme mini-cards use a smaller brick; print treats a failed image as missing (no error brick)

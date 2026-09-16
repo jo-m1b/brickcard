@@ -7,6 +7,12 @@ import { downloadBlob } from "./card-export.js";
 import { getCardAppearanceSettings } from "./card-design.js";
 import { APP_ID, APP_VERSION } from "./version.js";
 import { _t, getLocale } from "./i18n.js";
+import {
+  mergePresetOverride,
+  readThemeOverride,
+  themeOverrideDiff,
+  themeOverrideHasFields,
+} from "./themes-data.js";
 
 export const BACKUP_EXT = ".brickcard";
 export const BACKUP_INVALID = "The loaded backup is invalid!";
@@ -63,6 +69,7 @@ const BACKUP_MIGRATIONS = [
  * @property {Card[]} cards
  * @property {LegoTheme[]} themes All themes (to group cards)
  * @property {LegoTheme[]} customThemes
+ * @property {LegoTheme[]} [presetThemes] Default themes (to compact overlays)
  * @property {string[]} [selectedThemeIds]
  * @property {boolean} [includeSettings]
  * @property {boolean} [includeImages]
@@ -112,13 +119,22 @@ function isValidCardLike(card) {
 function isValidThemeLike(theme) {
   if (!theme || typeof theme !== "object") return false;
   const t = /** @type {Record<string, unknown>} */ (theme);
-  if (typeof t.id !== "string") return false;
+  if (typeof t.id !== "string" || !t.id) return false;
   const hasName = typeof t.name === "string" || typeof t.themeName === "string";
+  const hasOverrideField =
+    typeof t.color === "string" ||
+    typeof t.accentColor === "string" ||
+    typeof t.secondaryColor === "string" ||
+    typeof t.logoDataUrl === "string" ||
+    typeof t.image === "string" ||
+    t.logoZoom != null ||
+    t.logoOffsetX != null ||
+    t.logoOffsetY != null;
   const hasLogoField =
     typeof t.logoDataUrl === "string" ||
     typeof t.image === "string" ||
     t.logoDataUrl === undefined;
-  return hasName && hasLogoField;
+  return (hasName && hasLogoField) || hasOverrideField;
 }
 
 /**
@@ -254,12 +270,42 @@ function compactBackupCards(cards, includeImages) {
 /**
  * @param {object[]} themes
  * @param {boolean} includeThemeLogos
+ * @param {Map<string, LegoTheme>} [presetById]
  */
-function compactBackupThemes(themes, includeThemeLogos) {
+function compactBackupThemes(themes, includeThemeLogos, presetById = new Map()) {
   const rows = includeThemeLogos ? themes : themes.map(stripThemeLogo);
-  return rows.map(stripThemeBuiltinFlag).map((row) =>
-    omitEmptyBackupFields(row, THEME_BACKUP_DEFAULTS)
-  );
+  return rows
+    .map(stripThemeBuiltinFlag)
+    .map((row) => compactBackupThemeRow(row, includeThemeLogos, presetById))
+    .filter(Boolean);
+}
+
+/**
+ * @param {object} theme
+ * @param {boolean} includeThemeLogos
+ * @param {Map<string, LegoTheme>} presetById
+ * @returns {object|null}
+ */
+function compactBackupThemeRow(theme, includeThemeLogos, presetById) {
+  const preset = theme?.id ? presetById.get(theme.id) : null;
+  if (preset) {
+    const overlay = readThemeOverride(theme);
+    const merged = mergePresetOverride(preset, overlay);
+    const diff = themeOverrideDiff(merged, preset);
+    if (!includeThemeLogos) {
+      delete diff.logoDataUrl;
+      delete diff.logoZoom;
+      delete diff.logoOffsetX;
+      delete diff.logoOffsetY;
+    }
+    if (!themeOverrideHasFields(diff)) return null;
+    /** @type {Record<string, unknown>} */
+    const out = { id: theme.id, ...diff };
+    const updatedAt = String(merged.updatedAt || theme.updatedAt || "").trim();
+    if (updatedAt) out.updatedAt = updatedAt;
+    return out;
+  }
+  return omitEmptyBackupFields(theme, THEME_BACKUP_DEFAULTS);
 }
 
 /**
@@ -363,6 +409,11 @@ function selectCardsByThemes(cards, themes, selectedThemeIds) {
   return out;
 }
 
+/** @param {LegoTheme[]|undefined} presetThemes */
+function presetThemeMap(presetThemes) {
+  return new Map((presetThemes || []).map((t) => [t.id, t]));
+}
+
 /**
  * @param {BackupBuildOpts} opts
  * @returns {BackupData}
@@ -375,6 +426,7 @@ export function buildBackupPayload(opts) {
   const cardsIn = opts.cards || [];
   const customThemes = opts.customThemes || [];
   const themes = opts.themes || [];
+  const presetById = presetThemeMap(opts.presetThemes);
 
   /** @type {Card[]} */
   let cards;
@@ -393,7 +445,7 @@ export function buildBackupPayload(opts) {
   }
 
   const exportedCards = compactBackupCards(cards, includeImages);
-  exportedThemes = compactBackupThemes(exportedThemes, includeThemeLogos);
+  exportedThemes = compactBackupThemes(exportedThemes, includeThemeLogos, presetById);
 
   return backupFilePayload({
     version: APP_VERSION,
@@ -446,6 +498,7 @@ export function listImportThemeChoices(cards, themes, customThemes) {
  *   includeSettings?: boolean,
  *   includeImages?: boolean,
  *   includeThemeLogos?: boolean,
+ *   presetThemes?: LegoTheme[],
  * }} opts
  * @returns {BackupData}
  */
@@ -462,7 +515,8 @@ export function buildImportPayload(backup, opts) {
   const cards = selectCardsByThemes(cardsIn, themes, selected);
   const exportedThemes = compactBackupThemes(
     customThemes.filter((t) => t && selected.has(t.id)),
-    includeThemeLogos
+    includeThemeLogos,
+    presetThemeMap(opts.presetThemes)
   );
   const exportedCards = compactBackupCards(cards, includeImages);
 
@@ -814,11 +868,16 @@ export async function exportBackup(opts = /** @type {BackupBuildOpts} */ ({})) {
   let cards = opts.cards;
   let customThemes = opts.customThemes;
   let themes = opts.themes;
+  let presetThemes = opts.presetThemes;
   if (!cards || !customThemes || !themes) {
     const storage = await import("./storage.js");
     cards = cards ?? (await storage.loadCards());
     customThemes = customThemes ?? (await storage.loadCustomThemes());
     themes = themes ?? (await storage.loadThemes());
+  }
+  if (!presetThemes) {
+    const { getPresetThemes } = await import("./themes-data.js");
+    presetThemes = await getPresetThemes();
   }
   const kind = opts.kind === "custom" ? "custom" : "full";
   const includeImages = kind === "full" ? true : opts.includeImages !== false;
@@ -828,6 +887,7 @@ export async function exportBackup(opts = /** @type {BackupBuildOpts} */ ({})) {
     cards,
     customThemes,
     themes,
+    presetThemes,
     selectedThemeIds: opts.selectedThemeIds,
     includeSettings: opts.includeSettings,
     includeImages,

@@ -16,7 +16,7 @@ import { _t } from "./i18n.js";
  * @property {number} logoZoom Logo width zoom (1 = 75% of the card width)
  * @property {number} logoOffsetX Horizontal logo offset (box fraction)
  * @property {number} logoOffsetY Vertical logo offset (box fraction)
- * @property {boolean} isBuiltin Default theme (read-only, not deletable)
+ * @property {boolean} isBuiltin Default theme (true) or custom / preset override (false)
  * @property {number|null} rebrickableThemeId Catalog theme id (`sets-presets.json`); null if unset
  * @property {string} updatedAt ISO (custom); empty for default themes
  */
@@ -222,6 +222,165 @@ export function partitionThemes(themes) {
     else custom.push(t);
   }
   return { custom, builtin };
+}
+
+/** Overlay fields that can differ from a default theme. */
+const THEME_OVERRIDE_KEYS = [
+  "name",
+  "color",
+  "secondaryColor",
+  "logoDataUrl",
+  "logoZoom",
+  "logoOffsetX",
+  "logoOffsetY",
+];
+
+/**
+ * Logo src without a cache-buster query (`?_=` on localhost).
+ * @param {unknown} src
+ * @returns {string}
+ */
+export function canonicalLogoSrc(src) {
+  return String(src || "").split("?")[0];
+}
+
+/**
+ * Runtime theme is a saved customization of a default theme.
+ * @param {LegoTheme|null|undefined} theme
+ * @param {LegoTheme|null|undefined} preset
+ * @returns {boolean}
+ */
+export function isPresetOverride(theme, preset) {
+  return Boolean(theme && preset && theme.id === preset.id && !theme.isBuiltin);
+}
+
+/**
+ * Sparse overlay has at least one appearance field (not only `id` / `updatedAt`).
+ * @param {Record<string, unknown>|null|undefined} overlay
+ * @returns {boolean}
+ */
+export function themeOverrideHasFields(overlay) {
+  if (!overlay || typeof overlay !== "object") return false;
+  return THEME_OVERRIDE_KEYS.some((key) => Object.hasOwn(overlay, key));
+}
+
+/**
+ * Read a sparse default-theme overlay (IndexedDB / backup). Missing keys inherit.
+ * Present empty strings mean “cleared”.
+ * @param {object|null|undefined} row
+ * @returns {Record<string, unknown>}
+ */
+export function readThemeOverride(row) {
+  /** @type {Record<string, unknown>} */
+  const out = {};
+  if (!row || typeof row !== "object") return out;
+  const r = /** @type {Record<string, unknown>} */ (row);
+  if (typeof r.name === "string" || typeof r.themeName === "string") {
+    out.name = String(r.name ?? r.themeName ?? "").trim();
+  }
+  if (Object.hasOwn(r, "color") || Object.hasOwn(r, "accentColor")) {
+    out.color = parseHexColor(r.color ?? r.accentColor);
+  }
+  if (Object.hasOwn(r, "secondaryColor")) {
+    out.secondaryColor = parseHexColor(r.secondaryColor);
+  }
+  if (Object.hasOwn(r, "logoDataUrl") || Object.hasOwn(r, "image")) {
+    out.logoDataUrl = String(r.logoDataUrl ?? r.image ?? "");
+  }
+  if (Object.hasOwn(r, "logoZoom")) {
+    out.logoZoom = clampLogoZoom(r.logoZoom);
+  }
+  if (Object.hasOwn(r, "logoOffsetX")) {
+    out.logoOffsetX = roundCropCoord(r.logoOffsetX);
+  }
+  if (Object.hasOwn(r, "logoOffsetY")) {
+    out.logoOffsetY = roundCropCoord(r.logoOffsetY);
+  }
+  const updatedAt = String(r.updatedAt || r.createdAt || "").trim();
+  if (updatedAt) out.updatedAt = updatedAt;
+  return out;
+}
+
+/**
+ * Apply a sparse overlay onto a default theme (`isBuiltin` becomes false).
+ * @param {LegoTheme} preset
+ * @param {Record<string, unknown>|null|undefined} overlay
+ * @returns {LegoTheme}
+ */
+export function mergePresetOverride(preset, overlay) {
+  /** @type {LegoTheme} */
+  const out = {
+    ...preset,
+    isBuiltin: false,
+    updatedAt: "",
+  };
+  if (!overlay || typeof overlay !== "object") return out;
+  const name = Object.hasOwn(overlay, "name") ? String(overlay.name || "").trim() : "";
+  if (name) out.name = name;
+  if (Object.hasOwn(overlay, "color")) {
+    out.color = parseHexColor(overlay.color);
+  }
+  if (Object.hasOwn(overlay, "secondaryColor")) {
+    out.secondaryColor = parseHexColor(overlay.secondaryColor);
+  }
+  if (Object.hasOwn(overlay, "logoDataUrl")) {
+    out.logoDataUrl = String(overlay.logoDataUrl ?? "");
+  }
+  if (Object.hasOwn(overlay, "logoZoom")) {
+    out.logoZoom = clampLogoZoom(overlay.logoZoom);
+  }
+  if (Object.hasOwn(overlay, "logoOffsetX")) {
+    out.logoOffsetX = roundCropCoord(overlay.logoOffsetX);
+  }
+  if (Object.hasOwn(overlay, "logoOffsetY")) {
+    out.logoOffsetY = roundCropCoord(overlay.logoOffsetY);
+  }
+  if (overlay.updatedAt) out.updatedAt = String(overlay.updatedAt);
+  return out;
+}
+
+/**
+ * Fields of `merged` that differ from `preset` (empty string kept when cleared).
+ * @param {Pick<LegoTheme, "name"|"color"|"secondaryColor"|"logoDataUrl"|"logoZoom"|"logoOffsetX"|"logoOffsetY">} merged
+ * @param {LegoTheme} preset
+ * @returns {Record<string, unknown>}
+ */
+export function themeOverrideDiff(merged, preset) {
+  /** @type {Record<string, unknown>} */
+  const diff = {};
+  if (!merged || !preset) return diff;
+  const name = String(merged.name || "").trim();
+  if (name && name !== String(preset.name || "").trim()) diff.name = name;
+  const color = parseHexColor(merged.color);
+  if (color !== parseHexColor(preset.color)) diff.color = color;
+  const secondaryColor = parseHexColor(merged.secondaryColor);
+  if (secondaryColor !== parseHexColor(preset.secondaryColor)) {
+    diff.secondaryColor = secondaryColor;
+  }
+  if (canonicalLogoSrc(merged.logoDataUrl) !== canonicalLogoSrc(preset.logoDataUrl)) {
+    diff.logoDataUrl = String(merged.logoDataUrl || "");
+  }
+  const logoZoom = clampLogoZoom(merged.logoZoom);
+  if (logoZoom !== clampLogoZoom(preset.logoZoom)) diff.logoZoom = logoZoom;
+  const logoOffsetX = roundCropCoord(merged.logoOffsetX);
+  if (logoOffsetX !== roundCropCoord(preset.logoOffsetX)) diff.logoOffsetX = logoOffsetX;
+  const logoOffsetY = roundCropCoord(merged.logoOffsetY);
+  if (logoOffsetY !== roundCropCoord(preset.logoOffsetY)) diff.logoOffsetY = logoOffsetY;
+  return diff;
+}
+
+/**
+ * Merge an IndexedDB / backup row onto a preset; `null` if there is no real diff.
+ * @param {LegoTheme} preset
+ * @param {object|null|undefined} overlayRow
+ * @returns {LegoTheme|null}
+ */
+export function resolvePresetOverride(preset, overlayRow) {
+  const overlay = readThemeOverride(overlayRow);
+  if (!themeOverrideHasFields(overlay)) return null;
+  const merged = mergePresetOverride(preset, overlay);
+  if (!themeOverrideHasFields(themeOverrideDiff(merged, preset))) return null;
+  return merged;
 }
 
 /**
