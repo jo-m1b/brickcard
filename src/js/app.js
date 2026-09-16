@@ -571,6 +571,9 @@ async function showOverlay(routeInfo) {
         }
         if (parseRoute().name === "editor") navigate("#", { replace: true });
       },
+      onThemeChanged: () => {
+        underlayStale = true;
+      },
     });
     focusTopModal();
   }

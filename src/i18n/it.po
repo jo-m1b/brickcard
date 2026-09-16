@@ -601,6 +601,12 @@ msgstr "Massimo 3 righe sulla carta (Invio per un a capo)"
 msgid "Theme"
 msgstr "Tema"
 
+msgid "Customize the theme"
+msgstr "Personalizza il tema"
+
+msgid "Manage themes"
+msgstr "Gestisci i temi"
+
 msgid "Image"
 msgstr "Immagine"
 

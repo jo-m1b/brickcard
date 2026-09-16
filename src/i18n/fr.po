@@ -601,6 +601,12 @@ msgstr "Maximum 3 lignes affichées sur la carte (Entrée pour un saut de ligne)
 msgid "Theme"
 msgstr "Thème"
 
+msgid "Customize the theme"
+msgstr "Personnaliser le thème"
+
+msgid "Manage themes"
+msgstr "Gérer les thèmes"
+
 msgid "Image"
 msgstr "Image"
 

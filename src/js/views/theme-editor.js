@@ -13,7 +13,8 @@ import { mountCardBackPreview, refreshCardBackPreview } from "../card-render.js"
 import { contrastText, DEFAULT_THEME_COLOR, getPresetTheme } from "../themes-data.js";
 import { resolveCardAccent } from "../card-design.js";
 import { confirmDialog, confirmUnsavedClose } from "../confirm-dialog.js";
-import { setAppDocumentTitle } from "../document-title.js";
+import { popModalDocumentTitle, pushModalDocumentTitle, setAppDocumentTitle } from "../document-title.js";
+import { getTopModal } from "../modal-focus.js";
 import { _t } from "../i18n.js";
 
 /**
@@ -22,6 +23,7 @@ import { _t } from "../i18n.js";
  * @param {HTMLElement} host
  * @param {{
  *   themeId?: string|null,
+ *   stacked?: boolean,
  *   onClose: () => void,
  *   onSaved: (name: string, meta: { isNew: boolean, theme: import("../themes-data.js").LegoTheme, presetOverride?: boolean }) => void,
  *   onDeleted?: (name: string, themeId: string, meta?: { presetOverride?: boolean, restoredPreset?: import("../themes-data.js").LegoTheme }) => void,
@@ -30,6 +32,7 @@ import { _t } from "../i18n.js";
  */
 export async function renderThemeEditor(host, opts) {
   const { onClose, onSaved, onDeleted } = opts;
+  const stacked = Boolean(opts.stacked);
   const isEdit = Boolean(opts.themeId);
   const existing = isEdit ? await getTheme(opts.themeId) : null;
   if (isEdit && !existing) return null;
@@ -169,7 +172,8 @@ export async function renderThemeEditor(host, opts) {
   const backdrop = /** @type {HTMLElement} */ (wrap.firstElementChild);
   host.appendChild(backdrop);
 
-  setAppDocumentTitle(dialogTitle);
+  if (stacked) pushModalDocumentTitle(dialogTitle);
+  else setAppDocumentTitle(dialogTitle);
 
   const q = (sel) => backdrop.querySelector(sel);
   const nameInput = q("#theme-name");
@@ -377,6 +381,7 @@ export async function renderThemeEditor(host, opts) {
   /** @param {KeyboardEvent} e */
   function onKey(e) {
     if (e.key !== "Escape") return;
+    if (getTopModal() !== backdrop.querySelector(".modal")) return;
     e.preventDefault();
     requestClose();
   }
@@ -427,6 +432,7 @@ export async function renderThemeEditor(host, opts) {
     logoField?.destroy();
     window.removeEventListener("keydown", onKey);
     window.removeEventListener("resize", syncPreview);
+    if (stacked) popModalDocumentTitle();
     backdrop.remove();
   };
 }

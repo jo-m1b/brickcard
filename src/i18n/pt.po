@@ -601,6 +601,12 @@ msgstr "No máximo 3 linhas no cartão (Enter para uma quebra de linha)"
 msgid "Theme"
 msgstr "Tema"
 
+msgid "Customize the theme"
+msgstr "Personalizar o tema"
+
+msgid "Manage themes"
+msgstr "Gerir os temas"
+
 msgid "Image"
 msgstr "Imagem"
 

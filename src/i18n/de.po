@@ -601,6 +601,12 @@ msgstr "Maximal 3 Zeilen auf der Karte (Eingabe für einen Zeilenumbruch)"
 msgid "Theme"
 msgstr "Thema"
 
+msgid "Customize the theme"
+msgstr "Thema anpassen"
+
+msgid "Manage themes"
+msgstr "Themen verwalten"
+
 msgid "Image"
 msgstr "Bild"
 

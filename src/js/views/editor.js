@@ -28,6 +28,8 @@ import { confirmDialog, confirmUnsavedClose } from "../confirm-dialog.js";
 import { _t } from "../i18n.js";
 import { partitionThemes } from "../themes-data.js";
 import { setAppDocumentTitle } from "../document-title.js";
+import { focusTopModal, getTopModal } from "../modal-focus.js";
+import { toast } from "../toast.js";
 
 /**
  * @param {HTMLElement} host Modal container (#modal-root)
@@ -35,7 +37,8 @@ import { setAppDocumentTitle } from "../document-title.js";
  *   cardId?: string|null,
  *   onSaved: (subject: string, meta: { isNew: boolean, card: import("../storage.js").Card }) => void,
  *   onCancel: () => void,
- *   onDeleted?: (subject: string, cardId: string) => void
+ *   onDeleted?: (subject: string, cardId: string) => void,
+ *   onThemeChanged?: () => void,
  * }} opts
  * @returns {Promise<() => void>} cleanup
  */
@@ -43,7 +46,7 @@ export async function renderEditor(host, opts) {
   const existing = opts.cardId ? await getCard(opts.cardId) : null;
   const isEdit = Boolean(existing);
   const cardId = existing?.id || createId();
-  const themes = await loadThemes();
+  let themes = await loadThemes();
   const storedImageBg = existing?.imageBackgroundColor || "";
 
   /** @type {{
@@ -70,18 +73,21 @@ export async function renderEditor(host, opts) {
   }
 
   const selectedId = existing?.brickcardThemeId || "";
-  /** @param {import("../themes-data.js").LegoTheme} t */
-  function themeOption(t) {
-    return `<option value="${escapeAttr(t.id)}" ${
-      selectedId === t.id ? "selected" : ""
-    }>${escapeHtml(t.name)}</option>`;
-  }
-  const { custom: customThemes, builtin: builtinThemes } =
-    partitionThemes(themes);
-  const themeOptions = customThemes.length
-    ? `<optgroup label="${escapeAttr(_t("Custom themes"))}">${customThemes.map(themeOption).join("")}</optgroup>
+  /** @param {import("../themes-data.js").LegoTheme[]} list @param {string} selected */
+  function themeOptionsHtml(list, selected) {
+    /** @param {import("../themes-data.js").LegoTheme} t */
+    function themeOption(t) {
+      return `<option value="${escapeAttr(t.id)}" ${
+        selected === t.id ? "selected" : ""
+      }>${escapeHtml(t.name)}</option>`;
+    }
+    const { custom: customThemes, builtin: builtinThemes } = partitionThemes(list);
+    return customThemes.length
+      ? `<optgroup label="${escapeAttr(_t("Custom themes"))}">${customThemes.map(themeOption).join("")}</optgroup>
                   <optgroup label="${escapeAttr(_t("Default themes"))}">${builtinThemes.map(themeOption).join("")}</optgroup>`
-    : builtinThemes.map(themeOption).join("");
+      : builtinThemes.map(themeOption).join("");
+  }
+  const themeOptions = themeOptionsHtml(themes, selectedId);
 
   document.body.classList.add("modal-open");
 
@@ -148,12 +154,17 @@ export async function renderEditor(host, opts) {
 
               <div class="form-field">
                 <label class="form-label" for="brickcard-theme-id">${_t("Theme")}</label>
-                <div class="form-control-wrap">
-                  <span class="form-control-icon" aria-hidden="true">${ICON_PALETTE}</span>
-                  <select id="brickcard-theme-id" class="form-control">
-                    <option value="">${_t("No theme")}</option>
-                    ${themeOptions}
-                  </select>
+                <div class="form-field-with-action">
+                  <div class="form-control-wrap">
+                    <span class="form-control-icon" aria-hidden="true">${ICON_PALETTE}</span>
+                    <select id="brickcard-theme-id" class="form-control">
+                      <option value="">${_t("No theme")}</option>
+                      ${themeOptions}
+                    </select>
+                  </div>
+                  <button type="button" class="btn primary" id="btn-theme-action">
+                    ${ICON_PALETTE}<span id="btn-theme-action-label">${selectedId ? _t("Customize the theme") : _t("Manage themes")}</span>
+                  </button>
                 </div>
               </div>
 
@@ -201,6 +212,8 @@ export async function renderEditor(host, opts) {
     numPieces: host.querySelector("#num-pieces"),
     numFigurines: host.querySelector("#num-figurines"),
     brickcardThemeId: host.querySelector("#brickcard-theme-id"),
+    themeAction: host.querySelector("#btn-theme-action"),
+    themeActionLabel: host.querySelector("#btn-theme-action-label"),
     error: host.querySelector("#error"),
     previewWrap: host.querySelector("#preview-wrap"),
     previewHost: host.querySelector("#preview-host"),
@@ -214,7 +227,8 @@ export async function renderEditor(host, opts) {
   const imageRoot = /** @type {HTMLElement|null} */ (host.querySelector("#card-image"));
   /** @type {ReturnType<typeof bindFormImage>|null} */
   let imageField = null;
-  const destroyThemeSelect = enhanceFormSelect(
+  /** @type {(() => void)|null} */
+  let destroyThemeSelect = enhanceFormSelect(
     /** @type {HTMLSelectElement} */ (refs.brickcardThemeId)
   );
 
@@ -323,7 +337,199 @@ export async function renderEditor(host, opts) {
   refs.brickcardThemeId.addEventListener("change", () => {
     const id = refs.brickcardThemeId.value;
     state.legoTheme = id ? themes.find((t) => t.id === id) || null : null;
+    syncThemeActionButton();
     syncPreview();
+  });
+
+  function themeActionLabel() {
+    return refs.brickcardThemeId.value ? _t("Customize the theme") : _t("Manage themes");
+  }
+
+  function syncThemeActionButton() {
+    if (!refs.themeActionLabel) return;
+    refs.themeActionLabel.textContent = themeActionLabel();
+  }
+
+  function bindThemeSelect() {
+    destroyThemeSelect?.();
+    destroyThemeSelect = enhanceFormSelect(
+      /** @type {HTMLSelectElement} */ (refs.brickcardThemeId)
+    );
+  }
+
+  async function refreshThemeField() {
+    const keepId = refs.brickcardThemeId.value;
+    themes = await loadThemes();
+    const still = Boolean(keepId && themes.some((t) => t.id === keepId));
+    const nextId = still ? keepId : "";
+    destroyThemeSelect?.();
+    destroyThemeSelect = null;
+    refs.brickcardThemeId.innerHTML = `<option value="">${escapeHtml(_t("No theme"))}</option>${themeOptionsHtml(themes, nextId)}`;
+    refs.brickcardThemeId.value = nextId;
+    bindThemeSelect();
+    state.legoTheme = nextId ? themes.find((t) => t.id === nextId) || null : null;
+    syncThemeActionButton();
+    syncPreview();
+  }
+
+  function notifyThemeSaved(name, meta) {
+    toast({
+      type: "success",
+      title: meta?.presetOverride ? _t("Customization saved") : _t("Theme saved"),
+      message: name,
+      icon: "palette",
+    });
+    opts.onThemeChanged?.();
+  }
+
+  function notifyThemeDeleted(name, meta) {
+    toast({
+      type: "success",
+      title: meta?.presetOverride ? _t("Customization removed") : _t("Theme deleted"),
+      message: name,
+      icon: "delete-bin-2",
+    });
+    opts.onThemeChanged?.();
+  }
+
+  function overlayLoadError(err) {
+    console.error(err);
+    const msg = err && err.message ? err.message : String(err || _t("Loading error"));
+    toast({ type: "error", message: msg });
+  }
+
+  /** @type {(() => void)|null} */
+  let cleanupStackedThemeEditor = null;
+  /** @type {(() => void)|null} */
+  let cleanupStackedThemes = null;
+  /** @type {typeof import("./themes.js") | null} */
+  let stackedThemesMod = null;
+  let themeStackBusy = false;
+
+  function disposeStackedThemeEditor() {
+    const fn = cleanupStackedThemeEditor;
+    cleanupStackedThemeEditor = null;
+    if (fn) fn();
+  }
+
+  function disposeStackedThemes() {
+    disposeStackedThemeEditor();
+    const fn = cleanupStackedThemes;
+    cleanupStackedThemes = null;
+    stackedThemesMod = null;
+    if (fn) fn();
+  }
+
+  function editorDialogEl() {
+    return refs.backdrop?.querySelector(".modal") || null;
+  }
+
+  /**
+   * @param {string|null} themeId
+   */
+  async function openStackedThemeEditor(themeId) {
+    if (themeStackBusy) return;
+    themeStackBusy = true;
+    try {
+      disposeStackedThemeEditor();
+      const themeEditor = await import("./theme-editor.js");
+      const listOpen = Boolean(cleanupStackedThemes && stackedThemesMod);
+      cleanupStackedThemeEditor = await themeEditor.renderThemeEditor(host, {
+        themeId,
+        stacked: true,
+        onClose: () => {
+          disposeStackedThemeEditor();
+          if (listOpen && stackedThemesMod) {
+            if (themeId) stackedThemesMod.focusThemeInList(themeId);
+            stackedThemesMod.applyPendingThemeFocus();
+            focusTopModal({ resetScroll: false });
+            return;
+          }
+          void refreshThemeField().then(() => focusTopModal());
+        },
+        onSaved: (name, meta) => {
+          notifyThemeSaved(name, meta);
+          if (listOpen && stackedThemesMod) {
+            if (meta?.isNew) {
+              if (!stackedThemesMod.refreshThemesListAfterCreate(meta.theme)) {
+                stackedThemesMod.prepareThemesAfterThemeCreate();
+              }
+            } else if (!stackedThemesMod.patchThemeInList(meta?.theme)) {
+              /* list missing */
+            }
+            disposeStackedThemeEditor();
+            if (meta?.theme?.id) stackedThemesMod.focusThemeInList(meta.theme.id);
+            stackedThemesMod.applyPendingThemeFocus();
+            focusTopModal({ resetScroll: false });
+            return;
+          }
+          disposeStackedThemeEditor();
+          void refreshThemeField().then(() => focusTopModal());
+        },
+        onDeleted: (name, deletedId, meta) => {
+          notifyThemeDeleted(name, meta);
+          if (listOpen && stackedThemesMod) {
+            stackedThemesMod.removeThemeFromList(deletedId, meta?.restoredPreset);
+            disposeStackedThemeEditor();
+            focusTopModal({ resetScroll: false });
+            return;
+          }
+          disposeStackedThemeEditor();
+          void refreshThemeField().then(() => focusTopModal());
+        },
+      });
+      if (!cleanupStackedThemeEditor) {
+        if (!listOpen) await refreshThemeField();
+        focusTopModal({ resetScroll: listOpen ? false : true });
+        return;
+      }
+      focusTopModal();
+    } catch (err) {
+      overlayLoadError(err);
+    } finally {
+      themeStackBusy = false;
+    }
+  }
+
+  async function openStackedThemesList() {
+    if (themeStackBusy || cleanupStackedThemes) return;
+    themeStackBusy = true;
+    try {
+      stackedThemesMod = await import("./themes.js");
+      cleanupStackedThemes = await stackedThemesMod.renderThemesModal(host, {
+        stacked: true,
+        onClose: () => {
+          disposeStackedThemes();
+          void refreshThemeField().then(() => focusTopModal());
+        },
+        onCreate: () => {
+          void openStackedThemeEditor(null);
+        },
+        onEdit: (id) => {
+          void openStackedThemeEditor(id);
+        },
+        onClearedCustomThemes: () => {
+          toast({
+            type: "success",
+            message: _t("All custom themes have been deleted"),
+            icon: "delete-bin-2",
+          });
+          opts.onThemeChanged?.();
+        },
+      });
+      focusTopModal();
+    } catch (err) {
+      overlayLoadError(err);
+      stackedThemesMod = null;
+    } finally {
+      themeStackBusy = false;
+    }
+  }
+
+  refs.themeAction?.addEventListener("click", () => {
+    const id = refs.brickcardThemeId.value;
+    if (id) void openStackedThemeEditor(id);
+    else void openStackedThemesList();
   });
 
   window.addEventListener("resize", syncPreview);
@@ -414,7 +620,9 @@ export async function renderEditor(host, opts) {
   refs.close.addEventListener("click", requestClose);
 
   refs.backdrop.addEventListener("click", (e) => {
-    if (e.target === refs.backdrop) requestClose();
+    if (e.target !== refs.backdrop) return;
+    if (getTopModal() !== editorDialogEl()) return;
+    requestClose();
   });
 
   function cardToastSubject() {
@@ -435,6 +643,7 @@ export async function renderEditor(host, opts) {
 
   function onKeydown(e) {
     if (e.key !== "Escape") return;
+    if (getTopModal() !== editorDialogEl()) return;
     e.preventDefault();
     requestClose();
   }
@@ -471,7 +680,8 @@ export async function renderEditor(host, opts) {
   }
 
   return () => {
-    destroyThemeSelect();
+    disposeStackedThemes();
+    destroyThemeSelect?.();
     imageField?.destroy();
     window.removeEventListener("resize", syncPreview);
     window.removeEventListener("keydown", onKeydown);

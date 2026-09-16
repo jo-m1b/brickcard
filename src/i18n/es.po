@@ -601,6 +601,12 @@ msgstr "Máximo 3 líneas en la tarjeta (Intro para un salto de línea)"
 msgid "Theme"
 msgstr "Tema"
 
+msgid "Customize the theme"
+msgstr "Personalizar el tema"
+
+msgid "Manage themes"
+msgstr "Gestionar los temas"
+
 msgid "Image"
 msgstr "Imagen"
 

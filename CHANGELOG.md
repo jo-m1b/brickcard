@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### ➕ Added
 
+- Card editor: **Customize the theme** / **Manage themes** next to the theme field; the theme manager and editor stack over the card without changing the hash; the select and preview refresh when the stack closes
 - Default themes can be customized (name, colors, logo): saving stores a sparse overlay in IndexedDB with the same id as the preset; the theme moves to **Custom themes**; **Remove customization** restores the default without detaching cards
 - Card photos and theme logos: **Load from a URL** can keep an `https:` URL (vertical radios: import into the collection, or use the remote URL) when CORS blocks `fetch`; stored in `imageDataUrl` / `logoDataUrl`; import radio hint: always displayed even offline
 - Optional Rebrickable origin refs on cards (`rebrickableSetId`, `rebrickableThemeId`) and themes (`rebrickableThemeId`); catalog-created ids use the `rebrickable-{id}-` + UUID prefix; `sets-presets.js` drafts a card from the offline catalog and reuses or creates a custom theme by `rebrickableThemeId` (`brickcardThemeId` stays the card ↔ theme link)

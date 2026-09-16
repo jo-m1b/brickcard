@@ -1778,6 +1778,32 @@ html:not([data-theme]) .btn .icon-system {
   margin-bottom: 1rem;
 }
 
+.form-field-with-action {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+.form-field-with-action > .form-control-wrap {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.form-field-with-action > .btn {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+  .form-field-with-action {
+    flex-direction: column;
+  }
+
+  .form-field-with-action > .btn {
+    white-space: normal;
+  }
+}
+
 .form-field[hidden],
 .form-check-group[hidden],
 .settings-panel[hidden],

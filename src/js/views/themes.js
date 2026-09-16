@@ -20,7 +20,8 @@ import {
   fallbackThemeTileToImageError,
 } from "../card-render.js";
 import { emptyViewMarkup } from "../empty-view.js";
-import { setAppDocumentTitle } from "../document-title.js";
+import { popModalDocumentTitle, pushModalDocumentTitle, setAppDocumentTitle } from "../document-title.js";
+import { getTopModal } from "../modal-focus.js";
 import { _t, getLocale } from "../i18n.js";
 import { includesCI } from "../includes-ci.js";
 
@@ -192,11 +193,13 @@ let rememberedQuery = "";
  *   onCreate: () => void,
  *   onEdit: (id: string) => void,
  *   onClearedCustomThemes?: () => void,
+ *   stacked?: boolean,
  * }} opts
  * @returns {Promise<() => void>} cleanup
  */
 export async function renderThemesModal(host, opts) {
   const { onClose, onCreate, onEdit, onClearedCustomThemes } = opts;
+  const stacked = Boolean(opts.stacked);
   const [allThemes, cards] = await Promise.all([loadThemes(), loadCards()]);
   let { custom, builtin } = partitionThemes(allThemes);
 
@@ -235,7 +238,7 @@ export async function renderThemesModal(host, opts) {
 
   document.body.classList.add("modal-open");
 
-  host.innerHTML = `
+  const markup = `
     <div class="modal-backdrop" id="themes-modal-backdrop" role="presentation">
       <div class="modal modal--lg" role="dialog" aria-modal="true" aria-labelledby="themes-modal-title">
         <div class="modal-header">
@@ -326,10 +329,21 @@ export async function renderThemesModal(host, opts) {
     </div>
   `;
 
-  setAppDocumentTitle(_t("Themes"));
+  /** @type {HTMLElement} */
+  let backdrop;
+  if (stacked) {
+    const wrap = document.createElement("div");
+    wrap.innerHTML = markup.trim();
+    backdrop = /** @type {HTMLElement} */ (wrap.firstElementChild);
+    host.appendChild(backdrop);
+    pushModalDocumentTitle(_t("Themes"));
+  } else {
+    host.innerHTML = markup;
+    backdrop = /** @type {HTMLElement} */ (host.querySelector("#themes-modal-backdrop"));
+    setAppDocumentTitle(_t("Themes"));
+  }
 
-  const q = (sel) => host.querySelector(sel);
-  const backdrop = q("#themes-modal-backdrop");
+  const q = (sel) => backdrop.querySelector(sel);
   const btnClose = q("#btn-themes-close");
   const searchBar = q("#themes-search-bar");
   const searchInput = q("#themes-search");
@@ -654,6 +668,8 @@ export async function renderThemesModal(host, opts) {
     }
     if (e.key !== "Escape") return;
     if (document.getElementById("theme-editor-backdrop")) return;
+    const modal = backdrop.querySelector(".modal");
+    if (getTopModal() !== modal) return;
     e.preventDefault();
     close();
   };
@@ -882,6 +898,8 @@ export async function renderThemesModal(host, opts) {
     window.removeEventListener("resize", applyTileLogoCrops);
     backdrop?.removeEventListener("click", onBackdropClick);
     btnClose?.removeEventListener("click", close);
+    if (stacked) popModalDocumentTitle();
+    backdrop?.remove();
   };
 }
 
