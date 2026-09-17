@@ -5,7 +5,7 @@
  */
 
 import { _t, getLocale } from "./i18n.js";
-import { foldCI } from "./includes-ci.js";
+import { foldCI, queryNeedles } from "./includes-ci.js";
 import {
   createId,
   createRebrickableThemeId,
@@ -196,16 +196,6 @@ export function clearSetsPresetsCache() {
   catalogPromise = null;
 }
 
-/** Folded tokens (AND). Leading `#` on a token is ignored. */
-function catalogQueryNeedles(query) {
-  const parts = String(query || "")
-    .trim()
-    .split(/\s+/)
-    .map((t) => foldCI(t.replace(/^#+/, "")))
-    .filter(Boolean);
-  return [...new Set(parts)];
-}
-
 /** @param {CatalogSetRecord} rec @param {string[]} needles */
 function recordMatchesNeedles(rec, needles) {
   return needles.every(
@@ -234,7 +224,7 @@ export async function searchCatalogSets(query, opts = {}) {
   const limit = Number.isFinite(rawLimit)
     ? Math.max(0, Math.round(rawLimit))
     : Infinity;
-  const needles = catalogQueryNeedles(query);
+  const needles = queryNeedles(query);
   if (!needles.length) {
     return { items: [], matchCount: 0, total, generatedAt, setsImageUrl, needles };
   }

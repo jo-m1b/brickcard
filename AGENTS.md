@@ -75,7 +75,7 @@ All app code lives in **`src/`**.
 | `src/js/link.js` | Link markup (`a.link` / external / icon) |
 | `src/js/tile.js` | Tile markup (`ul.tile-list` / `a.tile`) |
 | `src/js/empty-view.js` | Empty / loading markup (`section.empty-view`, CSS brick, `welcomeViewMarkup`, `loadingViewMarkup`) |
-| `src/js/includes-ci.js` | Search comparison (`includesCI` / `foldCI`): case and accents ignored |
+| `src/js/includes-ci.js` | Search comparison (`foldCI` / `includesCI` / `queryNeedles` / `matchesNeedles`): case and accents ignored; space-separated tokens are AND (leading `#` on a token stripped) |
 | `src/js/confirm-dialog.js` | `modal--sm` dialogs (`openConfirmDialog` / `confirmDialog` / `alertDialog`, optional `icon`) — no `alert()` / `confirm()` / `prompt()` |
 | `src/js/toast.js` | Stackable toasts: normal / success / error, header/body, 7 s delay (15 s collection import/backup); `toast()` / `dismissToast()` |
 | `src/js/developer-access.js` | Developer space access (always on locally; off-local, `localStorage` flag after `#developer` confirmation) |
@@ -172,7 +172,7 @@ Helpers (catalog creation / matching only; the card ↔ theme link stays `brickc
 - `findThemeByRebrickableId(themeId)` — default theme first (including a saved customization of that preset), then a custom theme; match on the `rebrickableThemeId` field (not the Brickcard id)
 - `resolveOrCreateThemeFromRebrickable(themeId)` — reuse if found; else create a custom theme (catalog name only, id `rebrickable-{themeId}`). Call when persisting a card, not while browsing
 - `cardDraftFromRebrickableSet(setId)` — card fields, not persisted; does not create a theme (`brickcardThemeId` empty if none matches yet); `imageDataUrl` is the remote `catalogSetImageUrl` (empty if no template)
-- `searchCatalogSets(query, { limit })` — `includesCI` on set `id`, `name`, and catalog theme name (leading `#` on a token stripped); space-separated tokens are AND; A–Z `name` then `id` (`localeCompare` + `getLocale()`); `items` is the full hit list unless `limit` is given; `matchCount` is the full hit count; returns `generatedAt` and `setsImageUrl` from `meta`
+- `searchCatalogSets(query, { limit })` — `queryNeedles` on set `id`, `name`, and catalog theme name (leading `#` on a token stripped); space-separated tokens are AND; A–Z `name` then `id` (`localeCompare` + `getLocale()`); `items` is the full hit list unless `limit` is given; `matchCount` is the full hit count; returns `generatedAt` and `setsImageUrl` from `meta`
 - `catalogSetImageUrl(setId, template)` — substitute `{id}` in `meta.setsImageUrl` with the catalog `set_num` in lowercase; empty if the id or template is missing
 
 JSON shape: `meta` (`generatedAt`, `source`, `numThemes`, `themesKeys`, `numParentThemes`, `numSets`, `setsKeys`, `setsImageUrl`); `themes` and `sets` are **positional rows** (`themesKeys` = `id`, `name`, `parentId`; `setsKeys` = `id`, `name`, `numPieces`, `numFigurines`, `releaseYear`, `themeId`). Read with `Object.fromEntries(keys.map((k, i) => [k, row[i]]))`. GitHub Actions `.github/workflows/refresh-sets-presets-from-rebrickable.yml` runs the script daily (`07:30` UTC) and on `workflow_dispatch`, then commits when the catalog changed (`chore: refresh sets-presets.json from Rebrickable`) and triggers **Deploy Brickcard to GitHub Pages** (`workflow_dispatch`; a bot `push` does not start `pages.yml`). The Actions app needs write access to the default branch (contents + actions).
@@ -387,7 +387,7 @@ Center bar (list): `search-bar` block in the `topbar-search` slot.
 
 Opening the sort menu: **click** only (not hover or focus alone); once the button is focused, keyboard like `form-select` (↑↓ Enter/Space Home/End Escape, `aria-activedescendant`). The menu **stays open** after a criterion choice or direction flip (close: outside click, Escape, or click the button again).
 
-Applied: list topbar · themes modal (results + sort: `numCards`, title, date modified if ≥ 2 custom themes — default themes not involved; default `numCards` descending) · `#developer` home and `#settings` (`search-bar--input-only`, no results or sort) · card editor **Prefill from rebrickable.com** and `#developer/search` set-catalog demo (`search-bar--suggest`, `sets-presets.json`). Matching: `includesCI` (`includes-ci.js`), case- and accent-insensitive. Gallery: `#developer/search`.
+Applied: list topbar · themes modal (results + sort: `numCards`, title, date modified if ≥ 2 custom themes — default themes not involved; default `numCards` descending) · `#developer` home and `#settings` (`search-bar--input-only`, no results or sort) · card editor **Prefill from rebrickable.com** and `#developer/search` set-catalog demo (`search-bar--suggest`, `sets-presets.json`). Matching: `queryNeedles` / `matchesNeedles` (`includes-ci.js`) — space-separated tokens are AND (each token must match at least one field; case and accents ignored; leading `#` on a token stripped). Settings / developer home: if every token is in the section title, the whole section is shown; otherwise each field or tile matches if every token is in the section title or that item. Gallery: `#developer/search`.
 
 ## Titles (design system)
 

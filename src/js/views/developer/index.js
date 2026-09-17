@@ -1,6 +1,6 @@
 import { ICON_COLLAGE, ICON_PAGES, ICON_PENCIL_RULER_2, ICON_SEARCH_LINE } from "../../icons.js";
 import { emptyViewMarkup } from "../../empty-view.js";
-import { includesCI } from "../../includes-ci.js";
+import { matchesNeedles, queryNeedles } from "../../includes-ci.js";
 import { tileListMarkup } from "../../tile.js";
 
 let rememberedQuery = "";
@@ -166,19 +166,23 @@ export function renderDeveloperIndex(host) {
   if (searchInput) searchInput.value = rememberedQuery;
 
   function applyFilter() {
-    const needle = (searchInput?.value || "").trim();
+    const needles = queryNeedles(searchInput?.value);
     let any = false;
     sections.forEach((section) => {
-      const titleMatch =
-        !needle || includesCI(section.querySelector(".section-title")?.textContent || "", needle);
+      const titleText = section.querySelector(".section-title")?.textContent || "";
+      const titleMatch = matchesNeedles(needles, titleText);
       let anyTile = false;
       section.querySelectorAll(".tile-list > li").forEach((li) => {
         const href = li.querySelector("a.tile")?.getAttribute("href") || "";
         const show =
           titleMatch ||
-          includesCI(li.querySelector(".tile-title")?.textContent || "", needle) ||
-          includesCI(li.querySelector(".tile-desc")?.textContent || "", needle) ||
-          includesCI(href, needle);
+          matchesNeedles(
+            needles,
+            titleText,
+            li.querySelector(".tile-title")?.textContent || "",
+            li.querySelector(".tile-desc")?.textContent || "",
+            href,
+          );
         li.hidden = !show;
         if (show) anyTile = true;
       });

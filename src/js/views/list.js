@@ -15,7 +15,7 @@ import {
 } from "../print-menu.js";
 import { emptyViewMarkup } from "../empty-view.js";
 import { _t } from "../i18n.js";
-import { includesCI } from "../includes-ci.js";
+import { matchesNeedles, queryNeedles } from "../includes-ci.js";
 import { registerCardsGrid } from "../list-layout.js";
 import { mountCardPreview } from "../card-render.js";
 
@@ -201,26 +201,25 @@ export async function renderList(main, opts) {
     return (searchInput?.value || "").trim();
   }
 
-  /** @param {import("../storage.js").Card} card */
-  function matchesSearch(card) {
-    const q = searchQuery();
-    if (!q) return true;
+  /** @param {import("../storage.js").Card} card @param {string[]} needles */
+  function matchesSearch(card, needles) {
     const legoTheme = card.brickcardThemeId
       ? themeMap.get(card.brickcardThemeId)
       : null;
-    const haystack = [
+    return matchesNeedles(
+      needles,
       card.legoSetRef || "",
       card.title || "",
       legoTheme?.name || "",
       card.releaseYear != null ? String(card.releaseYear) : "",
-    ].join("\n");
-    return includesCI(haystack, q);
+    );
   }
 
   function filtered() {
+    const needles = queryNeedles(searchQuery());
     const dir = sortDir === "asc" ? 1 : -1;
     return cards
-      .filter(matchesSearch)
+      .filter((card) => matchesSearch(card, needles))
       .slice()
       .sort((a, b) => compareCardsAsc(a, b, sortKey) * dir);
   }

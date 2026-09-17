@@ -61,7 +61,7 @@ import {
   syncPrintBleedDisabled,
   setPrintSettings,
 } from "../print-settings.js";
-import { includesCI } from "../includes-ci.js";
+import { matchesNeedles, queryNeedles } from "../includes-ci.js";
 
 /**
  * Settings modal.
@@ -537,31 +537,30 @@ export function renderSettingsModal(host, opts) {
 
   let currentPrintSettings = printSettings;
 
-  /** @param {ParentNode} root @param {string} needle */
-  function matchesLabels(root, needle) {
-    if (!needle) return true;
-    for (const el of root.querySelectorAll(".form-label, .form-hint, option, .form-select-option")) {
-      if (includesCI(el.textContent || "", needle)) return true;
-    }
-    return false;
+  /** @param {ParentNode} root @param {string[]} needles @param {...string} extra */
+  function matchesLabels(root, needles, ...extra) {
+    const texts = [...root.querySelectorAll(".form-label, .form-hint, option, .form-select-option")].map(
+      (el) => el.textContent || "",
+    );
+    return matchesNeedles(needles, ...extra, ...texts);
   }
 
   function applyFilter() {
-    const needle = (searchInput?.value || "").trim();
+    const needles = queryNeedles(searchInput?.value);
     const assemblyAllowed = currentPrintSettings.printSide === "both";
     let anyPanel = false;
     settingsSections?.querySelectorAll(":scope > .settings-panel").forEach((panel) => {
-      const titleMatch =
-        !needle || includesCI(panel.querySelector(":scope > .section-title")?.textContent || "", needle);
+      const titleText = panel.querySelector(":scope > .section-title")?.textContent || "";
+      const titleMatch = matchesNeedles(needles, titleText);
       let anyChild = false;
       panel.querySelectorAll(":scope > .form-field").forEach((field) => {
-        const show = titleMatch || matchesLabels(field, needle);
+        const show = titleMatch || matchesLabels(field, needles, titleText);
         field.hidden = !show;
         if (show) anyChild = true;
       });
       panel.querySelectorAll(":scope > .form-check-group").forEach((group) => {
         const assemblyBlocked = group === printAssemblyField && !assemblyAllowed;
-        const show = !assemblyBlocked && (titleMatch || matchesLabels(group, needle));
+        const show = !assemblyBlocked && (titleMatch || matchesLabels(group, needles, titleText));
         group.hidden = !show;
         if (show) anyChild = true;
       });
@@ -571,9 +570,13 @@ export function renderSettingsModal(host, opts) {
           const href = li.querySelector("a.tile")?.getAttribute("href") || "";
           const show =
             titleMatch ||
-            includesCI(li.querySelector(".tile-title")?.textContent || "", needle) ||
-            includesCI(li.querySelector(".tile-desc")?.textContent || "", needle) ||
-            includesCI(href, needle);
+            matchesNeedles(
+              needles,
+              titleText,
+              li.querySelector(".tile-title")?.textContent || "",
+              li.querySelector(".tile-desc")?.textContent || "",
+              href,
+            );
           li.hidden = !show;
           if (show) anyTile = true;
         });

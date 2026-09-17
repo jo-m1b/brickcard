@@ -23,7 +23,7 @@ import { emptyViewMarkup } from "../empty-view.js";
 import { popModalDocumentTitle, pushModalDocumentTitle, setAppDocumentTitle } from "../document-title.js";
 import { getTopModal } from "../modal-focus.js";
 import { _t, getLocale } from "../i18n.js";
-import { includesCI } from "../includes-ci.js";
+import { matchesNeedles, queryNeedles } from "../includes-ci.js";
 
 const SORT_KEY = "brickcard:themes-sort";
 const SORT_DIR_KEY = "brickcard:themes-sort-dir";
@@ -365,11 +365,9 @@ export async function renderThemesModal(host, opts) {
     return (searchInput?.value || "").trim();
   }
 
-  /** @param {import("../themes-data.js").LegoTheme} theme */
-  function matchesSearch(theme) {
-    const needle = searchQuery();
-    if (!needle) return true;
-    return includesCI(theme.name, needle);
+  /** @param {import("../themes-data.js").LegoTheme} theme @param {string[]} needles */
+  function matchesSearch(theme, needles) {
+    return matchesNeedles(needles, theme.name);
   }
 
   /**
@@ -562,10 +560,11 @@ export async function renderThemesModal(host, opts) {
   }
 
   function paint() {
+    const needles = queryNeedles(searchQuery());
     const dateSort = sortKey === "updatedAt" && canSortByDate();
-    const customShown = sorted(custom.filter(matchesSearch), dateSort ? "updatedAt" : sortKey);
+    const customShown = sorted(custom.filter((t) => matchesSearch(t, needles)), dateSort ? "updatedAt" : sortKey);
     const builtinShown = sorted(
-      builtin.filter(matchesSearch),
+      builtin.filter((t) => matchesSearch(t, needles)),
       dateSort ? "name" : sortKey,
       dateSort ? "asc" : sortDir
     );

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### ✏️ Changed
+
+- Home, themes, settings, and developer-space search: space-separated words are AND (same matching as the Rebrickable catalog suggest), so `"combat titans"` finds *Le combat des Titans* and `"ninjago titans"` finds that card via its theme
+
 ## [0.9.4] — 2026-09-17
 
 ### ➕ Added

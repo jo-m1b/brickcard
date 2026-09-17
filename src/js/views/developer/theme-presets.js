@@ -20,7 +20,7 @@ import {
   loadPresetDraftThemes,
   resetPresetDraft,
 } from "../../preset-draft.js";
-import { includesCI } from "../../includes-ci.js";
+import { matchesNeedles, queryNeedles } from "../../includes-ci.js";
 import { _t, getLocale } from "../../i18n.js";
 import { isRemoteImageSrc } from "../../storage.js";
 
@@ -206,11 +206,9 @@ export function renderDeveloperThemePresets(host, opts) {
     return (searchInput?.value || "").trim();
   }
 
-  /** @param {import("../../preset-draft.js").PresetDraftTheme} theme */
-  function matchesSearch(theme) {
-    const needle = searchQuery();
-    if (!needle) return true;
-    return includesCI(theme.name, needle) || includesCI(theme.id, needle);
+  /** @param {import("../../preset-draft.js").PresetDraftTheme} theme @param {string[]} needles */
+  function matchesSearch(theme, needles) {
+    return matchesNeedles(needles, theme.name, theme.id);
   }
 
   function updateSearchNumResults(shown) {
@@ -281,7 +279,8 @@ export function renderDeveloperThemePresets(host, opts) {
    * @param {{ byDate?: boolean }} [opts]
    */
   function paint(opts = {}) {
-    const shownThemes = sorted(themes.filter(matchesSearch), opts.byDate);
+    const needles = queryNeedles(searchQuery());
+    const shownThemes = sorted(themes.filter((t) => matchesSearch(t, needles)), opts.byDate);
     const shown = shownThemes.length;
     if (grid) {
       grid.innerHTML = shownThemes.map((t) => themeTileMarkup(draftToLegoTheme(t))).join("");
