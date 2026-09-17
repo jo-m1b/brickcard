@@ -7,7 +7,7 @@
 import { _t, getLocale } from "./i18n.js";
 import { foldCI } from "./includes-ci.js";
 import {
-  createRebrickableCardId,
+  createId,
   createRebrickableThemeId,
   getTheme,
   loadThemes,
@@ -286,7 +286,7 @@ export async function getCatalogTheme(id) {
 
 /**
  * First Brickcard theme with this catalog theme id (default theme, possibly
- * customized, then a custom UUID theme).
+ * customized, then a custom theme).
  * @param {unknown} themeId
  * @returns {Promise<import("./themes-data.js").LegoTheme|null>}
  */
@@ -308,7 +308,8 @@ export async function findThemeByRebrickableId(themeId) {
 
 /**
  * Reuse a Brickcard theme with this catalog id, or create a custom one
- * (name only). Call when persisting a card, not while browsing the catalog.
+ * (name only, id `rebrickable-{themeId}`). Call when persisting a card,
+ * not while browsing the catalog.
  * @param {unknown} themeId
  * @returns {Promise<import("./themes-data.js").LegoTheme>}
  */
@@ -346,11 +347,12 @@ export async function cardDraftFromRebrickableSet(setId) {
       _t("Unknown Rebrickable set “%(id)s”", { id: rawId || String(setId ?? "") })
     );
   }
+  const catalog = await loadSetsPresets();
   const theme = set.themeId
     ? await findThemeByRebrickableId(set.themeId)
     : null;
   return {
-    id: createRebrickableCardId(set.id),
+    id: createId(),
     legoSetRef: catalogSetRef(set.id),
     title: set.name,
     brickcardThemeId: theme?.id || "",
@@ -359,7 +361,7 @@ export async function cardDraftFromRebrickableSet(setId) {
     numPieces: set.numPieces,
     numFigurines: set.numFigurines,
     releaseYear: set.releaseYear,
-    imageDataUrl: "",
+    imageDataUrl: catalogSetImageUrl(set.id, catalog.setsImageUrl),
     imageBackgroundColor: "",
     imageZoom: 1,
     imageOffsetX: 0,

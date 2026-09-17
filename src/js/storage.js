@@ -147,21 +147,13 @@ export function parseRebrickableSetId(raw) {
 }
 
 /**
- * Card id for a catalog-created card: `rebrickable-{setId}-{uuid}`.
- * @param {unknown} setId
- */
-export function createRebrickableCardId(setId) {
-  const id = parseRebrickableSetId(setId);
-  return id ? `rebrickable-${id}-${createId()}` : createId();
-}
-
-/**
- * Theme id for a catalog-created custom theme: `rebrickable-{themeId}-{uuid}`.
+ * Theme id for a catalog-created custom theme: `rebrickable-{themeId}`
+ * (one Brickcard theme per catalog theme id).
  * @param {unknown} themeId
  */
 export function createRebrickableThemeId(themeId) {
   const id = parseRebrickableThemeId(themeId);
-  return id ? `rebrickable-${id}-${createId()}` : createId();
+  return id ? `rebrickable-${id}` : createId();
 }
 
 /** @param {object} card */

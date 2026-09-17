@@ -10,11 +10,12 @@ import {
   getTheme,
 } from "../storage.js";
 import { mountCardBackPreview, refreshCardBackPreview } from "../card-render.js";
-import { contrastText, DEFAULT_THEME_COLOR, getPresetTheme } from "../themes-data.js";
+import { contrastText, DEFAULT_THEME_COLOR, getPresetTheme, parseRebrickableThemeId } from "../themes-data.js";
 import { resolveCardAccent } from "../card-design.js";
 import { confirmDialog, confirmUnsavedClose } from "../confirm-dialog.js";
 import { popModalDocumentTitle, pushModalDocumentTitle, setAppDocumentTitle } from "../document-title.js";
 import { getTopModal } from "../modal-focus.js";
+import { rebrickableOriginMarkup, rebrickableThemeHref } from "../rebrickable-ref.js";
 import { _t } from "../i18n.js";
 
 /**
@@ -96,6 +97,12 @@ export async function renderThemeEditor(host, opts) {
         <div class="modal-body" tabindex="-1">
           <div class="editor-layout">
             <aside class="preview-wrap">
+              ${rebrickableOriginMarkup({
+                href: parseRebrickableThemeId(existing?.rebrickableThemeId)
+                  ? rebrickableThemeHref(existing.rebrickableThemeId)
+                  : "",
+                hintMsgid: "This theme is referenced on",
+              })}
               <div class="card-preview" id="theme-preview-back-host" aria-label="${_t("Back preview")}"></div>
             </aside>
             <div>

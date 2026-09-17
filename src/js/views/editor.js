@@ -8,6 +8,7 @@ import {
   ICON_PALETTE,
   ICON_PENCIL,
   ICON_SAVE,
+  ICON_SEARCH_LINE,
   ICON_USER_3,
   modalTitleMarkup,
 } from "../icons.js";
@@ -16,6 +17,8 @@ import { bindFormImage, formImageMarkup } from "../form-image.js";
 import {
   compressImage,
   createId,
+  createRebrickableThemeId,
+  parseRebrickableSetId,
   upsertCard,
   deleteCard,
   getCard,
@@ -29,6 +32,18 @@ import { _t } from "../i18n.js";
 import { partitionThemes } from "../themes-data.js";
 import { setAppDocumentTitle } from "../document-title.js";
 import { focusTopModal, getTopModal } from "../modal-focus.js";
+import {
+  REBRICKABLE_HOME_HREF,
+  rebrickableLinkedText,
+  rebrickableLogoLinkMarkup,
+  rebrickableOriginMarkup,
+  rebrickableSetHref,
+} from "../rebrickable-ref.js";
+import { bindSetSearch } from "../set-search.js";
+import {
+  cardDraftFromRebrickableSet,
+  resolveOrCreateThemeFromRebrickable,
+} from "../sets-presets.js";
 import { toast } from "../toast.js";
 
 /**
@@ -45,9 +60,15 @@ import { toast } from "../toast.js";
 export async function renderEditor(host, opts) {
   const existing = opts.cardId ? await getCard(opts.cardId) : null;
   const isEdit = Boolean(existing);
-  const cardId = existing?.id || createId();
+  let cardId = existing?.id || createId();
   let themes = await loadThemes();
   const storedImageBg = existing?.imageBackgroundColor || "";
+  const savedSetId = parseRebrickableSetId(existing?.rebrickableSetId);
+  const showCatalogSearch = !savedSetId;
+  let originSetId = savedSetId;
+  let originThemeId = existing?.rebrickableThemeId ?? null;
+  /** @type {import("../themes-data.js").LegoTheme|null} */
+  let pendingTheme = null;
 
   /** @type {{
    *   imageDataUrl: string|null,
@@ -108,12 +129,39 @@ export async function renderEditor(host, opts) {
         </div>
         <div class="modal-body" tabindex="-1">
           <div class="editor-layout">
-            <aside class="preview-wrap preview-wrap--pair" id="preview-wrap">
+            <aside class="editor-preview-col">
+              ${
+                savedSetId
+                  ? rebrickableOriginMarkup({
+                      href: rebrickableSetHref(savedSetId),
+                      hintMsgid: "This set is referenced on",
+                    })
+                  : ""
+              }
+              <div class="preview-wrap preview-wrap--pair" id="preview-wrap">
               <div class="card-preview" id="preview-host" aria-label="${escapeAttr(_t("Front preview"))}"></div>
               <div class="card-preview" id="preview-back-host" aria-label="${escapeAttr(_t("Back preview"))}"></div>
+              </div>
             </aside>
 
             <div>
+              ${
+                showCatalogSearch
+                  ? `<div class="form-field">
+                <label class="form-label" for="card-set-search">${rebrickableLinkedText(_t("Prefill from rebrickable.com"), REBRICKABLE_HOME_HREF)}</label>
+                <div class="form-field-with-rebrickable">
+                  ${rebrickableLogoLinkMarkup(REBRICKABLE_HOME_HREF)}
+                  <div class="search-bar search-bar--suggest" id="card-set-search-bar">
+                    <span class="form-control-icon" aria-hidden="true">${ICON_SEARCH_LINE}</span>
+                    <input class="form-control" type="search" id="card-set-search" placeholder="${escapeAttr(_t("Search for a set…"))}" autocomplete="off" />
+                    <div class="search-bar-trail">
+                      <span class="search-num-results" id="card-set-search-num-results" aria-live="polite"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>`
+                  : ""
+              }
               <div class="form-field">
                 <label class="form-label" for="lego-set-ref">${_t("Set number")}</label>
                 <div class="form-control-wrap">
@@ -282,6 +330,8 @@ export async function renderEditor(host, opts) {
       imageZoom: state.imageZoom,
       imageOffsetX: state.imageOffsetX,
       imageOffsetY: state.imageOffsetY,
+      rebrickableSetId: originSetId,
+      rebrickableThemeId: originThemeId,
     };
   }
 
@@ -319,6 +369,110 @@ export async function renderEditor(host, opts) {
     });
   }
 
+  /**
+   * @param {HTMLInputElement|HTMLTextAreaElement} input
+   * @param {string|number|null|undefined} value
+   * @param {boolean} replaceAll
+   */
+  function fillIfEmpty(input, value, replaceAll) {
+    if (!replaceAll && String(input.value || "").trim()) return;
+    input.value = value == null || value === "" ? "" : String(value);
+  }
+
+  /**
+   * @param {import("../sets-presets.js").CatalogSetMatch} set
+   * @returns {import("../themes-data.js").LegoTheme|null}
+   */
+  function pendingThemeFromSet(set) {
+    const id = set.themeId;
+    if (!id) return null;
+    const name = String(set.themeName || "").trim();
+    return {
+      id: createRebrickableThemeId(id),
+      name: name || String(id),
+      color: "",
+      secondaryColor: "",
+      logoDataUrl: "",
+      logoZoom: 1,
+      logoOffsetX: 0,
+      logoOffsetY: 0,
+      isBuiltin: false,
+      rebrickableThemeId: id,
+      updatedAt: "",
+    };
+  }
+
+  let applySeq = 0;
+
+  /**
+   * @param {import("../sets-presets.js").CatalogSetMatch} set
+   */
+  async function applyCatalogSet(set) {
+    const seq = ++applySeq;
+    const replaceAll = !isEdit;
+    try {
+      const catalogDraft = await cardDraftFromRebrickableSet(set.id);
+      if (seq !== applySeq) return;
+      originSetId = catalogDraft.rebrickableSetId;
+      originThemeId = catalogDraft.rebrickableThemeId;
+
+      fillIfEmpty(refs.legoSetRef, catalogDraft.legoSetRef, replaceAll);
+      fillIfEmpty(refs.title, catalogDraft.title, replaceAll);
+      fillIfEmpty(refs.releaseYear, catalogDraft.releaseYear, replaceAll);
+      fillIfEmpty(refs.numPieces, catalogDraft.numPieces, replaceAll);
+      fillIfEmpty(refs.numFigurines, catalogDraft.numFigurines, replaceAll);
+
+      const themeEmpty = !refs.brickcardThemeId.value;
+      if (replaceAll || themeEmpty) {
+        if (catalogDraft.brickcardThemeId) {
+          pendingTheme = null;
+          applyThemeSelection(catalogDraft.brickcardThemeId);
+        } else {
+          pendingTheme = pendingThemeFromSet(set);
+          applyThemeSelection(pendingTheme?.id || "");
+        }
+      }
+
+      const imageEmpty = !state.imageDataUrl;
+      if (replaceAll || imageEmpty) {
+        const url = catalogDraft.imageDataUrl || "";
+        state.imageDataUrl = url || null;
+        state.imageBackgroundColor = "";
+        state.imageZoom = 1;
+        state.imageOffsetX = 0;
+        state.imageOffsetY = 0;
+        imageField?.setValue({
+          dataUrl: url,
+          backgroundColor: "",
+          zoom: 1,
+          offsetX: 0,
+          offsetY: 0,
+        });
+      }
+
+      syncPreview();
+    } catch (err) {
+      if (seq !== applySeq) return;
+      console.error(err);
+      const msg =
+        err && typeof err === "object" && "message" in err && err.message
+          ? String(err.message)
+          : _t("Loading error");
+      toast({ type: "error", message: msg });
+    }
+  }
+
+  const setSearchBar = /** @type {HTMLElement|null} */ (
+    host.querySelector("#card-set-search-bar")
+  );
+  const unbindSetSearch = setSearchBar
+    ? bindSetSearch(setSearchBar, {
+        onSelect(set) {
+          void applyCatalogSet(set);
+        },
+      })
+    : () => {};
+
   const initialSnapshot = JSON.stringify(draft());
   function isDirty() {
     return JSON.stringify(draft()) !== initialSnapshot;
@@ -336,13 +490,33 @@ export async function renderEditor(host, opts) {
 
   refs.brickcardThemeId.addEventListener("change", () => {
     const id = refs.brickcardThemeId.value;
-    state.legoTheme = id ? themes.find((t) => t.id === id) || null : null;
+    state.legoTheme = resolveThemeById(id);
     syncThemeActionButton();
     syncPreview();
   });
 
+  function themesWithPending() {
+    if (!pendingTheme) return themes;
+    if (themes.some((t) => t.id === pendingTheme.id)) return themes;
+    return [pendingTheme, ...themes];
+  }
+
+  /** @param {string} id */
+  function resolveThemeById(id) {
+    if (!id) return null;
+    return themes.find((t) => t.id === id) || (pendingTheme?.id === id ? pendingTheme : null);
+  }
+
+  function isPendingSelected() {
+    const id = refs.brickcardThemeId.value;
+    if (!pendingTheme || pendingTheme.id !== id) return false;
+    return !themes.some((t) => t.id === id);
+  }
+
   function themeActionLabel() {
-    return refs.brickcardThemeId.value ? _t("Customize the theme") : _t("Manage themes");
+    const id = refs.brickcardThemeId.value;
+    if (id && !isPendingSelected()) return _t("Customize the theme");
+    return _t("Manage themes");
   }
 
   function syncThemeActionButton() {
@@ -360,16 +534,31 @@ export async function renderEditor(host, opts) {
   async function refreshThemeField() {
     const keepId = refs.brickcardThemeId.value;
     themes = await loadThemes();
-    const still = Boolean(keepId && themes.some((t) => t.id === keepId));
+    const list = themesWithPending();
+    const still = Boolean(keepId && list.some((t) => t.id === keepId));
     const nextId = still ? keepId : "";
     destroyThemeSelect?.();
     destroyThemeSelect = null;
-    refs.brickcardThemeId.innerHTML = `<option value="">${escapeHtml(_t("No theme"))}</option>${themeOptionsHtml(themes, nextId)}`;
+    refs.brickcardThemeId.innerHTML = `<option value="">${escapeHtml(_t("No theme"))}</option>${themeOptionsHtml(list, nextId)}`;
     refs.brickcardThemeId.value = nextId;
     bindThemeSelect();
-    state.legoTheme = nextId ? themes.find((t) => t.id === nextId) || null : null;
+    state.legoTheme = resolveThemeById(nextId);
     syncThemeActionButton();
     syncPreview();
+  }
+
+  /**
+   * @param {string} id
+   */
+  function applyThemeSelection(id) {
+    const nextId = id || "";
+    destroyThemeSelect?.();
+    destroyThemeSelect = null;
+    refs.brickcardThemeId.innerHTML = `<option value="">${escapeHtml(_t("No theme"))}</option>${themeOptionsHtml(themesWithPending(), nextId)}`;
+    refs.brickcardThemeId.value = nextId;
+    bindThemeSelect();
+    state.legoTheme = resolveThemeById(nextId);
+    syncThemeActionButton();
   }
 
   function notifyThemeSaved(name, meta) {
@@ -528,7 +717,7 @@ export async function renderEditor(host, opts) {
 
   refs.themeAction?.addEventListener("click", () => {
     const id = refs.brickcardThemeId.value;
-    if (id) void openStackedThemeEditor(id);
+    if (id && !isPendingSelected()) void openStackedThemeEditor(id);
     else void openStackedThemesList();
   });
 
@@ -561,7 +750,10 @@ export async function renderEditor(host, opts) {
     previewFlipAria();
   }
 
-  function onPreviewWrapClick() {
+  function onPreviewWrapClick(e) {
+    if (e.target instanceof Element && e.target.closest("a, .theme-rebrickable-ref")) {
+      return;
+    }
     togglePreviewSide();
   }
 
@@ -585,11 +777,21 @@ export async function renderEditor(host, opts) {
     refs.error.textContent = "";
     refs.save.disabled = true;
     try {
+      let brickcardThemeId = data.brickcardThemeId;
+      if (isPendingSelected() && pendingTheme?.rebrickableThemeId) {
+        const created = await resolveOrCreateThemeFromRebrickable(
+          pendingTheme.rebrickableThemeId
+        );
+        brickcardThemeId = created.id;
+        pendingTheme = null;
+        themes = await loadThemes();
+      }
       const saved = await upsertCard({
         ...data,
+        brickcardThemeId,
         id: cardId,
-        rebrickableSetId: existing?.rebrickableSetId || "",
-        rebrickableThemeId: existing?.rebrickableThemeId ?? null,
+        rebrickableSetId: originSetId,
+        rebrickableThemeId: originThemeId,
       });
       opts.onSaved(cardToastSubject(), { isNew: !isEdit, card: saved });
       return true;
@@ -680,6 +882,7 @@ export async function renderEditor(host, opts) {
   }
 
   return () => {
+    unbindSetSearch();
     disposeStackedThemes();
     destroyThemeSelect?.();
     imageField?.destroy();

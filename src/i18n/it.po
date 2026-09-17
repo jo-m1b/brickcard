@@ -13,6 +13,9 @@ msgstr "Lingua"
 msgid "Search for a card…"
 msgstr "Cerca una carta…"
 
+msgid "Search for a set…"
+msgstr "Cerca un set…"
+
 msgid "Search (reference, title, theme, year)"
 msgstr "Cerca (riferimento, titolo, tema, anno)"
 
@@ -342,6 +345,15 @@ msgstr "Set Rebrickable « %(id)s » sconosciuto"
 
 msgid "Unknown Rebrickable theme “%(id)s”"
 msgstr "Tema Rebrickable « %(id)s » sconosciuto"
+
+msgid "This theme is referenced on"
+msgstr "Questo tema è referenziato su"
+
+msgid "This set is referenced on"
+msgstr "Questo set è referenziato su"
+
+msgid "Prefill from rebrickable.com"
+msgstr "Precompila da rebrickable.com"
 
 msgid "%(count)s theme"
 msgstr "%(count)s tema"

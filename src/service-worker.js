@@ -53,6 +53,7 @@ const OFFLINE_ASSETS = [
     "./js/print-qty.js",
     "./js/print-settings.js",
     "./js/print.js",
+    "./js/rebrickable-ref.js",
     "./js/set-search.js",
     "./js/sets-presets.js",
     "./js/storage.js",
@@ -105,7 +106,7 @@ const OFFLINE_ASSETS = [
     "./data/page-about.it.md",
     "./data/page-about.pt.md",
   ],
-  ["./data/themes-presets.json", "./data/sets-presets.json"],
+  ["./data/themes-presets.json", "./data/sets-presets.json", "./data/rebrickable-logo.png"],
   [
     `./css/styles.css?v=${APP_VERSION}`,
     "./fonts/OpenSans-Variable.woff2",

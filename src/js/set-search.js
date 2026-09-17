@@ -1,6 +1,6 @@
 /**
  * Set-catalog search combobox (`search-bar--suggest` + `form-select-list`).
- * Loads `sets-presets.json` on bind. Used by `#developer/search`; later `#new-card`.
+ * Loads `sets-presets.json` on bind. Used by `#developer/search` and the card editor.
  */
 
 import {

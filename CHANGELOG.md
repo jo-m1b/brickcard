@@ -9,19 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### ➕ Added
 
+- Card editor: **Prefill from rebrickable.com** catalog autocomplete (`bindSetSearch`) above Set number on `#new-card` and on `#edit-card/:id` when `rebrickableSetId` is empty; picking a set fills known fields (new card: replace all, including the remote Rebrickable photo URL; existing card: empty fields only) and stores origin ids on save; a matching Brickcard theme is reused, or `rebrickable-{themeId}` is created only when the card is saved; a saved set origin shows **This set is referenced on** then the clickable Rebrickable logo above the previews (not editable)
 - Card editor: **Customize the theme** / **Manage themes** next to the theme field; the theme manager and editor stack over the card without changing the hash; the select and preview refresh when the stack closes
 - Default themes can be customized (name, colors, logo): saving stores a sparse overlay in IndexedDB with the same id as the preset; the theme moves to **Custom themes**; **Remove customization** restores the default without detaching cards
 - Card photos and theme logos: **Load from a URL** can keep an `https:` URL (vertical radios: import into the collection, or use the remote URL) when CORS blocks `fetch`; stored in `imageDataUrl` / `logoDataUrl`; import radio hint: always displayed even offline
-- Optional Rebrickable origin refs on cards (`rebrickableSetId`, `rebrickableThemeId`) and themes (`rebrickableThemeId`); catalog-created ids use the `rebrickable-{id}-` + UUID prefix; `sets-presets.js` drafts a card from the offline catalog and reuses or creates a custom theme by `rebrickableThemeId` (`brickcardThemeId` stays the card ↔ theme link)
+- Optional Rebrickable origin refs on cards (`rebrickableSetId`, `rebrickableThemeId`) and themes (`rebrickableThemeId`); card ids stay a UUID (`createId()`); `sets-presets.js` drafts a card from the offline catalog and reuses or creates a custom theme by `rebrickableThemeId` (`brickcardThemeId` stays the card ↔ theme link)
 - Search gallery (`#developer/search`): set-catalog autocomplete demo (`search-bar--suggest`, `sets-presets.json`); multi-line `form-select` options (id, year / pieces / figurines, theme, name)
 - Collection backup (`.brickcard`): optional `exportedFrom` (page origin + path, no hash / query) when exporting from a DNS host; omitted on localhost, IP addresses, and `.local` / `.localhost`; ignored on import
 - Set catalog `data/sets-presets.json`: `meta.setsImageUrl` template (inferred from Rebrickable `img_url`, `{id}` = lowercase `set_num`) so remote set photos can be built without storing a URL per set; `catalogSetImageUrl()` in `sets-presets.js`
 - Search gallery set-catalog suggest: square set photo on the left (`meta.setsImageUrl`, centered cover crop in `.form-select-option-media`)
 - Set catalog `data/sets-presets.json`: optional theme `parentId` (Rebrickable parent theme id; omitted when unset); `meta.numParentThemes` counts catalog root themes (rows with no `parentId`)
 - Default themes (`data/themes-presets.json`): `rebrickableThemeId` on unambiguous catalog matches so autocomplete can reuse the preset instead of creating a custom theme
+- Theme editor (`#themes/edit/:id`): when `rebrickableThemeId` is set, a compact Rebrickable origin (**This theme is referenced on** then clickable `data/rebrickable-logo.png` → `https://rebrickable.com/sets/?theme={id}` `_blank`) is centered above the back preview; nothing if unset (the id is not editable)
 
 ### ✏️ Changed
 
+- Catalog-created custom theme ids are `rebrickable-{rebrickableThemeId}` (no UUID suffix); cards keep a normal UUID (`createId()`), including those prefilled from the catalog, so the same set can be added more than once
 - Set catalog: include sets with fewer than 10 pieces by default (including 0-piece / not-yet-inventoried); `--min-num-pieces` default is `0`
 - Card and theme-tile hover: enlarge to `scale(1.06)` in `0.08s` (was `1.04` / `0.15s`) so the lift is easier to see
 - Theme editor: overlay note **Customization of the default “%(name)s” theme.**; saving a default-theme customization toasts **Customization saved** (UUID custom themes still **Theme saved**)
