@@ -36,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Search gallery set-catalog suggest: search starts from 1 character; first 25 hits, then 25 more on scroll (no 50-cap)
 - Collection backup (`.brickcard`): omit `null`, empty-string, and default fields on cards and themes (card crop `1` / `0` / `0`; theme logo crop `1` / `0` / `0`); `themes` is written before `cards`
 - Settings **Optimize images** hint: “imported into the collection” instead of “added to the collection”
+- UI catalogs (`i18n/{de,es,fr,it,pt}.po`): drop unused strings (old read-only theme titles, old delete-all-custom message, unused backup load error)
 
 ### 🔧 Fixed
 

@@ -292,9 +292,6 @@ msgstr "¡La copia cargada no es válida!"
 msgid "The backup URL is invalid."
 msgstr "La URL de la copia no es válida."
 
-msgid "Backup loading error!"
-msgstr "¡Error al cargar la copia!"
-
 msgid "Backup loading error! Network or CORS - the source site refuses the load."
 msgstr "¡Error al cargar la copia! Red o CORS: el sitio de origen rechaza la carga."
 
@@ -688,9 +685,6 @@ msgstr "%(total)s temas"
 msgid "Delete all custom themes?"
 msgstr "¿Eliminar todos los temas personalizados?"
 
-msgid "All custom themes will be permanently deleted. Cards from the deleted themes are kept but will no longer be associated with a theme."
-msgstr "Todos los temas personalizados se eliminarán de forma definitiva. Las tarjetas de los temas eliminados se conservan, pero ya no estarán asociadas a un tema."
-
 msgid "All custom themes and default-theme customizations will be deleted. Cards from a deleted custom theme are kept but will no longer have a theme. Cards from a customized default theme keep that default theme."
 msgstr "Se eliminarán todos los temas personalizados y las personalizaciones de temas predeterminados. Las tarjetas de un tema personalizado eliminado se conservan, pero ya no tendrán tema. Las tarjetas de un tema predeterminado personalizado siguen con ese tema predeterminado."
 
@@ -717,12 +711,6 @@ msgstr "No se pudieron eliminar los temas personalizados"
 
 msgid "Edit “%(name)s”"
 msgstr "Editar « %(name)s »"
-
-msgid "View “%(name)s”"
-msgstr "Ver « %(name)s »"
-
-msgid "Theme “%(name)s”"
-msgstr "Tema « %(name)s »"
 
 msgid "Identifier"
 msgstr "Identificador"

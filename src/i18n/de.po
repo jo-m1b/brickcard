@@ -292,9 +292,6 @@ msgstr "Die geladene Sicherung ist ungültig!"
 msgid "The backup URL is invalid."
 msgstr "Die Sicherungs-URL ist ungültig."
 
-msgid "Backup loading error!"
-msgstr "Fehler beim Laden der Sicherung!"
-
 msgid "Backup loading error! Network or CORS - the source site refuses the load."
 msgstr "Fehler beim Laden der Sicherung! Netzwerk oder CORS – die Quellseite verweigert das Laden."
 
@@ -688,9 +685,6 @@ msgstr "%(total)s Themen"
 msgid "Delete all custom themes?"
 msgstr "Alle eigenen Themen löschen?"
 
-msgid "All custom themes will be permanently deleted. Cards from the deleted themes are kept but will no longer be associated with a theme."
-msgstr "Alle eigenen Themen werden endgültig gelöscht. Die Karten der gelöschten Themen bleiben erhalten, sind aber keinem Thema mehr zugeordnet."
-
 msgid "All custom themes and default-theme customizations will be deleted. Cards from a deleted custom theme are kept but will no longer have a theme. Cards from a customized default theme keep that default theme."
 msgstr "Alle eigenen Themen und Anpassungen von Standardthemen werden gelöscht. Karten eines gelöschten eigenen Themas bleiben erhalten, sind aber keinem Thema mehr zugeordnet. Karten eines angepassten Standardthemas behalten dieses Standardthema."
 
@@ -717,12 +711,6 @@ msgstr "Die eigenen Themen konnten nicht gelöscht werden"
 
 msgid "Edit “%(name)s”"
 msgstr "„%(name)s“ bearbeiten"
-
-msgid "View “%(name)s”"
-msgstr "„%(name)s“ ansehen"
-
-msgid "Theme “%(name)s”"
-msgstr "Thema „%(name)s“"
 
 msgid "Identifier"
 msgstr "Kennung"

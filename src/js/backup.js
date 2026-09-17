@@ -17,7 +17,6 @@ import {
 export const BACKUP_EXT = ".brickcard";
 export const BACKUP_INVALID = "The loaded backup is invalid!";
 export const BACKUP_URL_INVALID = "The backup URL is invalid.";
-export const BACKUP_LOAD_ERROR = "Backup loading error!";
 export const BACKUP_LOAD_ERROR_CORS =
   "Backup loading error! Network or CORS - the source site refuses the load.";
 

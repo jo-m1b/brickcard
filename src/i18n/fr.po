@@ -292,9 +292,6 @@ msgstr "La sauvegarde chargée est invalide !"
 msgid "The backup URL is invalid."
 msgstr "L’URL de la sauvegarde est invalide."
 
-msgid "Backup loading error!"
-msgstr "Erreur de chargement de la sauvegarde !"
-
 msgid "Backup loading error! Network or CORS - the source site refuses the load."
 msgstr "Erreur de chargement de la sauvegarde ! Réseau ou CORS - le site source refuse le chargement."
 
@@ -688,9 +685,6 @@ msgstr "%(total)s thèmes"
 msgid "Delete all custom themes?"
 msgstr "Supprimer tous les thèmes personnalisés ?"
 
-msgid "All custom themes will be permanently deleted. Cards from the deleted themes are kept but will no longer be associated with a theme."
-msgstr "Tous les thèmes personnalisés seront supprimés définitivement. Les cartes des thèmes supprimés sont conservées mais ne seront plus associées à un thème."
-
 msgid "All custom themes and default-theme customizations will be deleted. Cards from a deleted custom theme are kept but will no longer have a theme. Cards from a customized default theme keep that default theme."
 msgstr "Tous les thèmes personnalisés et les personnalisations de thèmes par défaut seront supprimés. Les cartes d’un thème personnalisé supprimé sont conservées mais n’auront plus de thème. Les cartes d’un thème par défaut personnalisé gardent ce thème par défaut."
 
@@ -717,12 +711,6 @@ msgstr "Impossible de supprimer les thèmes personnalisés"
 
 msgid "Edit “%(name)s”"
 msgstr "Modifier « %(name)s »"
-
-msgid "View “%(name)s”"
-msgstr "Voir « %(name)s »"
-
-msgid "Theme “%(name)s”"
-msgstr "Thème « %(name)s »"
 
 msgid "Identifier"
 msgstr "Identifiant"
