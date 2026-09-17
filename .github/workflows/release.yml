@@ -74,6 +74,8 @@ jobs:
                 feat:* | feat!:*) feats+="* ${line#*: }"$'\n' ;;
                 fix:* | fix!:*) fixes+="* ${line#*: }"$'\n' ;;
                 docs:* | docs!:*) docs+="* ${line#*: }"$'\n' ;;
+                # The tag is the version; a bump commit on every release is noise.
+                chore:\ bump\ to\ * | chore!:\ bump\ to\ *) continue ;;
                 chore:* | chore!:*) chores+="* ${line#*: }"$'\n' ;;
                 *) other+="* ${line}"$'\n' ;;
               esac
