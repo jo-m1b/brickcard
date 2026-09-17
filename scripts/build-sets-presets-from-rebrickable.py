@@ -325,8 +325,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--min-num-pieces",
         type=int,
-        default=10,
-        help="Minimum numPieces (default: 10; use 0 to keep empty sets)",
+        default=0,
+        help="Minimum numPieces (default: 0, keeps empty / uninventoried sets)",
     )
     parser.add_argument("--max-num-pieces", type=int, default=None)
     parser.add_argument("--min-release-year", type=int, default=None)

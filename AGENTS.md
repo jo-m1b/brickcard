@@ -152,13 +152,13 @@ Compiled from the daily [Rebrickable downloads](https://rebrickable.com/download
 
 ```
 python3 -B scripts/build-sets-presets-from-rebrickable.py
-python3 -B scripts/build-sets-presets-from-rebrickable.py --output src/data/sets-presets.json --min-num-pieces 0
+python3 -B scripts/build-sets-presets-from-rebrickable.py --output src/data/sets-presets.json
 ```
 
 Paths are relative to the repo root. Arguments:
 
 - `--output` (default `src/data/sets-presets.json`)
-- `--min-num-pieces` (default `10`; `--min-num-pieces 0` keeps 0-piece sets)
+- `--min-num-pieces` (default `0`; keeps 0-piece / uninventoried sets; `--min-num-pieces 10` drops small sets)
 - `--max-num-pieces`, `--min-release-year`, `--max-release-year`, `--min-num-figurines`, `--max-num-figurines` (inactive if omitted)
 - `--exclude-theme-id` (repeatable; default `254` Bulk Bricks, `438` Power Functions, `443` / `524` Service Packs, `497` Books, `501` Gear, `535` Collectible Minifigures, `646` Xtra, `683` LEGO Originals, `746` Database Sets; each includes children) — drop that Rebrickable theme, its descendants, and their sets (passing the flag replaces the default)
 
