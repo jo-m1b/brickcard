@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.9.4] — 2026-09-17
+
 ### ➕ Added
 
 - Card editor: **Prefill from rebrickable.com** catalog autocomplete (`bindSetSearch`) above Set number on `#new-card` and on `#edit-card/:id` when `rebrickableSetId` is empty; picking a set fills known fields (new card: replace all, including the remote Rebrickable photo URL; existing card: empty fields only) and stores origin ids on save; a matching Brickcard theme is reused, or `rebrickable-{themeId}` is created only when the card is saved; a saved set origin shows **This set is referenced on** then the clickable Rebrickable logo above the previews (not editable)
