@@ -9,11 +9,13 @@ Crie cartões, imprima, plastifique e coloque numa capa transparente com um set 
 ## Recursos
 
 - **Criar e editar cartões**: referência, foto, título, tema, ano, número de peças…
+- **Preenchimento automático Rebrickable**: um super autocompletar do catálogo para criar cartões num instante ;)
 - **Prontos para imprimir**: grades A4 de 1×1 a 10×10, frente + verso alinhados para impressão frente e verso
 - **Temas**: temas padrão (nome, logo, cor) + seus temas personalizados
 - **Salvamento automático**: tudo fica no navegador (IndexedDB)
 - **Exportar / importar**: arquivos `.brickcard` (cartões + temas personalizados) para fazer backup e compartilhar a sua coleção
 - **Lista com busca**: encontre rápido um cartão e selecione-o para imprimir
+- **Offline**: funciona sem conexão com a Internet
 - **Instalável**: funciona como PWA no celular ou no computador
 
 ## Ajuda e discussão
@@ -30,6 +32,7 @@ Use [GitHub Discussions](https://github.com/jo-m1b/brickcard/discussions).
 
 ## Créditos
 
+- **Rebrickable**: um enorme obrigado à comunidade [Rebrickable](https://rebrickable.com).
 - **Logo do app Brickcard**: ícone brick outline de [Joko Sutrisno](https://www.vecteezy.com/members/108458460840346680378) em [Vecteezy](https://www.vecteezy.com/vector-art/12802525-brick-outline-icon).
 - **Alguns logos de temas padrão**: de [Brickipedia](https://brickipedia.fandom.com/wiki/List_of_themes) e [Logopedia](https://logos.fandom.com/fr/wiki/Logopedia).
 - **Fonte Open Sans**: desenhada por [Steve Matteson](https://mattesontypographics.com), mantida por [The Open Sans Project Authors](https://github.com/googlefonts/opensans).

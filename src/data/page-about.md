@@ -9,11 +9,13 @@ Create cards, print them, laminate them, and slip them into a clear sleeve with 
 ## Features
 
 - **Create and edit cards**: reference, photo, title, theme, year, piece count…
+- **Rebrickable autocomplete**: a super catalog search to create cards in a snap ;)
 - **Print-ready**: A4 grids from 1×1 to 10×10, front + back aligned for duplex printing
 - **Themes**: default themes (name, logo, color) + your own custom themes
 - **Auto-save**: everything is stored in the browser (IndexedDB)
 - **Export / import**: `.brickcard` files (cards + custom themes) to back up and share your collection
 - **Searchable list**: quickly find a card and select it for printing
+- **Offline**: works without an internet connection
 - **Installable**: works as a PWA on phone or desktop
 
 ## Help and discussion
@@ -30,6 +32,7 @@ Please use [GitHub Discussions](https://github.com/jo-m1b/brickcard/discussions)
 
 ## Credits
 
+- **Rebrickable**: a huge thank-you to the [Rebrickable](https://rebrickable.com) community.
 - **Brickcard app logo**: brick outline icon by [Joko Sutrisno](https://www.vecteezy.com/members/108458460840346680378) on [Vecteezy](https://www.vecteezy.com/vector-art/12802525-brick-outline-icon).
 - **Some default theme logos**: from [Brickipedia](https://brickipedia.fandom.com/wiki/List_of_themes) and [Logopedia](https://logos.fandom.com/fr/wiki/Logopedia).
 - **Open Sans font**: designed by [Steve Matteson](https://mattesontypographics.com), maintained by [The Open Sans Project Authors](https://github.com/googlefonts/opensans).

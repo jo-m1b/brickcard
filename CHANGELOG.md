@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### ✏️ Changed
 
+- About (`#page/about`): Features mentions Rebrickable catalog autocomplete and **offline** use; Credits thanks the [Rebrickable](https://rebrickable.com) community (all locales)
 - Catalog-created custom theme ids are `rebrickable-{rebrickableThemeId}` (no UUID suffix); cards keep a normal UUID (`createId()`), including those prefilled from the catalog, so the same set can be added more than once
 - Set catalog: include sets with fewer than 10 pieces by default (including 0-piece / not-yet-inventoried); `--min-num-pieces` default is `0`
 - Card and theme-tile hover: enlarge to `scale(1.06)` in `0.08s` (was `1.04` / `0.15s`) so the lift is easier to see

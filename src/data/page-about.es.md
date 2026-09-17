@@ -9,11 +9,13 @@ Crea tarjetas, imprímelas, plastifícalas y mételas en una funda transparente 
 ## Funciones
 
 - **Crear y editar tarjetas**: referencia, foto, título, tema, año, número de piezas…
+- **Autocompletado Rebrickable**: un super buscador del catálogo para crear tarjetas en un instante ;)
 - **Listas para imprimir**: rejillas A4 de 1×1 a 10×10, frente + dorso alineados para impresión dúplex
 - **Temas**: temas predeterminados (nombre, logo, color) + tus temas personalizados
 - **Guardado automático**: todo se guarda en el navegador (IndexedDB)
 - **Exportar / importar**: archivos `.brickcard` (tarjetas + temas personalizados) para respaldar y compartir tu colección
 - **Lista con búsqueda**: encuentra rápido una tarjeta y selecciónala para imprimir
+- **Sin conexión**: funciona sin conexión a Internet
 - **Instalable**: funciona como PWA en el teléfono o el escritorio
 
 ## Ayuda y discusión
@@ -30,6 +32,7 @@ Usa [GitHub Discussions](https://github.com/jo-m1b/brickcard/discussions).
 
 ## Créditos
 
+- **Rebrickable**: un enorme agradecimiento a la comunidad de [Rebrickable](https://rebrickable.com).
 - **Logo de la app Brickcard**: icono brick outline de [Joko Sutrisno](https://www.vecteezy.com/members/108458460840346680378) en [Vecteezy](https://www.vecteezy.com/vector-art/12802525-brick-outline-icon).
 - **Algunos logos de temas predeterminados**: de [Brickipedia](https://brickipedia.fandom.com/wiki/List_of_themes) y [Logopedia](https://logos.fandom.com/fr/wiki/Logopedia).
 - **Fuente Open Sans**: diseñada por [Steve Matteson](https://mattesontypographics.com), mantenida por [The Open Sans Project Authors](https://github.com/googlefonts/opensans).
