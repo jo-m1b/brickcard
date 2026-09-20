@@ -1,6 +1,7 @@
 /**
- * Set-catalog search combobox (`search-bar--suggest` + `form-select-list`).
- * Loads `sets-presets.json` on bind. Used by `#developer/search` and the card editor.
+ * Catalog search combobox (`search-bar--suggest` + `form-select-list`).
+ * Loads `sets-presets.json` on bind. Used by `#developer/search`, the card
+ * editor, and the theme editor.
  */
 
 import {
@@ -16,17 +17,28 @@ import {
   catalogSetImageUrl,
   loadSetsPresets,
   searchCatalogSets,
+  searchCatalogThemes,
 } from "./sets-presets.js";
 import { toast } from "./toast.js";
 
 /** First paint + each scroll page. */
-const SET_SEARCH_PAGE = 25;
+const SUGGEST_PAGE = 25;
+/** Keep at least this much room for the typed query when the trail overlays. */
+const TRAIL_MIN_INPUT_REM = 8;
 
 /**
  * @typedef {object} SetSearchOptions
  * @property {number} [minChars=1]
  * @property {number} [maxResults] Cap on hits (omitted = no cap)
  * @property {(set: import("./sets-presets.js").CatalogSetMatch) => void} [onSelect]
+ */
+
+/**
+ * @typedef {object} ThemeSearchOptions
+ * @property {number} [minChars=1]
+ * @property {number} [maxResults]
+ * @property {string} [exceptThemeId] Brickcard theme id to ignore when skipping taken catalog ids
+ * @property {(theme: import("./sets-presets.js").CatalogThemeMatch) => void} [onSelect]
  */
 
 /**
@@ -47,21 +59,38 @@ export function formatCatalogGeneratedAt(iso) {
 
 /**
  * @param {{ querying: boolean, matchCount: number, total: number, generatedAt: string }} state
+ * @param {{ empty: string, querying: string, idle: string }} msgids
+ * @returns {{ count: string, date: string }}
  */
-function trailLabel(state) {
+function catalogTrailParts(state, msgids) {
   let count;
   if (!state.total) {
-    count = _t("0 sets");
+    count = _t(msgids.empty);
   } else if (state.querying) {
-    count = _t("%(shown)s / %(total)s sets", {
+    count = _t(msgids.querying, {
       shown: state.matchCount,
       total: state.total,
     });
   } else {
-    count = _t("%(total)s sets", { total: state.total });
+    count = _t(msgids.idle, { total: state.total });
   }
-  const date = formatCatalogGeneratedAt(state.generatedAt);
-  return date ? `${count} · ${date}` : count;
+  return { count, date: formatCatalogGeneratedAt(state.generatedAt) };
+}
+
+function setTrailParts(state) {
+  return catalogTrailParts(state, {
+    empty: "0 sets",
+    querying: "%(shown)s / %(total)s sets",
+    idle: "%(total)s sets",
+  });
+}
+
+function themeTrailParts(state) {
+  return catalogTrailParts(state, {
+    empty: "0 themes",
+    querying: "%(shown)s / %(total)s themes",
+    idle: "%(total)s themes",
+  });
 }
 
 /**
@@ -149,7 +178,7 @@ function metaBadge(svg, value, title) {
  * @param {string[]} needles
  * @param {string} [imageUrl]
  */
-function makeOption(set, listId, index, needles, imageUrl = "") {
+function makeSetOption(set, listId, index, needles, imageUrl = "") {
   const li = document.createElement("li");
   li.className = "form-select-option form-select-option--multiline";
   li.setAttribute("role", "option");
@@ -207,8 +236,8 @@ function makeOption(set, listId, index, needles, imageUrl = "") {
   row.append(idEl, meta);
   body.append(row);
 
-  const themeName = String(set.themeName || "").trim();
-  if (themeName) {
+  const themePath = String(set.themePath || set.themeName || "").trim();
+  if (themePath) {
     const themeRow = document.createElement("span");
     themeRow.className = "form-select-option-theme";
     const icon = document.createElement("span");
@@ -217,7 +246,7 @@ function makeOption(set, listId, index, needles, imageUrl = "") {
     icon.innerHTML = ICON_PALETTE;
     const name = document.createElement("span");
     name.className = "form-select-option-theme-name";
-    appendHighlighted(name, themeName, needles);
+    appendHighlighted(name, themePath, needles);
     themeRow.append(icon, name);
     body.append(themeRow);
   }
@@ -232,14 +261,51 @@ function makeOption(set, listId, index, needles, imageUrl = "") {
 }
 
 /**
+ * @param {import("./sets-presets.js").CatalogThemeMatch} theme
+ * @param {string} listId
+ * @param {number} index
+ * @param {string[]} needles
+ */
+function makeThemeOption(theme, listId, index, needles) {
+  const li = document.createElement("li");
+  li.className = "form-select-option";
+  li.setAttribute("role", "option");
+  li.id = `${listId}-opt-${index}`;
+  li.dataset.themeId = String(theme.id);
+
+  const icon = document.createElement("span");
+  icon.className = "form-select-option-theme-icon";
+  icon.setAttribute("aria-hidden", "true");
+  icon.innerHTML = ICON_PALETTE;
+  const name = document.createElement("span");
+  name.className = "form-select-option-theme-name";
+  appendHighlighted(name, theme.path || theme.name || "", needles);
+  li.append(icon, name);
+  return li;
+}
+
+/**
+ * @typedef {object} CatalogSuggestOptions
+ * @property {number} [minChars=1]
+ * @property {number} [maxResults]
+ * @property {(item: any) => void} [onSelect]
+ * @property {() => Promise<{ total: number, generatedAt: string, extra?: any }>} load
+ * @property {(query: string, opts: { limit?: number }) => Promise<{ items: any[], matchCount: number, total: number, generatedAt: string, needles: string[], extra?: any }>} search
+ * @property {(item: any, ctx: { listId: string, index: number, needles: string[], extra: any }) => HTMLElement} makeOption
+ * @property {(state: { querying: boolean, matchCount: number, total: number, generatedAt: string }) => { count: string, date: string }} trailParts
+ * @property {(item: any) => string} inputValue
+ */
+
+/**
  * Bind catalog autocomplete on a `.search-bar.search-bar--suggest`.
  * @param {HTMLElement} searchBar
- * @param {SetSearchOptions} [opts]
+ * @param {CatalogSuggestOptions} opts
  * @returns {() => void}
  */
-export function bindSetSearch(searchBar, opts = {}) {
+function bindCatalogSuggest(searchBar, opts) {
   const input = searchBar.querySelector("input.form-control");
   const trailOut = searchBar.querySelector(".search-num-results");
+  const trailEl = searchBar.querySelector(":scope > .search-bar-trail");
   if (!(input instanceof HTMLInputElement)) return () => {};
 
   const minChars = Number.isFinite(Number(opts.minChars))
@@ -251,7 +317,7 @@ export function bindSetSearch(searchBar, opts = {}) {
   const onSelect = opts.onSelect;
 
   const listId =
-    `${input.id || `set-search-${Math.random().toString(36).slice(2, 9)}`}-list`;
+    `${input.id || `catalog-search-${Math.random().toString(36).slice(2, 9)}`}-list`;
   let list = searchBar.querySelector(":scope > .form-select-list");
   if (!(list instanceof HTMLElement)) {
     list = document.createElement("ul");
@@ -268,7 +334,7 @@ export function bindSetSearch(searchBar, opts = {}) {
   input.setAttribute("aria-controls", listId);
   input.setAttribute("aria-haspopup", "listbox");
 
-  /** @type {import("./sets-presets.js").CatalogSetMatch[]} */
+  /** @type {any[]} */
   let items = [];
   /** @type {string[]} */
   let optionNeedles = [];
@@ -277,11 +343,56 @@ export function bindSetSearch(searchBar, opts = {}) {
   let activeIndex = -1;
   let total = 0;
   let generatedAt = "";
-  let setsImageUrl = "";
+  /** @type {any} */
+  let extra = {};
   let ready = false;
   let cancelled = false;
   let seq = 0;
   let skipOpenUntilInput = false;
+  let measuringPad = false;
+
+  function remPx(n) {
+    const fs = parseFloat(getComputedStyle(searchBar).fontSize);
+    return n * (Number.isFinite(fs) && fs > 0 ? fs : 16);
+  }
+
+  function syncTrailPad() {
+    if (measuringPad || cancelled) return;
+    if (!(trailEl instanceof HTMLElement)) return;
+    measuringPad = true;
+    searchBar.classList.remove("search-bar--trail-below", "search-bar--trail-nodate");
+    const trailHidden = trailEl.hidden || !String(trailEl.textContent || "").trim();
+    if (trailHidden) {
+      searchBar.style.setProperty("--search-trail-pad", "0.85rem");
+      measuringPad = false;
+      return;
+    }
+    const minInput = remPx(TRAIL_MIN_INPUT_REM);
+    const gap = remPx(0.5);
+    const padLeft = parseFloat(getComputedStyle(input).paddingLeft) || 0;
+    const remaining = () =>
+      searchBar.clientWidth - padLeft - trailEl.offsetWidth - gap;
+    if (remaining() < minInput) {
+      searchBar.classList.add("search-bar--trail-nodate");
+    }
+    if (remaining() < minInput) {
+      searchBar.classList.remove("search-bar--trail-nodate");
+      searchBar.classList.add("search-bar--trail-below");
+      searchBar.style.setProperty("--search-trail-pad", "0.85rem");
+    } else {
+      searchBar.style.setProperty(
+        "--search-trail-pad",
+        `${Math.ceil(trailEl.offsetWidth + gap)}px`
+      );
+    }
+    measuringPad = false;
+  }
+
+  const trailPadObserver = new ResizeObserver(() => {
+    syncTrailPad();
+  });
+  trailPadObserver.observe(searchBar);
+  if (trailEl instanceof HTMLElement) trailPadObserver.observe(trailEl);
 
   function isOpen() {
     return !list.hidden;
@@ -334,26 +445,44 @@ export function bindSetSearch(searchBar, opts = {}) {
   function syncTrail(state) {
     if (!(trailOut instanceof HTMLElement)) return;
     if (!ready) {
-      trailOut.textContent = "";
+      trailOut.replaceChildren();
+      syncTrailPad();
       return;
     }
-    trailOut.textContent = trailLabel({
+    const { count, date } = opts.trailParts({
       querying: Boolean(state?.querying),
       matchCount: state?.matchCount ?? 0,
       total,
       generatedAt,
     });
+    let countEl = trailOut.querySelector(".search-num-results-count");
+    let dateEl = trailOut.querySelector(".search-num-results-date");
+    if (!(countEl instanceof HTMLElement) || !(dateEl instanceof HTMLElement)) {
+      countEl = document.createElement("span");
+      countEl.className = "search-num-results-count";
+      dateEl = document.createElement("span");
+      dateEl.className = "search-num-results-date";
+      trailOut.replaceChildren(countEl, dateEl);
+    }
+    countEl.textContent = count;
+    if (date) {
+      dateEl.textContent = ` · ${date}`;
+      dateEl.hidden = false;
+    } else {
+      dateEl.textContent = "";
+      dateEl.hidden = true;
+    }
+    syncTrailPad();
   }
 
-  /** @param {import("./sets-presets.js").CatalogSetMatch} set @param {number} i */
-  function addOption(set, i) {
-    const li = makeOption(
-      set,
+  /** @param {any} item @param {number} i */
+  function addOption(item, i) {
+    const li = opts.makeOption(item, {
       listId,
-      i,
-      optionNeedles,
-      catalogSetImageUrl(set.id, setsImageUrl)
-    );
+      index: i,
+      needles: optionNeedles,
+      extra,
+    });
     li.addEventListener("pointerenter", () => {
       if (!isOpen()) return;
       setActive(i);
@@ -363,7 +492,7 @@ export function bindSetSearch(searchBar, opts = {}) {
     });
     li.addEventListener("click", (e) => {
       e.preventDefault();
-      choose(set);
+      choose(item);
     });
     list.append(li);
     optionEls.push(li);
@@ -372,7 +501,7 @@ export function bindSetSearch(searchBar, opts = {}) {
   /** Next page of already-found hits. @returns {boolean} */
   function loadMore() {
     if (optionEls.length >= items.length) return false;
-    const to = Math.min(items.length, optionEls.length + SET_SEARCH_PAGE);
+    const to = Math.min(items.length, optionEls.length + SUGGEST_PAGE);
     for (let i = optionEls.length; i < to; i++) addOption(items[i], i);
     return true;
   }
@@ -387,7 +516,7 @@ export function bindSetSearch(searchBar, opts = {}) {
     maybeLoadMore();
   }
 
-  /** @param {import("./sets-presets.js").CatalogSetMatch[]} next @param {string[]} [needles] */
+  /** @param {any[]} next @param {string[]} [needles] */
   function renderOptions(next, needles = []) {
     items = next;
     optionNeedles = needles;
@@ -398,12 +527,12 @@ export function bindSetSearch(searchBar, opts = {}) {
     list.scrollTop = 0;
   }
 
-  /** @param {import("./sets-presets.js").CatalogSetMatch} set */
-  function choose(set) {
+  /** @param {any} item */
+  function choose(item) {
     skipOpenUntilInput = true;
-    input.value = set.name;
+    input.value = opts.inputValue(item);
     close();
-    onSelect?.(set);
+    onSelect?.(item);
     void refresh({ openList: false });
   }
 
@@ -421,14 +550,11 @@ export function bindSetSearch(searchBar, opts = {}) {
       return;
     }
     const token = ++seq;
-    const result = await searchCatalogSets(
-      raw,
-      maxResults ? { limit: maxResults } : {}
-    );
+    const result = await opts.search(raw, maxResults ? { limit: maxResults } : {});
     if (cancelled || token !== seq) return;
     total = result.total;
     generatedAt = result.generatedAt;
-    setsImageUrl = result.setsImageUrl;
+    extra = result.extra ?? extra;
     renderOptions(result.items, result.needles);
     syncTrail({ querying: true, matchCount: result.matchCount });
     if (flags.openList && result.items.length && !skipOpenUntilInput) open();
@@ -463,8 +589,8 @@ export function bindSetSearch(searchBar, opts = {}) {
     } else if (e.key === "Enter") {
       if (isOpen() && optionEls[activeIndex]) {
         e.preventDefault();
-        const set = items[activeIndex];
-        if (set) choose(set);
+        const item = items[activeIndex];
+        if (item) choose(item);
       }
     } else if (e.key === "Escape") {
       if (isOpen()) {
@@ -507,13 +633,14 @@ export function bindSetSearch(searchBar, opts = {}) {
     close();
   }
 
-  loadSetsPresets()
-    .then((catalog) => {
+  opts
+    .load()
+    .then((meta) => {
       if (cancelled) return;
       ready = true;
-      total = catalog.sets.size;
-      generatedAt = catalog.generatedAt;
-      setsImageUrl = catalog.setsImageUrl;
+      total = meta.total;
+      generatedAt = meta.generatedAt;
+      extra = meta.extra ?? {};
       void refresh({
         openList: document.activeElement === input,
       });
@@ -533,6 +660,9 @@ export function bindSetSearch(searchBar, opts = {}) {
   return () => {
     cancelled = true;
     close();
+    trailPadObserver.disconnect();
+    searchBar.classList.remove("search-bar--trail-below");
+    searchBar.style.removeProperty("--search-trail-pad");
     input.removeEventListener("input", onInput);
     input.removeEventListener("focus", onFocus);
     input.removeEventListener("focusout", onFocusOut);
@@ -547,4 +677,78 @@ export function bindSetSearch(searchBar, opts = {}) {
     input.removeAttribute("aria-activedescendant");
     list.remove();
   };
+}
+
+/**
+ * Bind catalog autocomplete on a `.search-bar.search-bar--suggest`.
+ * @param {HTMLElement} searchBar
+ * @param {SetSearchOptions} [opts]
+ * @returns {() => void}
+ */
+export function bindSetSearch(searchBar, opts = {}) {
+  return bindCatalogSuggest(searchBar, {
+    minChars: opts.minChars,
+    maxResults: opts.maxResults,
+    onSelect: opts.onSelect,
+    async load() {
+      const catalog = await loadSetsPresets();
+      return {
+        total: catalog.sets.size,
+        generatedAt: catalog.generatedAt,
+        extra: { setsImageUrl: catalog.setsImageUrl },
+      };
+    },
+    async search(query, searchOpts) {
+      const result = await searchCatalogSets(query, searchOpts);
+      return {
+        ...result,
+        extra: { setsImageUrl: result.setsImageUrl },
+      };
+    },
+    makeOption(set, ctx) {
+      return makeSetOption(
+        set,
+        ctx.listId,
+        ctx.index,
+        ctx.needles,
+        catalogSetImageUrl(set.id, ctx.extra?.setsImageUrl)
+      );
+    },
+    trailParts: setTrailParts,
+    inputValue: (set) => set.name || "",
+  });
+}
+
+/**
+ * Bind catalog theme autocomplete on a `.search-bar.search-bar--suggest`.
+ * @param {HTMLElement} searchBar
+ * @param {ThemeSearchOptions} [opts]
+ * @returns {() => void}
+ */
+export function bindThemeSearch(searchBar, opts = {}) {
+  const exceptThemeId = String(opts.exceptThemeId || "").trim();
+  const searchOpts = exceptThemeId ? { exceptThemeId } : {};
+  return bindCatalogSuggest(searchBar, {
+    minChars: opts.minChars,
+    maxResults: opts.maxResults,
+    onSelect: opts.onSelect,
+    async load() {
+      const [catalog, empty] = await Promise.all([
+        loadSetsPresets(),
+        searchCatalogThemes("", searchOpts),
+      ]);
+      return {
+        total: empty.total,
+        generatedAt: catalog.generatedAt,
+      };
+    },
+    search(query, paging) {
+      return searchCatalogThemes(query, { ...searchOpts, ...paging });
+    },
+    makeOption(theme, ctx) {
+      return makeThemeOption(theme, ctx.listId, ctx.index, ctx.needles);
+    },
+    trailParts: themeTrailParts,
+    inputValue: (theme) => theme.path || theme.name || "",
+  });
 }

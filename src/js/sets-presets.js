@@ -36,7 +36,11 @@ const CATALOG_URL = "data/sets-presets.json";
  */
 
 /**
- * @typedef {CatalogSet & { themeName: string }} CatalogSetMatch
+ * @typedef {CatalogSet & { themeName: string, themePath: string }} CatalogSetMatch
+ */
+
+/**
+ * @typedef {CatalogTheme & { path: string }} CatalogThemeMatch
  */
 
 /**
@@ -67,6 +71,16 @@ const CATALOG_URL = "data/sets-presets.json";
  *   setsImageUrl: string,
  *   needles: string[],
  * }} CatalogSetSearch
+ */
+
+/**
+ * @typedef {{
+ *   items: CatalogThemeMatch[],
+ *   matchCount: number,
+ *   total: number,
+ *   generatedAt: string,
+ *   needles: string[],
+ * }} CatalogThemeSearch
  */
 
 /** @type {Promise<CatalogIndex>|null} */
@@ -168,11 +182,13 @@ export async function loadSetsPresets() {
         };
         sets.set(id, set);
         const theme = set.themeId ? themes.get(String(set.themeId)) : null;
+        const parent = theme?.parentId ? themes.get(String(theme.parentId)) : null;
+        const themeHay = [parent?.name, theme?.name].filter(Boolean).join(" ");
         setRecords.push({
           set,
           foldId: foldCI(id),
           foldName: foldCI(set.name),
-          foldTheme: foldCI(theme?.name || ""),
+          foldTheme: foldCI(themeHay),
         });
       }
 
@@ -196,6 +212,20 @@ export function clearSetsPresetsCache() {
   catalogPromise = null;
 }
 
+/**
+ * At most two catalog names: `"Parent > Theme"` or `"Theme"`.
+ * @param {CatalogTheme|null|undefined} theme
+ * @param {Map<string, CatalogTheme>} [themes]
+ * @returns {string}
+ */
+export function catalogThemePathLabel(theme, themes) {
+  const name = String(theme?.name || "").trim();
+  if (!name) return "";
+  const parent = theme.parentId && themes ? themes.get(String(theme.parentId)) : null;
+  const parentName = String(parent?.name || "").trim();
+  return parentName ? `${parentName} > ${name}` : name;
+}
+
 /** @param {CatalogSetRecord} rec @param {string[]} needles */
 function recordMatchesNeedles(rec, needles) {
   return needles.every(
@@ -205,8 +235,9 @@ function recordMatchesNeedles(rec, needles) {
 }
 
 /**
- * Search the offline catalog (`id`, `name`, and catalog theme name).
- * Space-separated tokens are AND (each must match at least one field).
+ * Search the offline catalog (`id`, `name`, catalog theme name, and
+ * immediate parent theme name). Space-separated tokens are AND (each
+ * must match at least one field).
  * Case and accents ignored; leading `#` on a token is stripped.
  * `items` is the alphabetical list (`name`, then `id`); `matchCount` is the
  * full hit count. `limit` caps `items` when given; omitted → all hits.
@@ -253,9 +284,91 @@ export async function searchCatalogSets(query, opts = {}) {
       releaseYear: set.releaseYear,
       themeId: set.themeId,
       themeName: theme?.name || "",
+      themePath: catalogThemePathLabel(theme, catalog.themes),
     };
   });
   return { items, matchCount, total, generatedAt, setsImageUrl, needles };
+}
+
+/** @param {CatalogTheme} theme @param {Map<string, CatalogTheme>} themes */
+function catalogThemeIsRoot(theme, themes) {
+  return !theme.parentId || !themes.has(String(theme.parentId));
+}
+
+/** @param {string} [exceptThemeId] Brickcard theme id to ignore */
+async function takenCatalogThemeIds(exceptThemeId = "") {
+  const except = String(exceptThemeId || "").trim();
+  /** @type {Set<number>} */
+  const taken = new Set();
+  const themes = await loadThemes();
+  for (const theme of themes) {
+    if (except && theme.id === except) continue;
+    const id = parseRebrickableThemeId(theme.rebrickableThemeId);
+    if (id) taken.add(id);
+  }
+  return taken;
+}
+
+/**
+ * Search catalog themes (name + immediate parent name). Space-separated
+ * tokens are AND. Case and accents ignored. Roots first, then children;
+ * A–Z on `catalogThemePathLabel` within each group.
+ * Omits catalog ids already linked to another Brickcard theme
+ * (`findThemeByRebrickableId` / `loadThemes`). `exceptThemeId` is the
+ * Brickcard theme being edited (its current origin stays available).
+ * `total` is the count of still-unlinked catalog themes.
+ * Empty / whitespace query → no items.
+ * @param {unknown} query
+ * @param {{ limit?: number, exceptThemeId?: string }} [opts]
+ * @returns {Promise<CatalogThemeSearch>}
+ */
+export async function searchCatalogThemes(query, opts = {}) {
+  const catalog = await loadSetsPresets();
+  const generatedAt = catalog.generatedAt;
+  const taken = await takenCatalogThemeIds(opts.exceptThemeId);
+  /** @type {CatalogTheme[]} */
+  const available = [];
+  for (const theme of catalog.themes.values()) {
+    if (taken.has(theme.id)) continue;
+    available.push(theme);
+  }
+  const total = available.length;
+  const rawLimit = Number(opts.limit);
+  const limit = Number.isFinite(rawLimit)
+    ? Math.max(0, Math.round(rawLimit))
+    : Infinity;
+  const needles = queryNeedles(query);
+  if (!needles.length) {
+    return { items: [], matchCount: 0, total, generatedAt, needles };
+  }
+
+  /** @type {CatalogTheme[]} */
+  const matches = [];
+  for (const theme of available) {
+    const parent = theme.parentId
+      ? catalog.themes.get(String(theme.parentId))
+      : null;
+    const hay = foldCI([parent?.name, theme.name].filter(Boolean).join(" "));
+    if (needles.every((n) => hay.includes(n))) matches.push(theme);
+  }
+  const locale = getLocale();
+  matches.sort((a, b) => {
+    const aRoot = catalogThemeIsRoot(a, catalog.themes);
+    const bRoot = catalogThemeIsRoot(b, catalog.themes);
+    if (aRoot !== bRoot) return aRoot ? -1 : 1;
+    const aPath = catalogThemePathLabel(a, catalog.themes);
+    const bPath = catalogThemePathLabel(b, catalog.themes);
+    return aPath.localeCompare(bPath, locale, { sensitivity: "base" });
+  });
+
+  const matchCount = matches.length;
+  const items = matches.slice(0, limit).map((theme) => ({
+    id: theme.id,
+    name: theme.name,
+    parentId: theme.parentId,
+    path: catalogThemePathLabel(theme, catalog.themes),
+  }));
+  return { items, matchCount, total, generatedAt, needles };
 }
 
 /** @param {unknown} id @returns {Promise<CatalogSet|null>} */
@@ -285,8 +398,9 @@ export async function findThemeByRebrickableId(themeId) {
   if (!id) return null;
   const presets = await getPresetThemes();
   for (const preset of presets) {
-    if (preset.rebrickableThemeId !== id) continue;
-    return (await getTheme(preset.id)) || preset;
+    const live = (await getTheme(preset.id)) || preset;
+    if (live.rebrickableThemeId !== id) continue;
+    return live;
   }
   const themes = await loadThemes();
   for (const theme of themes) {

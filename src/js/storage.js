@@ -702,6 +702,9 @@ export async function upsertTheme(input) {
       logoZoom: clampLogoZoom(input.logoZoom),
       logoOffsetX: roundCropCoord(input.logoOffsetX),
       logoOffsetY: roundCropCoord(input.logoOffsetY),
+      rebrickableThemeId:
+        parseRebrickableThemeId(input.rebrickableThemeId) ??
+        parseRebrickableThemeId(preset.rebrickableThemeId),
     };
     const mergedName = desired.name || preset.name;
     if (!mergedName) {

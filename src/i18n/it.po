@@ -16,6 +16,9 @@ msgstr "Cerca una carta…"
 msgid "Search for a set…"
 msgstr "Cerca un set…"
 
+msgid "Search for a theme…"
+msgstr "Cerca un tema…"
+
 msgid "Search (reference, title, theme, year)"
 msgstr "Cerca (riferimento, titolo, tema, anno)"
 
@@ -349,8 +352,14 @@ msgstr "Questo tema è referenziato su"
 msgid "This set is referenced on"
 msgstr "Questo set è referenziato su"
 
-msgid "Prefill from rebrickable.com"
-msgstr "Precompila da rebrickable.com"
+msgid "Prefill from the catalog database"
+msgstr "Precompila con il database del catalogo"
+
+msgid "Associate with the catalog database"
+msgstr "Associa con il database del catalogo"
+
+msgid "This catalog theme is already linked to “%(name)s”."
+msgstr "Questo tema del catalogo è già collegato a “%(name)s”."
 
 msgid "%(count)s theme"
 msgstr "%(count)s tema"
@@ -574,6 +583,15 @@ msgstr "%(shown)s / %(total)s set"
 msgid "%(total)s sets"
 msgstr "%(total)s set"
 
+msgid "0 themes"
+msgstr "0 temi"
+
+msgid "%(shown)s / %(total)s themes"
+msgstr "%(shown)s / %(total)s temi"
+
+msgid "%(total)s themes"
+msgstr "%(total)s temi"
+
 msgid "Ascending"
 msgstr "Crescente"
 
@@ -652,9 +670,6 @@ msgstr "Modifica il tema"
 msgid "Home"
 msgstr "Home"
 
-msgid "Search for a theme…"
-msgstr "Cerca un tema…"
-
 msgid "Search for a theme"
 msgstr "Cerca un tema"
 
@@ -672,15 +687,6 @@ msgstr "Elimina tutti i temi personalizzati"
 
 msgid "New theme"
 msgstr "Nuovo tema"
-
-msgid "0 themes"
-msgstr "0 temi"
-
-msgid "%(shown)s / %(total)s themes"
-msgstr "%(shown)s / %(total)s temi"
-
-msgid "%(total)s themes"
-msgstr "%(total)s temi"
 
 msgid "Delete all custom themes?"
 msgstr "Eliminare tutti i temi personalizzati?"

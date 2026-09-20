@@ -1,4 +1,4 @@
-import { ICON_ADD, ICON_CLOSE, ICON_DELETE_BIN_2, ICON_PENCIL, ICON_SAVE, modalTitleMarkup } from "../icons.js";
+import { ICON_ADD, ICON_CLOSE, ICON_DELETE_BIN_2, ICON_PENCIL, ICON_SAVE, ICON_SEARCH_LINE, modalTitleMarkup } from "../icons.js";
 import { bindFormColor, formColorMarkup } from "../form-color.js";
 import { bindFormImage, formImageMarkup } from "../form-image.js";
 import { formatThemeLogoBasename } from "../card-export.js";
@@ -7,6 +7,7 @@ import {
   deleteTheme,
   compressImage,
   createId,
+  createRebrickableThemeId,
   getTheme,
 } from "../storage.js";
 import { mountCardBackPreview, refreshCardBackPreview } from "../card-render.js";
@@ -15,7 +16,19 @@ import { resolveCardAccent } from "../card-design.js";
 import { confirmDialog, confirmUnsavedClose } from "../confirm-dialog.js";
 import { popModalDocumentTitle, pushModalDocumentTitle, setAppDocumentTitle } from "../document-title.js";
 import { getTopModal } from "../modal-focus.js";
-import { rebrickableOriginMarkup, rebrickableThemeHref } from "../rebrickable-ref.js";
+import {
+  REBRICKABLE_HOME_HREF,
+  rebrickableLogoLinkMarkup,
+  rebrickableOriginMarkup,
+  rebrickableThemeHref,
+  setRebrickableOriginPath,
+} from "../rebrickable-ref.js";
+import {
+  catalogThemePathLabel,
+  findThemeByRebrickableId,
+  loadSetsPresets,
+} from "../sets-presets.js";
+import { bindThemeSearch } from "../set-search.js";
 import { _t } from "../i18n.js";
 
 /**
@@ -40,6 +53,9 @@ export async function renderThemeEditor(host, opts) {
   const preset = existing ? await getPresetTheme(existing.id) : null;
   const isPresetOverride = Boolean(preset && existing && !existing.isBuiltin);
   const canDelete = Boolean(existing && !existing.isBuiltin);
+  const savedOriginId = parseRebrickableThemeId(existing?.rebrickableThemeId);
+  const showCatalogSearch = !savedOriginId;
+  let originThemeId = savedOriginId;
 
   document.body.classList.add("modal-open");
 
@@ -96,16 +112,45 @@ export async function renderThemeEditor(host, opts) {
         </div>
         <div class="modal-body" tabindex="-1">
           <div class="editor-layout">
-            <aside class="preview-wrap">
-              ${rebrickableOriginMarkup({
-                href: parseRebrickableThemeId(existing?.rebrickableThemeId)
-                  ? rebrickableThemeHref(existing.rebrickableThemeId)
-                  : "",
-                hintMsgid: "This theme is referenced on",
-              })}
+            <aside class="editor-preview-col">
+              ${
+                savedOriginId
+                  ? rebrickableOriginMarkup({
+                      href: rebrickableThemeHref(savedOriginId),
+                      hintMsgid: "This theme is referenced on",
+                    })
+                  : ""
+              }
+              <div class="preview-wrap">
               <div class="card-preview" id="theme-preview-back-host" aria-label="${_t("Back preview")}"></div>
+              </div>
             </aside>
-            <div>
+              ${
+                showCatalogSearch
+                  ? `<div class="editor-catalog-search">
+              <div class="form-field">
+                <label class="form-label" for="theme-catalog-search">${escapeHtml(
+                  _t(
+                    isEdit
+                      ? "Associate with the catalog database"
+                      : "Prefill from the catalog database"
+                  )
+                )}</label>
+                <div class="form-field-with-rebrickable">
+                  ${rebrickableLogoLinkMarkup(REBRICKABLE_HOME_HREF)}
+                  <div class="search-bar search-bar--suggest" id="theme-catalog-search-bar">
+                    <span class="form-control-icon" aria-hidden="true">${ICON_SEARCH_LINE}</span>
+                    <input class="form-control" type="search" id="theme-catalog-search" placeholder="${escapeAttr(_t("Search for a theme…"))}" autocomplete="off" />
+                    <div class="search-bar-trail">
+                      <span class="search-num-results" id="theme-catalog-search-num-results" aria-live="polite"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              </div>`
+                  : ""
+              }
+            <div class="editor-fields">
               ${
                 isPresetOverride
                   ? `<p class="view-desc">${escapeHtml(_t("Customization of the default “%(name)s” theme.", { name: preset.name }))}</p>
@@ -192,6 +237,20 @@ export async function renderThemeEditor(host, opts) {
 
   nameInput.value = draft.name;
   if (idInput) idInput.value = draft.id;
+
+  let cancelled = false;
+  if (savedOriginId) {
+    void loadSetsPresets()
+      .then((catalog) => {
+        if (cancelled) return;
+        const theme = catalog.themes.get(String(savedOriginId));
+        setRebrickableOriginPath(
+          backdrop,
+          catalogThemePathLabel(theme, catalog.themes)
+        );
+      })
+      .catch(() => {});
+  }
 
   /** @returns {import("../themes-data.js").LegoTheme} */
   function previewTheme() {
@@ -290,6 +349,7 @@ export async function renderThemeEditor(host, opts) {
 
   function persistSnapshot() {
     return JSON.stringify({
+      id: draft.id,
       name: nameInput.value.trim(),
       color: draft.color,
       secondaryColor: draft.secondaryColor,
@@ -297,6 +357,7 @@ export async function renderThemeEditor(host, opts) {
       logoZoom: draft.logoZoom,
       logoOffsetX: draft.logoOffsetX,
       logoOffsetY: draft.logoOffsetY,
+      rebrickableThemeId: originThemeId,
     });
   }
 
@@ -334,6 +395,18 @@ export async function renderThemeEditor(host, opts) {
     setNameError("");
     if (errEl) errEl.textContent = "";
     try {
+      if (originThemeId) {
+        const taken = await findThemeByRebrickableId(originThemeId);
+        if (taken && taken.id !== draft.id) {
+          if (errEl) {
+            errEl.textContent = _t(
+              "This catalog theme is already linked to “%(name)s”.",
+              { name: taken.name }
+            );
+          }
+          return false;
+        }
+      }
       const saved = await upsertTheme({
         id: draft.id,
         name,
@@ -343,7 +416,7 @@ export async function renderThemeEditor(host, opts) {
         logoZoom: draft.logoZoom,
         logoOffsetX: draft.logoOffsetX,
         logoOffsetY: draft.logoOffsetY,
-        rebrickableThemeId: existing?.rebrickableThemeId ?? null,
+        rebrickableThemeId: originThemeId,
         isBuiltin: false,
       });
       const becameOverride = Boolean(preset && existing?.isBuiltin && !saved.isBuiltin);
@@ -433,7 +506,30 @@ export async function renderThemeEditor(host, opts) {
     };
   }
 
+  const themeSearchBar = /** @type {HTMLElement|null} */ (
+    q("#theme-catalog-search-bar")
+  );
+  const unbindThemeSearch = themeSearchBar
+    ? bindThemeSearch(themeSearchBar, {
+        exceptThemeId: draft.id,
+        onSelect(theme) {
+          originThemeId = theme.id;
+          if (!isEdit) {
+            draft.id = createRebrickableThemeId(theme.id);
+            if (idInput) idInput.value = draft.id;
+          }
+          if (!isEdit || !String(nameInput.value || "").trim()) {
+            nameInput.value = theme.name;
+            if (nameError?.textContent) setNameError("");
+            syncPreview();
+          }
+        },
+      })
+    : () => {};
+
   return () => {
+    cancelled = true;
+    unbindThemeSearch();
     themeColorField?.destroy();
     secondaryColorField?.destroy();
     logoField?.destroy();
@@ -450,4 +546,8 @@ function escapeHtml(str) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
+}
+
+function escapeAttr(str) {
+  return escapeHtml(str);
 }

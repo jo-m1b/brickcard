@@ -5,7 +5,7 @@ import {
   ICON_SORT_DESC,
 } from "../../icons.js";
 import { linkMarkup } from "../../link.js";
-import { bindSetSearch } from "../../set-search.js";
+import { bindSetSearch, bindThemeSearch } from "../../set-search.js";
 
 /**
  * @param {string} svg
@@ -39,9 +39,14 @@ export function renderDeveloperSearch(host) {
         Results + sort&nbsp;: visible only when there are <strong>at least 2</strong>
         items. Label is always “&nbsp;cards&nbsp;”.
         Catalog suggest (<code>search-bar--suggest</code>)&nbsp;: trail is
-        set count <code>·</code> catalog date; list uses <code>form-select</code>
+        set/theme count <code>·</code> catalog date (date hidden at
+        <code>&lt; 550px</code>, or first when the bar is too narrow;
+        padding follows the trail width; the count drops under the field
+        if it still does not fit);
+        set list uses <code>form-select</code>
         look with multi-line options and a square set photo
         (<code>bindSetSearch</code>, <code>sets-presets.json</code>).
+        Theme list is one path line (<code>bindThemeSearch</code>).
         Used: card list (topbar) · themes modal (num results + sort) ·
         developer home and settings (<code>search-bar--input-only</code>).
       </p>
@@ -75,7 +80,9 @@ export function renderDeveloperSearch(host) {
           Autocomplete from <code>sets-presets.json</code>
           (<code>search-bar--suggest</code>, <code>bindSetSearch</code>).
           The list opens after 1 character. Matches set <code>name</code>,
-          <code>id</code>, and catalog theme name (case and accents ignored).
+          <code>id</code>, catalog theme name, and the immediate parent
+          theme name (case and accents ignored). Theme row shows
+          <code>Parent &gt; Theme</code> (2 names max).
           Several words are AND. A–Z by name then id. First 25 hits, then 25
           more as you scroll. Trail: matching count <code>·</code> catalog date
           (UI locale).
@@ -89,6 +96,31 @@ export function renderDeveloperSearch(host) {
             <input class="form-control" type="search" id="demo-set-search" placeholder="Search for a set…" autocomplete="off" aria-label="Search for a set" />
             <div class="search-bar-trail">
               <span class="search-num-results" id="demo-set-search-num-results" aria-live="polite"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="styleguide-section">
+        <h2 class="styleguide-section-title">Theme catalog</h2>
+        <p class="form-hint" style="margin-bottom: 0.65rem">
+          Autocomplete from <code>sets-presets.json</code>
+          (<code>search-bar--suggest</code>, <code>bindThemeSearch</code>).
+          The list opens after 1 character. Matches catalog theme name and
+          the immediate parent name (case and accents ignored). One line:
+          palette icon + <code>Parent &gt; Theme</code> (2 names max), or the
+          name alone for a root. Several words are AND. Roots first, then
+          children; A–Z by path. Catalog ids already linked to a Brickcard
+          theme are omitted. First 25 hits, then 25 more as you scroll.
+          Trail: matching count <code>·</code> catalog date (UI locale).
+          Pick a theme to fill the field with its path.
+        </p>
+        <div class="styleguide-search-demo" style="max-width: 36rem">
+          <div class="search-bar search-bar--suggest" data-demo-theme-search>
+            ${controlIconMarkup(ICON_SEARCH_LINE)}
+            <input class="form-control" type="search" id="demo-theme-search" placeholder="Search for a theme…" autocomplete="off" aria-label="Search for a theme" />
+            <div class="search-bar-trail">
+              <span class="search-num-results" id="demo-theme-search-num-results" aria-live="polite"></span>
             </div>
           </div>
         </div>
@@ -412,9 +444,16 @@ export function renderDeveloperSearch(host) {
   const unbindSetSearch = setSearchBar
     ? bindSetSearch(setSearchBar)
     : () => {};
+  const themeSearchBar = /** @type {HTMLElement|null} */ (
+    host.querySelector("[data-demo-theme-search]")
+  );
+  const unbindThemeSearch = themeSearchBar
+    ? bindThemeSearch(themeSearchBar)
+    : () => {};
 
   return () => {
     unbindSetSearch();
+    unbindThemeSearch();
     countInput?.removeEventListener("input", onCountInput);
     fullInput?.removeEventListener("input", onFullInput);
     sortBtn?.removeEventListener("click", onSortBtn);

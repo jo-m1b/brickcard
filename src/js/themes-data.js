@@ -233,6 +233,7 @@ const THEME_OVERRIDE_KEYS = [
   "logoZoom",
   "logoOffsetX",
   "logoOffsetY",
+  "rebrickableThemeId",
 ];
 
 /**
@@ -296,6 +297,8 @@ export function readThemeOverride(row) {
   if (Object.hasOwn(r, "logoOffsetY")) {
     out.logoOffsetY = roundCropCoord(r.logoOffsetY);
   }
+  const originId = parseRebrickableThemeId(r.rebrickableThemeId);
+  if (originId) out.rebrickableThemeId = originId;
   const updatedAt = String(r.updatedAt || r.createdAt || "").trim();
   if (updatedAt) out.updatedAt = updatedAt;
   return out;
@@ -335,13 +338,17 @@ export function mergePresetOverride(preset, overlay) {
   if (Object.hasOwn(overlay, "logoOffsetY")) {
     out.logoOffsetY = roundCropCoord(overlay.logoOffsetY);
   }
+  if (Object.hasOwn(overlay, "rebrickableThemeId")) {
+    const originId = parseRebrickableThemeId(overlay.rebrickableThemeId);
+    if (originId) out.rebrickableThemeId = originId;
+  }
   if (overlay.updatedAt) out.updatedAt = String(overlay.updatedAt);
   return out;
 }
 
 /**
  * Fields of `merged` that differ from `preset` (empty string kept when cleared).
- * @param {Pick<LegoTheme, "name"|"color"|"secondaryColor"|"logoDataUrl"|"logoZoom"|"logoOffsetX"|"logoOffsetY">} merged
+ * @param {Pick<LegoTheme, "name"|"color"|"secondaryColor"|"logoDataUrl"|"logoZoom"|"logoOffsetX"|"logoOffsetY"|"rebrickableThemeId">} merged
  * @param {LegoTheme} preset
  * @returns {Record<string, unknown>}
  */
@@ -366,6 +373,11 @@ export function themeOverrideDiff(merged, preset) {
   if (logoOffsetX !== roundCropCoord(preset.logoOffsetX)) diff.logoOffsetX = logoOffsetX;
   const logoOffsetY = roundCropCoord(merged.logoOffsetY);
   if (logoOffsetY !== roundCropCoord(preset.logoOffsetY)) diff.logoOffsetY = logoOffsetY;
+  const mergedOrigin = parseRebrickableThemeId(merged.rebrickableThemeId);
+  const presetOrigin = parseRebrickableThemeId(preset.rebrickableThemeId);
+  if (mergedOrigin && mergedOrigin !== presetOrigin) {
+    diff.rebrickableThemeId = mergedOrigin;
+  }
   return diff;
 }
 
