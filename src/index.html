@@ -66,8 +66,13 @@
         }
       } catch (e) {}
       try {
-        var loc = localStorage.getItem("brickcard:ui-locale");
-        if (loc === "en" || loc === "fr") {
+        /* Stored locale only: locales.json is async, so first paint cannot wait for it. */
+        var loc = String(localStorage.getItem("brickcard:ui-locale") || "")
+          .trim()
+          .toLowerCase()
+          .replace(/_/g, "-")
+          .split("-")[0];
+        if (/^[a-z]{2}$/.test(loc)) {
           document.documentElement.lang = loc;
         }
       } catch (e) {}

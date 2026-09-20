@@ -20,6 +20,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Card editor catalog suggest: **Prefill from the catalog database** on `#new-card`, **Associate with the catalog database** on `#edit-card/:id` without origin (label is plain text; only the Rebrickable logo stays a link); at ≤840px the field moves above the previews; at < 550px the label, Rebrickable logo, and search field are centered (field full width) and the catalog date is hidden so the count stays readable; trail padding follows the count width instead of a fixed `16rem`
 - Home, themes, settings, and developer-space search: space-separated words are AND (same matching as the Rebrickable catalog suggest), so `"combat titans"` finds *Le combat des Titans* and `"ninjago titans"` finds that card via its theme
 
+### 🔧 Fixed
+
+- First paint: apply a stored UI locale (`brickcard:ui-locale`) to `<html lang>` for any ISO language code (`de` / `es` / `it` / `pt`, not only `en` / `fr`); `initI18n()` still confirms against `locales.json` after boot
+
 ## [0.9.4] — 2026-09-17
 
 ### ➕ Added

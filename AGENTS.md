@@ -20,7 +20,7 @@ All app code lives in **`src/`**.
 
 | File | Role |
 |------|------|
-| `src/index.html` | Shell: `<title>` = `APP_DOCUMENT_TITLE`; English SEO (`description`, canonical, Open Graph, Twitter Card, JSON-LD — not updated with the UI locale); sticky topbar, `#main`, `#modal-root`, `#toast-root`, `#print-root`; import map (`?v=` on `app.js` / `version.js`) |
+| `src/index.html` | Shell: `<title>` = `APP_DOCUMENT_TITLE`; English SEO (`description`, canonical, Open Graph, Twitter Card, JSON-LD — not updated with the UI locale); sticky topbar, `#main`, `#modal-root`, `#toast-root`, `#print-root`; import map (`?v=` on `app.js` / `version.js`); blocking script after CSS applies stored UI theme and a stored 2-letter `brickcard:ui-locale` to `<html lang>` before first paint (`locales.json` is async) |
 | `src/404.html` | GitHub Pages 404 (unknown paths, not hash routes); English, no i18n; empty-view like boot **Load error — retry**; `<base href="/">`; CSS `?v=` aligned with `index.html` |
 | `src/robots.txt` | Crawlers: allow `/`; sitemap URL (do not block `js/` / `css/`) |
 | `src/sitemap.xml` | One URL (`https://brickcard.org/`); hash routes omitted |
@@ -217,7 +217,7 @@ The Brickcard logo (back, and face with no photo) is an **inline SVG** (`fill="c
 - Preset-tool IndexedDB: `brickcard-preset-draft` — `#developer/theme-presets` draft only (independent of local Reset)
 - UI theme key: `brickcard:ui-theme`
 - UI locale key: `brickcard:ui-locale` (`de` / `en` / `es` / `fr` / `it` / `pt`; missing = browser language if a `.po` exists, else English); local Reset removes it; change in Settings → reload
-- i18n: `_t('English msgid')` / `_t('… %(name)s …', { name })`; fallback = msgid; no compiler or lib; `en` has no `.po`; `index.html` / manifest: `lang="en"` (SEO / crawler default); SEO meta (`description`, canonical, Open Graph, Twitter Card, JSON-LD) stay English in `index.html` (not updated with the UI locale); `document.documentElement.lang` updated in JS from the locale; Markdown pages: `data/page-{{slug}}.md` (English) / `page-{{slug}}.{{locale}}.md` (English fallback); `#developer/…` copy is **hardcoded English** (no `.po`); `#developer/theme-presets` reuses existing `_t` strings (Save, Delete, Close…); **Brickcard** brand is not translated; PDF filenames: `_t` strings then slugified (`filenameSlug`)
+- i18n: `_t('English msgid')` / `_t('… %(name)s …', { name })`; fallback = msgid; no compiler or lib; `en` has no `.po`; `index.html` / manifest: `lang="en"` (SEO / crawler default); SEO meta (`description`, canonical, Open Graph, Twitter Card, JSON-LD) stay English in `index.html` (not updated with the UI locale); blocking script in `index.html` sets `document.documentElement.lang` from a stored 2-letter `brickcard:ui-locale` before first paint (cannot `fetch` `locales.json`); `initI18n()` then confirms against `locales.json` (unknown stored value → browser language if a `.po` exists, else English); Markdown pages: `data/page-{{slug}}.md` (English) / `page-{{slug}}.{{locale}}.md` (English fallback); `#developer/…` copy is **hardcoded English** (no `.po`); `#developer/theme-presets` reuses existing `_t` strings (Save, Delete, Close…); **Brickcard** brand is not translated; PDF filenames: `_t` strings then slugified (`filenameSlug`)
 - Face border key: `brickcard:card-face-border-mm` (default `3`)
 - Corner radius key: `brickcard:card-radius-mm` (default `2`, face + back)
 - Image radius key: `brickcard:card-image-radius-mm` (default `1`, photo frame)
