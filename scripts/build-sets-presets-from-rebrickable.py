@@ -417,13 +417,22 @@ def build_catalog(args: argparse.Namespace) -> tuple[list[list], list[list], Ima
             str(entry[1] if len(entry) > 1 else ""),
         )
     )
+    catalog_theme_ids = set(used_theme_ids)
+    for theme_id in used_theme_ids:
+        parent_id = theme_parents.get(theme_id)
+        if (
+            parent_id is not None
+            and parent_id not in excluded
+            and theme_names.get(parent_id, "")
+        ):
+            catalog_theme_ids.add(parent_id)
     themes = [
         theme_row(
             theme_id=theme_id,
             name=name,
             parent_id=theme_parents.get(theme_id),
         )
-        for theme_id in sorted(used_theme_ids)
+        for theme_id in sorted(catalog_theme_ids)
         if (name := theme_names.get(theme_id, ""))
     ]
     return themes, sets, image_scan
