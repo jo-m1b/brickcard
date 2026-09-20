@@ -20,4 +20,4 @@ Keep the change small and focused.
 
 See the [README](README.md) to run locally. App conventions (routing, design system, i18n) live in [AGENTS.md](AGENTS.md) (English). Source comments and JSDoc in `src/` are English.
 
-By contributing, you agree that your work is licensed under the [MIT License](LICENSE).
+By contributing, you agree that your work is licensed under the [MIT License](LICENSE). Do not add third-party theme logos you do not have rights to; those assets are not covered by MIT (see [NOTICE](NOTICE)).

@@ -10,7 +10,9 @@
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/I5P825YXAH)
 
-> LEGO® is a trademark of the LEGO Group. This is a personal project that is not affiliated with or sponsored by the LEGO Group.
+> LEGO® is a trademark of the LEGO Group, which does not sponsor, authorize or endorse this website. Brickcard is a personal, non-commercial project.
+>
+> Other product names, logos, and brands shown in the app are trademarks of their respective owners. They are used only to help identify LEGO® themes. Brickcard is not affiliated with, sponsored by, or endorsed by those owners.
 
 Brickcard is a tiny app for creating and printing playing-card sized cards that describe LEGO® sets (reference, photo, title, theme, year, and piece count).
 
@@ -53,6 +55,7 @@ Please use [GitHub discussions](https://github.com/jo-m1b/brickcard/discussions)
 
 ## Credits
 
+- **Rebrickable**: set and theme catalog data is compiled from [Rebrickable downloads](https://rebrickable.com/downloads/). Thanks to the [Rebrickable](https://rebrickable.com) community.
 - **Brickcard app logo**: Brick outline icon by [Joko Sutrisno](https://www.vecteezy.com/members/108458460840346680378) on [Vecteezy](https://www.vecteezy.com/vector-art/12802525-brick-outline-icon).
 - **Some default theme logos**: From [Brickipedia](https://brickipedia.fandom.com/wiki/List_of_themes) and [Logopedia](https://logos.fandom.com/fr/wiki/Logopedia).
 - **Open Sans Font**: Designed by [Steve Matteson](https://mattesontypographics.com), maintained by [The Open Sans Project Authors](https://github.com/googlefonts/opensans).
@@ -60,4 +63,8 @@ Please use [GitHub discussions](https://github.com/jo-m1b/brickcard/discussions)
 
 ## License
 
-Brickcard is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+The MIT License applies to the Brickcard source code and documentation only. See the [LICENSE](LICENSE) file.
+
+Default theme logos, the Rebrickable wordmark, and third-party trademarks are **not** licensed under MIT. See [NOTICE](NOTICE).
+
+Fonts in `src/fonts/` are under the SIL Open Font License.

@@ -10,7 +10,9 @@
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/I5P825YXAH)
 
-> LEGO® est une marque de LEGO Group. Cette application est un projet personnel, non affilié ni sponsorisé par LEGO Group.
+> LEGO® est une marque de LEGO Group. Ce site n’est ni sponsorisé, ni autorisé, ni approuvé par LEGO Group. Brickcard est un projet personnel, non commercial.
+>
+> Les autres noms de produits, logos et marques affichés dans l’application sont des marques de leurs propriétaires respectifs. Ils ne servent qu’à identifier les thèmes LEGO®. Brickcard n’est ni affilié, ni sponsorisé, ni approuvé par ces propriétaires.
 
 Brickcard est une petite application pour créer et imprimer de bien jolies cartes pour vos briques LEGO® au format carte à jouer qui décrivent vos sets LEGO® (référence, photo, titre, thème, année et nombre de pièces).
 
@@ -53,6 +55,7 @@ Merci d’utiliser [GitHub Discussions](https://github.com/jo-m1b/brickcard/disc
 
 ## Crédits
 
+- **Rebrickable** : les données du catalogue de sets et de thèmes sont compilées à partir des [téléchargements Rebrickable](https://rebrickable.com/downloads/). Merci à la communauté [Rebrickable](https://rebrickable.com).
 - **Logo de l’app Brickcard** : icône brick outline par [Joko Sutrisno](https://www.vecteezy.com/members/108458460840346680378) sur [Vecteezy](https://www.vecteezy.com/vector-art/12802525-brick-outline-icon).
 - **Certains logos de thèmes par défaut** : issus de [Brickipedia](https://brickipedia.fandom.com/wiki/List_of_themes) et [Logopedia](https://logos.fandom.com/fr/wiki/Logopedia).
 - **Police Open Sans** : conçue par [Steve Matteson](https://mattesontypographics.com), maintenue par [The Open Sans Project Authors](https://github.com/googlefonts/opensans).
@@ -60,4 +63,8 @@ Merci d’utiliser [GitHub Discussions](https://github.com/jo-m1b/brickcard/disc
 
 ## Licence
 
-Brickcard est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour le détail.
+La licence MIT s’applique uniquement au code source et à la documentation de Brickcard. Voir le fichier [LICENSE](LICENSE).
+
+Les logos de thèmes par défaut, le logo Rebrickable et les marques tierces ne sont **pas** sous licence MIT. Voir [NOTICE](NOTICE).
+
+Les polices dans `src/fonts/` sont sous SIL Open Font License.

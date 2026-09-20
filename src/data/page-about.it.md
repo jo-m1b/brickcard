@@ -1,6 +1,8 @@
 # Informazioni
 
-> LEGO® è un marchio di LEGO Group. Questa applicazione è un progetto personale, non affiliato né sponsorizzato da LEGO Group.
+> LEGO® è un marchio di LEGO Group, che non sponsorizza, autorizza né approva questo sito. Brickcard è un progetto personale, non commerciale.
+>
+> Gli altri nomi di prodotti, loghi e marchi mostrati nell’app sono marchi dei rispettivi proprietari. Servono solo a identificare i temi LEGO®. Brickcard non è affiliato, sponsorizzato né approvato da tali proprietari.
 
 Brickcard è una piccola applicazione per creare e stampare delle belle carte in formato carta da gioco per i tuoi mattoncini LEGO® che descrivono i tuoi set LEGO® (riferimento, foto, titolo, tema, anno e numero di pezzi).
 
@@ -32,7 +34,7 @@ Usa [GitHub Discussions](https://github.com/jo-m1b/brickcard/discussions).
 
 ## Crediti
 
-- **Rebrickable**: un grande grazie alla community di [Rebrickable](https://rebrickable.com).
+- **Rebrickable**: i dati del catalogo di set e temi sono compilati dai [download di Rebrickable](https://rebrickable.com/downloads/). Un grande grazie alla community di [Rebrickable](https://rebrickable.com).
 - **Logo dell’app Brickcard**: icona brick outline di [Joko Sutrisno](https://www.vecteezy.com/members/108458460840346680378) su [Vecteezy](https://www.vecteezy.com/vector-art/12802525-brick-outline-icon).
 - **Alcuni loghi dei temi predefiniti**: da [Brickipedia](https://brickipedia.fandom.com/wiki/List_of_themes) e [Logopedia](https://logos.fandom.com/fr/wiki/Logopedia).
 - **Font Open Sans**: progettato da [Steve Matteson](https://mattesontypographics.com), mantenuto da [The Open Sans Project Authors](https://github.com/googlefonts/opensans).
@@ -40,6 +42,10 @@ Usa [GitHub Discussions](https://github.com/jo-m1b/brickcard/discussions).
 
 ## Licenza
 
-Brickcard è sotto licenza MIT. Vedi il file [LICENSE](https://github.com/jo-m1b/brickcard/blob/main/LICENSE) per i dettagli.
+La licenza MIT si applica solo al codice sorgente e alla documentazione di Brickcard.<br>Vedi il file [LICENSE](https://github.com/jo-m1b/brickcard/blob/main/LICENSE).
+
+I loghi dei temi predefiniti, il logo Rebrickable e i marchi di terzi **non** sono sotto licenza MIT.<br>Vedi [NOTICE](https://github.com/jo-m1b/brickcard/blob/main/NOTICE).
+
+I font utilizzati sono sotto SIL Open Font License.
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/I5P825YXAH)

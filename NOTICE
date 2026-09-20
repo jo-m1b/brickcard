@@ -1,0 +1,7 @@
+Additional notice
+
+The MIT License in LICENSE applies to the Brickcard source code and documentation only.
+
+It does not apply to default theme logos (src/data/theme-logo-*), the Rebrickable wordmark (src/data/rebrickable-logo.png), or any third-party trademarks shown in the app. Those remain the property of their owners. You may not extract, redistribute, or sell them as if they were open-source assets.
+
+Fonts in src/fonts/ are licensed under the SIL Open Font License.

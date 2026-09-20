@@ -38,7 +38,7 @@ Add an entry in [`locales.json`](locales.json). `name` is the language name in t
 
 ### 5. Translate About
 
-Copy [`../data/page-about.md`](../data/page-about.md) to `src/data/page-about.xx.md`. The first `#` heading is the dialog title.
+Copy [`../data/page-about.md`](../data/page-about.md) to `src/data/page-about.xx.md`. The first `#` heading is the dialog title. Keep the two opening disclaimer quotes and the License section aligned with the English source (LEGO Fair Play wording, other trademarks, MIT = code only).
 
 ### 6. Done
 

@@ -1,7 +1,7 @@
 /**
  * Light Markdown parser (GFM subset) + page loading
  * `data/page-{{slug}}.md` (English) / `data/page-{{slug}}.{{locale}}.md`.
- * Handles: headings, paragraphs, lists, quotes, code, links, images, bold/italic, HR, HTML blocks.
+ * Handles: headings, paragraphs, lists, quotes, code, links, images, bold/italic, HR, `<br>`, HTML blocks.
  * Placeholder: `{{APP_VERSION}}` → SemVer version.
  * Page title: `# Title` (removed from the modal body).
  */
@@ -30,6 +30,7 @@ function escapeHtml(s) {
  */
 function inline(text) {
   let s = escapeHtml(text);
+  s = s.replace(/&lt;br\s*\/?&gt;/gi, "<br>");
   s = s.replace(/`([^`]+)`/g, "<code>$1</code>");
   s = s.replace(/!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)/g, (_, alt, src, title) => {
     const t = title ? ` title="${escapeHtml(title)}"` : "";
