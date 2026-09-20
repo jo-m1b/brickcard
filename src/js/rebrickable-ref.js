@@ -1,13 +1,13 @@
 /**
- * Compact Rebrickable origin (hint + clickable logo) for theme and
- * card editors.
+ * Compact Rebrickable origin (hint + clickable logo, optional catalog
+ * path) for theme and card editors.
  */
 
+import { ICON_PALETTE } from "./icons.js";
 import { _t } from "./i18n.js";
 import { linkMarkup } from "./link.js";
 
 export const REBRICKABLE_HOME_HREF = "https://rebrickable.com/";
-export const REBRICKABLE_SITE = "rebrickable.com";
 
 /**
  * @param {unknown} setId Catalog `set_num`
@@ -45,19 +45,6 @@ export function rebrickableLogoLinkMarkup(href) {
 }
 
 /**
- * Put `rebrickable.com` in `text` through `linkMarkup` (same URL as the logo).
- * @param {string} text Already translated msgid
- * @param {string} href
- */
-export function rebrickableLinkedText(text, href) {
-  const src = String(text || "");
-  const siteLink = linkMarkup(REBRICKABLE_SITE, { href });
-  const i = src.indexOf(REBRICKABLE_SITE);
-  if (i < 0) return `${escapeHtml(src)} ${siteLink}`;
-  return `${escapeHtml(src.slice(0, i))}${siteLink}${escapeHtml(src.slice(i + REBRICKABLE_SITE.length))}`;
-}
-
-/**
  * Centered origin block (hint, then clickable logo) above a card / back preview.
  * @param {{ href?: string, hintMsgid?: string }} [opts]
  */
@@ -70,7 +57,45 @@ export function rebrickableOriginMarkup(opts = {}) {
   return `<div class="theme-rebrickable-ref">
                 <p class="form-hint">${escapeHtml(hint)}</p>
                 ${rebrickableLogoLinkMarkup(href)}
+                <p class="form-hint theme-rebrickable-path" hidden><span class="theme-rebrickable-path-icon" aria-hidden="true"><!-- ri-palette-fill -->${ICON_PALETTE}</span><span class="theme-rebrickable-path-text"></span></p>
+                <p class="form-hint theme-rebrickable-set" hidden></p>
               </div>`;
+}
+
+/**
+ * Fill one muted catalog line under a Rebrickable origin block.
+ * @param {ParentNode|null|undefined} root
+ * @param {string} selector
+ * @param {string} text
+ */
+function setOriginLine(root, selector, text) {
+  const el = root instanceof Element ? root.querySelector(selector) : null;
+  if (!(el instanceof HTMLElement)) return;
+  const value = String(text || "").trim();
+  const textEl = el.querySelector(".theme-rebrickable-path-text");
+  if (textEl) textEl.textContent = value;
+  else el.textContent = value;
+  el.hidden = !value;
+}
+
+/**
+ * Fill catalog lines under a Rebrickable origin block
+ * (`Parent > Theme`, optional set name).
+ * @param {ParentNode|null|undefined} root
+ * @param {{ path?: string, setName?: string }} [details]
+ */
+export function setRebrickableOriginCatalog(root, details = {}) {
+  setOriginLine(root, ".theme-rebrickable-path", details.path || "");
+  setOriginLine(root, ".theme-rebrickable-set", details.setName || "");
+}
+
+/**
+ * Fill the catalog path under a Rebrickable origin block (`Parent > Theme`).
+ * @param {ParentNode|null|undefined} root
+ * @param {string} path
+ */
+export function setRebrickableOriginPath(root, path) {
+  setRebrickableOriginCatalog(root, { path });
 }
 
 /** @param {string} str */

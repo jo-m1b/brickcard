@@ -7,8 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### ➕ Added
+
+- Theme editor: **Prefill from the catalog database** / **Associate with the catalog database** (`bindThemeSearch`) when `rebrickableThemeId` is empty; picking fills the name (new theme: replace; edit: empty only) and stores the catalog id on save (`rebrickable-{id}` for a new custom theme); already-linked catalog ids are omitted; a default theme can store the origin on its overlay
+- Search gallery (`#developer/search`): theme-catalog autocomplete demo (path line, roots then children)
+- Catalog suggest and theme editor origin (`#themes/edit/:id`): Rebrickable theme path **Parent > Theme** (2 names max) so a parent and the catalog name stay visible after a Brickcard rename; search also matches the immediate parent theme name; `themeName` stays the leaf name for the pending catalog theme
+- Card editor origin (`#edit-card/:id` with a saved `rebrickableSetId`): same theme path under **This set is referenced on** plus the catalog set name, so both stay visible after a Brickcard rename; the path line uses the theme palette icon (`ri-palette-fill`)
+- Set catalog `data/sets-presets.json`: include each used theme’s named immediate parent even if that parent has no kept sets
+
 ### ✏️ Changed
 
+- Card editor catalog suggest: **Prefill from the catalog database** on `#new-card`, **Associate with the catalog database** on `#edit-card/:id` without origin (label is plain text; only the Rebrickable logo stays a link); at ≤840px the field moves above the previews; at < 550px the label, Rebrickable logo, and search field are centered (field full width) and the catalog date is hidden so the count stays readable; trail padding follows the count width instead of a fixed `16rem`
 - Home, themes, settings, and developer-space search: space-separated words are AND (same matching as the Rebrickable catalog suggest), so `"combat titans"` finds *Le combat des Titans* and `"ninjago titans"` finds that card via its theme
 
 ## [0.9.4] — 2026-09-17

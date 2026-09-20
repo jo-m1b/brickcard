@@ -34,14 +34,16 @@ import { setAppDocumentTitle } from "../document-title.js";
 import { focusTopModal, getTopModal } from "../modal-focus.js";
 import {
   REBRICKABLE_HOME_HREF,
-  rebrickableLinkedText,
   rebrickableLogoLinkMarkup,
   rebrickableOriginMarkup,
   rebrickableSetHref,
+  setRebrickableOriginCatalog,
 } from "../rebrickable-ref.js";
 import { bindSetSearch } from "../set-search.js";
 import {
   cardDraftFromRebrickableSet,
+  catalogThemePathLabel,
+  loadSetsPresets,
   resolveOrCreateThemeFromRebrickable,
 } from "../sets-presets.js";
 import { toast } from "../toast.js";
@@ -143,12 +145,17 @@ export async function renderEditor(host, opts) {
               <div class="card-preview" id="preview-back-host" aria-label="${escapeAttr(_t("Back preview"))}"></div>
               </div>
             </aside>
-
-            <div>
               ${
                 showCatalogSearch
-                  ? `<div class="form-field">
-                <label class="form-label" for="card-set-search">${rebrickableLinkedText(_t("Prefill from rebrickable.com"), REBRICKABLE_HOME_HREF)}</label>
+                  ? `<div class="editor-catalog-search">
+              <div class="form-field">
+                <label class="form-label" for="card-set-search">${escapeHtml(
+                  _t(
+                    isEdit
+                      ? "Associate with the catalog database"
+                      : "Prefill from the catalog database"
+                  )
+                )}</label>
                 <div class="form-field-with-rebrickable">
                   ${rebrickableLogoLinkMarkup(REBRICKABLE_HOME_HREF)}
                   <div class="search-bar search-bar--suggest" id="card-set-search-bar">
@@ -159,9 +166,11 @@ export async function renderEditor(host, opts) {
                     </div>
                   </div>
                 </div>
+              </div>
               </div>`
                   : ""
               }
+            <div class="editor-fields">
               <div class="form-field">
                 <label class="form-label" for="lego-set-ref">${_t("Set number")}</label>
                 <div class="form-control-wrap">
@@ -312,6 +321,22 @@ export async function renderEditor(host, opts) {
       existing.numPieces != null ? String(existing.numPieces) : "";
     refs.numFigurines.value =
       existing.numFigurines != null ? String(existing.numFigurines) : "";
+  }
+
+  let cancelled = false;
+  if (savedSetId) {
+    void loadSetsPresets()
+      .then((catalog) => {
+        if (cancelled) return;
+        const set = catalog.sets.get(savedSetId);
+        const themeId = set?.themeId ?? originThemeId;
+        const theme = themeId ? catalog.themes.get(String(themeId)) : null;
+        setRebrickableOriginCatalog(host, {
+          path: catalogThemePathLabel(theme, catalog.themes),
+          setName: String(set?.name || "").trim(),
+        });
+      })
+      .catch(() => {});
   }
 
   function draft() {
@@ -882,6 +907,7 @@ export async function renderEditor(host, opts) {
   }
 
   return () => {
+    cancelled = true;
     unbindSetSearch();
     disposeStackedThemes();
     destroyThemeSelect?.();

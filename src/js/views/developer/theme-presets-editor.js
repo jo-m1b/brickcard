@@ -102,10 +102,12 @@ export async function renderPresetDraftEditor(host, opts) {
         </div>
         <div class="modal-body" tabindex="-1">
           <div class="editor-layout">
-            <aside class="preview-wrap">
+            <aside class="editor-preview-col">
+              <div class="preview-wrap">
               <div class="card-preview" id="preset-preview-back-host" aria-label="${_t("Back preview")}"></div>
+              </div>
             </aside>
-            <div>
+            <div class="editor-fields">
               <div class="form-field">
                 <label class="form-label form-label--required" for="preset-theme-name">${_t("Name")}</label>
                 <input class="form-control" type="text" id="preset-theme-name" placeholder="CITY" autocomplete="off" />
