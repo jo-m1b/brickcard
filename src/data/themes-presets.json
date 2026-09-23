@@ -67,13 +67,6 @@
       "color": "#141414"
     },
     {
-      "id": "braille-bricks",
-      "name": "Braille Bricks",
-      "logoSrc": "data/theme-logo-braille-bricks.svg",
-      "color": "#4b8294",
-      "logoZoom": 0.75
-    },
-    {
       "id": "brickheadz",
       "name": "BrickHeadz™",
       "rebrickableThemeId": 610,
@@ -177,12 +170,6 @@
       "color": "#d35400"
     },
     {
-      "id": "how-to-train-your-dragon",
-      "name": "How to Train Your Dragon",
-      "logoSrc": "data/theme-logo-how-to-train-your-dragon.svg",
-      "color": "#1a252f"
-    },
-    {
       "id": "icons",
       "name": "Icons",
       "rebrickableThemeId": 721,
@@ -226,13 +213,6 @@
       "rebrickableThemeId": 571,
       "logoSrc": "data/theme-logo-legends-of-chima.webp",
       "color": "#0088dd"
-    },
-    {
-      "id": "looney-tunes",
-      "name": "Looney Tunes™",
-      "logoSrc": "data/theme-logo-looney-tunes.svg",
-      "color": "#f2f2f2",
-      "logoZoom": 0.6
     },
     {
       "id": "lord-of-the-rings",
@@ -378,12 +358,6 @@
       "color": "#00ced1"
     },
     {
-      "id": "star-trek",
-      "name": "Star Trek",
-      "logoSrc": "data/theme-logo-star-trek.svg",
-      "color": "#003f87"
-    },
-    {
       "id": "star-wars",
       "name": "Star Wars™",
       "rebrickableThemeId": 158,
@@ -442,19 +416,6 @@
       "rebrickableThemeId": 764,
       "logoSrc": "data/theme-logo-the-legend-of-zelda.svg",
       "color": "#0b2916"
-    },
-    {
-      "id": "the-simpsons",
-      "name": "The Simpsons",
-      "logoSrc": "data/theme-logo-the-simpsons.svg",
-      "color": "#ffd34e"
-    },
-    {
-      "id": "transformers",
-      "name": "Transformers",
-      "logoSrc": "data/theme-logo-transformers.svg",
-      "color": "#bb122f",
-      "logoZoom": 0.5
     },
     {
       "id": "vidiyo",

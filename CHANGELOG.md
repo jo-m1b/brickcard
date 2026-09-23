@@ -31,6 +31,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - First paint: apply a stored UI locale (`brickcard:ui-locale`) to `<html lang>` for any ISO language code (`de` / `es` / `it` / `pt`, not only `en` / `fr`); `initI18n()` still confirms against `locales.json` after boot
 
+### 🗑️ Removed
+
+- Default themes with no Rebrickable catalog id (and their logos): Braille Bricks, How to Train Your Dragon, Looney Tunes, Star Trek, The Simpsons, Transformers — too few catalog sets to keep as presets (autocomplete already maps those boxes to Icons, Education, or Other)
+
 ## [0.9.4] — 2026-09-17
 
 ### ➕ Added
