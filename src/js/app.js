@@ -631,6 +631,18 @@ async function renderHomeUnderlay(cards) {
   cleanupList = await renderList(main, listOpts);
 }
 
+/** First-visit welcome on home (no-op once `brickcard:welcome-seen` is set). */
+async function openWelcomeOnHome(token) {
+  try {
+    const { openWelcomeIfNeeded } = await import("./welcome-dialog.js");
+    if (token !== routeToken) return;
+    if (parseRoute().name !== "home" || !modalRoot) return;
+    openWelcomeIfNeeded(modalRoot);
+  } catch (err) {
+    console.error(err);
+  }
+}
+
 async function route() {
   const token = ++routeToken;
 
@@ -660,8 +672,16 @@ async function route() {
     shownRoute = routeInfo;
     setAppDocumentTitle();
     await ensureUnderlay();
+    if (token !== routeToken) return;
     trackTelemetryPage();
+    void openWelcomeOnHome(token);
     return;
+  }
+
+  if (modalRoot?.querySelector("#welcome-dialog-backdrop")) {
+    const { dismissWelcomeDialog } = await import("./welcome-dialog.js");
+    if (token !== routeToken) return;
+    dismissWelcomeDialog();
   }
 
   if (prev?.name === "developer" && routeInfo.name === "developer") {

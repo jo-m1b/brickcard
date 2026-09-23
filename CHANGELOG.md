@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### ➕ Added
 
+- First-visit welcome modal (**Welcome to Brickcard**) on home (no hash): short intro and the LEGO / trademark disclaimer; off-local, if telemetry was never chosen, a yes/no ask to enable anonymous usage stats (public link shown as data.brickcard.org, no IP stored). **No thanks**, Escape, close, or the backdrop stores telemetry off. Leaving home without closing shows the modal again
 - Theme editor: **Prefill from the catalog database** / **Associate with the catalog database** (`bindThemeSearch`) when `rebrickableThemeId` is empty; picking fills the name (new theme: replace; edit: empty only) and stores the catalog id on save (`rebrickable-{id}` for a new custom theme); already-linked catalog ids are omitted; a default theme can store the origin on its overlay
 - Search gallery (`#developer/search`): theme-catalog autocomplete demo (path line, roots then children)
 - Catalog suggest and theme editor origin (`#themes/edit/:id`): Rebrickable theme path **Parent > Theme** (2 names max) so a parent and the catalog name stay visible after a Brickcard rename; search also matches the immediate parent theme name; `themeName` stays the leaf name for the pending catalog theme
@@ -17,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### ✏️ Changed
 
+- Telemetry is off by default (missing `brickcard:telemetry` = off). Settings hint matches the welcome ask: anonymous stats, nothing identifies you, no IP stored, and usage data is public on data.brickcard.org (link to the public board)
 - About: MIT applies to source and docs only; theme logos and third-party marks are carved out (`NOTICE`); LEGO Fair Play disclaimer and a generic other-trademark line
 - Markdown pages: keep `<br>` in inline text (About license: line break before LICENSE / NOTICE, without a new paragraph)
 - Card editor catalog suggest: **Prefill from the catalog database** on `#new-card`, **Associate with the catalog database** on `#edit-card/:id` without origin (label is plain text; only the Rebrickable logo stays a link); at ≤840px the field moves above the previews; at < 550px the label, Rebrickable logo, and search field are centered (field full width) and the catalog date is hidden so the count stays readable; trail padding follows the count width instead of a fixed `16rem`

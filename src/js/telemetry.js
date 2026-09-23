@@ -1,6 +1,7 @@
 /**
  * Anonymous usage telemetry (localStorage).
- * Script injected only if enabled (default: checked). Off-local.
+ * Script injected only if enabled (default: off), and never on a local dev host.
+ * Settings and the welcome ask follow `isTelemetryAvailable()` (off-local).
  */
 
 import { isLocalDevHost } from "./themes-data.js";
@@ -11,8 +12,37 @@ const SCRIPT_ID = "brickcard-telemetry";
 const SCRIPT_SRC = "https://data.brickcard.org/script.js";
 const WEBSITE_ID = "27efb7e5-60ce-4840-a3bb-325954f006a2";
 
-/** Default: checked. */
-export const DEFAULT_TELEMETRY = true;
+/** Public Umami board (anonymous stats, no stored IP). */
+export const TELEMETRY_PUBLIC_STATS_URL =
+  "https://data.brickcard.org/share/B5pHUIJzX1WJhJ04";
+
+/** Visible label for that board (the href stays the share URL). */
+export const TELEMETRY_PUBLIC_STATS_LABEL = "data.brickcard.org";
+
+/**
+ * @param {string} s
+ */
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+/**
+ * Translated sentence with trusted link HTML in place of `%(link)s`.
+ * @param {string} msgid
+ * @param {string} linkHtml
+ */
+export function htmlWithPublicStatsLink(msgid, linkHtml) {
+  const sentinel = "\u0000LINK\u0000";
+  const text = _t(msgid, { link: sentinel });
+  return escapeHtml(text).replaceAll(sentinel, String(linkHtml));
+}
+
+/** Default: off until the user opts in (welcome modal or Settings). */
+export const DEFAULT_TELEMETRY = false;
 
 /** @type {string} */
 let lastTrackedUrl = "";
@@ -40,9 +70,22 @@ export function setTelemetry(on) {
   applyTelemetry(on);
 }
 
-/** Available off-local only (no injection, no Settings field). */
+/**
+ * Settings field and welcome ask (off-local).
+ * Script injection stays off on a local dev host.
+ */
 export function isTelemetryAvailable() {
   return !isLocalDevHost();
+}
+
+/** True when the user already stored on (`"1"`) or off (`"0"`). */
+export function hasTelemetryChoice() {
+  try {
+    const raw = localStorage.getItem(TELEMETRY_KEY);
+    return raw === "1" || raw === "0";
+  } catch {
+    return true;
+  }
 }
 
 export function initTelemetry() {

@@ -63,6 +63,7 @@ const OFFLINE_ASSETS = [
     "./js/tile.js",
     "./js/toast.js",
     "./js/version.js",
+    "./js/welcome-dialog.js",
     "./js/views/editor.js",
     "./js/views/list.js",
     "./js/views/page.js",

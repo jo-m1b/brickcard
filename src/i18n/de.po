@@ -781,8 +781,35 @@ msgstr "Neue in die Sammlung importierte Bilder automatisch in ein optimiertes F
 msgid "Telemetry"
 msgstr "Telemetrie"
 
-msgid "Send anonymous usage telemetry data"
-msgstr "Anonyme Nutzungsdaten zur Telemetrie senden"
+msgid "Anonymous usage stats. Nothing identifies you and no IP address is stored. Usage data is public and published on %(link)s"
+msgstr "Anonyme Nutzungsstatistiken. Nichts identifiziert dich und es wird keine IP-Adresse gespeichert. Die Nutzungsdaten sind öffentlich und werden auf %(link)s veröffentlicht"
+
+msgid "Welcome to Brickcard"
+msgstr "Willkommen bei Brickcard"
+
+msgid "Got it"
+msgstr "Alles klar"
+
+msgid "No thanks"
+msgstr "Nein danke"
+
+msgid "Yes, enable telemetry"
+msgstr "Ja, Telemetrie aktivieren"
+
+msgid "Brickcard is a tiny app for creating and printing lovely playing-card sized cards for your LEGO® bricks that describe your LEGO® sets (reference, photo, title, theme, year, and piece count)."
+msgstr "Brickcard ist eine kleine App, mit der du hübsche Karten im Spielkartenformat für deine LEGO® Steine erstellst und druckst. Sie beschreiben deine LEGO® Sets (Nummer, Foto, Titel, Thema, Jahr und Teileanzahl)."
+
+msgid "Create cards, print them, laminate them, and slip them into a clear sleeve with a set whose box has gone missing. My kids love them — and it helps avoid unpacking the wrong set by mistake :P"
+msgstr "Erstelle Karten, drucke sie, laminiere sie und stecke sie mit einem Set ohne Schachtel in eine Klarsichthülle. Meine Kinder lieben sie — und so packt man nicht aus Versehen das falsche Set aus :P"
+
+msgid "LEGO® is a trademark of the LEGO Group, which does not sponsor, authorize or endorse this application. Brickcard is a personal, non-commercial project."
+msgstr "LEGO® ist eine Marke der LEGO Group, die diese App weder sponsert, autorisiert noch unterstützt. Brickcard ist ein persönliches, nicht kommerzielles Projekt."
+
+msgid "Other product names, logos, and brands shown in the app are trademarks of their respective owners. They are used only to help identify LEGO® themes. Brickcard is not affiliated with, sponsored by, or endorsed by those owners."
+msgstr "Andere Produktnamen, Logos und Marken in der App sind Marken ihrer jeweiligen Inhaber. Sie dienen nur dazu, LEGO®-Themen zu kennzeichnen. Brickcard ist mit diesen Inhabern weder verbunden noch von ihnen gesponsert oder unterstützt."
+
+msgid "This application is free and open source: no account, no ads, and you can install it on your own server. My best reward is simply knowing whether it is used, thanks to anonymous usage statistics. Nothing identifies you and no IP address is stored. Usage data is public and published on %(link)s. At any time, you can turn telemetry on or off from the application settings."
+msgstr "Diese Anwendung ist kostenlos und Open Source: kein Konto, keine Werbung, und du kannst sie auf deinem eigenen Server installieren. Meine schönste Belohnung ist einfach zu wissen, ob sie genutzt wird, dank der anonymen Nutzungsstatistiken. Nichts identifiziert dich und es wird keine IP-Adresse gespeichert. Die Nutzungsdaten sind öffentlich und werden auf %(link)s veröffentlicht. Du kannst die Telemetrie jederzeit in den Einstellungen der Anwendung ein- oder ausschalten."
 
 msgid "Card appearance"
 msgstr "Erscheinungsbild der Karten"

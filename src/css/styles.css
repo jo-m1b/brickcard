@@ -1812,6 +1812,15 @@ html:not([data-theme]) .btn .icon-system {
   margin-bottom: 1rem;
 }
 
+.form-field > p {
+  margin: 0;
+}
+
+/* Hint under a checkbox: align with the label, not the box */
+.form-field > .form-check + .form-hint {
+  padding-left: calc(1.5rem + 0.55rem);
+}
+
 .form-label a.link {
   font-weight: inherit;
   font-size: inherit;
@@ -3869,17 +3878,20 @@ body.modal-open {
   place-content: start center;
 }
 
-.md-content {
+.md-content,
+.welcome-copy {
   font-size: 0.98rem;
   line-height: 1.55;
   color: var(--ink);
 }
 
-.md-content > *:first-child {
+.md-content > *:first-child,
+.welcome-copy > *:first-child {
   margin-top: 0;
 }
 
-.md-content > *:last-child {
+.md-content > *:last-child,
+.welcome-copy > *:last-child {
   margin-bottom: 0;
 }
 
@@ -3903,7 +3915,8 @@ body.modal-open {
 
 .md-content p,
 .md-content ul,
-.md-content ol {
+.md-content ol,
+.welcome-copy p {
   margin: 0 0 0.9rem;
 }
 
@@ -3943,14 +3956,20 @@ body.modal-open {
   background: none;
 }
 
-.md-content blockquote {
+.md-content blockquote,
+.welcome-copy blockquote {
   margin: 0 0 0.9rem;
   padding: 0.15rem 0 0.15rem 0.9rem;
   border-left: 3px solid var(--line-strong);
   color: var(--ink-soft);
 }
 
-.md-content blockquote > *:last-child {
+.welcome-copy > :last-child {
+  margin-bottom: 0;
+}
+
+.md-content blockquote > *:last-child,
+.welcome-copy blockquote > *:last-child {
   margin-bottom: 0;
 }
 

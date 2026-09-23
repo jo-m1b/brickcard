@@ -6,7 +6,15 @@ import { formRadioMarkup } from "../form-radio.js";
 import { enhanceFormSelect } from "../form-select.js";
 import { _t, getLocale, listLocales, localeDisplayName, setLocale } from "../i18n.js";
 import { getOptimizeImages, setOptimizeImages } from "../image-optimize.js";
-import { getTelemetry, isTelemetryAvailable, setTelemetry } from "../telemetry.js";
+import { linkMarkup } from "../link.js";
+import {
+  getTelemetry,
+  htmlWithPublicStatsLink,
+  isTelemetryAvailable,
+  setTelemetry,
+  TELEMETRY_PUBLIC_STATS_LABEL,
+  TELEMETRY_PUBLIC_STATS_URL,
+} from "../telemetry.js";
 import { getTheme, setTheme } from "../theme.js";
 import {
   CARD_IMAGE_RADIUS_MAX_MM,
@@ -192,9 +200,13 @@ export function renderSettingsModal(host, opts) {
                 ${formCheckboxMarkup({
                   id: "settings-telemetry",
                   label: _t("Telemetry"),
-                  hint: _t("Send anonymous usage telemetry data"),
+                  describedBy: "settings-telemetry-hint",
                   checked: getTelemetry(),
                 })}
+                <p class="form-hint" id="settings-telemetry-hint">${htmlWithPublicStatsLink(
+                  "Anonymous usage stats. Nothing identifies you and no IP address is stored. Usage data is public and published on %(link)s",
+                  linkMarkup(TELEMETRY_PUBLIC_STATS_LABEL, { href: TELEMETRY_PUBLIC_STATS_URL }),
+                )}</p>
               </div>`
                   : ""
               }
@@ -539,7 +551,7 @@ export function renderSettingsModal(host, opts) {
 
   /** @param {ParentNode} root @param {string[]} needles @param {...string} extra */
   function matchesLabels(root, needles, ...extra) {
-    const texts = [...root.querySelectorAll(".form-label, .form-hint, option, .form-select-option")].map(
+    const texts = [...root.querySelectorAll(".form-label, .form-hint, option, .form-select-option, a.link")].map(
       (el) => el.textContent || "",
     );
     return matchesNeedles(needles, ...extra, ...texts);

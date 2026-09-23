@@ -354,6 +354,7 @@ export async function wipeAllLocalData() {
     localStorage.removeItem("brickcard:list-cols-max");
     localStorage.removeItem("brickcard:optimize-images");
     localStorage.removeItem("brickcard:telemetry");
+    localStorage.removeItem("brickcard:welcome-seen");
     localStorage.removeItem("brickcard:print-qty");
     localStorage.removeItem("brickcard:print-settings");
     localStorage.removeItem("brickcard:developer-enabled");
