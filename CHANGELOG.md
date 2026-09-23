@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Markdown pages: keep `<br>` in inline text (About license: line break before LICENSE / NOTICE, without a new paragraph)
 - Card editor catalog suggest: **Prefill from the catalog database** on `#new-card`, **Associate with the catalog database** on `#edit-card/:id` without origin (label is plain text; only the Rebrickable logo stays a link); at ≤840px the field moves above the previews; at < 550px the label, Rebrickable logo, and search field are centered (field full width) and the catalog date is hidden so the count stays readable; trail padding follows the count width instead of a fixed `16rem`
 - Home, themes, settings, and developer-space search: space-separated words are AND (same matching as the Rebrickable catalog suggest), so `"combat titans"` finds *Le combat des Titans* and `"ninjago titans"` finds that card via its theme
+- Default themes (`data/themes-presets.json`): Rebrickable origin ids on City (`52`), Disney (`608`), Marvel (`696`), Super Heroes DC (`695`), Batman (`697`), Space (`126`), Educational and Dacta (`507`), Mindstorms (`258`), The Lord of the Rings (`566`), and Collectible Minifigures (`535`; excluded from the offline catalog, origin / manual associate only)
 
 ### 🔧 Fixed
 

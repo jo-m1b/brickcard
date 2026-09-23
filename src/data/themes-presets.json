@@ -48,6 +48,7 @@
     {
       "id": "batman",
       "name": "Batman™",
+      "rebrickableThemeId": 697,
       "logoSrc": "data/theme-logo-batman.svg",
       "color": "#212121"
     },
@@ -83,6 +84,7 @@
     {
       "id": "city",
       "name": "City",
+      "rebrickableThemeId": 52,
       "logoSrc": "data/theme-logo-city.webp",
       "color": "#003290",
       "logoZoom": 0.85
@@ -104,6 +106,7 @@
     {
       "id": "dc",
       "name": "DC",
+      "rebrickableThemeId": 695,
       "logoSrc": "data/theme-logo-dc.svg",
       "color": "#006993",
       "logoZoom": 0.6
@@ -111,6 +114,7 @@
     {
       "id": "disney",
       "name": "Disney",
+      "rebrickableThemeId": 608,
       "logoSrc": "data/theme-logo-disney.svg",
       "color": "#00395d"
     },
@@ -132,6 +136,7 @@
     {
       "id": "education",
       "name": "Education",
+      "rebrickableThemeId": 507,
       "logoSrc": "data/theme-logo-education.svg",
       "color": "#141414"
     },
@@ -232,6 +237,7 @@
     {
       "id": "lord-of-the-rings",
       "name": "Lord of the Rings™",
+      "rebrickableThemeId": 566,
       "logoSrc": "data/theme-logo-lord-of-the-rings.webp",
       "color": "#034622",
       "logoZoom": 0.8,
@@ -240,6 +246,7 @@
     {
       "id": "marvel",
       "name": "Marvel",
+      "rebrickableThemeId": 696,
       "logoSrc": "data/theme-logo-marvel.svg",
       "color": "#011c58",
       "logoZoom": 0.95
@@ -247,6 +254,7 @@
     {
       "id": "mindstorms",
       "name": "Mindstorms",
+      "rebrickableThemeId": 258,
       "logoSrc": "data/theme-logo-mindstorms.svg",
       "color": "#dc143c"
     },
@@ -260,6 +268,7 @@
     {
       "id": "minifigures",
       "name": "Minifigures",
+      "rebrickableThemeId": 535,
       "logoSrc": "data/theme-logo-minifigures.svg",
       "color": "#fac400"
     },
@@ -347,6 +356,7 @@
     {
       "id": "space",
       "name": "Space",
+      "rebrickableThemeId": 126,
       "logoSrc": "data/theme-logo-space.svg",
       "color": "#0a58ca",
       "logoZoom": 0.65,
