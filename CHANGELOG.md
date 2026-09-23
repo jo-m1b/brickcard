@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ### ➕ Added
 
 - First-visit welcome modal (**Welcome to Brickcard**) on home (no hash): short intro and the LEGO / trademark disclaimer; off-local, if telemetry was never chosen, a yes/no ask to enable anonymous usage stats (public link shown as data.brickcard.org, no IP stored). **No thanks**, Escape, close, or the backdrop stores telemetry off. Leaving home without closing shows the modal again
+- Local telemetry UI preview: `?telemetry` (any value except `0`) shows the Settings checkbox and the welcome ask on localhost; the Umami script is still not injected and no page view is sent
 - Theme editor: **Prefill from the catalog database** / **Associate with the catalog database** (`bindThemeSearch`) when `rebrickableThemeId` is empty; picking fills the name (new theme: replace; edit: empty only) and stores the catalog id on save (`rebrickable-{id}` for a new custom theme); already-linked catalog ids are omitted; a default theme can store the origin on its overlay
 - Search gallery (`#developer/search`): theme-catalog autocomplete demo (path line, roots then children)
 - Catalog suggest and theme editor origin (`#themes/edit/:id`): Rebrickable theme path **Parent > Theme** (2 names max) so a parent and the catalog name stay visible after a Brickcard rename; search also matches the immediate parent theme name; `themeName` stays the leaf name for the pending catalog theme

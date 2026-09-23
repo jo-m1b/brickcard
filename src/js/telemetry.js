@@ -1,7 +1,7 @@
 /**
  * Anonymous usage telemetry (localStorage).
  * Script injected only if enabled (default: off), and never on a local dev host.
- * Settings and the welcome ask follow `isTelemetryAvailable()` (off-local).
+ * Settings and the welcome ask follow `isTelemetryAvailable()` (off-local, or `?telemetry` preview).
  */
 
 import { isLocalDevHost } from "./themes-data.js";
@@ -71,11 +71,25 @@ export function setTelemetry(on) {
 }
 
 /**
- * Settings field and welcome ask (off-local).
+ * Local preview of the telemetry UI (`?telemetry`, any value except `0`).
+ * Does not inject the script or send views (`isLocalDevHost` still blocks that).
+ * @returns {boolean}
+ */
+export function isTelemetryPreview() {
+  try {
+    const raw = new URLSearchParams(location.search).get("telemetry");
+    return raw !== null && raw !== "0";
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Settings field and welcome ask: off-local, or a local `?telemetry` preview.
  * Script injection stays off on a local dev host.
  */
 export function isTelemetryAvailable() {
-  return !isLocalDevHost();
+  return !isLocalDevHost() || isTelemetryPreview();
 }
 
 /** True when the user already stored on (`"1"`) or off (`"0"`). */
