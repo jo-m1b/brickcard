@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### ✏️ Changed
 
+- LEGO disclaimer names the application instead of the website (welcome modal and About)
 - Telemetry is off by default (missing `brickcard:telemetry` = off). Settings hint matches the welcome ask: anonymous stats, nothing identifies you, no IP stored, and usage data is public on data.brickcard.org (link to the public board)
 - About: MIT applies to source and docs only; theme logos and third-party marks are carved out (`NOTICE`); LEGO Fair Play disclaimer and a generic other-trademark line
 - Markdown pages: keep `<br>` in inline text (About license: line break before LICENSE / NOTICE, without a new paragraph)

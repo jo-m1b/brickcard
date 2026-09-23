@@ -10,7 +10,7 @@
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/I5P825YXAH)
 
-> LEGO® est une marque de LEGO Group. Ce site n’est ni sponsorisé, ni autorisé, ni approuvé par LEGO Group. Brickcard est un projet personnel, non commercial.
+> LEGO® est une marque de LEGO Group. Cette application n’est ni sponsorisée, ni autorisée, ni approuvée par LEGO Group. Brickcard est un projet personnel, non commercial.
 >
 > Les autres noms de produits, logos et marques affichés dans l’application sont des marques de leurs propriétaires respectifs. Ils ne servent qu’à identifier les thèmes LEGO®. Brickcard n’est ni affilié, ni sponsorisé, ni approuvé par ces propriétaires.
 
