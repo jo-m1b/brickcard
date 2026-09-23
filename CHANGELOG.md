@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.9.5] — 2026-09-23
+
 ### ➕ Added
 
 - Custom catalog themes (not a default theme or its overlay) show the nearest linked Brickcard ancestor’s color, secondary color, and logo (with crop) when their own value is empty. The chain follows catalog `parentId`. Nothing is copied into the theme, import, or backup
