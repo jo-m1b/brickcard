@@ -13,6 +13,7 @@ import {
   hideThemeLogoAsMissing,
 } from "./card-render.js";
 import { loadThemes } from "./storage.js";
+import { themeDisplayMap } from "./sets-presets.js";
 import {
   computePrintLayout,
   effectivePrintBleed,
@@ -324,7 +325,7 @@ export async function printCards(cards, opts = {}) {
   beginPrintDocumentTitle(pdfName);
 
   const themes = await loadThemes();
-  const themeMap = new Map(themes.map((t) => [t.id, t]));
+  const themeMap = await themeDisplayMap(themes);
   const layout = computePrintLayout(settings.printGrid);
 
   printRoot.innerHTML = "";

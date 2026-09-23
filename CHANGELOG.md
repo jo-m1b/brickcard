@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### ➕ Added
 
+- Custom catalog themes (not a default theme or its overlay) show the nearest linked Brickcard ancestor’s color, secondary color, and logo (with crop) when their own value is empty. The chain follows catalog `parentId`. Nothing is copied into the theme, import, or backup
 - First-visit welcome modal (**Welcome to Brickcard**) on home (no hash): short intro and the LEGO / trademark disclaimer; off-local, if telemetry was never chosen, a yes/no ask to enable anonymous usage stats (public link shown as data.brickcard.org, no IP stored). **No thanks**, Escape, close, or the backdrop stores telemetry off. Leaving home without closing shows the modal again
 - Local telemetry UI preview: `?telemetry` (any value except `0`) shows the Settings checkbox and the welcome ask on localhost; the Umami script is still not injected and no page view is sent
 - Theme editor: **Prefill from the catalog database** / **Associate with the catalog database** (`bindThemeSearch`) when `rebrickableThemeId` is empty; picking fills the name (new theme: replace; edit: empty only) and stores the catalog id on save (`rebrickable-{id}` for a new custom theme); already-linked catalog ids are omitted; a default theme can store the origin on its overlay

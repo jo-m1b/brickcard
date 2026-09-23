@@ -11,7 +11,7 @@ import {
   getTheme,
 } from "../storage.js";
 import { mountCardBackPreview, refreshCardBackPreview } from "../card-render.js";
-import { contrastText, DEFAULT_THEME_COLOR, getPresetTheme, parseRebrickableThemeId } from "../themes-data.js";
+import { contrastText, DEFAULT_THEME_COLOR, getPresetTheme, parseHexColor, parseRebrickableThemeId } from "../themes-data.js";
 import { resolveCardAccent } from "../card-design.js";
 import { confirmDialog, confirmUnsavedClose } from "../confirm-dialog.js";
 import { popModalDocumentTitle, pushModalDocumentTitle, setAppDocumentTitle } from "../document-title.js";
@@ -27,6 +27,7 @@ import {
   catalogThemePathLabel,
   findThemeByRebrickableId,
   loadSetsPresets,
+  themeDisplayMap,
 } from "../sets-presets.js";
 import { bindThemeSearch } from "../set-search.js";
 import { _t } from "../i18n.js";
@@ -80,18 +81,55 @@ export async function renderThemeEditor(host, opts) {
     logoOffsetY: existing?.logoOffsetY || 0,
   };
 
-  const colorDisplay = draft.color || resolveCardAccent(existing);
+  /**
+   * Ancestor appearance only (own fields blanked). Not written into `draft`.
+   * @type {import("../themes-data.js").LegoTheme|null}
+   */
+  let ancestor = null;
+  let ancestorSeq = 0;
+
+  /**
+   * @param {number|null} originId
+   * @returns {Promise<import("../themes-data.js").LegoTheme|null>}
+   */
+  async function loadAncestor(originId) {
+    if (preset || !originId) return null;
+    const shell = {
+      id: draft.id || "ancestor-shell",
+      name: "",
+      color: "",
+      secondaryColor: "",
+      logoDataUrl: "",
+      logoZoom: 1,
+      logoOffsetX: 0,
+      logoOffsetY: 0,
+      isBuiltin: false,
+      rebrickableThemeId: originId,
+      updatedAt: "",
+    };
+    const map = await themeDisplayMap([shell]);
+    const display = map.get(shell.id);
+    if (!display || display === shell) return null;
+    return display;
+  }
+
+  if (!preset && originThemeId) {
+    ancestor = await loadAncestor(originThemeId);
+  }
+
+  const colorDisplay = draft.color || resolveCardAccent({ color: ancestor?.color || "" });
   const dialogTitle = existing
     ? _t("Edit “%(name)s”", { name: existing.name })
     : _t("New theme");
   const dialogIcon = existing ? ICON_PENCIL : ICON_ADD;
 
   function themeCropBackground() {
-    return resolveCardAccent({ color: draft.color });
+    return resolveCardAccent({ color: draft.color || ancestor?.color || "" });
   }
 
   function autoAccentFg() {
-    return contrastText(themeCropBackground());
+    const fromParent = draft.secondaryColor ? "" : parseHexColor(ancestor?.secondaryColor);
+    return fromParent || contrastText(themeCropBackground());
   }
 
   const wrap = document.createElement("div");
@@ -254,16 +292,19 @@ export async function renderThemeEditor(host, opts) {
 
   /** @returns {import("../themes-data.js").LegoTheme} */
   function previewTheme() {
+    const ownLogo = String(draft.logoDataUrl || "").trim();
+    const useInheritedLogo = !ownLogo && Boolean(ancestor?.logoDataUrl);
     return {
       id: draft.id || "",
       name: nameInput.value.trim(),
-      color: draft.color,
-      secondaryColor: draft.secondaryColor,
-      logoDataUrl: draft.logoDataUrl,
-      logoZoom: draft.logoZoom,
-      logoOffsetX: draft.logoOffsetX,
-      logoOffsetY: draft.logoOffsetY,
+      color: draft.color || ancestor?.color || "",
+      secondaryColor: draft.secondaryColor || ancestor?.secondaryColor || "",
+      logoDataUrl: ownLogo || ancestor?.logoDataUrl || "",
+      logoZoom: useInheritedLogo ? ancestor.logoZoom : draft.logoZoom,
+      logoOffsetX: useInheritedLogo ? ancestor.logoOffsetX : draft.logoOffsetX,
+      logoOffsetY: useInheritedLogo ? ancestor.logoOffsetY : draft.logoOffsetY,
       isBuiltin: Boolean(existing?.isBuiltin),
+      rebrickableThemeId: originThemeId,
       updatedAt: "",
     };
   }
@@ -293,7 +334,7 @@ export async function renderThemeEditor(host, opts) {
       onChange: (value) => {
             draft.color = value || "";
             if (!value) {
-              themeColorField?.setValue("", resolveCardAccent(null));
+              themeColorField?.setValue("", themeCropBackground());
             }
             logoField?.setPreviewBackground(themeCropBackground());
             secondaryColorField?.setValue(draft.secondaryColor, autoAccentFg());
@@ -506,6 +547,17 @@ export async function renderThemeEditor(host, opts) {
     };
   }
 
+  async function refreshAncestor() {
+    const seq = ++ancestorSeq;
+    const next = await loadAncestor(originThemeId);
+    if (seq !== ancestorSeq) return;
+    ancestor = next;
+    if (!draft.color) themeColorField?.setValue("", themeCropBackground());
+    if (!draft.secondaryColor) secondaryColorField?.setValue("", autoAccentFg());
+    logoField?.setPreviewBackground(themeCropBackground());
+    syncPreview();
+  }
+
   const themeSearchBar = /** @type {HTMLElement|null} */ (
     q("#theme-catalog-search-bar")
   );
@@ -521,8 +573,8 @@ export async function renderThemeEditor(host, opts) {
           if (!isEdit || !String(nameInput.value || "").trim()) {
             nameInput.value = theme.name;
             if (nameError?.textContent) setNameError("");
-            syncPreview();
           }
+          void refreshAncestor();
         },
       })
     : () => {};

@@ -24,6 +24,7 @@ import { popModalDocumentTitle, pushModalDocumentTitle, setAppDocumentTitle } fr
 import { getTopModal } from "../modal-focus.js";
 import { _t, getLocale } from "../i18n.js";
 import { matchesNeedles, queryNeedles } from "../includes-ci.js";
+import { themeDisplayMap } from "../sets-presets.js";
 
 const SORT_KEY = "brickcard:themes-sort";
 const SORT_DIR_KEY = "brickcard:themes-sort-dir";
@@ -115,7 +116,8 @@ export function refreshThemesListAfterCreate(theme) {
 }
 
 /**
- * Updates the mini-card of a theme already shown, without rebuilding the grid.
+ * Updates a theme mini-card already shown, and refreshes custom tiles that
+ * inherit appearance from it.
  * @param {import("../themes-data.js").LegoTheme} theme
  * @returns {boolean} false if the list is not mounted
  */
@@ -157,9 +159,11 @@ function applyThemeTileFocus(tile) {
 }
 
 /**
- * Removes a theme from the mounted list (tile + memory + counters), without rebuilding the grid.
+ * Removes a theme from the mounted list and repaints, so child tiles drop
+ * appearance inherited from it. `restoredPreset` puts a default theme back
+ * after an overlay is removed.
  * @param {string} id
- * @param {import("../themes-data.js").LegoTheme} [restoredPreset] Default theme to put back after removing an overlay
+ * @param {import("../themes-data.js").LegoTheme} [restoredPreset]
  * @returns {boolean} false if the list is not mounted
  */
 export function removeThemeFromList(id, restoredPreset) {
@@ -559,6 +563,31 @@ export async function renderThemesModal(host, opts) {
     });
   }
 
+  /** @type {Map<string, import("../themes-data.js").LegoTheme>} */
+  let displayById = new Map();
+  let displaySeq = 0;
+
+  /** @param {import("../themes-data.js").LegoTheme} theme */
+  function tileTheme(theme) {
+    return displayById.get(theme.id) || theme;
+  }
+
+  /** Recompute ancestor colors / logos, then repaint. Keeps tile focus. */
+  async function repaintThemes() {
+    const seq = ++displaySeq;
+    const map = await themeDisplayMap([...custom, ...builtin]);
+    if (seq !== displaySeq) return;
+    displayById = map;
+    const focusId =
+      pendingFocusThemeId ||
+      (document.activeElement instanceof Element
+        ? document.activeElement.closest("[data-edit]")?.getAttribute("data-edit")
+        : "") ||
+      "";
+    paint();
+    if (focusId) applyThemeTileFocus(queryThemeTile(focusId));
+  }
+
   function paint() {
     const needles = queryNeedles(searchQuery());
     const dateSort = sortKey === "updatedAt" && canSortByDate();
@@ -571,10 +600,10 @@ export async function renderThemesModal(host, opts) {
     const shown = customShown.length + builtinShown.length;
 
     customGrid.innerHTML = customShown
-      .map((t) => themeTileMarkup(t, usage.get(t.id) || 0, "edit"))
+      .map((t) => themeTileMarkup(tileTheme(t), usage.get(t.id) || 0, "edit"))
       .join("");
     builtinGrid.innerHTML = builtinShown
-      .map((t) => themeTileMarkup(t, usage.get(t.id) || 0, "edit"))
+      .map((t) => themeTileMarkup(tileTheme(t), usage.get(t.id) || 0, "edit"))
       .join("");
 
     customSection.hidden = customShown.length === 0;
@@ -597,27 +626,6 @@ export async function renderThemesModal(host, opts) {
       queryCustomTile(id) ||
       builtinGrid.querySelector(`[data-edit="${CSS.escape(id)}"]`)
     );
-  }
-
-  function visibleNumTiles() {
-    return (
-      customGrid.querySelectorAll(".theme-tile").length +
-      builtinGrid.querySelectorAll(".theme-tile").length
-    );
-  }
-
-  function syncThemesChrome() {
-    const shown = visibleNumTiles();
-    customSection.hidden = customGrid.querySelectorAll(".theme-tile").length === 0;
-    builtinSection.hidden = builtinGrid.querySelectorAll(".theme-tile").length === 0;
-    emptyFilter.hidden = shown > 0;
-    updateSearchNumResults(shown);
-    if (sortKey === "updatedAt" && !canSortByDate()) {
-      sortKey = "numCards";
-      sortDir = defaultSortDir("numCards");
-    }
-    syncSortMenu();
-    syncDeleteAllCustomBtn();
   }
 
   function scrollThemesListTop() {
@@ -767,6 +775,7 @@ export async function renderThemesModal(host, opts) {
     openThemeTile(tile);
   }
 
+  displayById = await themeDisplayMap([...custom, ...builtin]);
   paint();
 
   mountedFocusThemeInList = (id) => applyThemeTileFocus(queryThemeTile(id));
@@ -787,6 +796,7 @@ export async function renderThemesModal(host, opts) {
     }
     paint();
     scrollThemesListTop();
+    void repaintThemes();
     return true;
   };
 
@@ -797,40 +807,26 @@ export async function renderThemesModal(host, opts) {
       const bidx = builtin.findIndex((t) => t.id === theme.id);
       if (bidx >= 0) builtin[bidx] = theme;
       else builtin.push(theme);
-      paint();
-      return true;
+    } else {
+      const bidx = builtin.findIndex((t) => t.id === theme.id);
+      if (bidx >= 0) builtin.splice(bidx, 1);
+      const idx = custom.findIndex((t) => t.id === theme.id);
+      if (idx >= 0) custom[idx] = theme;
+      else custom.push(theme);
     }
-    const bidx = builtin.findIndex((t) => t.id === theme.id);
-    if (bidx >= 0) builtin.splice(bidx, 1);
-    const idx = custom.findIndex((t) => t.id === theme.id);
-    if (idx >= 0) custom[idx] = theme;
-    else custom.push(theme);
-    const tile = queryCustomTile(theme.id);
-    if (!(tile instanceof HTMLElement)) {
-      paint();
-      return true;
-    }
-    const wrap = document.createElement("div");
-    wrap.innerHTML = themeTileMarkup(theme, usage.get(theme.id) || 0, "edit").trim();
-    const next = wrap.firstElementChild;
-    if (!(next instanceof HTMLElement)) return true;
-    tile.replaceWith(next);
-    bindThemeTileLogos(next);
+    void repaintThemes();
     return true;
   };
 
   mountedRemoveThemeFromList = (id, restoredPreset) => {
     const cidx = custom.findIndex((t) => t.id === id);
     if (cidx >= 0) custom.splice(cidx, 1);
-    queryCustomTile(id)?.remove();
     if (restoredPreset) {
       const bidx = builtin.findIndex((t) => t.id === restoredPreset.id);
       if (bidx >= 0) builtin[bidx] = restoredPreset;
       else builtin.push(restoredPreset);
-      paint();
-      return true;
     }
-    syncThemesChrome();
+    void repaintThemes();
     return true;
   };
 
@@ -855,6 +851,7 @@ export async function renderThemesModal(host, opts) {
         const presets = await getPresetThemes();
         builtin.length = 0;
         builtin.push(...presets);
+        displayById = new Map();
         paint();
         onClearedCustomThemes?.();
         btnAddTheme?.focus();

@@ -18,6 +18,7 @@ import { _t } from "../i18n.js";
 import { matchesNeedles, queryNeedles } from "../includes-ci.js";
 import { registerCardsGrid } from "../list-layout.js";
 import { mountCardPreview } from "../card-render.js";
+import { themeDisplayMap } from "../sets-presets.js";
 
 const ICON_PRINT = ICON_PRINTER;
 const ICON_MINUS = ICON_SUBTRACT;
@@ -155,6 +156,13 @@ export async function renderList(main, opts) {
   const [cards, themes] = await Promise.all([loadCards(), loadThemes()]);
   /** @type {Map<string, import("../storage.js").LegoTheme>} */
   const themeMap = new Map(themes.map((t) => [t.id, t]));
+  const displayMap = await themeDisplayMap(themes);
+
+  /** Display copy (ancestor colors / logo) for the card paint. */
+  function themeForCard(id) {
+    if (!id) return null;
+    return displayMap.get(id) || themeMap.get(id) || null;
+  }
 
   let pruned = false;
   const ids = new Set(cards.map((c) => c.id));
@@ -413,9 +421,7 @@ export async function renderList(main, opts) {
     els.emptyFilter.hidden = list.length > 0 || cards.length === 0;
 
     for (const card of list) {
-      const legoTheme = card.brickcardThemeId
-        ? themeMap.get(card.brickcardThemeId)
-        : null;
+      const legoTheme = themeForCard(card.brickcardThemeId);
       const qty = getPrintQty(card.id);
       const isSel = qty > 0;
 
@@ -641,9 +647,7 @@ export async function renderList(main, opts) {
     cards[idx] = card;
     const tile = queryCardTile(card.id);
     if (!(tile instanceof HTMLElement)) return true;
-    const legoTheme = card.brickcardThemeId
-      ? themeMap.get(card.brickcardThemeId)
-      : null;
+    const legoTheme = themeForCard(card.brickcardThemeId);
     const preview = tile.querySelector(".card-tile-preview");
     if (preview instanceof HTMLElement) {
       mountCardPreview(preview, card, { legoTheme });

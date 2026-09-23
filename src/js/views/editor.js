@@ -30,6 +30,7 @@ import { formatCardImageBasename } from "../card-export.js";
 import { confirmDialog, confirmUnsavedClose } from "../confirm-dialog.js";
 import { _t } from "../i18n.js";
 import { partitionThemes } from "../themes-data.js";
+import { themeDisplayMap } from "../sets-presets.js";
 import { setAppDocumentTitle } from "../document-title.js";
 import { focusTopModal, getTopModal } from "../modal-focus.js";
 import {
@@ -94,6 +95,30 @@ export async function renderEditor(host, opts) {
       themes.find((t) => t.id === existing.brickcardThemeId) ||
       (await getTheme(existing.brickcardThemeId));
   }
+
+  /** Display copy for the card preview (ancestor colors / logo). Not saved. */
+  let previewLegoTheme = state.legoTheme;
+  let previewSeq = 0;
+
+  async function resolvePreviewTheme() {
+    const seq = ++previewSeq;
+    const theme = state.legoTheme;
+    if (!theme) {
+      if (seq !== previewSeq) return;
+      previewLegoTheme = null;
+      return;
+    }
+    try {
+      const map = await themeDisplayMap([theme]);
+      if (seq !== previewSeq) return;
+      previewLegoTheme = map.get(theme.id) || theme;
+    } catch {
+      if (seq !== previewSeq) return;
+      previewLegoTheme = theme;
+    }
+  }
+
+  const previewThemeReady = resolvePreviewTheme();
 
   const selectedId = existing?.brickcardThemeId || "";
   /** @param {import("../themes-data.js").LegoTheme[]} list @param {string} selected */
@@ -302,14 +327,16 @@ export async function renderEditor(host, opts) {
     imageOffsetY: state.imageOffsetY,
   };
 
+  await previewThemeReady;
+
   /** @type {HTMLElement} */
   let previewCard = mountCardPreview(refs.previewHost, previewDraft, {
-    legoTheme: state.legoTheme,
+    legoTheme: previewLegoTheme,
   });
 
   /** @type {HTMLElement} */
   let previewBack = mountCardBackPreview(refs.previewBackHost, previewDraft, {
-    legoTheme: state.legoTheme,
+    legoTheme: previewLegoTheme,
   });
 
   if (existing) {
@@ -363,11 +390,16 @@ export async function renderEditor(host, opts) {
   function syncPreview() {
     const data = draft();
     refreshCardPreview(previewCard, data, {
-      legoTheme: state.legoTheme,
+      legoTheme: previewLegoTheme,
     });
     refreshCardBackPreview(previewBack, data, {
-      legoTheme: state.legoTheme,
+      legoTheme: previewLegoTheme,
     });
+  }
+
+  async function applyPreviewTheme() {
+    await resolvePreviewTheme();
+    syncPreview();
   }
 
   function cardImageBasename() {
@@ -475,7 +507,7 @@ export async function renderEditor(host, opts) {
         });
       }
 
-      syncPreview();
+      await applyPreviewTheme();
     } catch (err) {
       if (seq !== applySeq) return;
       console.error(err);
@@ -517,7 +549,7 @@ export async function renderEditor(host, opts) {
     const id = refs.brickcardThemeId.value;
     state.legoTheme = resolveThemeById(id);
     syncThemeActionButton();
-    syncPreview();
+    void applyPreviewTheme();
   });
 
   function themesWithPending() {
@@ -569,7 +601,7 @@ export async function renderEditor(host, opts) {
     bindThemeSelect();
     state.legoTheme = resolveThemeById(nextId);
     syncThemeActionButton();
-    syncPreview();
+    void applyPreviewTheme();
   }
 
   /**

@@ -14,7 +14,12 @@ import {
   parseRebrickableSetId,
   upsertTheme,
 } from "./storage.js";
-import { getPresetThemes, isLocalDevHost, parseRebrickableThemeId } from "./themes-data.js";
+import {
+  getPresetThemes,
+  isLocalDevHost,
+  parseHexColor,
+  parseRebrickableThemeId,
+} from "./themes-data.js";
 
 const CATALOG_URL = "data/sets-presets.json";
 
@@ -408,6 +413,145 @@ export async function findThemeByRebrickableId(themeId) {
     if (theme.rebrickableThemeId === id) return theme;
   }
   return null;
+}
+
+/**
+ * Brickcard themes keyed by catalog id. Default theme (live overlay if any)
+ * wins over a custom theme; the first custom theme wins if several share an id.
+ * @param {import("./themes-data.js").LegoTheme[]} presets
+ * @param {import("./themes-data.js").LegoTheme[]} live
+ * @returns {Map<number, import("./themes-data.js").LegoTheme>}
+ */
+function indexThemesByRebrickableId(presets, live) {
+  /** @type {Map<number, import("./themes-data.js").LegoTheme>} */
+  const byId = new Map();
+  /** @type {Set<string>} */
+  const presetIds = new Set();
+  const liveById = new Map(live.map((theme) => [theme.id, theme]));
+  for (const preset of presets) {
+    presetIds.add(preset.id);
+    const theme = liveById.get(preset.id) || preset;
+    const id = parseRebrickableThemeId(theme.rebrickableThemeId);
+    if (id && !byId.has(id)) byId.set(id, theme);
+  }
+  for (const theme of live) {
+    if (theme.isBuiltin || presetIds.has(theme.id)) continue;
+    const id = parseRebrickableThemeId(theme.rebrickableThemeId);
+    if (id && !byId.has(id)) byId.set(id, theme);
+  }
+  return byId;
+}
+
+/**
+ * Custom theme (not a default theme or its overlay) with a catalog link
+ * and at least one empty appearance field.
+ * @param {import("./themes-data.js").LegoTheme|null|undefined} theme
+ * @param {Set<string>} presetIds
+ * @returns {boolean}
+ */
+function themeNeedsAncestorFill(theme, presetIds) {
+  if (!theme || theme.isBuiltin || presetIds.has(theme.id)) return false;
+  if (!parseRebrickableThemeId(theme.rebrickableThemeId)) return false;
+  if (!parseHexColor(theme.color)) return true;
+  if (!parseHexColor(theme.secondaryColor)) return true;
+  return !String(theme.logoDataUrl || "").trim();
+}
+
+/**
+ * Display copy: empty color, secondary color, and logo (with crop) filled
+ * from the nearest Brickcard ancestor on the catalog `parentId` chain.
+ * Stored theme is not mutated. Unchanged themes are returned as-is.
+ * @param {import("./themes-data.js").LegoTheme} theme
+ * @param {Map<number, import("./themes-data.js").LegoTheme>} byRebrickableId
+ * @param {Map<string, CatalogTheme>} catalogThemes
+ * @returns {import("./themes-data.js").LegoTheme}
+ */
+function themeWithAncestorAppearance(theme, byRebrickableId, catalogThemes) {
+  const ownColor = parseHexColor(theme.color);
+  const ownSecondary = parseHexColor(theme.secondaryColor);
+  const ownLogo = String(theme.logoDataUrl || "").trim();
+  let color = ownColor;
+  let secondaryColor = ownSecondary;
+  let logoDataUrl = ownLogo;
+  let logoZoom = theme.logoZoom;
+  let logoOffsetX = theme.logoOffsetX;
+  let logoOffsetY = theme.logoOffsetY;
+
+  const origin = parseRebrickableThemeId(theme.rebrickableThemeId);
+  /** @type {Set<number>} */
+  const seen = new Set();
+  if (origin) seen.add(origin);
+  let id = origin ? catalogThemes.get(String(origin))?.parentId ?? null : null;
+
+  while (id && !seen.has(id)) {
+    seen.add(id);
+    const parent = byRebrickableId.get(id);
+    if (parent && parent.id !== theme.id) {
+      if (!color) {
+        const next = parseHexColor(parent.color);
+        if (next) color = next;
+      }
+      if (!secondaryColor) {
+        const next = parseHexColor(parent.secondaryColor);
+        if (next) secondaryColor = next;
+      }
+      if (!logoDataUrl) {
+        const next = String(parent.logoDataUrl || "").trim();
+        if (next) {
+          logoDataUrl = next;
+          logoZoom = parent.logoZoom;
+          logoOffsetX = parent.logoOffsetX;
+          logoOffsetY = parent.logoOffsetY;
+        }
+      }
+    }
+    if (color && secondaryColor && logoDataUrl) break;
+    id = catalogThemes.get(String(id))?.parentId ?? null;
+  }
+
+  if (color === ownColor && secondaryColor === ownSecondary && logoDataUrl === ownLogo) {
+    return theme;
+  }
+  return {
+    ...theme,
+    color,
+    secondaryColor,
+    logoDataUrl,
+    logoZoom,
+    logoOffsetX,
+    logoOffsetY,
+  };
+}
+
+/**
+ * Display copies of `themes` (same id). Custom catalog children pick up
+ * empty color, secondary color, and logo from the nearest linked Brickcard
+ * ancestor. Default themes and their overlays are unchanged. Nothing is written
+ * to IndexedDB. On catalog failure, the stored themes are returned as-is.
+ * @param {import("./themes-data.js").LegoTheme[]} themes
+ * @returns {Promise<Map<string, import("./themes-data.js").LegoTheme>>}
+ */
+export async function themeDisplayMap(themes) {
+  const list = Array.isArray(themes) ? themes.filter(Boolean) : [];
+  /** @type {Map<string, import("./themes-data.js").LegoTheme>} */
+  const result = new Map(list.map((theme) => [theme.id, theme]));
+  try {
+    const presets = await getPresetThemes();
+    const presetIds = new Set(presets.map((preset) => preset.id));
+    const pending = list.filter((theme) => themeNeedsAncestorFill(theme, presetIds));
+    if (!pending.length) return result;
+    const [catalog, live] = await Promise.all([loadSetsPresets(), loadThemes()]);
+    const byRebrickableId = indexThemesByRebrickableId(presets, live);
+    for (const theme of pending) {
+      result.set(
+        theme.id,
+        themeWithAncestorAppearance(theme, byRebrickableId, catalog.themes)
+      );
+    }
+  } catch {
+    return result;
+  }
+  return result;
 }
 
 /**
