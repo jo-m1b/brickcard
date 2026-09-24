@@ -988,6 +988,64 @@ document.addEventListener("keydown", (e) => {
   navigate("#print");
 });
 
+const TOPBAR_TABBABLE = [
+  'a[href]:not([tabindex="-1"])',
+  'button:not([disabled]):not([tabindex="-1"])',
+  'input:not([disabled]):not([tabindex="-1"])',
+  'select:not([disabled]):not([tabindex="-1"])',
+  'textarea:not([disabled]):not([tabindex="-1"])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(",");
+
+/** @param {Element} el */
+function isShownTabStop(el) {
+  if (!(el instanceof HTMLElement)) return false;
+  if (el.closest("[hidden]")) return false;
+  if (el.getAttribute("aria-hidden") === "true") return false;
+  if ("disabled" in el && /** @type {HTMLButtonElement} */ (el).disabled) return false;
+  const style = getComputedStyle(el);
+  return style.display !== "none" && style.visibility !== "hidden";
+}
+
+/** @param {ParentNode} root */
+function shownTabStops(root) {
+  return [...root.querySelectorAll(TOPBAR_TABBABLE)].filter(isShownTabStop);
+}
+
+/**
+ * Tab skips the top bar unless focus is already inside it.
+ * Inside, Tab keeps the usual order (logo, search, sort, new card, print, settings),
+ * including Shift+Tab from the search field back to the logo.
+ */
+function bindTopbarTabSkip() {
+  document.addEventListener(
+    "keydown",
+    (e) => {
+      if (e.key !== "Tab" || e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
+      const topbar = document.querySelector(".topbar");
+      if (!(topbar instanceof HTMLElement) || getTopModal()) return;
+      const active = document.activeElement;
+      if (active instanceof Node && topbar.contains(active)) return;
+
+      const stops = shownTabStops(document);
+      const index = active instanceof Element ? stops.indexOf(active) : -1;
+      const upcoming = e.shiftKey ? (index > 0 ? stops[index - 1] : null) : index === -1 ? stops[0] : stops[index + 1];
+      if (!(upcoming instanceof Element) || !topbar.contains(upcoming)) return;
+
+      const target = e.shiftKey
+        ? stops.findLast((el, i) => i < index && !topbar.contains(el))
+        : stops.find((el, i) => i > index && !topbar.contains(el));
+      e.preventDefault();
+      if (target instanceof HTMLElement) {
+        target.focus({ focusVisible: true });
+        return;
+      }
+      if (e.shiftKey && active instanceof HTMLElement) active.blur();
+    },
+    true
+  );
+}
+
 document.addEventListener("click", (e) => {
   if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
     return;
@@ -1041,6 +1099,7 @@ async function boot() {
     initListLayout();
     initPrintMenu({ toast, onOpenPrint: () => navigate("#print") });
     bindModalFocusTrap();
+    bindTopbarTabSkip();
     applyShortcutAffordances(document);
     const modalRootObserved = document.getElementById("modal-root");
     if (modalRootObserved && typeof MutationObserver === "function") {
