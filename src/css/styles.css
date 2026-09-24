@@ -3811,6 +3811,55 @@ body.modal-open {
   min-width: 10.5rem;
 }
 
+.shortcut-list {
+  list-style: none;
+  margin: 0.35rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.shortcut-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.shortcut-label {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.shortcut-keys {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.shortcut-keys kbd {
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0.2rem 0.4rem;
+  border: none;
+  border-radius: 0;
+  background: var(--ink);
+  color: var(--bg);
+  box-shadow: none;
+}
+
+.shortcut-plus,
+.shortcut-or {
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+}
+
 .collection-xfer-dialog .settings-panel {
   padding-bottom: 0;
 }

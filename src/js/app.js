@@ -8,10 +8,24 @@ import { APP_ID, APP_VERSION } from "./version.js";
 import { setAppDocumentTitle } from "./document-title.js";
 import { toast } from "./toast.js";
 import { renderList, prepareListAfterCardCreate, patchListCard, removeListCard, focusListCard } from "./views/list.js";
-import { isPrintShortcut, isCollectionSaveShortcut } from "./hotkeys.js";
+import {
+  isBareAboutKey,
+  isBareDeveloperKey,
+  isBareNewCardKey,
+  isBareSettingsKey,
+  isBareThemesKey,
+  isCollectionSaveShortcut,
+  isFindShortcut,
+  isNewCardShortcut,
+  isPrimaryActionShortcut,
+  isPrintShortcut,
+  isSearchFocusKey,
+  isSettingsShortcut,
+  applyShortcutAffordances,
+} from "./hotkeys.js";
 import { loadingViewMarkup, welcomeViewMarkup } from "./empty-view.js";
 import { openConfirmDialog } from "./confirm-dialog.js";
-import { bindModalFocusTrap, focusTopModal } from "./modal-focus.js";
+import { bindModalFocusTrap, focusTopModal, getTopModal } from "./modal-focus.js";
 import {
   initPrintMenu,
   setPrintMenuVisible,
@@ -243,7 +257,7 @@ function overlayOnClose(name) {
   };
 }
 
-/** Draft editor: Ctrl/Cmd+S does not open `#backup` (avoids losing input). */
+/** Draft editor: Ctrl/Cmd+S saves the draft instead of opening `#backup`. */
 function isDraftEditorRoute(info) {
   if (info.name === "editor") return true;
   if (info.name === "themes" && (info.page === "new" || info.page === "edit")) return true;
@@ -674,6 +688,7 @@ async function route() {
     await ensureUnderlay();
     if (token !== routeToken) return;
     trackTelemetryPage();
+    applyShortcutAffordances(document);
     void openWelcomeOnHome(token);
     return;
   }
@@ -690,6 +705,7 @@ async function route() {
     if (token !== routeToken) return;
     shownRoute = routeInfo;
     trackTelemetryPage();
+    applyShortcutAffordances(document);
     return;
   }
 
@@ -699,6 +715,7 @@ async function route() {
     if (token !== routeToken) return;
     shownRoute = routeInfo;
     trackTelemetryPage();
+    applyShortcutAffordances(document);
     return;
   }
 
@@ -716,6 +733,7 @@ async function route() {
   if (token !== routeToken) return;
   shownRoute = routeInfo;
   trackTelemetryPage();
+  applyShortcutAffordances(document);
 }
 
 /**
@@ -766,19 +784,194 @@ async function handleDevReset() {
 btnNew.addEventListener("click", () => navigate("#new-card"));
 if (btnSettings) btnSettings.addEventListener("click", () => navigate("#settings"));
 
+/**
+ * Visible catalog / list search (`type="search"` inside `.search-bar`).
+ * @param {EventTarget|null} el
+ * @returns {el is HTMLInputElement}
+ */
+function isAvailableSearchInput(el) {
+  if (!(el instanceof HTMLInputElement) || el.disabled) return false;
+  if ((el.type || "").toLowerCase() !== "search") return false;
+  if (!el.closest(".search-bar")) return false;
+  if (el.closest("[hidden]")) return false;
+  if (el.getAttribute("aria-hidden") === "true") return false;
+  const style = getComputedStyle(el);
+  return style.display !== "none" && style.visibility !== "hidden";
+}
+
+/** Search field of the front view (modal first, otherwise the home bar). */
+function availableSearchInput() {
+  const modal = getTopModal();
+  const scope = modal instanceof HTMLElement ? modal : document;
+  const inputs = scope.querySelectorAll(".search-bar input[type='search']");
+  for (const input of inputs) {
+    if (isAvailableSearchInput(input)) return input;
+  }
+  return null;
+}
+
+function focusAvailableSearch() {
+  const input = availableSearchInput();
+  if (!input) return false;
+  input.focus();
+  input.select();
+  return true;
+}
+
+/** Suggestion list or sort menu still open under this search field. */
+function searchListOpen(input) {
+  const bar = input.closest(".search-bar");
+  if (!bar) return false;
+  const list = bar.querySelector(":scope > .form-select-list, :scope > .search-sort-menu");
+  return list instanceof HTMLElement && !list.hidden;
+}
+
+/**
+ * Escape in a filled search field clears it (the open list closes first,
+ * via its own handler).
+ * @returns {boolean}
+ */
+function clearFocusedSearch() {
+  const el = document.activeElement;
+  if (!isAvailableSearchInput(el) || !el.value || searchListOpen(el)) return false;
+  el.value = "";
+  el.dispatchEvent(new Event("input", { bubbles: true }));
+  return true;
+}
+
+/**
+ * Save button of the front draft editor, or the unsaved-close **Save**.
+ * @param {HTMLElement} modal
+ * @returns {HTMLButtonElement|null}
+ */
+function editorSaveButton(modal) {
+  const save = modal.querySelector("#btn-card-save, #theme-save, #preset-theme-save");
+  if (save instanceof HTMLButtonElement) return save;
+  const confirmSave = modal.querySelector('[data-confirm-action="save"]');
+  if (confirmSave instanceof HTMLButtonElement) return confirmSave;
+  return null;
+}
+
+/** @param {HTMLButtonElement} btn */
+function clickIfEnabled(btn) {
+  if (btn.disabled) return;
+  btn.click();
+}
+
+/**
+ * Primary footer action (`btn primary`, not the icon-only close, not danger).
+ * @param {HTMLElement} modal
+ * @returns {HTMLButtonElement|null}
+ */
+function primaryActionButton(modal) {
+  const buttons = modal.querySelectorAll(".modal-footer button.btn.primary:not(.icon-only)");
+  for (const btn of buttons) {
+    if (!(btn instanceof HTMLButtonElement)) continue;
+    if (btn.hidden || btn.closest("[hidden]")) continue;
+    return btn;
+  }
+  return null;
+}
+
+/** Hash change would drop a draft, an import, or a child dialog. */
+function canLeaveForShortcut() {
+  const info = parseRoute();
+  if (isDraftEditorRoute(info)) return false;
+  if (info.name === "import") return false;
+  if (hasChildDialog()) return false;
+  return true;
+}
+
+/** @param {string} hash */
+function openShortcutRoute(hash) {
+  if (normalizeHash(location.hash) === normalizeHash(hash)) return;
+  navigate(hash);
+}
+
+document.addEventListener(
+  "keydown",
+  (e) => {
+    if (isNewCardShortcut(e)) {
+      if (!canLeaveForShortcut()) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      openShortcutRoute("#new-card");
+      return;
+    }
+    if (isSettingsShortcut(e)) {
+      if (!canLeaveForShortcut()) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      openShortcutRoute("#settings");
+      return;
+    }
+    if (e.key === "Escape" && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+      if (clearFocusedSearch()) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+      }
+      return;
+    }
+    if (!isPrimaryActionShortcut(e)) return;
+    const modal = getTopModal();
+    if (!modal) return;
+    const btn = primaryActionButton(modal);
+    if (!btn) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    clickIfEnabled(btn);
+  },
+  true
+);
+
 document.addEventListener("keydown", (e) => {
   if (isCollectionSaveShortcut(e)) {
     e.preventDefault();
     const info = parseRoute();
-    if (
-      info.name === "backup" ||
-      info.name === "import" ||
-      isDraftEditorRoute(info) ||
-      hasChildDialog()
-    ) {
+    if (isDraftEditorRoute(info)) {
+      const modal = getTopModal();
+      const save = modal ? editorSaveButton(modal) : null;
+      if (save) clickIfEnabled(save);
       return;
     }
+    if (info.name === "backup" || info.name === "import" || hasChildDialog()) return;
     navigate("#backup");
+    return;
+  }
+  if (isFindShortcut(e) || isSearchFocusKey(e)) {
+    if (focusAvailableSearch()) {
+      e.preventDefault();
+    }
+    return;
+  }
+  if (isBareNewCardKey(e)) {
+    if (!canLeaveForShortcut()) return;
+    e.preventDefault();
+    openShortcutRoute("#new-card");
+    return;
+  }
+  if (isBareSettingsKey(e)) {
+    if (!canLeaveForShortcut()) return;
+    e.preventDefault();
+    openShortcutRoute("#settings");
+    return;
+  }
+  if (isBareThemesKey(e)) {
+    if (!canLeaveForShortcut()) return;
+    e.preventDefault();
+    openShortcutRoute("#themes");
+    return;
+  }
+  if (isBareDeveloperKey(e)) {
+    if (!canLeaveForShortcut()) return;
+    e.preventDefault();
+    openShortcutRoute("#developer");
+    return;
+  }
+  if (isBareAboutKey(e)) {
+    if (!canLeaveForShortcut()) return;
+    e.preventDefault();
+    openShortcutRoute("#page/about");
     return;
   }
   if (!isPrintShortcut(e)) return;
@@ -848,6 +1041,20 @@ async function boot() {
     initListLayout();
     initPrintMenu({ toast, onOpenPrint: () => navigate("#print") });
     bindModalFocusTrap();
+    applyShortcutAffordances(document);
+    const modalRootObserved = document.getElementById("modal-root");
+    if (modalRootObserved && typeof MutationObserver === "function") {
+      let shortcutAffordanceQueued = false;
+      const shortcutObserver = new MutationObserver(() => {
+        if (shortcutAffordanceQueued) return;
+        shortcutAffordanceQueued = true;
+        queueMicrotask(() => {
+          shortcutAffordanceQueued = false;
+          applyShortcutAffordances(document);
+        });
+      });
+      shortcutObserver.observe(modalRootObserved, { childList: true, subtree: true });
+    }
     registerServiceWorker();
 
     history.replaceState({ app: APP_ID, depth: 0 }, "", hashUrl(location.hash));

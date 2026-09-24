@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### ➕ Added
+
+- Keyboard: **Ctrl/Cmd+S** saves the open card, theme, or preset editor (and the unsaved-close **Save?** button) instead of opening the collection backup. **Ctrl/Cmd+Enter** runs the front dialog’s primary button (Save, Import, Start printing, Load, New theme, welcome). **Ctrl/Cmd+F** and **/** focus the visible search bar of the current view (home, themes, settings, developer, catalog suggest) and select its text; **Escape** clears that field when it has text and its list is closed. **Ctrl/Cmd+Alt+N**, or **N** outside a text field, opens a new card (**Ctrl/Cmd+N** alone is reserved by the browser for a new window and is not delivered to the page). **Ctrl/Cmd+,**, or **,** outside a text field, opens Settings. **T** outside a text field opens Themes. **D** outside a text field opens the developer space. **?** outside a text field opens About. These navigation shortcuts are ignored in a draft editor, on import, and while a child dialog is open. Settings → **Keyboard shortcuts** lists them in the usual menu order (New, Save, Print, Search, Settings, other views, dialog confirm then dismiss); the controls they activate expose `aria-keyshortcuts`
+
 ## [0.9.5] — 2026-09-23
 
 ### ➕ Added

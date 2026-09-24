@@ -412,6 +412,11 @@ export function renderSettingsModal(host, opts) {
               ])}
             </section>
 
+            <section class="settings-panel">
+              <h2 class="section-title">${_t("Keyboard shortcuts")}</h2>
+              ${shortcutSectionMarkup()}
+            </section>
+
             ${
               showDevReset
                 ? `<section class="settings-panel">
@@ -595,6 +600,24 @@ export function renderSettingsModal(host, opts) {
         list.hidden = !anyTile;
         if (anyTile) anyChild = true;
       });
+      panel.querySelectorAll(":scope > .shortcut-list").forEach((list) => {
+        let anyRow = false;
+        list.querySelectorAll(":scope > li").forEach((li) => {
+          const show =
+            titleMatch ||
+            matchesNeedles(
+              needles,
+              titleText,
+              li.querySelector(".shortcut-name")?.textContent || "",
+              li.querySelector(".shortcut-hint")?.textContent || "",
+              li.querySelector(".shortcut-keys")?.textContent || "",
+            );
+          li.hidden = !show;
+          if (show) anyRow = true;
+        });
+        list.hidden = !anyRow;
+        if (anyRow) anyChild = true;
+      });
       panel.hidden = !anyChild;
       if (anyChild) anyPanel = true;
     });
@@ -767,6 +790,91 @@ function escapeHtml(str) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
+}
+
+/** Ctrl on Linux / Windows, Cmd on macOS. */
+function commandKeyLabel() {
+  const platform = navigator.userAgentData?.platform || navigator.platform || "";
+  if (/mac|iphone|ipad|ipod/i.test(platform)) return "Cmd";
+  return "Ctrl";
+}
+
+/**
+ * @param {string[][]} alternatives Each alternative is a sequence of key labels.
+ */
+function shortcutKeysMarkup(alternatives) {
+  return alternatives
+    .map((parts) => {
+      const keys = parts
+        .map((part) => `<kbd>${escapeHtml(part)}</kbd>`)
+        .join('<span class="shortcut-plus" aria-hidden="true">+</span>');
+      return `<span class="shortcut-combo">${keys}</span>`;
+    })
+    .join(`<span class="shortcut-or">${escapeHtml(_t("or"))}</span>`);
+}
+
+/**
+ * @param {string} name
+ * @param {string} keysHtml
+ * @param {string} [hint]
+ */
+function shortcutRow(name, keysHtml, hint) {
+  const hintHtml = hint ? `<span class="shortcut-hint form-hint">${escapeHtml(hint)}</span>` : "";
+  return `<li class="shortcut-row">
+    <span class="shortcut-label">
+      <span class="shortcut-name form-label">${escapeHtml(name)}</span>
+      ${hintHtml}
+    </span>
+    <span class="shortcut-keys">${keysHtml}</span>
+  </li>`;
+}
+
+/**
+ * @param {string} name
+ * @param {string[][]} alternatives
+ * @param {string} [hint]
+ */
+function shortcutRowMarkup(name, alternatives, hint) {
+  return shortcutRow(name, shortcutKeysMarkup(alternatives), hint);
+}
+
+function shortcutSectionMarkup() {
+  const mod = commandKeyLabel();
+  // Menu order: New, Save, Print, Find, Preferences, other views (Help last),
+  // then dialog confirm / dismiss, then keys that apply inside a list.
+  const rows = [
+    shortcutRowMarkup(_t("New card"), [["N"], [mod, "Alt", "N"]]),
+    shortcutRowMarkup(
+      _t("Save"),
+      [[mod, "S"]],
+      _t("Saves the open editor, or opens the collection backup."),
+    ),
+    shortcutRowMarkup(
+      _t("Print"),
+      [[mod, "P"]],
+      _t("Opens print settings. If they are already open, starts printing."),
+    ),
+    shortcutRowMarkup(
+      _t("Search"),
+      [["/"], [mod, "F"]],
+      _t("Focus the search bar of the current view"),
+    ),
+    shortcutRowMarkup(_t("Settings"), [[","], [mod, ","]]),
+    shortcutRowMarkup(_t("Themes"), [["T"]]),
+    shortcutRowMarkup(_t("Developer space"), [["D"]]),
+    shortcutRowMarkup(_t("About"), [["?"]]),
+    shortcutRowMarkup(
+      _t("Main button"),
+      [[mod, _t("Enter")]],
+      _t("Presses the dialog's main button."),
+    ),
+    shortcutRowMarkup(
+      _t("Close"),
+      [[_t("Escape")]],
+      _t("Clears a filled search field, then closes the dialog."),
+    ),
+  ];
+  return `<ul class="shortcut-list">${rows.join("")}</ul>`;
 }
 
 function escapeAttr(str) {

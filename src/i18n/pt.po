@@ -975,3 +975,39 @@ msgstr "Carregar outro backup"
 
 msgid "Nothing to import"
 msgstr "Nada para importar"
+
+msgid "Keyboard shortcuts"
+msgstr "Atalhos de teclado"
+
+msgid "or"
+msgstr "ou"
+
+msgid "Search"
+msgstr "Pesquisar"
+
+msgid "Focus the search bar of the current view"
+msgstr "Foca a barra de pesquisa da vista atual"
+
+msgid "About"
+msgstr "Sobre"
+
+msgid "Opens print settings. If they are already open, starts printing."
+msgstr "Abre as configurações de impressão. Se já estiverem abertas, inicia a impressão."
+
+msgid "Saves the open editor, or opens the collection backup."
+msgstr "Salva o editor aberto ou abre o backup da coleção."
+
+msgid "Main button"
+msgstr "Botão principal"
+
+msgid "Enter"
+msgstr "Enter"
+
+msgid "Presses the dialog's main button."
+msgstr "Aciona o botão principal da janela."
+
+msgid "Escape"
+msgstr "Esc"
+
+msgid "Clears a filled search field, then closes the dialog."
+msgstr "Limpa um campo de pesquisa preenchido e depois fecha a janela."
