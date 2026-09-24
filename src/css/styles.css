@@ -4404,6 +4404,20 @@ textarea {
   box-shadow: 0 0 0 2px var(--ink);
 }
 
+/* Previews are not selectable: a drag must not highlight the title or start an image drag. */
+.card,
+.card-back,
+.card-tile,
+.theme-tile {
+  user-select: none;
+}
+
+.card img,
+.card-back img,
+.theme-tile img {
+  -webkit-user-drag: none;
+}
+
 /*
  * Physical cards: accent via --card-accent (LEGO theme).
  * Face: auto header (1 line) · flexible photo · fixed footer.
