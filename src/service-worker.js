@@ -54,6 +54,7 @@ const OFFLINE_ASSETS = [
     "./js/print-settings.js",
     "./js/print.js",
     "./js/rebrickable-ref.js",
+    "./js/roving-grid.js",
     "./js/set-search.js",
     "./js/sets-presets.js",
     "./js/storage.js",

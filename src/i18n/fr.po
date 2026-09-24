@@ -1011,3 +1011,21 @@ msgstr "Échap"
 
 msgid "Clears a filled search field, then closes the dialog."
 msgstr "Efface un champ de recherche rempli, puis ferme la fenêtre."
+
+msgid "Move in a list"
+msgstr "Se déplacer dans la liste des cartes"
+
+msgid "Home key"
+msgstr "Début"
+
+msgid "End key"
+msgstr "Fin"
+
+msgid "Arrow keys move between cards or themes. Home and End jump to the ends."
+msgstr "Les flèches passent d’une carte ou d’un thème à l’autre. Début et Fin sautent aux extrémités."
+
+msgid "Print quantity"
+msgstr "Quantité d’impression"
+
+msgid "Changes the print quantity of the focused card."
+msgstr "Change la quantité d’impression de la carte focalisée."

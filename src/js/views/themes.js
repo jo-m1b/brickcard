@@ -22,6 +22,7 @@ import {
 import { emptyViewMarkup } from "../empty-view.js";
 import { popModalDocumentTitle, pushModalDocumentTitle, setAppDocumentTitle } from "../document-title.js";
 import { getTopModal } from "../modal-focus.js";
+import { bindRovingGrid, focusRovingItem, refreshRovingGrid } from "../roving-grid.js";
 import { _t, getLocale } from "../i18n.js";
 import { matchesNeedles, queryNeedles } from "../includes-ci.js";
 import { themeDisplayMap } from "../sets-presets.js";
@@ -134,10 +135,6 @@ export function patchThemeInList(theme) {
 export function focusThemeInList(id) {
   if (!id) return;
   pendingFocusThemeId = id;
-  if (mountedFocusThemeInList?.(id)) {
-    pendingFocusThemeId = null;
-    return;
-  }
   requestAnimationFrame(() => applyPendingThemeFocus());
 }
 
@@ -153,9 +150,7 @@ export function applyPendingThemeFocus() {
  */
 function applyThemeTileFocus(tile) {
   if (!(tile instanceof HTMLElement)) return false;
-  tile.scrollIntoView({ block: "nearest", inline: "nearest" });
-  tile.focus({ preventScroll: true, focusVisible: true });
-  return true;
+  return focusRovingItem(tile, "data-edit");
 }
 
 /**
@@ -300,12 +295,12 @@ export async function renderThemesModal(host, opts) {
         </div>
         <div class="modal-body" tabindex="-1">
           <section class="themes-section" id="themes-section-custom" hidden>
-            <h2 class="section-title">${_t("Custom themes")}</h2>
-            <div class="themes-grid" id="themes-grid-custom"></div>
+            <h2 class="section-title" id="themes-custom-title">${_t("Custom themes")}</h2>
+            <div class="themes-grid" id="themes-grid-custom" role="grid" aria-labelledby="themes-custom-title"></div>
           </section>
           <section class="themes-section" id="themes-section-builtin" hidden>
-            <h2 class="section-title">${_t("Default themes")}</h2>
-            <div class="themes-grid" id="themes-grid-builtin"></div>
+            <h2 class="section-title" id="themes-builtin-title">${_t("Default themes")}</h2>
+            <div class="themes-grid" id="themes-grid-builtin" role="grid" aria-labelledby="themes-builtin-title"></div>
           </section>
           ${emptyViewMarkup({
             id: "themes-empty-filter",
@@ -598,6 +593,9 @@ export async function renderThemesModal(host, opts) {
       dateSort ? "asc" : sortDir
     );
     const shown = customShown.length + builtinShown.length;
+    const active = document.activeElement;
+    const customHadFocus = active instanceof Node && customGrid.contains(active);
+    const builtinHadFocus = active instanceof Node && builtinGrid.contains(active);
 
     customGrid.innerHTML = customShown
       .map((t) => themeTileMarkup(tileTheme(t), usage.get(t.id) || 0, "edit"))
@@ -613,6 +611,8 @@ export async function renderThemesModal(host, opts) {
     syncSortMenu();
     syncDeleteAllCustomBtn();
     bindThemeTileLogos(host);
+    refreshRovingGrid(customGrid, "data-edit", { restoreFocus: customHadFocus });
+    refreshRovingGrid(builtinGrid, "data-edit", { restoreFocus: builtinHadFocus });
   }
 
   /** @param {string} id */
@@ -765,16 +765,6 @@ export async function renderThemesModal(host, opts) {
     openThemeTile(tile);
   }
 
-  /** @param {KeyboardEvent} e */
-  function onGridKeydown(e) {
-    if (e.key !== "Enter" && e.key !== " ") return;
-    const t = /** @type {HTMLElement} */ (e.target);
-    const tile = t.closest("[data-edit]");
-    if (!tile) return;
-    e.preventDefault();
-    openThemeTile(tile);
-  }
-
   displayById = await themeDisplayMap([...custom, ...builtin]);
   paint();
 
@@ -863,9 +853,13 @@ export async function renderThemesModal(host, opts) {
     };
   }
   customGrid.addEventListener("click", onGridClick);
-  customGrid.addEventListener("keydown", onGridKeydown);
   builtinGrid.addEventListener("click", onGridClick);
-  builtinGrid.addEventListener("keydown", onGridKeydown);
+  const unbindCustomRoving = bindRovingGrid(customGrid, "data-edit", {
+    onActivate: openThemeTile,
+  });
+  const unbindBuiltinRoving = bindRovingGrid(builtinGrid, "data-edit", {
+    onActivate: openThemeTile,
+  });
 
   searchInput.addEventListener("input", onSearchInput);
   searchBar.tabIndex = 0;
@@ -891,6 +885,8 @@ export async function renderThemesModal(host, opts) {
     mountedFocusThemeInList = null;
     document.removeEventListener("keydown", onKey);
     document.removeEventListener("click", onDocClick);
+    unbindCustomRoving();
+    unbindBuiltinRoving();
     window.removeEventListener("resize", applyTileLogoCrops);
     backdrop?.removeEventListener("click", onBackdropClick);
     btnClose?.removeEventListener("click", close);
@@ -929,7 +925,7 @@ function themeTileMarkup(theme, count, action) {
   if (action) named = _t("Edit “%(name)s”", { name: theme.name });
   const label = escapeAttr(count > 0 ? `${named}, ${countLabel}` : named);
   const dataAttr = action ? `data-edit="${escapeAttr(theme.id)}"` : "";
-  const attrs = dataAttr ? `role="button" tabindex="0" ${dataAttr}` : "";
+  const attrs = dataAttr ? `role="gridcell" tabindex="-1" ${dataAttr}` : "";
 
   return `
     <article class="theme-tile${action ? " is-editable" : ""}" style="--theme-accent:${escapeAttr(accent)};--theme-accent-fg:${escapeAttr(fg)}" ${attrs} aria-label="${label}">

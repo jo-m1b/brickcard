@@ -686,9 +686,9 @@ export async function renderEditor(host, opts) {
         onClose: () => {
           disposeStackedThemeEditor();
           if (listOpen && stackedThemesMod) {
+            focusTopModal({ resetScroll: false });
             if (themeId) stackedThemesMod.focusThemeInList(themeId);
             stackedThemesMod.applyPendingThemeFocus();
-            focusTopModal({ resetScroll: false });
             return;
           }
           void refreshThemeField().then(() => focusTopModal());
@@ -704,9 +704,9 @@ export async function renderEditor(host, opts) {
               /* list missing */
             }
             disposeStackedThemeEditor();
+            focusTopModal({ resetScroll: false });
             if (meta?.theme?.id) stackedThemesMod.focusThemeInList(meta.theme.id);
             stackedThemesMod.applyPendingThemeFocus();
-            focusTopModal({ resetScroll: false });
             return;
           }
           disposeStackedThemeEditor();

@@ -1011,3 +1011,21 @@ msgstr "Esc"
 
 msgid "Clears a filled search field, then closes the dialog."
 msgstr "Vacía un campo de búsqueda con texto y luego cierra el cuadro de diálogo."
+
+msgid "Move in a list"
+msgstr "Moverse por la lista"
+
+msgid "Home key"
+msgstr "Inicio"
+
+msgid "End key"
+msgstr "Fin"
+
+msgid "Arrow keys move between cards or themes. Home and End jump to the ends."
+msgstr "Las flechas pasan de una carta o un tema a otro. Inicio y Fin saltan a los extremos."
+
+msgid "Print quantity"
+msgstr "Cantidad de impresión"
+
+msgid "Changes the print quantity of the focused card."
+msgstr "Cambia la cantidad de impresión de la carta enfocada."

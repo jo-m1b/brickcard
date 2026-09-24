@@ -19,6 +19,7 @@ import { matchesNeedles, queryNeedles } from "../includes-ci.js";
 import { registerCardsGrid } from "../list-layout.js";
 import { mountCardPreview } from "../card-render.js";
 import { themeDisplayMap } from "../sets-presets.js";
+import { bindRovingGrid, focusRovingItem, refreshRovingGrid, syncRovingTab } from "../roving-grid.js";
 
 const ICON_PRINT = ICON_PRINTER;
 const ICON_MINUS = ICON_SUBTRACT;
@@ -123,9 +124,7 @@ export function focusListCard(id) {
  */
 function applyListCardFocus(tile) {
   if (!(tile instanceof HTMLElement)) return false;
-  tile.scrollIntoView({ block: "nearest", inline: "nearest" });
-  tile.focus({ preventScroll: true, focusVisible: true });
-  return true;
+  return focusRovingItem(tile, "data-id");
 }
 
 /**
@@ -188,8 +187,8 @@ export async function renderList(main, opts) {
 
   main.innerHTML = `
     <section class="panel">
-      <h1 class="visually-hidden">${_t("Cards")}</h1>
-      <div class="cards-grid" id="cards-grid"></div>
+      <h1 class="visually-hidden" id="cards-heading">${_t("Cards")}</h1>
+      <div class="cards-grid" id="cards-grid" role="grid" aria-labelledby="cards-heading"></div>
       ${emptyViewMarkup({
         id: "empty-filter",
         hidden: true,
@@ -366,7 +365,7 @@ export async function renderList(main, opts) {
       qty === 1 ? _t("%(count)s card", { count: qty }) : _t("%(count)s cards", { count: qty });
     return `
       <div class="print-qty${has ? " is-active" : ""}" data-print-qty="${safeId}">
-        <button type="button" class="btn ghost icon-only sm" data-qty-dec="${safeId}" ${has ? "" : "hidden"}>
+        <button type="button" class="btn ghost icon-only sm" data-qty-dec="${safeId}" tabindex="-1" ${has ? "" : "hidden"}>
           ${ICON_MINUS}
           <span class="visually-hidden">${decLabel}</span>
         </button>
@@ -374,7 +373,7 @@ export async function renderList(main, opts) {
           ${ICON_PRINT}
           <span class="print-qty-num">${qty}</span>
         </span>
-        <button type="button" class="btn ghost icon-only${has ? " sm" : ""}" data-qty-inc="${safeId}">
+        <button type="button" class="btn ghost icon-only${has ? " sm" : ""}" data-qty-inc="${safeId}" tabindex="-1">
           ${has ? ICON_PLUS : ICON_PRINT}
           <span class="visually-hidden">${incLabel}</span>
         </button>
@@ -406,16 +405,7 @@ export async function renderList(main, opts) {
     syncListChrome();
 
     const active = document.activeElement;
-    /** @type {{ id: string, which: "inc" | "dec" } | null} */
-    let restoreFocus = null;
-    if (active instanceof HTMLElement && els.grid.contains(active)) {
-      const tile = active.closest(".card-tile");
-      const id = tile?.dataset.id;
-      if (id) {
-        if (active.closest("[data-qty-inc]")) restoreFocus = { id, which: "inc" };
-        else if (active.closest("[data-qty-dec]")) restoreFocus = { id, which: "dec" };
-      }
-    }
+    const focusInGrid = active instanceof Node && els.grid.contains(active);
 
     els.grid.innerHTML = "";
     els.emptyFilter.hidden = list.length > 0 || cards.length === 0;
@@ -428,8 +418,8 @@ export async function renderList(main, opts) {
       const tile = document.createElement("article");
       tile.className = "card-tile" + (isSel ? " is-selected" : "");
       tile.dataset.id = card.id;
-      tile.setAttribute("role", "button");
-      tile.tabIndex = 0;
+      tile.setAttribute("role", "gridcell");
+      tile.tabIndex = -1;
       tile.setAttribute("aria-label", cardTileAriaLabel(card));
 
       const preview = document.createElement("div");
@@ -444,18 +434,7 @@ export async function renderList(main, opts) {
       els.grid.appendChild(tile);
     }
 
-    if (restoreFocus) {
-      const tile = queryCardTile(restoreFocus.id);
-      /** @type {HTMLElement|null} */
-      let el = null;
-      if (restoreFocus.which === "inc") {
-        el = tile?.querySelector("[data-qty-inc]") ?? null;
-      } else {
-        el = tile?.querySelector("[data-qty-dec]:not([hidden])") ?? null;
-        if (!el) el = tile?.querySelector("[data-qty-inc]") ?? null;
-      }
-      el?.focus({ preventScroll: true });
-    }
+    refreshRovingGrid(els.grid, "data-id", { restoreFocus: focusInGrid });
 
     if (pendingFocusCardId && applyListCardFocus(queryCardTile(pendingFocusCardId))) {
       pendingFocusCardId = null;
@@ -594,6 +573,17 @@ export async function renderList(main, opts) {
   });
 
   const unregisterGrid = registerCardsGrid(els.grid);
+  const unbindRoving = bindRovingGrid(els.grid, "data-id", {
+    onActivate(tile) {
+      if (tile.dataset.id) opts.onEdit(tile.dataset.id);
+    },
+    onAdjust(tile, delta) {
+      const id = tile.dataset.id;
+      if (!id) return;
+      setPrintQty(id, Math.min(QTY_MAX, Math.max(0, getPrintQty(id) + delta)));
+      renderGrid();
+    },
+  });
 
   els.grid.addEventListener("click", async (e) => {
     const t = /** @type {HTMLElement} */ (e.target);
@@ -631,14 +621,6 @@ export async function renderList(main, opts) {
     }
   });
 
-  els.grid.addEventListener("keydown", (e) => {
-    if (e.key !== "Enter" && e.key !== " ") return;
-    const tile = /** @type {HTMLElement} */ (e.target).closest?.(".card-tile");
-    if (!tile?.dataset.id || e.target.closest("[data-print-qty]")) return;
-    e.preventDefault();
-    opts.onEdit(tile.dataset.id);
-  });
-
   mountedFocusListCard = (id) => applyListCardFocus(queryCardTile(id));
 
   mountedPatchListCard = (card) => {
@@ -661,6 +643,7 @@ export async function renderList(main, opts) {
     if (idx >= 0) cards.splice(idx, 1);
     if (getPrintQty(id) > 0) setPrintQty(id, 0);
     queryCardTile(id)?.remove();
+    syncRovingTab(els.grid, "data-id");
     els.emptyFilter.hidden = filtered().length > 0 || cards.length === 0;
     syncListChrome();
     return { empty: cards.length === 0 };
@@ -674,6 +657,7 @@ export async function renderList(main, opts) {
     mountedRemoveListCard = null;
     mountedFocusListCard = null;
     unregisterGrid();
+    unbindRoving();
     if (searchInput) searchInput.removeEventListener("input", onSearchInput);
     if (searchBar) {
       searchBar.removeEventListener("focusin", onSearchBarFocusIn);

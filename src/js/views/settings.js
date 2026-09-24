@@ -814,6 +814,17 @@ function shortcutKeysMarkup(alternatives) {
 }
 
 /**
+ * `Home` is already the home view, so the key names use their own msgids.
+ * English (no catalog entry) shows the key printed on the keyboard.
+ * @param {string} msgid
+ * @param {string} english
+ */
+function keyLabel(msgid, english) {
+  const label = _t(msgid);
+  return label === msgid ? english : label;
+}
+
+/**
  * @param {string} name
  * @param {string} keysHtml
  * @param {string} [hint]
@@ -836,6 +847,23 @@ function shortcutRow(name, keysHtml, hint) {
  */
 function shortcutRowMarkup(name, alternatives, hint) {
   return shortcutRow(name, shortcutKeysMarkup(alternatives), hint);
+}
+
+/**
+ * Keys shown side by side. `"/"` is the slash between a pair.
+ * @param {string} name
+ * @param {string[]} parts
+ * @param {string} [hint]
+ */
+function shortcutChipRowMarkup(name, parts, hint) {
+  const keys = parts
+    .map((part) =>
+      part === "/"
+        ? `<span class="shortcut-or" aria-hidden="true">/</span>`
+        : `<kbd>${escapeHtml(part)}</kbd>`,
+    )
+    .join("");
+  return shortcutRow(name, keys, hint);
 }
 
 function shortcutSectionMarkup() {
@@ -872,6 +900,16 @@ function shortcutSectionMarkup() {
       _t("Close"),
       [[_t("Escape")]],
       _t("Clears a filled search field, then closes the dialog."),
+    ),
+    shortcutChipRowMarkup(
+      _t("Move in a list"),
+      ["←", "→", "↑", "↓", keyLabel("Home key", "Home"), "/", keyLabel("End key", "End")],
+      _t("Arrow keys move between cards or themes. Home and End jump to the ends."),
+    ),
+    shortcutChipRowMarkup(
+      _t("Print quantity"),
+      ["+", "/", "−"],
+      _t("Changes the print quantity of the focused card."),
     ),
   ];
   return `<ul class="shortcut-list">${rows.join("")}</ul>`;
