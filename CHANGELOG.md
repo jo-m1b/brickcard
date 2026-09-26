@@ -3,23 +3,25 @@
 Notable changes to the Brickcard app.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/).
+and this project adheres to [Semantic Versioning](https://semver.org/),
+[Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/),
+and [gitmoji](https://gitmoji.dev).
 
 ## [Unreleased]
 
 ## [0.9.6] — 2026-09-24
 
-### ➕ Added
+### ✨ Added
 
 - Keyboard: **Ctrl/Cmd+S** saves the open card, theme, or preset editor (and the unsaved-close **Save?** button) instead of opening the collection backup. **Ctrl/Cmd+Enter** runs the front dialog’s primary button (Save, Import, Start printing, Load, New theme, welcome). **Ctrl/Cmd+F** and **/** focus the visible search bar of the current view (home, themes, settings, developer, catalog suggest) and select its text; **Escape** clears that field when it has text and its list is closed. **Ctrl/Cmd+Alt+N**, or **N** outside a text field, opens a new card (**Ctrl/Cmd+N** alone is reserved by the browser for a new window and is not delivered to the page). **Ctrl/Cmd+,**, or **,** outside a text field, opens Settings. **T** outside a text field opens Themes. **D** outside a text field opens the developer space. **?** outside a text field opens About. These navigation shortcuts are ignored in a draft editor, on import, and while a child dialog is open. Settings → **Keyboard shortcuts** lists them; the controls they activate expose `aria-keyshortcuts`. **Tab** from outside the top bar skips it and lands on the card list; inside the bar, **Tab** still walks the logo, search, sort, new card, print, and settings. Card and theme grids are one **Tab** stop each: arrow keys move between tiles, **Home** / **End** jump to the ends, and **+** / **−** changes the focused card’s print quantity. Settings → **Keyboard shortcuts** lists those two as well, in the usual menu order (New, Save, Print, Search, Settings, other views, dialog confirm then dismiss, then list keys)
 
-### ✏️ Changed
+### ♻️ Changed
 
 - Card and theme previews (home tiles, theme mini-cards, editor previews) no longer select text or drag their images
 
 ## [0.9.5] — 2026-09-23
 
-### ➕ Added
+### ✨ Added
 
 - Custom catalog themes (not a default theme or its overlay) show the nearest linked Brickcard ancestor’s color, secondary color, and logo (with crop) when their own value is empty. The chain follows catalog `parentId`. Nothing is copied into the theme, import, or backup
 - First-visit welcome modal (**Welcome to Brickcard**) on home (no hash): short intro and the LEGO / trademark disclaimer; off-local, if telemetry was never chosen, a yes/no ask to enable anonymous usage stats (public link shown as data.brickcard.org, no IP stored). **No thanks**, Escape, close, or the backdrop stores telemetry off. Leaving home without closing shows the modal again
@@ -30,7 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Card editor origin (`#edit-card/:id` with a saved `rebrickableSetId`): same theme path under **This set is referenced on** plus the catalog set name, so both stay visible after a Brickcard rename; the path line uses the theme palette icon (`ri-palette-fill`)
 - Set catalog `data/sets-presets.json`: include each used theme’s named immediate parent even if that parent has no kept sets
 
-### ✏️ Changed
+### ♻️ Changed
 
 - LEGO disclaimer names the application instead of the website (welcome modal and About)
 - Telemetry is off by default (missing `brickcard:telemetry` = off). Settings hint matches the welcome ask: anonymous stats, nothing identifies you, no IP stored, and usage data is public on data.brickcard.org (link to the public board)
@@ -40,17 +42,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Home, themes, settings, and developer-space search: space-separated words are AND (same matching as the Rebrickable catalog suggest), so `"combat titans"` finds *Le combat des Titans* and `"ninjago titans"` finds that card via its theme
 - Default themes (`data/themes-presets.json`): Rebrickable origin ids on City (`52`), Disney (`608`), Marvel (`696`), Super Heroes DC (`695`), Batman (`697`), Space (`126`), Educational and Dacta (`507`), Mindstorms (`258`), The Lord of the Rings (`566`), and Collectible Minifigures (`535`; excluded from the offline catalog, origin / manual associate only)
 
-### 🔧 Fixed
+### 🐛 Fixed
 
 - First paint: apply a stored UI locale (`brickcard:ui-locale`) to `<html lang>` for any ISO language code (`de` / `es` / `it` / `pt`, not only `en` / `fr`); `initI18n()` still confirms against `locales.json` after boot
 
-### 🗑️ Removed
+### 🔥 Removed
 
 - Default themes with no Rebrickable catalog id (and their logos): Braille Bricks, How to Train Your Dragon, Looney Tunes, Star Trek, The Simpsons, Transformers — too few catalog sets to keep as presets (autocomplete already maps those boxes to Icons, Education, or Other)
 
 ## [0.9.4] — 2026-09-17
 
-### ➕ Added
+### ✨ Added
 
 - Card editor: **Prefill from rebrickable.com** catalog autocomplete (`bindSetSearch`) above Set number on `#new-card` and on `#edit-card/:id` when `rebrickableSetId` is empty; picking a set fills known fields (new card: replace all, including the remote Rebrickable photo URL; existing card: empty fields only) and stores origin ids on save; a matching Brickcard theme is reused, or `rebrickable-{themeId}` is created only when the card is saved; a saved set origin shows **This set is referenced on** then the clickable Rebrickable logo above the previews (not editable)
 - Card editor: **Customize the theme** / **Manage themes** next to the theme field; the theme manager and editor stack over the card without changing the hash; the select and preview refresh when the stack closes
@@ -65,7 +67,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Default themes (`data/themes-presets.json`): `rebrickableThemeId` on unambiguous catalog matches so autocomplete can reuse the preset instead of creating a custom theme
 - Theme editor (`#themes/edit/:id`): when `rebrickableThemeId` is set, a compact Rebrickable origin (**This theme is referenced on** then clickable `data/rebrickable-logo.png` → `https://rebrickable.com/sets/?theme={id}` `_blank`) is centered above the back preview; nothing if unset (the id is not editable)
 
-### ✏️ Changed
+### ♻️ Changed
 
 - About (`#page/about`): Features mentions Rebrickable catalog autocomplete and **offline** use; Credits thanks the [Rebrickable](https://rebrickable.com) community (all locales)
 - Catalog-created custom theme ids are `rebrickable-{rebrickableThemeId}` (no UUID suffix); cards keep a normal UUID (`createId()`), including those prefilled from the catalog, so the same set can be added more than once
@@ -82,7 +84,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Settings **Optimize images** hint: “imported into the collection” instead of “added to the collection”
 - UI catalogs (`i18n/{de,es,fr,it,pt}.po`): drop unused strings (old read-only theme titles, old delete-all-custom message, unused backup load error)
 
-### 🔧 Fixed
+### 🐛 Fixed
 
 - Theme editor: saving an unchanged default theme no longer shows a **Theme saved** toast
 - Image error brick: use the official Remix `ri-file-damage-fill` path (the previous `d` was not that icon)
@@ -91,7 +93,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [0.9.3] — 2026-09-04
 
-### ✏️ Changed
+### ♻️ Changed
 
 - Set catalog `data/sets-presets.json`: `meta.numThemes` / `meta.themesKeys` / `meta.numSets` / `meta.setsKeys`; rows no longer include `brickcardThemeId` (map from Rebrickable `themeId` later)
 - Card fields `pieceCount` / `figurineCount` renamed `numPieces` / `numFigurines` (editor ids `num-pieces` / `num-figurines`; list and print sort keys; old names still read from IndexedDB / `.brickcard` / localStorage)
@@ -99,31 +101,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [0.9.2] — 2026-09-03
 
-### ➕ Added
+### ✨ Added
 
 - Draft editors (`#new-card`, `#edit-card`, `#themes/new`, `#themes/edit`, `#developer/theme-presets/new`, `#developer/theme-presets/edit`): if a field changed, closing via Escape / close / backdrop asks **Save?** (**Close without saving**, **Cancel**, **Save**) instead of discarding silently; footer **Cancel** still closes immediately
 - Offline set catalog `data/sets-presets.json` (Rebrickable dumps, no images): piece count, figurines, year, theme id — precached by the service worker for a future card-editor autocomplete; optional `rebrickableThemeId` on a default theme maps to `brickcardThemeId`; positional rows (`meta.themeKeys` / `meta.setKeys`) to keep the file small; card `legoSetRef` / `title` are derived later; Database Sets (theme `746`) and empty theme names are omitted; missing / `0` counts are `null` or trailing-omitted
 
-### 🔧 Fixed
+### 🐛 Fixed
 
 - Offline PWA: after the first online visit, the service worker background-precache every app file (lazy overlay modules, i18n, About pages, default-theme logos, demo) so **New card**, **About**, themes, and the rest work without having opened them beforehand
 
 ## [0.9.1] — 2026-08-31
 
-### ➕ Added
+### ✨ Added
 
 - GitHub Pages 404 (`404.html`): English empty-view (same look as boot **Load error — retry**); title **Brickcard**, message **404 - page not found**, **Reload the app** link to `/`; `noindex`; no i18n
 - SEO and social previews: English `meta description`, canonical, Open Graph, Twitter Card, and JSON-LD (`WebApplication`) in `index.html`; `robots.txt` and a one-URL `sitemap.xml`; share image `img/brickcard-og-1200x630.png`. Print menu and topbar actions use `data-nosnippet` so Google does not recycle chrome copy as the search snippet.
 
 ## [0.9.0] — 2026-08-30
 
-### ➕ Added
+### ✨ Added
 
 - Interface language: English is the source language (`_t('…')`); catalogs live in `i18n/{de,es,fr,it,pt}.po` (gettext, loaded and parsed in JS, no compiler) — German, Spanish, French, Italian, and Portuguese (Brazilian). Settings → Application starts with a language dropdown (`DE · Deutsch`, `EN · English`…, sorted by ISO code); the choice is stored as `brickcard:ui-locale`. First visit uses the browser language when a catalog exists, otherwise English. HTML and the web manifest stay `lang="en"` for crawlers; the document language is updated in JS.
 - Print PDF filename: localized words (`grid`, `front`, `duplex`…) are translated then slugified (`brickcard-…-grille-3x3-face-et-dos-…` in French).
 - Markdown pages (`#page/:slug`): English file `data/page-{{slug}}.md`, locale file `data/page-{{slug}}.{{locale}}.md` (About: `page-about.de.md`, `page-about.es.md`, `page-about.fr.md`, `page-about.it.md`, `page-about.pt.md`); missing locale falls back to English.
 
-### ✏️ Changed
+### ♻️ Changed
 
 - Card list and print order: title and set-number sort use the UI locale (`localeCompare` + `getLocale()`), like themes and backups
 - Developer space (`#developer/…`): styleguide copy is English (hardcoded, no `_t`). The default-themes tool reuses existing `_t` strings for shared actions (Save, Delete, Close, search, empty states…)
@@ -133,7 +135,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [0.8] — 2026-08-29
 
-### ➕ Added
+### ✨ Added
 
 - Collection backup (`#backup`) and import (`#import`): full / custom export, file or URL import, in-memory validation, merge choices, live recap; writes only on **Import**; Ctrl/Cmd+S / Ctrl/Cmd+P (print) shortcuts
 - Demo backup: `data/backup-demo-jo.brickcard` (WebP photos); empty-home **Load a demo** tile (`ri-emotion-fill`)
@@ -143,7 +145,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Settings / developer-home search; `#developer/welcome` and `#developer/notifications` galleries
 - GitHub Releases on each `vX.Y.Z` tag; color `disabled` and image `readOnly` field options
 
-### ✏️ Changed
+### ♻️ Changed
 
 - Import is always a merge configured in `#import` (no more Merge / Replace); backup version = app SemVer; `.brickcard` names `brickcard-backup-…`
 - Default themes: catalog 65 entries (SVG / WebP); added Botanicals, Braille Bricks, BrickHeadz, Creator 3in1, DC, Marvel, Nike; `the-lord-of-the-rings` → `lord-of-the-rings`
@@ -155,7 +157,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Service worker at the site root (scope `/`); auto contrast only uses black on a truly pale accent
 - Card editor: one-side preview below 550px; About follows the product README (brand + Ko-fi)
 
-### 🔧 Fixed
+### 🐛 Fixed
 
 - Print: wait for photos and default-theme logos; sharp Brickcard logo; PDF name stays `brickcard-…` (Firefox `afterprint`)
 - Empty home: short viewports scroll; boot error can retry without a stuck cache
@@ -164,7 +166,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [0.7] — 2026-08-22
 
-### ➕ Added
+### ✨ Added
 
 - PWA: manifest, install icons (192/512, apple-touch), service worker
 - Home: loading screen (brick + “Chargement...”) until IndexedDB is ready; empty home “Bienvenue” and tiles; no-search-results “Oups !”
@@ -174,7 +176,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Custom themes: logo size / position (`logoZoom`, `logoOffsetX`, `logoOffsetY`); same optional fields on default themes
 - Settings → Card appearance: image corner radius (independent of card corner radius)
 
-### ✏️ Changed
+### ♻️ Changed
 
 - Product name and technical ids: **Brickcard**
 - Routes: overlays as `#settings`, `#new-card`, `#developer/…` (no `/` right after `#`); home = URL without hash
@@ -185,7 +187,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Card / theme editors: preview on the left, visual footer Delete / Cancel / Save
 - Local reset: reload with `?{timestamp}`
 
-### 🔧 Fixed
+### 🐛 Fixed
 
 - Boot: technical message if a module or `boot()` fails
 - Service worker: network revalidation (`cache: "reload"`)
@@ -193,13 +195,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Modals: scroll reset to top on show
 - Developer / default themes: new / edit routes (Back returns to the list)
 
-### 🗑️ Removed
+### 🔥 Removed
 
 - Default themes: 4 Juniors, Games, Homemaker, Make & Create, Xtra
 
 ## [0.6] — 2026-08-15
 
-### ➕ Added
+### ✨ Added
 
 - Themes: sort in the search bar (card count, title, modification date if ≥ 2 custom themes; default card count descending)
 - Themes: Brickcard-look mini-cards (color background, `--card-radius` corners, contrasted title on top; Brickcard logo if the theme has none)
@@ -209,7 +211,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Default themes: accent color for each theme (unique hex)
 - Default themes: official logos (`img/logo-theme-{{id}}`, SVG preferred then WebP / PNG / JPG) for 121 themes; Games, Homemaker, and Make & Create had no distinct logo found
 
-### ✏️ Changed
+### ♻️ Changed
 
 - Default themes: read-only (no more edit or reset)
 - Custom themes: UUID id; IndexedDB and JSON export keep custom themes only
@@ -217,25 +219,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Themes: modal title and description aligned with the Settings tile
 - Themes: **Nouveau thème** button in the footer (left), with + icon
 
-### 🔧 Fixed
+### 🐛 Fixed
 
 - List: keyboard focus outlines the card only; slight zoom on hover and focus
 - List: focus stays on + / − / the print icon after a click (quantity)
 
-### 🗑️ Removed
+### 🔥 Removed
 
 - Home: no more autofocus in search (virtual keyboard on mobile)
 
 ## [0.5] — 2026-08-13
 
-### ➕ Added
+### ✨ Added
 
 - **Modals** design system: 3 sizes (`modal--sm|md|lg`), backdrop alignment, inverted header, two-zone footer
 - Design system: tiles, links, confirmations (`confirm-dialog.js`); developer galleries (typography, fields, etc.)
 - SVG favicon (logo brick): black in light mode, white in dark mode
 - Home: autofocus in search when the bar is visible
 
-### ✏️ Changed
+### ♻️ Changed
 
 - Unified hash routes (`#/`, `#/new-card`, `#/edit-card/:id`, `#/themes`, `#/settings`, `#/page/:slug`); overlay → overlay swap; close (X / Escape / backdrop) = home
 - Developer space: `#/developer` route (was `#/test`) as an overlay modal; Settings: “Options pour les développeurs” (localhost)
@@ -245,7 +247,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Print menu: summary inset, DS buttons (start, clear, add from selection)
 - Delete a card: modal (`modal--sm`) instead of native `confirm()`
 
-### 🔧 Fixed
+### 🐛 Fixed
 
 - SVG favicon: invalid XML (the icon did not show)
 - Remix icons: official path and 24×24 size
@@ -254,7 +256,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Developer space: Back / Forward follow the galleries
 - Search sort: listeners correctly removed when leaving the list
 
-### 🗑️ Removed
+### 🔥 Removed
 
 - Native `confirm()` (reset, import, delete card / themes)
 - Old `#/list`, `#/new`, `#/edit/:id` routes; `#/test…` redirects → `#/developer…`
@@ -262,21 +264,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [0.4] — 2026-08-12
 
-### ➕ Added
+### ✨ Added
 
 - Header: Print menu (icon + count, summary inset / select all / deselect / print)
 - Settings → Display: max cards per row (2–10 or ∞)
 - Design system: buttons, fields, selects, colors, sliders, search bar; `#/test` styleguide
 - List: full width; inverted text selection (black background / white text)
 
-### ✏️ Changed
+### ♻️ Changed
 
 - LEGO themes: managed in an overlay modal (like Settings)
 - UI: white background (dark in dark mode), unified buttons (`primary` / `secondary` / `ghost` / `danger`, icon-only, `sm`)
 - UI icons: [Remix Icon](https://remixicon.com/) via `src/js/icons.js`
 - List: edit only by clicking the card; fixed horizontal gap between cards
 
-### 🔧 Fixed
+### 🐛 Fixed
 
 - Local reset: new IndexedDB (`db-gen`) instead of a stuck `deleteDatabase`
 - Boot: no more broken import that prevented the app from starting
@@ -285,27 +287,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Empty home: welcome page shown immediately after a reset
 - Custom select: no more “ghost” highlight after reset
 
-### 🗑️ Removed
+### 🔥 Removed
 
 - Dead CSS: `list-toolbar`, `search` styles outside `form-control`, `btn-icon` (replaced by `icon-only`)
 
 ## [0.3] — 2026-08-10
 
-### ➕ Added
+### ✨ Added
 
 - Card title: line breaks with Enter (textarea; 3 lines max on display)
 - Editor: “Télécharger la photo” button
 - List: print quantity per model (− / count / +)
 - List: count + sort in the search field (date, reference, title, year, pieces, figurines); sort direction togglable
 
-### ✏️ Changed
+### ♻️ Changed
 
 - Print back: 0.5 mm rectangular bleed (card color, corners without white)
 - List: checkbox replaced by a print-quantity stepper
 - UI: “Brickcard(s)” labels → “carte(s)” (Brickcard logo / brand unchanged)
 - UI: red accent replaced by black / near-black (light) or light (dark)
 
-### 🔧 Fixed
+### 🐛 Fixed
 
 - Print: photo crop (zoom / pan) applied correctly (off-screen layout before measure)
 - Print: no more toast / UI over the cards (sheets only)
@@ -313,7 +315,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [0.2] — 2026-08-09
 
-### ➕ Added
+### ✨ Added
 
 - Settings → Card design: face border size (0–10 mm, 0.5 step, default 3 mm)
 - Settings → Card design: face + back corner radius (0–8 mm, 0.5 step, default 1.5 mm)
@@ -322,7 +324,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Card field `figurineCount` (figurine count, optional)
 - All card fields are optional (blank card allowed)
 
-### ✏️ Changed
+### ♻️ Changed
 
 - Face: theme-color border; reference on top, title at the bottom; Brickcard logo hidden as soon as a photo is present; no more theme logo on the face
 - Back: theme logo (or name) between Brickcard branding and the bottom; no more black border or yellow pinstripe
@@ -333,17 +335,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Card fields `setTitle` → `title`, `setImageDataUrl` → `imageDataUrl`; theme field `accentColor` → `color`
 - Card type: Inter font (Google Fonts)
 
-### 🔧 Fixed
+### 🐛 Fixed
 
 - Preset theme color / logo: no longer overwritten on local refresh (seed only adds missing themes)
 
-### 🗑️ Removed
+### 🔥 Removed
 
 - Brickcard description field (editor, face render, search) — still accepted on JSON import
 
 ## [0.1] — 2026-08-05
 
-### ➕ Added
+### ✨ Added
 
 - First public Brickcard release
 - Poker-size face / back cards, A4 3×3 print

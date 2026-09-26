@@ -6,22 +6,22 @@ A short description of the pull request changes should go here and the sections 
 
 App source only (`src/`). Same categories as `CHANGELOG.md` (`## [Unreleased]`).
 
-### ➕ Added
+### ✨ Added
 
 - one
 - two
 
-### ✏️ Changed
+### ♻️ Changed
 
 - one
 - two
 
-### 🔧 Fixed
+### 🐛 Fixed
 
 - one
 - two
 
-### 🗑️ Removed
+### 🔥 Removed
 
 - one
 - two

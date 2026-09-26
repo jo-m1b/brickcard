@@ -71,13 +71,24 @@ jobs:
             # Pull merges of the daily catalog refresh (and any other merge) are noise.
             while IFS= read -r line || [ -n "$line" ]; do
               [ -z "$line" ] && continue
-              case "$line" in
-                feat:* | feat!:*) feats+="* ${line#*: }"$'\n' ;;
-                fix:* | fix!:*) fixes+="* ${line#*: }"$'\n' ;;
-                docs:* | docs!:*) docs+="* ${line#*: }"$'\n' ;;
+              # Optional leading gitmoji (`✨ feat: …` or `:sparkles: feat: …`).
+              # Older subjects without one still match.
+              subject="$line"
+              if [[ ! "$subject" =~ ^(feat|fix|docs|chore)!?: ]]; then
+                if [[ "$subject" =~ ^[^[:space:]]+[[:space:]]+(.*)$ ]]; then
+                  rest="${BASH_REMATCH[1]}"
+                  if [[ "$rest" =~ ^(feat|fix|docs|chore)!?: ]]; then
+                    subject="$rest"
+                  fi
+                fi
+              fi
+              case "$subject" in
+                feat:* | feat!:*) feats+="* ${subject#*: }"$'\n' ;;
+                fix:* | fix!:*) fixes+="* ${subject#*: }"$'\n' ;;
+                docs:* | docs!:*) docs+="* ${subject#*: }"$'\n' ;;
                 # The tag is the version; a bump commit on every release is noise.
                 chore:\ bump\ to\ * | chore!:\ bump\ to\ *) continue ;;
-                chore:* | chore!:*) chores+="* ${line#*: }"$'\n' ;;
+                chore:* | chore!:*) chores+="* ${subject#*: }"$'\n' ;;
                 *) other+="* ${line}"$'\n' ;;
               esac
             done < <(git log "${PREV}..HEAD" --pretty=tformat:'%s' --no-merges)
