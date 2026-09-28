@@ -9,6 +9,19 @@ and [gitmoji](https://gitmoji.dev).
 
 ## [Unreleased]
 
+### ✨ Added
+
+- Default theme Town (Rebrickable id `50`, color `#0057a8`, logo `data/theme-logo-town.webp`)
+- Default theme Creator (Rebrickable id `22`, color `#fac400`, logo `data/theme-logo-creator.svg`)
+- Default theme Bionicle (Rebrickable id `324`, color `#007a7a`, logo `data/theme-logo-bionicle.png`)
+- Default theme Castle (Rebrickable id `186`, color `#c9a227`, logo `data/theme-logo-castle.webp`)
+- Default theme Train (Rebrickable id `233`, color `#c8102e`, logo `data/theme-logo-train.svg`)
+- Default theme Nexo Knights (Rebrickable id `605`, color `#4b1c7a`, logo `data/theme-logo-nexo-knights.webp`)
+- Default theme DOTS (Rebrickable id `688`, color `#E31C79`, logo `data/theme-logo-dots.webp`)
+- Default theme Pirates (Rebrickable id `147`, color `#000000`, logo `data/theme-logo-pirates.svg`)
+- Default theme Adventurers (Rebrickable id `296`, color `#C4A35A`, logo `data/theme-logo-adventurers.webp`)
+- Default theme The LEGO Movie (Rebrickable id `578`, color `#F5C518`, logo `data/theme-logo-the-lego-movie.webp`)
+
 ## [0.9.6] — 2026-09-24
 
 ### ✨ Added
