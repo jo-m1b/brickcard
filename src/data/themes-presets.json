@@ -525,6 +525,13 @@
       "color": "#c20a31"
     },
     {
+      "id": "the-hobbit",
+      "name": "The Hobbit",
+      "rebrickableThemeId": 562,
+      "logoSrc": "data/theme-logo-the-hobbit.png",
+      "color": "#034622"
+    },
+    {
       "id": "the-lego-movie",
       "name": "The LEGO Movie",
       "rebrickableThemeId": 578,

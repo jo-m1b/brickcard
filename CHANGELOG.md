@@ -30,6 +30,7 @@ and [gitmoji](https://gitmoji.dev).
 - Default theme Belville (Rebrickable id `318`, color `#D81B60`, logo `data/theme-logo-belville.png`)
 - Default theme Exo-Force (Rebrickable id `389`, color `#C41E3A`, logo `data/theme-logo-exo-force.png`)
 - Default theme Cars (Rebrickable id `269`, color `#ED1C24`, logo `data/theme-logo-cars.webp`)
+- Default theme The Hobbit (Rebrickable id `562`, color `#034622`, logo `data/theme-logo-the-hobbit.png`)
 
 ## [0.9.6] — 2026-09-24
 
