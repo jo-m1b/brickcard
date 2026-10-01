@@ -191,6 +191,85 @@ export function isTypingTarget(target) {
   return false;
 }
 
+/**
+ * Primary pointer is a finger. A mouse or trackpad clears this
+ * (`(hover: none) and (pointer: coarse)`).
+ */
+const touchPrimaryQuery = window.matchMedia("(hover: none) and (pointer: coarse)");
+
+/** Set once a physical keyboard is used. Not stored: a reload starts over. */
+let keyboardSeen = false;
+
+/** @type {Set<() => void>} */
+const hintListeners = new Set();
+
+let hintNoticeQueued = false;
+
+/**
+ * Settings lists the shortcuts only when a keyboard is plausible.
+ * Listeners and `aria-keyshortcuts` stay either way.
+ * @returns {boolean}
+ */
+export function shortcutHintsVisible() {
+  return keyboardSeen || !touchPrimaryQuery.matches;
+}
+
+/**
+ * @param {() => void} onChange
+ * @returns {() => void} stop
+ */
+export function onShortcutHintsChange(onChange) {
+  hintListeners.add(onChange);
+  return () => {
+    hintListeners.delete(onChange);
+  };
+}
+
+function publishShortcutHints() {
+  if (hintNoticeQueued) return;
+  hintNoticeQueued = true;
+  queueMicrotask(() => {
+    hintNoticeQueued = false;
+    for (const fn of hintListeners) fn();
+  });
+}
+
+/** Arrow keys, Home, and End outside a text field. Tab and Escape count anywhere. */
+const PHYSICAL_NAV_KEYS = new Set([
+  "ArrowUp",
+  "ArrowDown",
+  "ArrowLeft",
+  "ArrowRight",
+  "Home",
+  "End",
+]);
+
+/**
+ * A software keyboard types into a field. A modifier, Tab, Escape, or list
+ * navigation comes from a physical keyboard.
+ * @param {KeyboardEvent} e
+ * @returns {boolean}
+ */
+function isPhysicalKeyboardEvent(e) {
+  if (!isPlainKeyEvent(e)) return false;
+  if (e.ctrlKey || e.metaKey || e.altKey) return true;
+  if (e.key === "Control" || e.key === "Meta" || e.key === "Alt") return true;
+  if (e.key === "Tab" || e.key === "Escape") return true;
+  return PHYSICAL_NAV_KEYS.has(e.key) && !isTypingTarget(e.target);
+}
+
+document.addEventListener(
+  "keydown",
+  (e) => {
+    if (keyboardSeen || !isPhysicalKeyboardEvent(e)) return;
+    keyboardSeen = true;
+    publishShortcutHints();
+  },
+  true,
+);
+
+touchPrimaryQuery.addEventListener("change", publishShortcutHints);
+
 /** `aria-keyshortcuts` values (Control and Meta so Linux and macOS both match). */
 export const SHORTCUT_NEW_CARD = "n Control+Alt+n Meta+Alt+n";
 export const SHORTCUT_SETTINGS = ", Control+, Meta+,";

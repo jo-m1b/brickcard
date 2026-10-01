@@ -70,6 +70,7 @@ import {
   setPrintSettings,
 } from "../print-settings.js";
 import { matchesNeedles, queryNeedles } from "../includes-ci.js";
+import { onShortcutHintsChange, shortcutHintsVisible } from "../hotkeys.js";
 
 /**
  * Settings modal.
@@ -412,7 +413,7 @@ export function renderSettingsModal(host, opts) {
               ])}
             </section>
 
-            <section class="settings-panel">
+            <section class="settings-panel" id="settings-shortcuts"${shortcutHintsVisible() ? "" : " hidden"}>
               <h2 class="section-title">${_t("Keyboard shortcuts")}</h2>
               ${shortcutSectionMarkup()}
             </section>
@@ -567,6 +568,10 @@ export function renderSettingsModal(host, opts) {
     const assemblyAllowed = currentPrintSettings.printSide === "both";
     let anyPanel = false;
     settingsSections?.querySelectorAll(":scope > .settings-panel").forEach((panel) => {
+      if (panel.id === "settings-shortcuts" && !shortcutHintsVisible()) {
+        panel.hidden = true;
+        return;
+      }
       const titleText = panel.querySelector(":scope > .section-title")?.textContent || "";
       const titleMatch = matchesNeedles(needles, titleText);
       let anyChild = false;
@@ -643,6 +648,7 @@ export function renderSettingsModal(host, opts) {
 
   refreshPrintSettingsUi();
   searchInput?.addEventListener("input", onSearchInput);
+  const stopShortcutHints = onShortcutHintsChange(applyFilter);
 
   bindSettingsRange("#settings-print-grid", {
     defaultValue: DEFAULT_PRINT_GRID,
@@ -776,6 +782,7 @@ export function renderSettingsModal(host, opts) {
     optimizeInput?.removeEventListener("change", onOptimizeChange);
     telemetryInput?.removeEventListener("change", onTelemetryChange);
     searchInput?.removeEventListener("input", onSearchInput);
+    stopShortcutHints();
     document.removeEventListener("keydown", onKey);
     backdrop?.removeEventListener("click", onBackdropClick);
     btnClose?.removeEventListener("click", close);

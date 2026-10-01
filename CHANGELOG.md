@@ -32,6 +32,10 @@ and [gitmoji](https://gitmoji.dev).
 - Default theme Cars (Rebrickable id `269`, color `#ED1C24`, logo `data/theme-logo-cars.webp`)
 - Default theme The Hobbit (Rebrickable id `562`, color `#034622`, logo `data/theme-logo-the-hobbit.png`)
 
+### ♻️ Changed
+
+- 💄 Settings hides **Keyboard shortcuts** on a touch-primary device until a physical keyboard is used. The shortcuts keep working
+
 ## [0.9.6] — 2026-09-24
 
 ### ✨ Added
