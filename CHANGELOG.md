@@ -25,6 +25,11 @@ and [gitmoji](https://gitmoji.dev).
 - Default theme Juniors (Rebrickable id `591`, color `#78B833`, logo `data/theme-logo-juniors.webp`)
 - Default theme Games (Rebrickable id `502`, color `#E87722`, logo `data/theme-logo-games.svg`)
 - Default theme Elves (Rebrickable id `600`, color `#00A99D`, logo `data/theme-logo-elves.png`)
+- Default theme Sports (Rebrickable id `458`, color `#E31C23`, logo `data/theme-logo-sports.webp`)
+- Default theme Fabuland (Rebrickable id `390`, color `#F2C300`, logo `data/theme-logo-fabuland.png`)
+- Default theme Belville (Rebrickable id `318`, color `#D81B60`, logo `data/theme-logo-belville.png`)
+- Default theme Exo-Force (Rebrickable id `389`, color `#C41E3A`, logo `data/theme-logo-exo-force.png`)
+- Default theme Cars (Rebrickable id `269`, color `#ED1C24`, logo `data/theme-logo-cars.webp`)
 
 ## [0.9.6] — 2026-09-24
 

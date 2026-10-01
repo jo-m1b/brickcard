@@ -60,6 +60,13 @@
       "color": "#212121"
     },
     {
+      "id": "belville",
+      "name": "Belville",
+      "rebrickableThemeId": 318,
+      "logoSrc": "data/theme-logo-belville.png",
+      "color": "#D81B60"
+    },
+    {
       "id": "bionicle",
       "name": "Bionicle",
       "rebrickableThemeId": 324,
@@ -94,6 +101,14 @@
       "rebrickableThemeId": 719,
       "logoSrc": "data/theme-logo-bricklink.svg",
       "color": "#FF6A00"
+    },
+    {
+      "id": "cars",
+      "name": "Cars",
+      "rebrickableThemeId": 269,
+      "logoSrc": "data/theme-logo-cars.webp",
+      "color": "#ED1C24",
+      "logoZoom": 0.8
     },
     {
       "id": "castle",
@@ -181,6 +196,20 @@
       "rebrickableThemeId": 600,
       "logoSrc": "data/theme-logo-elves.png",
       "color": "#00A99D"
+    },
+    {
+      "id": "exo-force",
+      "name": "Exo-Force",
+      "rebrickableThemeId": 389,
+      "logoSrc": "data/theme-logo-exo-force.png",
+      "color": "#C41E3A"
+    },
+    {
+      "id": "fabuland",
+      "name": "Fabuland",
+      "rebrickableThemeId": 390,
+      "logoSrc": "data/theme-logo-fabuland.png",
+      "color": "#F2C300"
     },
     {
       "id": "fortnite",
@@ -434,6 +463,13 @@
       "rebrickableThemeId": 272,
       "logoSrc": "data/theme-logo-spongebob-squarepants.svg",
       "color": "#00ced1"
+    },
+    {
+      "id": "sports",
+      "name": "Sports",
+      "rebrickableThemeId": 458,
+      "logoSrc": "data/theme-logo-sports.webp",
+      "color": "#E31C23"
     },
     {
       "id": "star-wars",
