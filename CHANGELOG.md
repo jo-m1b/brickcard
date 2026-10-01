@@ -9,6 +9,10 @@ and [gitmoji](https://gitmoji.dev).
 
 ## [Unreleased]
 
+### ♻️ Changed
+
+- 🗃️ Demo backup (`data/backup-demo-jo.brickcard`): Rebrickable set and theme ids (`6900-1` for Cyber saucer, `6140-1` for Crab); piece count, figurine count, and release year aligned with the catalog. Set numbers, titles, and photos stay as they were
+
 ## [0.9.7] — 2026-10-01
 
 ### ✨ Added
