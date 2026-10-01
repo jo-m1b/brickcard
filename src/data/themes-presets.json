@@ -89,6 +89,13 @@
       "logoZoom": 0.9
     },
     {
+      "id": "bricklink",
+      "name": "BrickLink™ Designer Program",
+      "rebrickableThemeId": 719,
+      "logoSrc": "data/theme-logo-bricklink.svg",
+      "color": "#FF6A00"
+    },
+    {
       "id": "castle",
       "name": "Castle",
       "rebrickableThemeId": 186,
@@ -169,6 +176,13 @@
       "color": "#141414"
     },
     {
+      "id": "elves",
+      "name": "Elves",
+      "rebrickableThemeId": 600,
+      "logoSrc": "data/theme-logo-elves.png",
+      "color": "#00A99D"
+    },
+    {
       "id": "fortnite",
       "name": "Fortnite®",
       "rebrickableThemeId": 766,
@@ -189,6 +203,13 @@
       "rebrickableThemeId": 748,
       "logoSrc": "data/theme-logo-gabbys-dollhouse.webp",
       "color": "#8ca8d6"
+    },
+    {
+      "id": "games",
+      "name": "Games",
+      "rebrickableThemeId": 502,
+      "logoSrc": "data/theme-logo-games.svg",
+      "color": "#E87722"
     },
     {
       "id": "harry-potter",
@@ -225,6 +246,13 @@
       "rebrickableThemeId": 264,
       "logoSrc": "data/theme-logo-indiana-jones.svg",
       "color": "#8b4513"
+    },
+    {
+      "id": "juniors",
+      "name": "Juniors",
+      "rebrickableThemeId": 591,
+      "logoSrc": "data/theme-logo-juniors.webp",
+      "color": "#78B833"
     },
     {
       "id": "jurassic-world",

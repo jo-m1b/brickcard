@@ -21,6 +21,10 @@ and [gitmoji](https://gitmoji.dev).
 - Default theme Pirates (Rebrickable id `147`, color `#000000`, logo `data/theme-logo-pirates.svg`)
 - Default theme Adventurers (Rebrickable id `296`, color `#C4A35A`, logo `data/theme-logo-adventurers.webp`)
 - Default theme The LEGO Movie (Rebrickable id `578`, color `#F5C518`, logo `data/theme-logo-the-lego-movie.webp`)
+- Default theme BrickLink Designer Program (Rebrickable id `719`, color `#FF6A00`, logo `data/theme-logo-bricklink.svg`)
+- Default theme Juniors (Rebrickable id `591`, color `#78B833`, logo `data/theme-logo-juniors.webp`)
+- Default theme Games (Rebrickable id `502`, color `#E87722`, logo `data/theme-logo-games.svg`)
+- Default theme Elves (Rebrickable id `600`, color `#00A99D`, logo `data/theme-logo-elves.png`)
 
 ## [0.9.6] — 2026-09-24
 
