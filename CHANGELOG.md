@@ -11,29 +11,30 @@ and [gitmoji](https://gitmoji.dev).
 
 ### ✨ Added
 
-- Default theme Town (Rebrickable id `50`, color `#0057a8`, logo `data/theme-logo-town.webp`)
-- Default theme Creator (Rebrickable id `22`, color `#fac400`, logo `data/theme-logo-creator.svg`)
-- Default theme Bionicle (Rebrickable id `324`, color `#007a7a`, logo `data/theme-logo-bionicle.png`)
-- Default theme Castle (Rebrickable id `186`, color `#c9a227`, logo `data/theme-logo-castle.webp`)
-- Default theme Train (Rebrickable id `233`, color `#c8102e`, logo `data/theme-logo-train.svg`)
-- Default theme Nexo Knights (Rebrickable id `605`, color `#4b1c7a`, logo `data/theme-logo-nexo-knights.webp`)
-- Default theme DOTS (Rebrickable id `688`, color `#E31C79`, logo `data/theme-logo-dots.webp`)
-- Default theme Pirates (Rebrickable id `147`, color `#000000`, logo `data/theme-logo-pirates.svg`)
-- Default theme Adventurers (Rebrickable id `296`, color `#C4A35A`, logo `data/theme-logo-adventurers.webp`)
-- Default theme The LEGO Movie (Rebrickable id `578`, color `#F5C518`, logo `data/theme-logo-the-lego-movie.webp`)
-- Default theme BrickLink Designer Program (Rebrickable id `719`, color `#FF6A00`, logo `data/theme-logo-bricklink.svg`)
-- Default theme Juniors (Rebrickable id `591`, color `#78B833`, logo `data/theme-logo-juniors.webp`)
-- Default theme Games (Rebrickable id `502`, color `#E87722`, logo `data/theme-logo-games.svg`)
-- Default theme Elves (Rebrickable id `600`, color `#00A99D`, logo `data/theme-logo-elves.png`)
-- Default theme Sports (Rebrickable id `458`, color `#E31C23`, logo `data/theme-logo-sports.webp`)
-- Default theme Fabuland (Rebrickable id `390`, color `#F2C300`, logo `data/theme-logo-fabuland.png`)
-- Default theme Belville (Rebrickable id `318`, color `#D81B60`, logo `data/theme-logo-belville.png`)
-- Default theme Exo-Force (Rebrickable id `389`, color `#C41E3A`, logo `data/theme-logo-exo-force.png`)
-- Default theme Cars (Rebrickable id `269`, color `#ED1C24`, logo `data/theme-logo-cars.webp`)
-- Default theme The Hobbit (Rebrickable id `562`, color `#034622`, logo `data/theme-logo-the-hobbit.png`)
+- Default theme Town (Rebrickable id `50`, color `#0057a8`, logo `img/themes/town.webp`)
+- Default theme Creator (Rebrickable id `22`, color `#fac400`, logo `img/themes/creator.svg`)
+- Default theme Bionicle (Rebrickable id `324`, color `#007a7a`, logo `img/themes/bionicle.png`)
+- Default theme Castle (Rebrickable id `186`, color `#c9a227`, logo `img/themes/castle.webp`)
+- Default theme Train (Rebrickable id `233`, color `#c8102e`, logo `img/themes/train.svg`)
+- Default theme Nexo Knights (Rebrickable id `605`, color `#4b1c7a`, logo `img/themes/nexo-knights.webp`)
+- Default theme DOTS (Rebrickable id `688`, color `#E31C79`, logo `img/themes/dots.webp`)
+- Default theme Pirates (Rebrickable id `147`, color `#000000`, logo `img/themes/pirates.svg`)
+- Default theme Adventurers (Rebrickable id `296`, color `#C4A35A`, logo `img/themes/adventurers.webp`)
+- Default theme The LEGO Movie (Rebrickable id `578`, color `#F5C518`, logo `img/themes/the-lego-movie.webp`)
+- Default theme BrickLink Designer Program (Rebrickable id `719`, color `#FF6A00`, logo `img/themes/bricklink.svg`)
+- Default theme Juniors (Rebrickable id `591`, color `#78B833`, logo `img/themes/juniors.webp`)
+- Default theme Games (Rebrickable id `502`, color `#E87722`, logo `img/themes/games.svg`)
+- Default theme Elves (Rebrickable id `600`, color `#00A99D`, logo `img/themes/elves.png`)
+- Default theme Sports (Rebrickable id `458`, color `#E31C23`, logo `img/themes/sports.webp`)
+- Default theme Fabuland (Rebrickable id `390`, color `#F2C300`, logo `img/themes/fabuland.png`)
+- Default theme Belville (Rebrickable id `318`, color `#D81B60`, logo `img/themes/belville.png`)
+- Default theme Exo-Force (Rebrickable id `389`, color `#C41E3A`, logo `img/themes/exo-force.png`)
+- Default theme Cars (Rebrickable id `269`, color `#ED1C24`, logo `img/themes/cars.webp`)
+- Default theme The Hobbit (Rebrickable id `562`, color `#034622`, logo `img/themes/the-hobbit.png`)
 
 ### ♻️ Changed
 
+- 🚚 Default theme logos live in `img/themes/{id}.{ext}`; About pages live in `pages/`; the Rebrickable wordmark lives in `img/`
 - 💄 Settings hides **Keyboard shortcuts** on a touch-primary device until a physical keyboard is used. The shortcuts keep working
 
 ## [0.9.6] — 2026-09-24

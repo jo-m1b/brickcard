@@ -136,7 +136,7 @@ export function renderDeveloperThemePresets(host, opts) {
           </div>
         </div>
       </div>
-      <p class="view-desc">Local copy of <code>themes-presets.json</code> — does not affect the collection. Download the JSON and logos and place them in <code>data/</code>.</p>
+      <p class="view-desc">Local copy of <code>themes-presets.json</code> — does not affect the collection. Download the JSON into <code>data/</code> and the logos into <code>img/themes/</code>.</p>
       <div class="themes-grid" id="preset-draft-grid" hidden></div>
       ${emptyViewMarkup({
         id: "preset-draft-empty-filter",
@@ -419,8 +419,8 @@ export function renderDeveloperThemePresets(host, opts) {
       } else {
         toast({
           type: "success",
-          message: `${ok} logo(s) downloaded (theme-logo-{id}.{ext})`,
-          messageHtml: `${ok} logo(s) downloaded (<code>theme-logo-{id}.{ext}</code>)`,
+          message: `${ok} logo(s) downloaded ({id}.{ext})`,
+          messageHtml: `${ok} logo(s) downloaded (<code>{id}.{ext}</code>)`,
         });
       }
     } catch (err) {

@@ -115,7 +115,7 @@ export async function renderPresetDraftEditor(host, opts) {
               </div>
               <div class="form-field">
                 <label class="form-label form-label--required" for="preset-theme-id">${_t("Identifier")}</label>
-                <p class="form-hint" id="preset-theme-id-hint">Unique kebab-case slug. Used for the logo file (<code>data/theme-logo-{id}.{ext}</code>).</p>
+                <p class="form-hint" id="preset-theme-id-hint">Unique kebab-case slug. Used for the logo file (<code>img/themes/{id}.{ext}</code>).</p>
                 <input class="form-control" type="text" id="preset-theme-id" placeholder="city" autocomplete="off" spellcheck="false" aria-describedby="preset-theme-id-hint" />
                 <p class="form-error" id="preset-theme-id-error" role="alert" hidden></p>
               </div>

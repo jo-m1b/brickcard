@@ -1,6 +1,6 @@
 /**
  * Default LEGO themes — metadata in `data/themes-presets.json`.
- * Logos: relative path (`logoSrc`, e.g. data/theme-logo-…) — optional, no generated fallback.
+ * Logos: relative path (`logoSrc`, e.g. img/themes/….png) — optional, no generated fallback.
  * No `color` → empty string; card display uses the configured color then factory gray.
  */
 
@@ -28,7 +28,7 @@ import { _t } from "./i18n.js";
  * @property {string} name
  * @property {string} [color] Hex; omitted → no own color (card cascade)
  * @property {string} [secondaryColor] Hex; omitted → black or white from the accent
- * @property {string} [logoSrc] Relative path from src/ (e.g. "data/theme-logo-….png")
+ * @property {string} [logoSrc] Relative path from src/ (e.g. "img/themes/….png")
  * @property {number} [logoZoom] Logo width (1 = 75% of the card); omitted → 1
  * @property {number} [logoOffsetX] Horizontal offset; omitted → 0
  * @property {number} [logoOffsetY] Vertical offset; omitted → 0
@@ -246,6 +246,25 @@ export function canonicalLogoSrc(src) {
 }
 
 /**
+ * Old default-theme logo paths (`data/theme-logo-…`, `img/theme-logo-…`)
+ * become `img/themes/{id}.{ext}`. Data URLs and remote URLs stay as they are.
+ * @param {unknown} src
+ * @returns {string}
+ */
+export function migrateThemeLogoSrc(src) {
+  const raw = String(src || "").trim();
+  if (!raw || /^[a-z][a-z0-9+.-]*:/i.test(raw)) return raw;
+  const q = raw.indexOf("?");
+  const path = (q === -1 ? raw : raw.slice(0, q)).replace(/^\.\//, "");
+  const query = q === -1 ? "" : raw.slice(q);
+  const match = path.match(
+    /^(?:data|img)\/theme-logo-([a-z0-9]+(?:-[a-z0-9]+)*)\.([a-z0-9]+)$/i
+  );
+  if (!match) return raw;
+  return `img/themes/${match[1]}.${match[2].toLowerCase()}${query}`;
+}
+
+/**
  * Runtime theme is a saved customization of a default theme.
  * @param {LegoTheme|null|undefined} theme
  * @param {LegoTheme|null|undefined} preset
@@ -286,7 +305,7 @@ export function readThemeOverride(row) {
     out.secondaryColor = parseHexColor(r.secondaryColor);
   }
   if (Object.hasOwn(r, "logoDataUrl") || Object.hasOwn(r, "image")) {
-    out.logoDataUrl = String(r.logoDataUrl ?? r.image ?? "");
+    out.logoDataUrl = migrateThemeLogoSrc(String(r.logoDataUrl ?? r.image ?? ""));
   }
   if (Object.hasOwn(r, "logoZoom")) {
     out.logoZoom = clampLogoZoom(r.logoZoom);

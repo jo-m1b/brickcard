@@ -31,9 +31,9 @@ export function rebrickableThemeHref(themeId) {
     : REBRICKABLE_HOME_HREF;
 }
 
-/** Clickable Rebrickable wordmark (`data/rebrickable-logo.png`). */
+/** Clickable Rebrickable wordmark (`img/rebrickable-logo.png`). */
 export function rebrickableLogoImgMarkup() {
-  return `<img class="theme-rebrickable-logo" src="data/rebrickable-logo.png" alt="Rebrickable" />`;
+  return `<img class="theme-rebrickable-logo" src="img/rebrickable-logo.png" alt="Rebrickable" />`;
 }
 
 /**

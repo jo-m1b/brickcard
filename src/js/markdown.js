@@ -1,6 +1,6 @@
 /**
  * Light Markdown parser (GFM subset) + page loading
- * `data/page-{{slug}}.md` (English) / `data/page-{{slug}}.{{locale}}.md`.
+ * `pages/{{slug}}.md` (English) / `pages/{{slug}}.{{locale}}.md`.
  * Handles: headings, paragraphs, lists, quotes, code, links, images, bold/italic, HR, `<br>`, HTML blocks.
  * Placeholder: `{{APP_VERSION}}` → SemVer version.
  * Page title: `# Title` (removed from the modal body).
@@ -59,7 +59,7 @@ function inline(text) {
 }
 
 /**
- * Line that opens an HTML block (mini GFM, trusted `data/` pages).
+ * Line that opens an HTML block (mini GFM, trusted `pages/` files).
  * @param {string} line
  */
 function isHtmlBlockStart(line) {
@@ -144,7 +144,7 @@ export function parseMarkdown(md) {
       continue;
     }
 
-    // Raw HTML (trusted `data/` pages; like GitHub: no escaping)
+    // Raw HTML (trusted `pages/` files; like GitHub: no escaping)
     if (isHtmlBlockStart(line)) {
       const block = readHtmlBlock(lines, i);
       out.push(block.html);
@@ -228,19 +228,19 @@ function parsePageHeading(raw) {
 }
 
 /**
- * Markdown page URL: `data/page-{{slug}}.md` (English source),
- * or `data/page-{{slug}}.{{locale}}.md` for a translation.
+ * Markdown page URL: `pages/{{slug}}.md` (English source),
+ * or `pages/{{slug}}.{{locale}}.md` for a translation.
  * @param {string} slug
  * @param {string} [locale]
  */
 export function pageMarkdownUrl(slug, locale) {
   const loc = String(locale || "").trim();
-  if (loc && loc !== getDefaultLocale()) return `data/page-${slug}.${loc}.md`;
-  return `data/page-${slug}.md`;
+  if (loc && loc !== getDefaultLocale()) return `pages/${slug}.${loc}.md`;
+  return `pages/${slug}.md`;
 }
 
 /**
- * Load and parse `data/page-{{slug}}.md` (or `page-{{slug}}.{{locale}}.md`).
+ * Load and parse `pages/{{slug}}.md` (or `{{slug}}.{{locale}}.md`).
  * Missing locale / 404 → English source file.
  * @param {string} slug
  * @returns {Promise<{ slug: string, title: string, html: string }>}

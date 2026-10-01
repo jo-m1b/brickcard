@@ -4,35 +4,35 @@
       "id": "adventurers",
       "name": "Adventurers",
       "rebrickableThemeId": 296,
-      "logoSrc": "data/theme-logo-adventurers.webp",
+      "logoSrc": "img/themes/adventurers.webp",
       "color": "#C4A35A"
     },
     {
       "id": "animal-crossing",
       "name": "Animal Crossing™",
       "rebrickableThemeId": 752,
-      "logoSrc": "data/theme-logo-animal-crossing.webp",
+      "logoSrc": "img/themes/animal-crossing.webp",
       "color": "#fff5ad"
     },
     {
       "id": "aquazone",
       "name": "Aquazone",
       "rebrickableThemeId": 307,
-      "logoSrc": "data/theme-logo-aquazone.png",
+      "logoSrc": "img/themes/aquazone.png",
       "color": "#f2cd37"
     },
     {
       "id": "architecture",
       "name": "Architecture",
       "rebrickableThemeId": 252,
-      "logoSrc": "data/theme-logo-architecture.svg",
+      "logoSrc": "img/themes/architecture.svg",
       "color": "#141414"
     },
     {
       "id": "art",
       "name": "Art",
       "rebrickableThemeId": 709,
-      "logoSrc": "data/theme-logo-art.webp",
+      "logoSrc": "img/themes/art.webp",
       "color": "#242424",
       "logoZoom": 0.75
     },
@@ -40,14 +40,14 @@
       "id": "avatar",
       "name": "Avatar",
       "rebrickableThemeId": 724,
-      "logoSrc": "data/theme-logo-avatar.svg",
+      "logoSrc": "img/themes/avatar.svg",
       "color": "#006da5"
     },
     {
       "id": "avatar-the-last-airbender",
       "name": "Avatar: The Last Airbender",
       "rebrickableThemeId": 317,
-      "logoSrc": "data/theme-logo-avatar-the-last-airbender.svg",
+      "logoSrc": "img/themes/avatar-the-last-airbender.svg",
       "color": "#b03a2e",
       "logoOffsetX": 0.05,
       "logoOffsetY": -0.04
@@ -56,42 +56,42 @@
       "id": "batman",
       "name": "Batman™",
       "rebrickableThemeId": 697,
-      "logoSrc": "data/theme-logo-batman.svg",
+      "logoSrc": "img/themes/batman.svg",
       "color": "#212121"
     },
     {
       "id": "belville",
       "name": "Belville",
       "rebrickableThemeId": 318,
-      "logoSrc": "data/theme-logo-belville.png",
+      "logoSrc": "img/themes/belville.png",
       "color": "#D81B60"
     },
     {
       "id": "bionicle",
       "name": "Bionicle",
       "rebrickableThemeId": 324,
-      "logoSrc": "data/theme-logo-bionicle.png",
+      "logoSrc": "img/themes/bionicle.png",
       "color": "#007a7a"
     },
     {
       "id": "bluey",
       "name": "Bluey",
       "rebrickableThemeId": 772,
-      "logoSrc": "data/theme-logo-bluey.svg",
+      "logoSrc": "img/themes/bluey.svg",
       "color": "#90c2f9"
     },
     {
       "id": "botanicals",
       "name": "Botanicals",
       "rebrickableThemeId": 769,
-      "logoSrc": "data/theme-logo-botanicals.webp",
+      "logoSrc": "img/themes/botanicals.webp",
       "color": "#141414"
     },
     {
       "id": "brickheadz",
       "name": "BrickHeadz™",
       "rebrickableThemeId": 610,
-      "logoSrc": "data/theme-logo-brickheadz.svg",
+      "logoSrc": "img/themes/brickheadz.svg",
       "color": "#242424",
       "logoZoom": 0.9
     },
@@ -99,14 +99,14 @@
       "id": "bricklink",
       "name": "BrickLink™ Designer Program",
       "rebrickableThemeId": 719,
-      "logoSrc": "data/theme-logo-bricklink.svg",
+      "logoSrc": "img/themes/bricklink.svg",
       "color": "#FF6A00"
     },
     {
       "id": "cars",
       "name": "Cars",
       "rebrickableThemeId": 269,
-      "logoSrc": "data/theme-logo-cars.webp",
+      "logoSrc": "img/themes/cars.webp",
       "color": "#ED1C24",
       "logoZoom": 0.8
     },
@@ -114,14 +114,14 @@
       "id": "castle",
       "name": "Castle",
       "rebrickableThemeId": 186,
-      "logoSrc": "data/theme-logo-castle.webp",
+      "logoSrc": "img/themes/castle.webp",
       "color": "#c9a227"
     },
     {
       "id": "city",
       "name": "City",
       "rebrickableThemeId": 52,
-      "logoSrc": "data/theme-logo-city.webp",
+      "logoSrc": "img/themes/city.webp",
       "color": "#003290",
       "logoZoom": 0.85
     },
@@ -129,28 +129,28 @@
       "id": "classic",
       "name": "Classic",
       "rebrickableThemeId": 621,
-      "logoSrc": "data/theme-logo-classic.svg",
+      "logoSrc": "img/themes/classic.svg",
       "color": "#fac400"
     },
     {
       "id": "creator",
       "name": "Creator",
       "rebrickableThemeId": 22,
-      "logoSrc": "data/theme-logo-creator.svg",
+      "logoSrc": "img/themes/creator.svg",
       "color": "#fac400"
     },
     {
       "id": "creator-3-in-1",
       "name": "Creator 3in1",
       "rebrickableThemeId": 672,
-      "logoSrc": "data/theme-logo-creator-3-in-1.svg",
+      "logoSrc": "img/themes/creator-3-in-1.svg",
       "color": "#fac400"
     },
     {
       "id": "dc",
       "name": "DC",
       "rebrickableThemeId": 695,
-      "logoSrc": "data/theme-logo-dc.svg",
+      "logoSrc": "img/themes/dc.svg",
       "color": "#006993",
       "logoZoom": 0.6
     },
@@ -158,21 +158,21 @@
       "id": "disney",
       "name": "Disney",
       "rebrickableThemeId": 608,
-      "logoSrc": "data/theme-logo-disney.svg",
+      "logoSrc": "img/themes/disney.svg",
       "color": "#00395d"
     },
     {
       "id": "dots",
       "name": "DOTS",
       "rebrickableThemeId": 688,
-      "logoSrc": "data/theme-logo-dots.webp",
+      "logoSrc": "img/themes/dots.webp",
       "color": "#E31C79"
     },
     {
       "id": "dreamzzz",
       "name": "DREAMZzz™",
       "rebrickableThemeId": 749,
-      "logoSrc": "data/theme-logo-dreamzzz.webp",
+      "logoSrc": "img/themes/dreamzzz.webp",
       "color": "#011c58",
       "logoZoom": 0.9
     },
@@ -180,49 +180,49 @@
       "id": "duplo",
       "name": "DUPLO®",
       "rebrickableThemeId": 504,
-      "logoSrc": "data/theme-logo-duplo.svg",
+      "logoSrc": "img/themes/duplo.svg",
       "color": "#5fc473"
     },
     {
       "id": "education",
       "name": "Education",
       "rebrickableThemeId": 507,
-      "logoSrc": "data/theme-logo-education.svg",
+      "logoSrc": "img/themes/education.svg",
       "color": "#141414"
     },
     {
       "id": "elves",
       "name": "Elves",
       "rebrickableThemeId": 600,
-      "logoSrc": "data/theme-logo-elves.png",
+      "logoSrc": "img/themes/elves.png",
       "color": "#00A99D"
     },
     {
       "id": "exo-force",
       "name": "Exo-Force",
       "rebrickableThemeId": 389,
-      "logoSrc": "data/theme-logo-exo-force.png",
+      "logoSrc": "img/themes/exo-force.png",
       "color": "#C41E3A"
     },
     {
       "id": "fabuland",
       "name": "Fabuland",
       "rebrickableThemeId": 390,
-      "logoSrc": "data/theme-logo-fabuland.png",
+      "logoSrc": "img/themes/fabuland.png",
       "color": "#F2C300"
     },
     {
       "id": "fortnite",
       "name": "Fortnite®",
       "rebrickableThemeId": 766,
-      "logoSrc": "data/theme-logo-fortnite.svg",
+      "logoSrc": "img/themes/fortnite.svg",
       "color": "#421b53"
     },
     {
       "id": "friends",
       "name": "Friends",
       "rebrickableThemeId": 494,
-      "logoSrc": "data/theme-logo-friends.svg",
+      "logoSrc": "img/themes/friends.svg",
       "color": "#de2473",
       "logoZoom": 1.1
     },
@@ -230,42 +230,42 @@
       "id": "gabbys-dollhouse",
       "name": "Gabby's Dollhouse",
       "rebrickableThemeId": 748,
-      "logoSrc": "data/theme-logo-gabbys-dollhouse.webp",
+      "logoSrc": "img/themes/gabbys-dollhouse.webp",
       "color": "#8ca8d6"
     },
     {
       "id": "games",
       "name": "Games",
       "rebrickableThemeId": 502,
-      "logoSrc": "data/theme-logo-games.svg",
+      "logoSrc": "img/themes/games.svg",
       "color": "#E87722"
     },
     {
       "id": "harry-potter",
       "name": "Harry Potter™",
       "rebrickableThemeId": 246,
-      "logoSrc": "data/theme-logo-harry-potter.webp",
+      "logoSrc": "img/themes/harry-potter.webp",
       "color": "#00395d"
     },
     {
       "id": "hero-factory",
       "name": "Hero Factory",
       "rebrickableThemeId": 400,
-      "logoSrc": "data/theme-logo-hero-factory.svg",
+      "logoSrc": "img/themes/hero-factory.svg",
       "color": "#d35400"
     },
     {
       "id": "icons",
       "name": "Icons",
       "rebrickableThemeId": 721,
-      "logoSrc": "data/theme-logo-icons.svg",
+      "logoSrc": "img/themes/icons.svg",
       "color": "#000000"
     },
     {
       "id": "ideas",
       "name": "Ideas",
       "rebrickableThemeId": 576,
-      "logoSrc": "data/theme-logo-ideas.svg",
+      "logoSrc": "img/themes/ideas.svg",
       "color": "#242424",
       "logoOffsetY": -0.05
     },
@@ -273,21 +273,21 @@
       "id": "indiana-jones",
       "name": "Indiana Jones",
       "rebrickableThemeId": 264,
-      "logoSrc": "data/theme-logo-indiana-jones.svg",
+      "logoSrc": "img/themes/indiana-jones.svg",
       "color": "#8b4513"
     },
     {
       "id": "juniors",
       "name": "Juniors",
       "rebrickableThemeId": 591,
-      "logoSrc": "data/theme-logo-juniors.webp",
+      "logoSrc": "img/themes/juniors.webp",
       "color": "#78B833"
     },
     {
       "id": "jurassic-world",
       "name": "Jurassic World",
       "rebrickableThemeId": 602,
-      "logoSrc": "data/theme-logo-jurassic-world.svg",
+      "logoSrc": "img/themes/jurassic-world.svg",
       "color": "#cbcbcb",
       "logoZoom": 0.8
     },
@@ -295,7 +295,7 @@
       "id": "kpop-demon-hunters",
       "name": "KPop Demon Hunters™",
       "rebrickableThemeId": 792,
-      "logoSrc": "data/theme-logo-kpop-demon-hunters.svg",
+      "logoSrc": "img/themes/kpop-demon-hunters.svg",
       "color": "#4f2881",
       "logoZoom": 0.8
     },
@@ -303,14 +303,14 @@
       "id": "legends-of-chima",
       "name": "Legends of Chima",
       "rebrickableThemeId": 571,
-      "logoSrc": "data/theme-logo-legends-of-chima.webp",
+      "logoSrc": "img/themes/legends-of-chima.webp",
       "color": "#0088dd"
     },
     {
       "id": "lord-of-the-rings",
       "name": "Lord of the Rings™",
       "rebrickableThemeId": 566,
-      "logoSrc": "data/theme-logo-lord-of-the-rings.webp",
+      "logoSrc": "img/themes/lord-of-the-rings.webp",
       "color": "#034622",
       "logoZoom": 0.8,
       "logoOffsetY": -0.03
@@ -319,7 +319,7 @@
       "id": "marvel",
       "name": "Marvel",
       "rebrickableThemeId": 696,
-      "logoSrc": "data/theme-logo-marvel.svg",
+      "logoSrc": "img/themes/marvel.svg",
       "color": "#011c58",
       "logoZoom": 0.95
     },
@@ -327,56 +327,56 @@
       "id": "mindstorms",
       "name": "Mindstorms",
       "rebrickableThemeId": 258,
-      "logoSrc": "data/theme-logo-mindstorms.svg",
+      "logoSrc": "img/themes/mindstorms.svg",
       "color": "#dc143c"
     },
     {
       "id": "minecraft",
       "name": "Minecraft®",
       "rebrickableThemeId": 577,
-      "logoSrc": "data/theme-logo-minecraft.svg",
+      "logoSrc": "img/themes/minecraft.svg",
       "color": "#005d2b"
     },
     {
       "id": "minifigures",
       "name": "Minifigures",
       "rebrickableThemeId": 535,
-      "logoSrc": "data/theme-logo-minifigures.svg",
+      "logoSrc": "img/themes/minifigures.svg",
       "color": "#fac400"
     },
     {
       "id": "minions-the-rise-of-gru",
       "name": "Minions: The Rise of Gru",
       "rebrickableThemeId": 689,
-      "logoSrc": "data/theme-logo-minions-the-rise-of-gru.svg",
+      "logoSrc": "img/themes/minions-the-rise-of-gru.svg",
       "color": "#6a1b9a"
     },
     {
       "id": "mixels",
       "name": "Mixels",
       "rebrickableThemeId": 580,
-      "logoSrc": "data/theme-logo-mixels.svg",
+      "logoSrc": "img/themes/mixels.svg",
       "color": "#cddc39"
     },
     {
       "id": "monkie-kid",
       "name": "Monkie Kid™",
       "rebrickableThemeId": 693,
-      "logoSrc": "data/theme-logo-monkie-kid.svg",
+      "logoSrc": "img/themes/monkie-kid.svg",
       "color": "#bd0000"
     },
     {
       "id": "nexo-knights",
       "name": "Nexo Knights",
       "rebrickableThemeId": 605,
-      "logoSrc": "data/theme-logo-nexo-knights.webp",
+      "logoSrc": "img/themes/nexo-knights.webp",
       "color": "#4b1c7a"
     },
     {
       "id": "nike",
       "name": "Nike",
       "rebrickableThemeId": 785,
-      "logoSrc": "data/theme-logo-nike.svg",
+      "logoSrc": "img/themes/nike.svg",
       "color": "#ff4400",
       "secondaryColor": "#000000",
       "logoZoom": 0.8,
@@ -386,14 +386,14 @@
       "id": "ninjago",
       "name": "NINJAGO®",
       "rebrickableThemeId": 435,
-      "logoSrc": "data/theme-logo-ninjago.svg",
+      "logoSrc": "img/themes/ninjago.svg",
       "color": "#9b0000"
     },
     {
       "id": "one-piece",
       "name": "ONE PIECE",
       "rebrickableThemeId": 775,
-      "logoSrc": "data/theme-logo-one-piece.webp",
+      "logoSrc": "img/themes/one-piece.webp",
       "color": "#e0c570",
       "secondaryColor": "#000000"
     },
@@ -401,7 +401,7 @@
       "id": "pirates",
       "name": "Pirates",
       "rebrickableThemeId": 147,
-      "logoSrc": "data/theme-logo-pirates.svg",
+      "logoSrc": "img/themes/pirates.svg",
       "color": "#000000",
       "logoZoom": 0.75
     },
@@ -409,42 +409,42 @@
       "id": "pokemon",
       "name": "Pokémon™",
       "rebrickableThemeId": 776,
-      "logoSrc": "data/theme-logo-pokemon.webp",
+      "logoSrc": "img/themes/pokemon.webp",
       "color": "#3d3d3d"
     },
     {
       "id": "racers",
       "name": "Racers",
       "rebrickableThemeId": 112,
-      "logoSrc": "data/theme-logo-racers.svg",
+      "logoSrc": "img/themes/racers.svg",
       "color": "#c62828"
     },
     {
       "id": "rock-raiders",
       "name": "Rock Raiders",
       "rebrickableThemeId": 442,
-      "logoSrc": "data/theme-logo-rock-raiders.webp",
+      "logoSrc": "img/themes/rock-raiders.webp",
       "color": "#4c4c4c"
     },
     {
       "id": "shrek",
       "name": "Shrek",
       "rebrickableThemeId": 796,
-      "logoSrc": "data/theme-logo-shrek.webp",
+      "logoSrc": "img/themes/shrek.webp",
       "color": "#15385a"
     },
     {
       "id": "sonic-the-hedgehog",
       "name": "Sonic the Hedgehog™",
       "rebrickableThemeId": 747,
-      "logoSrc": "data/theme-logo-sonic-the-hedgehog.svg",
+      "logoSrc": "img/themes/sonic-the-hedgehog.svg",
       "color": "#90c2f9"
     },
     {
       "id": "space",
       "name": "Space",
       "rebrickableThemeId": 126,
-      "logoSrc": "data/theme-logo-space.svg",
+      "logoSrc": "img/themes/space.svg",
       "color": "#0a58ca",
       "logoZoom": 0.65,
       "logoOffsetX": 0.06,
@@ -454,28 +454,28 @@
       "id": "speed-champions",
       "name": "Speed Champions",
       "rebrickableThemeId": 601,
-      "logoSrc": "data/theme-logo-speed-champions.webp",
+      "logoSrc": "img/themes/speed-champions.webp",
       "color": "#000000"
     },
     {
       "id": "spongebob-squarepants",
       "name": "SpongeBob SquarePants",
       "rebrickableThemeId": 272,
-      "logoSrc": "data/theme-logo-spongebob-squarepants.svg",
+      "logoSrc": "img/themes/spongebob-squarepants.svg",
       "color": "#00ced1"
     },
     {
       "id": "sports",
       "name": "Sports",
       "rebrickableThemeId": 458,
-      "logoSrc": "data/theme-logo-sports.webp",
+      "logoSrc": "img/themes/sports.webp",
       "color": "#E31C23"
     },
     {
       "id": "star-wars",
       "name": "Star Wars™",
       "rebrickableThemeId": 158,
-      "logoSrc": "data/theme-logo-star-wars.svg",
+      "logoSrc": "img/themes/star-wars.svg",
       "color": "#141414",
       "logoZoom": 0.76
     },
@@ -483,14 +483,14 @@
       "id": "stranger-things",
       "name": "Stranger Things",
       "rebrickableThemeId": 680,
-      "logoSrc": "data/theme-logo-stranger-things.svg",
+      "logoSrc": "img/themes/stranger-things.svg",
       "color": "#641e16"
     },
     {
       "id": "studios",
       "name": "Studios",
       "rebrickableThemeId": 273,
-      "logoSrc": "data/theme-logo-studios.svg",
+      "logoSrc": "img/themes/studios.svg",
       "color": "#37474f",
       "logoZoom": 0.6,
       "logoOffsetY": -0.02
@@ -499,7 +499,7 @@
       "id": "super-mario",
       "name": "Super Mario™",
       "rebrickableThemeId": 690,
-      "logoSrc": "data/theme-logo-super-mario.svg",
+      "logoSrc": "img/themes/super-mario.svg",
       "color": "#ffd200",
       "secondaryColor": "#000000"
     },
@@ -507,35 +507,35 @@
       "id": "technic",
       "name": "Technic™",
       "rebrickableThemeId": 1,
-      "logoSrc": "data/theme-logo-technic.svg",
+      "logoSrc": "img/themes/technic.svg",
       "color": "#000000"
     },
     {
       "id": "teenage-mutant-ninja-turtles",
       "name": "Teenage Mutant Ninja Turtles",
       "rebrickableThemeId": 570,
-      "logoSrc": "data/theme-logo-teenage-mutant-ninja-turtles.svg",
+      "logoSrc": "img/themes/teenage-mutant-ninja-turtles.svg",
       "color": "#3d8b37"
     },
     {
       "id": "the-angry-birds-movie",
       "name": "The Angry Birds Movie",
       "rebrickableThemeId": 606,
-      "logoSrc": "data/theme-logo-the-angry-birds-movie.svg",
+      "logoSrc": "img/themes/the-angry-birds-movie.svg",
       "color": "#c20a31"
     },
     {
       "id": "the-hobbit",
       "name": "The Hobbit",
       "rebrickableThemeId": 562,
-      "logoSrc": "data/theme-logo-the-hobbit.png",
+      "logoSrc": "img/themes/the-hobbit.png",
       "color": "#034622"
     },
     {
       "id": "the-lego-movie",
       "name": "The LEGO Movie",
       "rebrickableThemeId": 578,
-      "logoSrc": "data/theme-logo-the-lego-movie.webp",
+      "logoSrc": "img/themes/the-lego-movie.webp",
       "color": "#F5C518",
       "logoZoom": 0.85
     },
@@ -543,21 +543,21 @@
       "id": "the-legend-of-zelda",
       "name": "The Legend of Zelda™",
       "rebrickableThemeId": 764,
-      "logoSrc": "data/theme-logo-the-legend-of-zelda.svg",
+      "logoSrc": "img/themes/the-legend-of-zelda.svg",
       "color": "#0b2916"
     },
     {
       "id": "town",
       "name": "Town",
       "rebrickableThemeId": 50,
-      "logoSrc": "data/theme-logo-town.webp",
+      "logoSrc": "img/themes/town.webp",
       "color": "#0057a8"
     },
     {
       "id": "train",
       "name": "Train",
       "rebrickableThemeId": 233,
-      "logoSrc": "data/theme-logo-train.svg",
+      "logoSrc": "img/themes/train.svg",
       "color": "#c8102e",
       "logoZoom": 0.65
     },
@@ -565,21 +565,21 @@
       "id": "vidiyo",
       "name": "Vidiyo",
       "rebrickableThemeId": 713,
-      "logoSrc": "data/theme-logo-vidiyo.svg",
+      "logoSrc": "img/themes/vidiyo.svg",
       "color": "#00aeb5"
     },
     {
       "id": "wednesday",
       "name": "Wednesday",
       "rebrickableThemeId": 768,
-      "logoSrc": "data/theme-logo-wednesday.svg",
+      "logoSrc": "img/themes/wednesday.svg",
       "color": "#300c54"
     },
     {
       "id": "wicked",
       "name": "Wicked",
       "rebrickableThemeId": 765,
-      "logoSrc": "data/theme-logo-wicked.webp",
+      "logoSrc": "img/themes/wicked.webp",
       "color": "#039f38"
     }
   ]

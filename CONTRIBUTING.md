@@ -14,7 +14,7 @@ Please search [issues](https://github.com/jo-m1b/brickcard/issues) and [discussi
 Keep the change small and focused.
 
 - No bundler, framework, or Node — `src/` is the app
-- Default themes live in `src/data/themes-presets.json` (logos in `src/data/`)
+- Default themes live in `src/data/themes-presets.json` (logos in `src/img/themes/`)
 - Set catalog: `src/data/sets-presets.json` from `python3 -B scripts/build-sets-presets-from-rebrickable.py` (Rebrickable dumps; see [AGENTS.md](AGENTS.md))
 - Translations → [src/i18n/README.md](src/i18n/README.md)
 

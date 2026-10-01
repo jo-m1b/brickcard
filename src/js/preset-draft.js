@@ -15,6 +15,7 @@ import {
   clampLogoZoom,
   clearPresetCache,
   loadPresetMeta,
+  migrateThemeLogoSrc,
   parseHexColor,
   parseRebrickableThemeId,
   roundCropCoord,
@@ -26,7 +27,7 @@ const STORE_THEMES = "themes";
 const STORE_META = "meta";
 
 /** Relative path from `src/` for a default theme logo. */
-const PRESET_LOGO_DIR = "data";
+const PRESET_LOGO_DIR = "img/themes";
 
 /** kebab-case : `city`, `avatar-the-last-airbender` */
 export const PRESET_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -162,13 +163,11 @@ async function closeDb() {
   dbPromise = null;
 }
 
-/** Old path `img/theme-logo-…` → `data/theme-logo-…`. */
+/** Old logo paths → `img/themes/{id}.{ext}`. Drops a cache-buster on a relative path. */
 function migratePresetLogoSrc(src) {
-  const s = String(src || "").trim().split("?")[0];
-  if (s.startsWith("img/theme-logo-")) {
-    return `${PRESET_LOGO_DIR}/${s.slice("img/".length)}`;
-  }
-  return s;
+  const migrated = migrateThemeLogoSrc(src);
+  if (/^[a-z][a-z0-9+.-]*:/i.test(migrated)) return migrated;
+  return migrated.split("?")[0];
 }
 
 /** @param {object} t @returns {PresetDraftTheme} */
@@ -348,7 +347,7 @@ function toPresetMeta(theme) {
     out.logoSrc = remote;
   } else {
     const ext = presetDraftLogoExt(theme);
-    if (ext) out.logoSrc = `${PRESET_LOGO_DIR}/theme-logo-${theme.id}.${ext}`;
+    if (ext) out.logoSrc = `${PRESET_LOGO_DIR}/${theme.id}.${ext}`;
   }
   if (theme.color) out.color = theme.color;
   if (theme.secondaryColor) out.secondaryColor = theme.secondaryColor;
@@ -415,7 +414,7 @@ export async function downloadPresetDraftLogos() {
     }
     try {
       const blob = await srcToBlob(src);
-      files.push({ name: `theme-logo-${theme.id}.${ext}`, blob });
+      files.push({ name: `${theme.id}.${ext}`, blob });
     } catch {
       skipped += 1;
     }

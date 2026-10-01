@@ -28,7 +28,7 @@ function pageTitleText(page) {
 }
 
 /**
- * Shows a Markdown page (`data/page-{{slug}}.md` or `.{{locale}}.md`) in an overlay modal.
+ * Shows a Markdown page (`pages/{{slug}}.md` or `pages/{{slug}}.{{locale}}.md`) in an overlay modal.
  * @param {HTMLElement} host Modal container (#modal-root)
  * @param {{ slug: string, onClose: () => void, toast?: (msg: string, type?: string) => void }} opts
  * @returns {Promise<(() => void)|null>} cleanup, or `null` if the page is not found
