@@ -9,6 +9,8 @@ and [gitmoji](https://gitmoji.dev).
 
 ## [Unreleased]
 
+## [0.9.7] — 2026-10-01
+
 ### ✨ Added
 
 - Default theme Town (Rebrickable id `50`, color `#0057a8`, logo `img/themes/town.webp`)
