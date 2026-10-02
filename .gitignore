@@ -1,4 +1,4 @@
-# Fichiers système / éditeur
+# System / editor files
 .DS_Store
 Thumbs.db
 *.swp
@@ -7,10 +7,10 @@ Thumbs.db
 .vscode/
 *.code-workspace
 
-# Dépendances (si ajoutées plus tard)
+# Dependencies (if added later)
 node_modules/
 
-# Environnement local
+# Local environment
 .env
 .env.*
 .local/

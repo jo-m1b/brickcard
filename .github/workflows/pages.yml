@@ -1,4 +1,4 @@
-# Deploy GitHub Pages depuis le dossier src/
+# Deploy GitHub Pages from the src/ folder
 
 name: Deploy Brickcard to GitHub Pages
 
