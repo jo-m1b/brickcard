@@ -4072,6 +4072,12 @@ body.modal-open {
   align-items: start;
 }
 
+/* Search + fields share one cell, so the preview cannot stretch a gap between them. */
+.editor-main {
+  grid-area: main;
+  min-width: 0;
+}
+
 .editor-catalog-search {
   grid-area: search;
   min-width: 0;
@@ -4087,10 +4093,8 @@ body.modal-open {
   min-width: 0;
 }
 
-.editor-layout:has(.editor-catalog-search) {
-  grid-template-areas:
-    "preview search"
-    "preview fields";
+.editor-layout:has(.editor-main) {
+  grid-template-areas: "preview main";
 }
 
 @media (max-width: 840px) {
@@ -4101,11 +4105,22 @@ body.modal-open {
       "fields";
   }
 
+  .editor-layout:has(.editor-main) {
+    grid-template-areas:
+      "preview"
+      "main";
+  }
+
+  /* Search above the preview: drop the wrapper so the three areas are siblings again. */
   .editor-layout:has(.editor-catalog-search) {
     grid-template-areas:
       "search"
       "preview"
       "fields";
+  }
+
+  .editor-layout:has(.editor-catalog-search) > .editor-main {
+    display: contents;
   }
 }
 

@@ -11,6 +11,7 @@ and [gitmoji](https://gitmoji.dev).
 
 ### 🐛 Fixed
 
+- Card and theme editors: the catalog search sits directly above the first field, with the usual field spacing, instead of a tall empty band under the autocomplete
 - Demo backup and backup import: the loading brick is painted before the file is parsed and written, and it keeps its full height in the dialog, so it stays visible for the whole load instead of flashing once the work is already done
 - Backup import: **Import** stays enabled after a file or URL is loaded, without having to toggle a checkbox first
 

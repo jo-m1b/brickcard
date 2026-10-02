@@ -170,6 +170,7 @@ export async function renderEditor(host, opts) {
               <div class="card-preview" id="preview-back-host" aria-label="${escapeAttr(_t("Back preview"))}"></div>
               </div>
             </aside>
+            <div class="editor-main">
               ${
                 showCatalogSearch
                   ? `<div class="editor-catalog-search">
@@ -264,6 +265,7 @@ export async function renderEditor(host, opts) {
               </div>
 
               <p class="form-error" id="error" role="alert"></p>
+            </div>
             </div>
           </div>
         </div>

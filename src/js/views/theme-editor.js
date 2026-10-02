@@ -163,6 +163,7 @@ export async function renderThemeEditor(host, opts) {
               <div class="card-preview" id="theme-preview-back-host" aria-label="${_t("Back preview")}"></div>
               </div>
             </aside>
+            <div class="editor-main">
               ${
                 showCatalogSearch
                   ? `<div class="editor-catalog-search">
@@ -240,6 +241,7 @@ export async function renderThemeEditor(host, opts) {
                 })}
               </div>
               <p class="form-error" id="theme-error" role="alert"></p>
+            </div>
             </div>
           </div>
         </div>
