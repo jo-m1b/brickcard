@@ -23,11 +23,13 @@ Create cards, print them, laminate them, and slip them into a clear sleeve with 
 ## Features
 
 - **Create & edit cards**: Reference, photo, title, theme, year, piece count…
+- **Rebrickable autocomplete**: a super catalog search to create cards in a snap ;)
 - **Print-ready**: A4 grids from 1×1 to 10×10, front + back aligned for duplex printing
 - **Themes**: Built-in themes (name, logo, color) + your own custom themes
 - **Auto-save**: Everything is stored in the browser (IndexedDB)
 - **Export / import**: `.brickcard` files (cards + custom themes) to back up and share your collection
 - **Searchable list**: Quickly find and select any card to print
+- **Offline**: works without an internet connection
 - **Installable**: Works as a PWA on phone or desktop
 
 ## Getting started

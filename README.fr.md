@@ -23,11 +23,13 @@ Créez des cartes, imprimez-les, plastifiez-les et glissez-les dans une pochette
 ## Fonctionnalités
 
 - **Créer et modifier des cartes** : référence, photo, titre, thème, année, nombre de pièces…
+- **Autocomplétion Rebrickable** : un super autocompléteur du catalogue pour créer des cartes en un éclair ;)
 - **Prêt à imprimer** : grilles A4 de 1×1 à 10×10, face + dos alignés pour le recto-verso
 - **Thèmes** : thèmes par défaut (nom, logo, couleur) + vos thèmes personnalisés
 - **Sauvegarde automatique** : tout est stocké dans le navigateur (IndexedDB)
 - **Export / import** : fichiers `.brickcard` (cartes + thèmes perso) pour sauvegarder et partager votre collection
 - **Liste filtrable** : retrouvez vite une carte et sélectionnez-la pour l’impression
+- **Hors ligne** : fonctionne sans connexion Internet
 - **Installable** : fonctionne comme PWA sur téléphone ou ordinateur
 
 ## Pour commencer
