@@ -9,6 +9,8 @@ and [gitmoji](https://gitmoji.dev).
 
 ## [Unreleased]
 
+## [0.9.8] — 2026-10-03
+
 ### 🐛 Fixed
 
 - Card and theme editors: the catalog search sits directly above the first field, with the usual field spacing, instead of a tall empty band under the autocomplete
