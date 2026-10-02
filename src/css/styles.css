@@ -3923,7 +3923,8 @@ body.modal-open {
 }
 
 .url-dialog-loading .empty-view {
-  padding: 0;
+  /* The brick sits above the title, out of flow. Keep the same reserve as a modal. */
+  padding: calc(0.75rem + 9px + 40px) 0 0;
   place-content: start center;
 }
 

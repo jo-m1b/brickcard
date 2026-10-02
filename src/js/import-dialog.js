@@ -90,6 +90,27 @@ function escapeHtml(s) {
 }
 
 /**
+ * Resolves once the loading UI has been painted.
+ * An animation-frame callback runs before paint, so work started there still hides
+ * that frame. The second frame is reached only after the first paint is on screen.
+ * A short timeout covers a background tab, where animation frames are paused.
+ */
+function yieldForPaint() {
+  return new Promise((resolve) => {
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      resolve(undefined);
+    };
+    requestAnimationFrame(() => {
+      requestAnimationFrame(finish);
+    });
+    setTimeout(finish, 50);
+  });
+}
+
+/**
  * “Load from a URL” modal (child, no route).
  * @param {HTMLElement} host
  * @returns {Promise<{ backup: import("./backup.js").BackupData, href: string }|null>}
@@ -208,7 +229,10 @@ function openBackupUrlDialog(host) {
       setError("");
       setLoading(true);
       try {
+        await yieldForPaint();
+        if (settled) return;
         const text = await fetchBackupAsText(url);
+        if (settled) return;
         const backup = parseBrickcardBackup(text);
         finish({ backup, href: url });
       } catch (err) {
@@ -356,6 +380,8 @@ export function openDemoBackupDialog(host, opts = {}) {
 
     async function run() {
       try {
+        await yieldForPaint();
+        if (settled) return;
         const href = new URL(DEMO_BACKUP_SRC, document.baseURI).href;
         const text = await fetchBackupAsText(href, { signal: ac.signal });
         if (settled) return;
@@ -581,9 +607,16 @@ export async function renderImportDialog(host, opts) {
     host.querySelectorAll("#btn-import-from-file, #btn-import-from-url").forEach((btn) => {
       if (btn instanceof HTMLButtonElement) btn.disabled = on;
     });
-    if (runBtn instanceof HTMLButtonElement && !importing) {
-      runBtn.disabled = on || !backup || isImportPayloadEmpty(currentPayload());
+    const loadingEl = host.querySelector("#import-file-loading");
+    if (loadingEl instanceof HTMLElement) loadingEl.hidden = !on;
+    if (importing) return;
+    // The choose step is built while loading is still on, so its recap leaves
+    // Import disabled. Refresh once loading is off and a backup is in hand.
+    if (on || !backup) {
+      if (runBtn instanceof HTMLButtonElement) runBtn.disabled = true;
+      return;
     }
+    refreshRecap();
   }
 
   function resetLoadedBackup() {
@@ -679,6 +712,9 @@ export async function renderImportDialog(host, opts) {
               </button>
             </div>
             <p class="form-error" id="import-load-error" role="alert"></p>
+            <div class="url-dialog-loading" id="import-file-loading" hidden>
+              ${loadingViewMarkup({ titleTag: "p" })}
+            </div>
           </div>
         </section>
       </div>
@@ -699,7 +735,11 @@ export async function renderImportDialog(host, opts) {
       setLoadError("");
       setLoading(true);
       try {
-        const data = parseBrickcardBackup(await file.text());
+        await yieldForPaint();
+        if (!loading || !host.isConnected) return;
+        const text = await file.text();
+        if (!loading || !host.isConnected) return;
+        const data = parseBrickcardBackup(text);
         acceptBackup(data, { label: file.name });
       } catch (err) {
         setLoadError(err instanceof Error ? err.message : _t("Unable to import"));
@@ -711,8 +751,17 @@ export async function renderImportDialog(host, opts) {
       if (loading || importing) return;
       setLoadError("");
       const result = await openBackupUrlDialog(host);
-      if (!result) return;
-      acceptBackup(result.backup, { label: result.href, href: result.href });
+      if (!result || !host.isConnected) return;
+      setLoading(true);
+      try {
+        await yieldForPaint();
+        if (!loading || !host.isConnected) return;
+        acceptBackup(result.backup, { label: result.href, href: result.href });
+      } catch (err) {
+        setLoadError(err instanceof Error ? err.message : _t("Unable to import"));
+      } finally {
+        setLoading(false);
+      }
     });
     refreshRecap();
   }
@@ -898,13 +947,16 @@ export async function renderImportDialog(host, opts) {
 
   runBtn?.addEventListener("click", async () => {
     if (importing || !backup) return;
-    const payload = currentPayload();
-    if (isImportPayloadEmpty(payload)) {
-      toast?.(_t("Nothing to import"), "error");
-      return;
-    }
     setImporting(true);
     try {
+      await yieldForPaint();
+      if (!host.isConnected) return;
+      const payload = currentPayload();
+      if (isImportPayloadEmpty(payload)) {
+        toast?.(_t("Nothing to import"), "error");
+        setImporting(false);
+        return;
+      }
       await importBackup(payload, {
         mode: "merge",
         includeImages: !hasCardImages || includeImages,

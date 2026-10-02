@@ -9,6 +9,11 @@ and [gitmoji](https://gitmoji.dev).
 
 ## [Unreleased]
 
+### 🐛 Fixed
+
+- Demo backup and backup import: the loading brick is painted before the file is parsed and written, and it keeps its full height in the dialog, so it stays visible for the whole load instead of flashing once the work is already done
+- Backup import: **Import** stays enabled after a file or URL is loaded, without having to toggle a checkbox first
+
 ### ♻️ Changed
 
 - 🗃️ Demo backup (`data/backup-demo-jo.brickcard`): Rebrickable set and theme ids (`6900-1` for Cyber saucer, `6140-1` for Crab); piece count, figurine count, and release year aligned with the catalog. Set numbers, titles, and photos stay as they were
