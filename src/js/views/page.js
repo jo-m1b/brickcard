@@ -30,7 +30,13 @@ function pageTitleText(page) {
 /**
  * Shows a Markdown page (`pages/{{slug}}.md` or `pages/{{slug}}.{{locale}}.md`) in an overlay modal.
  * @param {HTMLElement} host Modal container (#modal-root)
- * @param {{ slug: string, onClose: () => void, toast?: (msg: string, type?: string) => void }} opts
+ * @param {{
+ *   slug: string,
+ *   onClose: () => void,
+ *   toast?: (msg: string, type?: string) => void,
+ *   page?: Promise<{ slug: string, title: string, html: string }> | null,
+ *   alive?: () => boolean,
+ * }} opts
  * @returns {Promise<(() => void)|null>} cleanup, or `null` if the page is not found
  */
 export async function renderPageModal(host, opts) {
@@ -38,12 +44,15 @@ export async function renderPageModal(host, opts) {
 
   let page;
   try {
-    page = await loadMarkdownPage(slug);
+    page = opts.page ? await opts.page : await loadMarkdownPage(slug);
   } catch (err) {
     console.error(err);
+    if (typeof opts.alive === "function" && !opts.alive()) return null;
     if (toast) toast(err.message || _t("Page not found"), "error");
     return null;
   }
+
+  if (typeof opts.alive === "function" && !opts.alive()) return null;
 
   document.body.classList.add("modal-open");
 

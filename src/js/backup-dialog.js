@@ -34,6 +34,7 @@ const UNTHEMED_VALUE = "none";
  * @param {{
  *   onClose: () => void,
  *   toast?: (msg: string, type?: string) => void,
+ *   alive?: () => boolean,
  * }} opts
  * @returns {Promise<() => void>} cleanup
  */
@@ -54,6 +55,8 @@ export async function renderBackupDialog(host, opts) {
   let includeSettings = true;
   let includeImages = true;
   let includeThemeLogos = true;
+
+  if (typeof opts.alive === "function" && !opts.alive()) return () => {};
 
   document.body.classList.add("modal-open");
 

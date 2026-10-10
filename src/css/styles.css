@@ -3499,6 +3499,12 @@ button.form-select-trigger.sm {
   height: var(--modal-max-h);
 }
 
+/* Loading shell: tall enough to read as an open dialog before the module arrives.
+   Settings / themes keep the fixed height above (higher specificity). */
+.modal-backdrop.is-overlay-shell > .modal {
+  min-height: min(18rem, var(--modal-max-h));
+}
+
 /* Developer home / presets: empty / loading state centered under search (brick out of flow) */
 #developer-modal-backdrop > .modal.is-fixed-h .modal-body:has(.empty-view:not([hidden])) {
   display: flex;

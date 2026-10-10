@@ -9,6 +9,10 @@ and [gitmoji](https://gitmoji.dev).
 
 ## [Unreleased]
 
+### ♻️ Changed
+
+- ⚡️ Overlays open at once with the loading brick while their module loads, and Settings and About are prefetched on idle so a later tap does not wait on the network
+
 ## [0.9.8] — 2026-10-03
 
 ### 🐛 Fixed

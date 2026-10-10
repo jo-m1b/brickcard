@@ -42,6 +42,8 @@ import { _t } from "../i18n.js";
  *   onClose: () => void,
  *   onSaved: (name: string, meta: { isNew: boolean, theme: import("../themes-data.js").LegoTheme, presetOverride?: boolean }) => void,
  *   onDeleted?: (name: string, themeId: string, meta?: { presetOverride?: boolean, restoredPreset?: import("../themes-data.js").LegoTheme }) => void,
+ *   alive?: () => boolean,
+ *   clearHost?: boolean,
  * }} opts
  * @returns {Promise<(() => void)|null>} cleanup, or null if id invalid
  */
@@ -131,6 +133,8 @@ export async function renderThemeEditor(host, opts) {
     const fromParent = draft.secondaryColor ? "" : parseHexColor(ancestor?.secondaryColor);
     return fromParent || contrastText(themeCropBackground());
   }
+
+  if (typeof opts.alive === "function" && !opts.alive()) return null;
 
   const wrap = document.createElement("div");
   wrap.innerHTML = `
@@ -262,6 +266,7 @@ export async function renderThemeEditor(host, opts) {
     </div>
   `.trim();
   const backdrop = /** @type {HTMLElement} */ (wrap.firstElementChild);
+  if (opts.clearHost) host.innerHTML = "";
   host.appendChild(backdrop);
 
   if (stacked) pushModalDocumentTitle(dialogTitle);

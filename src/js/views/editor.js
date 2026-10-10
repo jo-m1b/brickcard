@@ -57,6 +57,7 @@ import { toast } from "../toast.js";
  *   onCancel: () => void,
  *   onDeleted?: (subject: string, cardId: string) => void,
  *   onThemeChanged?: () => void,
+ *   alive?: () => boolean,
  * }} opts
  * @returns {Promise<() => void>} cleanup
  */
@@ -136,6 +137,8 @@ export async function renderEditor(host, opts) {
       : builtinThemes.map(themeOption).join("");
   }
   const themeOptions = themeOptionsHtml(themes, selectedId);
+
+  if (typeof opts.alive === "function" && !opts.alive()) return () => {};
 
   document.body.classList.add("modal-open");
 

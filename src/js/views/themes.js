@@ -193,6 +193,7 @@ let rememberedQuery = "";
  *   onEdit: (id: string) => void,
  *   onClearedCustomThemes?: () => void,
  *   stacked?: boolean,
+ *   alive?: () => boolean,
  * }} opts
  * @returns {Promise<() => void>} cleanup
  */
@@ -327,6 +328,8 @@ export async function renderThemesModal(host, opts) {
       </div>
     </div>
   `;
+
+  if (typeof opts.alive === "function" && !opts.alive()) return () => {};
 
   /** @type {HTMLElement} */
   let backdrop;

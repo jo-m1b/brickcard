@@ -442,6 +442,7 @@ export function openDemoBackupDialog(host, opts = {}) {
  *   onClose: () => void,
  *   onImported?: () => void,
  *   toast?: (msg: string, type?: string) => void,
+ *   alive?: () => boolean,
  * }} opts
  * @returns {Promise<() => void>} cleanup
  */
@@ -468,6 +469,8 @@ export async function renderImportDialog(host, opts) {
   let loading = false;
   /** @type {(() => void)|null} */
   let unbindChoose = null;
+
+  if (typeof opts.alive === "function" && !opts.alive()) return () => {};
 
   document.body.classList.add("modal-open");
 

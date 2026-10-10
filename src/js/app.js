@@ -32,6 +32,7 @@ import {
   syncPrintMenu,
 } from "./print-menu.js";
 import { clearPrintQty } from "./print-qty.js";
+import { ICON_CLOSE, modalTitleMarkup } from "./icons.js";
 import { _t, applyChromeI18n, initI18n } from "./i18n.js";
 
 const main = document.getElementById("main");
@@ -298,20 +299,311 @@ function teardownOverlays(opts = {}) {
 
 /**
  * Load an overlay module. Failure → toast + home (boot stays usable).
+ * A stale route (`token` no longer current) does not toast or navigate.
  * @template T
  * @param {() => Promise<T>} loader
+ * @param {number} token `route()` generation
  * @returns {Promise<T|null>}
  */
-async function loadOverlay(loader) {
+async function loadOverlay(loader, token) {
   try {
     return await loader();
   } catch (err) {
     console.error(err);
+    if (!routeIsCurrent(token)) return null;
     const msg = err && err.message ? err.message : String(err || _t("Loading error"));
     toast(msg, "error");
     dismissOverlay();
     return null;
   }
+}
+
+/** @param {number} token */
+function routeIsCurrent(token) {
+  return token === routeToken;
+}
+
+/** @type {Promise<typeof import("./views/settings.js")> | null} */
+let settingsModulePromise = null;
+
+/** @type {Promise<typeof import("./views/page.js")> | null} */
+let pageModulePromise = null;
+
+/** @type {Promise<{ slug: string, title: string, html: string }> | null} */
+let aboutPagePromise = null;
+
+let headerOverlaysWarmed = false;
+
+/** Shared with the idle prefetch so a tap awaits an import already in flight. */
+function loadSettingsModule() {
+  if (!settingsModulePromise) {
+    settingsModulePromise = import("./views/settings.js").catch((err) => {
+      settingsModulePromise = null;
+      throw err;
+    });
+  }
+  return settingsModulePromise;
+}
+
+/** Shared with the idle prefetch so a tap awaits an import already in flight. */
+function loadPageModule() {
+  if (!pageModulePromise) {
+    pageModulePromise = import("./views/page.js").catch((err) => {
+      pageModulePromise = null;
+      throw err;
+    });
+  }
+  return pageModulePromise;
+}
+
+/** About Markdown, started with the page module so the dialog is not fetched twice. */
+function loadAboutPage() {
+  if (!aboutPagePromise) {
+    aboutPagePromise = import("./markdown.js")
+      .then((mod) => mod.loadMarkdownPage("about"))
+      .catch((err) => {
+        aboutPagePromise = null;
+        throw err;
+      });
+  }
+  return aboutPagePromise;
+}
+
+/**
+ * After the first screen is up, load Settings and About while the browser is idle.
+ * One shot for every device (no hover): a later tap reuses the same promises.
+ */
+function warmHeaderOverlays() {
+  if (headerOverlaysWarmed) return;
+  headerOverlaysWarmed = true;
+  const run = () => {
+    void loadSettingsModule().catch(() => {});
+    void loadPageModule().catch(() => {});
+    void loadAboutPage().catch(() => {});
+  };
+  if (typeof requestIdleCallback === "function") {
+    requestIdleCallback(run, { timeout: 4000 });
+  } else {
+    setTimeout(run, 200);
+  }
+}
+
+/**
+ * Close handler for the loading shell. Theme create / edit returns to the list,
+ * matching the editor; every other overlay closes home.
+ * @param {{ name: string, page?: string }} routeInfo
+ */
+function shellOnClose(routeInfo) {
+  if (routeInfo.name === "themes" && routeInfo.page && routeInfo.page !== "list") {
+    return () => {
+      if (parseRoute().name === "themes") navigate("#themes", { replace: true });
+    };
+  }
+  return overlayOnClose(routeInfo.name);
+}
+
+/**
+ * Header of a route overlay, known before its module loads.
+ * `null` while the developer-space confirmation is still the thing to show.
+ * @param {{ name: string, page?: string, slug?: string, cardId?: string|null }} routeInfo
+ * @returns {{
+ *   title: string,
+ *   icon: string|false,
+ *   size: "md"|"lg",
+ *   backdropId: string,
+ *   titleId: string,
+ *   onClose: () => void,
+ * } | null}
+ */
+function overlayShellSpec(routeInfo) {
+  /** @type {{ title: string, icon: string|false, size: "md"|"lg", backdropId: string, titleId: string }} */
+  let spec;
+  switch (routeInfo.name) {
+    case "settings":
+      spec = {
+        title: _t("Settings"),
+        icon: "tools",
+        size: "md",
+        backdropId: "settings-modal-backdrop",
+        titleId: "settings-modal-title",
+      };
+      break;
+    case "print":
+      spec = {
+        title: _t("Print settings"),
+        icon: "printer",
+        size: "md",
+        backdropId: "print-dialog-backdrop",
+        titleId: "print-dialog-title",
+      };
+      break;
+    case "backup":
+      spec = {
+        title: _t("Save"),
+        icon: "download",
+        size: "md",
+        backdropId: "backup-dialog-backdrop",
+        titleId: "backup-dialog-title",
+      };
+      break;
+    case "import":
+      spec = {
+        title: _t("Import a backup"),
+        icon: "upload",
+        size: "md",
+        backdropId: "import-dialog-backdrop",
+        titleId: "import-dialog-title",
+      };
+      break;
+    case "themes":
+      if (routeInfo.page === "new") {
+        spec = {
+          title: _t("New theme"),
+          icon: "add",
+          size: "lg",
+          backdropId: "theme-editor-backdrop",
+          titleId: "theme-editor-title",
+        };
+      } else if (routeInfo.page === "edit" || routeInfo.page === "view") {
+        spec = {
+          title: _t("Edit theme"),
+          icon: "pencil",
+          size: "lg",
+          backdropId: "theme-editor-backdrop",
+          titleId: "theme-editor-title",
+        };
+      } else {
+        spec = {
+          title: _t("Themes"),
+          icon: "palette",
+          size: "lg",
+          backdropId: "themes-modal-backdrop",
+          titleId: "themes-modal-title",
+        };
+      }
+      break;
+    case "page":
+      spec = {
+        title: routeInfo.slug === "about" ? _t("About") : String(routeInfo.slug || ""),
+        icon: false,
+        size: "md",
+        backdropId: "page-modal-backdrop",
+        titleId: "page-modal-title",
+      };
+      break;
+    case "developer":
+      if (!isDeveloperEnabled()) return null;
+      spec = {
+        title: "Developer space",
+        icon: "tools",
+        size: routeInfo.page === "theme-presets" ? "lg" : "md",
+        backdropId: "developer-modal-backdrop",
+        titleId: "developer-modal-title",
+      };
+      break;
+    case "editor":
+      spec = {
+        title: routeInfo.cardId ? _t("Edit card") : _t("New card"),
+        icon: routeInfo.cardId ? "pencil" : "add",
+        size: "lg",
+        backdropId: "card-editor-backdrop",
+        titleId: "editor-title",
+      };
+      break;
+    default:
+      return null;
+  }
+  return { ...spec, onClose: shellOnClose(routeInfo) };
+}
+
+/**
+ * Paint the loading shell. Returns a detach for the document listener
+ * (the backdrop listener dies with the element when the real modal replaces it).
+ * @param {NonNullable<ReturnType<typeof overlayShellSpec>>} spec
+ */
+function paintOverlayShell(spec) {
+  if (!modalRoot) return () => {};
+  document.body.classList.add("modal-open");
+  modalRoot.innerHTML = `
+    <div class="modal-backdrop is-overlay-shell" id="${spec.backdropId}" role="presentation">
+      <div class="modal modal--${spec.size}" role="dialog" aria-modal="true" aria-busy="true" aria-labelledby="${spec.titleId}">
+        <div class="modal-header">
+          <div>
+            <h1 class="view-title" id="${spec.titleId}">${modalTitleMarkup(spec.title, spec.icon)}</h1>
+          </div>
+          <button type="button" class="btn primary icon-only modal-close" tabindex="-1" id="btn-overlay-shell-close">
+            ${ICON_CLOSE}
+            <span class="visually-hidden">${_t("Close")}</span>
+          </button>
+        </div>
+        <div class="modal-body" tabindex="-1">
+          ${loadingViewMarkup({ titleTag: "p" })}
+        </div>
+      </div>
+    </div>
+  `;
+  setAppDocumentTitle(spec.title);
+
+  const backdrop = modalRoot.querySelector(".is-overlay-shell");
+  const btnClose = modalRoot.querySelector("#btn-overlay-shell-close");
+
+  /** @param {MouseEvent} e */
+  const onBackdropClick = (e) => {
+    if (e.target === backdrop) spec.onClose();
+  };
+
+  /** @param {KeyboardEvent} e */
+  const onKey = (e) => {
+    if (!backdrop?.isConnected) return;
+    if (e.key !== "Escape" || e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
+    e.preventDefault();
+    spec.onClose();
+  };
+
+  backdrop?.addEventListener("click", onBackdropClick);
+  btnClose?.addEventListener("click", () => spec.onClose());
+  document.addEventListener("keydown", onKey);
+  focusTopModal();
+
+  return () => {
+    document.removeEventListener("keydown", onKey);
+    backdrop?.removeEventListener("click", onBackdropClick);
+  };
+}
+
+/**
+ * Show a modal shell while `import()` is in flight.
+ * From home, wait one frame so a module already in memory does not flash the brick.
+ * Replacing a dialog paints immediately: its listeners are already gone.
+ * @param {ReturnType<typeof overlayShellSpec>} spec
+ * @param {number} token
+ * @returns {{ cancel: () => void }}
+ */
+function scheduleOverlayShell(spec, token) {
+  if (!spec || !modalRoot) return { cancel() {} };
+  let detach = () => {};
+  const paint = () => {
+    if (!routeIsCurrent(token)) return;
+    detach();
+    detach = paintOverlayShell(spec);
+  };
+  const alreadyOpen = Boolean(modalRoot.querySelector(".modal-backdrop"));
+  let raf = 0;
+  if (alreadyOpen) paint();
+  else {
+    raf = requestAnimationFrame(() => {
+      raf = 0;
+      paint();
+    });
+  }
+  return {
+    cancel() {
+      if (raf) cancelAnimationFrame(raf);
+      raf = 0;
+      detach();
+      detach = () => {};
+    },
+  };
 }
 
 async function ensureUnderlay() {
@@ -330,23 +622,28 @@ async function ensureUnderlay() {
   underlayStale = false;
 }
 
-async function showOverlay(routeInfo) {
+/**
+ * @param {ReturnType<typeof parseRoute>} routeInfo
+ * @param {number} token
+ */
+async function showOverlay(routeInfo, token) {
   if (!modalRoot) {
+    if (!routeIsCurrent(token)) return;
     toast(_t("Modal unavailable"), "error");
     dismissOverlay();
     return;
   }
   document.body.classList.add("modal-open");
+  const alive = () => routeIsCurrent(token);
 
   if (routeInfo.name === "settings") {
-    const settings = await loadOverlay(() => import("./views/settings.js"));
-    if (!settings) return;
-    let numCards = 0;
-    try {
-      numCards = (await loadCards()).length;
-    } catch {
-      /* ignore */
-    }
+    const countPromise = loadCards()
+      .then((cards) => cards.length)
+      .catch(() => 0);
+    const settings = await loadOverlay(() => loadSettingsModule(), token);
+    if (!settings || !alive()) return;
+    const numCards = await countPromise;
+    if (!alive()) return;
     cleanupSettings = settings.renderSettingsModal(modalRoot, {
       onClose: overlayOnClose("settings"),
       onClearCards: handleClearCards,
@@ -358,8 +655,8 @@ async function showOverlay(routeInfo) {
   }
 
   if (routeInfo.name === "print") {
-    const printDlg = await loadOverlay(() => import("./print-dialog.js"));
-    if (!printDlg) return;
+    const printDlg = await loadOverlay(() => import("./print-dialog.js"), token);
+    if (!printDlg || !alive()) return;
     cleanupPrint = printDlg.renderPrintDialog(modalRoot, {
       onClose: overlayOnClose("print"),
       toast,
@@ -369,40 +666,46 @@ async function showOverlay(routeInfo) {
   }
 
   if (routeInfo.name === "backup") {
-    const backup = await loadOverlay(() => import("./backup-dialog.js"));
-    if (!backup) return;
-    cleanupBackup = await backup.renderBackupDialog(modalRoot, {
+    const backup = await loadOverlay(() => import("./backup-dialog.js"), token);
+    if (!backup || !alive()) return;
+    const cleanup = await backup.renderBackupDialog(modalRoot, {
       onClose: overlayOnClose("backup"),
       toast,
+      alive,
     });
+    if (!alive()) return;
+    cleanupBackup = cleanup;
     focusTopModal();
     return;
   }
 
   if (routeInfo.name === "import") {
-    const importDlg = await loadOverlay(() => import("./import-dialog.js"));
-    if (!importDlg) return;
-    cleanupImport = await importDlg.renderImportDialog(modalRoot, {
+    const importDlg = await loadOverlay(() => import("./import-dialog.js"), token);
+    if (!importDlg || !alive()) return;
+    const cleanup = await importDlg.renderImportDialog(modalRoot, {
       onClose: overlayOnClose("import"),
       onImported: () => {
         underlayStale = true;
       },
       toast,
+      alive,
     });
+    if (!alive()) return;
+    cleanupImport = cleanup;
     focusTopModal();
     return;
   }
 
   if (routeInfo.name === "themes") {
-    const themes = await loadOverlay(() => import("./views/themes.js"));
-    if (!themes) return;
+    const themes = await loadOverlay(() => import("./views/themes.js"), token);
+    if (!themes || !alive()) return;
     if (routeInfo.page === "list") {
       if (cleanupThemeEditor) {
         cleanupThemeEditor();
         cleanupThemeEditor = null;
       }
       if (!cleanupThemes) {
-        cleanupThemes = await themes.renderThemesModal(modalRoot, {
+        const cleanup = await themes.renderThemesModal(modalRoot, {
           onClose: overlayOnClose("themes"),
           onCreate: () => navigate("#themes/new"),
           onEdit: (id) => navigate(`#themes/edit/${encodeURIComponent(id)}`),
@@ -414,7 +717,10 @@ async function showOverlay(routeInfo) {
             });
             underlayStale = true;
           },
+          alive,
         });
+        if (!alive()) return;
+        cleanupThemes = cleanup;
         focusTopModal();
         themes.applyPendingThemeFocus();
       } else {
@@ -426,30 +732,32 @@ async function showOverlay(routeInfo) {
     }
 
     if (routeInfo.page === "view" && routeInfo.themeId) {
+      if (!alive()) return;
       navigate(`#themes/edit/${encodeURIComponent(routeInfo.themeId)}`, { replace: true });
       return;
     }
 
     if (routeInfo.page === "edit") {
       const theme = await getTheme(routeInfo.themeId);
+      if (!alive()) return;
       if (!theme) {
         navigate("#themes", { replace: true });
         return;
       }
     }
 
-    const themeEditor = await loadOverlay(() => import("./views/theme-editor.js"));
-    if (!themeEditor) return;
+    const themeEditor = await loadOverlay(() => import("./views/theme-editor.js"), token);
+    if (!themeEditor || !alive()) return;
     if (cleanupThemeEditor) {
       cleanupThemeEditor();
       cleanupThemeEditor = null;
     }
-    if (!cleanupThemes) {
-      modalRoot.innerHTML = "";
-    }
     const editorThemeId = routeInfo.page === "new" ? null : routeInfo.themeId;
-    cleanupThemeEditor = await themeEditor.renderThemeEditor(modalRoot, {
+    const clearHost = !cleanupThemes;
+    const cleanup = await themeEditor.renderThemeEditor(modalRoot, {
       themeId: editorThemeId,
+      clearHost,
+      alive,
       onClose: () => {
         const id = editorThemeId;
         if (parseRoute().name === "themes") {
@@ -492,24 +800,34 @@ async function showOverlay(routeInfo) {
         }
       },
     });
-    if (!cleanupThemeEditor) {
+    if (!alive()) return;
+    if (!cleanup) {
       navigate("#themes", { replace: true });
       return;
     }
+    cleanupThemeEditor = cleanup;
     focusTopModal();
     return;
   }
 
   if (routeInfo.name === "page") {
-    const page = await loadOverlay(() => import("./views/page.js"));
-    if (!page) return;
-    cleanupPage = await page.renderPageModal(modalRoot, {
+    const pagePromise = loadPageModule();
+    const aboutPromise = routeInfo.slug === "about" ? loadAboutPage() : null;
+    const page = await loadOverlay(() => pagePromise, token);
+    if (!page || !alive()) return;
+    const cleanup = await page.renderPageModal(modalRoot, {
       slug: routeInfo.slug,
       toast,
       onClose: overlayOnClose("page"),
+      page: aboutPromise,
+      alive,
     });
-    if (!cleanupPage) dismissOverlay();
-    else focusTopModal();
+    if (!alive()) return;
+    if (!cleanup) dismissOverlay();
+    else {
+      cleanupPage = cleanup;
+      focusTopModal();
+    }
     return;
   }
 
@@ -526,6 +844,7 @@ async function showOverlay(routeInfo) {
           { id: "ok", label: _t("Enable"), variant: "primary", slot: "end" },
         ],
       });
+      if (!alive()) return;
       const ok = choice === "ok";
       if (parseRoute().name !== "developer") return;
       if (!ok) {
@@ -533,33 +852,23 @@ async function showOverlay(routeInfo) {
         return;
       }
       enableDeveloper();
-    }
-    const developer = await loadOverlay(() => import("./views/developer/modal.js"));
-    if (!developer) return;
-    const staying = Boolean(modalRoot.querySelector("#developer-modal-backdrop"));
-    try {
-      cleanupDeveloper = await developer.renderDeveloperModal(modalRoot, {
-        page: routeInfo.page,
-        presetPage: routeInfo.presetPage,
-        themeId: routeInfo.themeId,
-        onClose: overlayOnClose("developer"),
-        onNavigate: navigate,
-      });
-    } catch (err) {
-      console.error(err);
-      const msg = err && err.message ? err.message : String(err || _t("Loading error"));
-      toast(msg, "error");
-      dismissOverlay();
+      const shell = scheduleOverlayShell(overlayShellSpec(routeInfo), token);
+      try {
+        await mountDeveloperOverlay(routeInfo, token);
+      } finally {
+        shell.cancel();
+      }
       return;
     }
-    focusTopModal({ resetScroll: !staying });
+    await mountDeveloperOverlay(routeInfo, token);
     return;
   }
 
   if (routeInfo.name === "editor") {
-    const editor = await loadOverlay(() => import("./views/editor.js"));
-    if (!editor) return;
-    cleanupEditor = await editor.renderEditor(modalRoot, {
+    const editor = await loadOverlay(() => import("./views/editor.js"), token);
+    if (!editor || !alive()) return;
+    const cleanup = await editor.renderEditor(modalRoot, {
+      alive,
       cardId: routeInfo.cardId,
       onSaved: (subject, meta) => {
         toastCardSavedOrDeleted("saved", subject);
@@ -589,8 +898,41 @@ async function showOverlay(routeInfo) {
         underlayStale = true;
       },
     });
+    if (!alive()) return;
+    cleanupEditor = cleanup;
     focusTopModal();
   }
+}
+
+/**
+ * Developer space after access is granted. The loading shell is scheduled by the caller
+ * when this is the first open (the confirmation dialog stays in front until then).
+ * @param {{ page?: string, presetPage?: string, themeId?: string }} routeInfo
+ * @param {number} token
+ */
+async function mountDeveloperOverlay(routeInfo, token) {
+  const developer = await loadOverlay(() => import("./views/developer/modal.js"), token);
+  if (!developer || !routeIsCurrent(token) || !modalRoot) return;
+  const staying = Boolean(modalRoot.querySelector("#developer-modal-backdrop:not(.is-overlay-shell)"));
+  try {
+    const cleanup = await developer.renderDeveloperModal(modalRoot, {
+      page: routeInfo.page,
+      presetPage: routeInfo.presetPage,
+      themeId: routeInfo.themeId,
+      onClose: overlayOnClose("developer"),
+      onNavigate: navigate,
+    });
+    if (!routeIsCurrent(token)) return;
+    cleanupDeveloper = cleanup;
+  } catch (err) {
+    console.error(err);
+    if (!routeIsCurrent(token)) return;
+    const msg = err && err.message ? err.message : String(err || _t("Loading error"));
+    toast(msg, "error");
+    dismissOverlay();
+    return;
+  }
+  focusTopModal({ resetScroll: !staying });
 }
 
 function disposeList() {
@@ -701,7 +1043,7 @@ async function route() {
 
   if (prev?.name === "developer" && routeInfo.name === "developer") {
     document.body.classList.add("modal-open");
-    await showOverlay(routeInfo);
+    await showOverlay(routeInfo, token);
     if (token !== routeToken) return;
     shownRoute = routeInfo;
     trackTelemetryPage();
@@ -711,7 +1053,7 @@ async function route() {
 
   if (prev?.name === "themes" && routeInfo.name === "themes") {
     document.body.classList.add("modal-open");
-    await showOverlay(routeInfo);
+    await showOverlay(routeInfo, token);
     if (token !== routeToken) return;
     shownRoute = routeInfo;
     trackTelemetryPage();
@@ -729,7 +1071,12 @@ async function route() {
   }
 
   document.body.classList.add("modal-open");
-  await showOverlay(routeInfo);
+  const shell = scheduleOverlayShell(overlayShellSpec(routeInfo), token);
+  try {
+    await showOverlay(routeInfo, token);
+  } finally {
+    shell.cancel();
+  }
   if (token !== routeToken) return;
   shownRoute = routeInfo;
   trackTelemetryPage();
@@ -1126,6 +1473,7 @@ async function boot() {
     }
     main.removeAttribute("aria-busy");
     await route();
+    warmHeaderOverlays();
   } catch (err) {
     console.error(err);
     if (typeof window.showBootError === "function") {
