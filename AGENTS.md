@@ -98,6 +98,7 @@ All app code lives in **`src/`**.
 | `README.md` | GitHub landing (EN); shields.io **FR / Lisez-moi** badge to `README.fr.md`; screenshots in `screenshots/` |
 | `README.fr.md` | Same landing in French; shields.io **EN / README** badge to `README.md` (GitHub does not auto-pick the language) |
 | `screenshots/` | README screenshots (WebP); no `docs/` folder (no doc site) |
+| `design/` | Editable masters of published images (Inkscape SVG); not deployed (Pages publishes `src/` only). Exports live in `src/img/` (`brickcard-og-1200x630.svg` → `brickcard-og-1200x630.png`, `brickcard-og-1200x1200.svg` → `brickcard-og-1200x1200.png`) |
 | `CHANGELOG.md` | Version history (Keep a Changelog, **English**); **app code only** (`src/`) — not README, CONTRIBUTING, GitHub templates, Ko-fi, etc. |
 | `CONTRIBUTING.md` | Contributor conventions (EN, KISS): issues, PRs, no bundler |
 | `.github/CODEOWNERS` | GitHub owners: `* @jo-m1b` (auto-review on PRs if the project grows) |
