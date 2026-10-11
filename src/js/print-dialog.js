@@ -3,6 +3,9 @@
  * Close (X, Escape, backdrop; Cancel if there are cards) → home; settings stay saved.
  * “Start printing” prints without closing the modal.
  * Nothing to print: message instead of options, no footer (the close button is enough).
+ * With cards: under the summary, a 150px strip of the A4 sheets Start printing will produce.
+ * The summary and the strip stay put; only the options scroll.
+ * The strip scrolls sideways with a drag, a swipe, or the wheel while hovering. No scrollbar.
  * Ctrl/Cmd+P: open the modal, or start printing if it is already open.
  */
 
@@ -13,7 +16,9 @@ import { emptyViewMarkup } from "./empty-view.js";
 import { bindFormRange, formRangeResetMarkup } from "./form-range.js";
 import { formRadioMarkup } from "./form-radio.js";
 import { isPrintShortcut } from "./hotkeys.js";
-import { loadCards } from "./storage.js";
+import { loadCards, loadThemes } from "./storage.js";
+import { themeDisplayMap } from "./sets-presets.js";
+import { buildPrintDocument } from "./print.js";
 import { syncPrintMenu } from "./print-menu.js";
 import { getPrintQty, totalPrintCount } from "./print-qty.js";
 import { compareCardsAsc } from "./card-sort.js";
@@ -35,6 +40,135 @@ import {
   syncPrintBleedDisabled,
   setPrintSettings,
 } from "./print-settings.js";
+
+/** Wait before rebuilding thumbnails while the grid slider is moving. */
+const PREVIEW_DEBOUNCE_MS = 60;
+
+/**
+ * Copies selected for printing (quantity, ascending order).
+ * @param {import("./storage.js").Card[]} cards
+ * @param {import("./print-settings.js").PrintSettings} settings
+ * @returns {import("./storage.js").Card[]}
+ */
+function cardsToPrint(cards, settings) {
+  const selected = cards
+    .filter((card) => getPrintQty(card.id) > 0)
+    .sort((a, b) => compareCardsAsc(a, b, settings.cardPrintOrder));
+  /** @type {import("./storage.js").Card[]} */
+  const toPrint = [];
+  for (const card of selected) {
+    const qty = getPrintQty(card.id);
+    for (let i = 0; i < qty; i++) toPrint.push(card);
+  }
+  return toPrint;
+}
+
+/**
+ * Fit each full-size A4 sheet into its thumbnail frame.
+ * The frame width follows the scaled sheet so horizontal scroll
+ * matches the visible pages, not the 210mm layout size.
+ * Height is measured without a scrollbar, so a wide row does not shrink the pages.
+ * `--print-preview-scale` keeps the cut-mark hairline about 1px on screen.
+ * @param {HTMLElement} preview
+ */
+function fitPrintPreviewSheets(preview) {
+  const frames = [...preview.querySelectorAll(".print-dialog-preview-sheet")].filter(
+    (frame) => frame instanceof HTMLElement
+  );
+  if (!frames.length) return;
+  for (const frame of frames) frame.style.width = "0px";
+
+  const sheet0 = frames[0].querySelector(".print-sheet");
+  if (!(sheet0 instanceof HTMLElement)) return;
+  const sheetH = sheet0.offsetHeight;
+  const sheetW = sheet0.offsetWidth;
+  if (!sheetH || !sheetW) return;
+
+  const previousOverflow = preview.style.overflowX;
+  preview.style.overflowX = "hidden";
+  const innerH = frames[0].clientHeight;
+  const borderX = frames[0].offsetWidth - frames[0].clientWidth;
+  preview.style.overflowX = previousOverflow;
+  if (!innerH) return;
+
+  const scale = innerH / sheetH;
+  for (const frame of frames) {
+    const sheet = frame.querySelector(".print-sheet");
+    if (!(sheet instanceof HTMLElement)) continue;
+    sheet.style.transform = `scale(${scale})`;
+    sheet.style.setProperty("--print-preview-scale", String(scale));
+    frame.style.width = `${sheetW * scale + borderX}px`;
+  }
+  preview.classList.toggle("is-scrollable", preview.scrollWidth > preview.clientWidth + 1);
+}
+
+/**
+ * Sideways scroll of the thumbnail strip: mouse / pen drag, touch swipe,
+ * and the wheel while the pointer is over the strip. No scrollbar.
+ * @param {HTMLElement} preview
+ * @returns {() => void}
+ */
+function bindPrintPreviewDrag(preview) {
+  /** @type {number|null} */
+  let pointerId = null;
+  let startX = 0;
+  let startScroll = 0;
+
+  const canScroll = () => preview.scrollWidth > preview.clientWidth + 1;
+
+  const endDrag = () => {
+    pointerId = null;
+    preview.classList.remove("is-dragging");
+    document.body.classList.remove("print-preview-dragging");
+  };
+
+  /** @param {PointerEvent} e */
+  const onDown = (e) => {
+    if (e.button !== 0 || !canScroll()) return;
+    pointerId = e.pointerId;
+    startX = e.clientX;
+    startScroll = preview.scrollLeft;
+    preview.setPointerCapture(e.pointerId);
+  };
+
+  /** @param {PointerEvent} e */
+  const onMove = (e) => {
+    if (e.pointerId !== pointerId) return;
+    preview.classList.add("is-dragging");
+    document.body.classList.add("print-preview-dragging");
+    preview.scrollLeft = startScroll - (e.clientX - startX);
+  };
+
+  /** @param {PointerEvent} e */
+  const onUp = (e) => {
+    if (e.pointerId !== pointerId) return;
+    endDrag();
+  };
+
+  /** Vertical wheel and horizontal wheel / trackpad both move the strip. */
+  const onWheel = (e) => {
+    if (!canScroll()) return;
+    const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    if (!delta) return;
+    e.preventDefault();
+    preview.scrollLeft += delta;
+  };
+
+  preview.addEventListener("pointerdown", onDown);
+  preview.addEventListener("pointermove", onMove);
+  preview.addEventListener("pointerup", onUp);
+  preview.addEventListener("pointercancel", onUp);
+  preview.addEventListener("wheel", onWheel, { passive: false });
+
+  return () => {
+    endDrag();
+    preview.removeEventListener("pointerdown", onDown);
+    preview.removeEventListener("pointermove", onMove);
+    preview.removeEventListener("pointerup", onUp);
+    preview.removeEventListener("pointercancel", onUp);
+    preview.removeEventListener("wheel", onWheel);
+  };
+}
 
 /**
  * @param {HTMLElement} host `#modal-root`
@@ -76,10 +210,22 @@ export function renderPrintDialog(host, opts) {
                   text: _t("Select at least one card to print from your collection."),
                 })
               : `
-          <div class="modal-confirm-msg" id="print-dialog-recap">
-            <h2 class="section-title" id="print-dialog-num"></h2>
-            <p class="view-desc" id="print-dialog-desc"></p>
+          <div class="print-dialog-summary">
+            <div class="modal-confirm-msg" id="print-dialog-recap">
+              <h2 class="section-title" id="print-dialog-num"></h2>
+              <p class="view-desc" id="print-dialog-desc"></p>
+            </div>
+            <div
+              class="print-dialog-preview"
+              id="print-dialog-preview"
+              role="img"
+              aria-label="${_t("Print preview")}"
+              aria-busy="true"
+            >
+              <div class="print-dialog-preview-track"></div>
+            </div>
           </div>
+          <div class="print-dialog-settings" tabindex="-1">
           <div class="form-field">
             <label class="form-label" for="print-dialog-grid">${_t("Print grid")}</label>
             <div class="form-range-row">
@@ -170,7 +316,8 @@ export function renderPrintDialog(host, opts) {
                 checked: settings.sheetAssembly === "grouped",
               })}
             </div>
-          </fieldset>`
+          </fieldset>
+          </div>`
           }
         </div>
         ${
@@ -201,6 +348,10 @@ export function renderPrintDialog(host, opts) {
 
   /** @type {ReturnType<typeof bindFormRange>|null} */
   let gridRangeField = null;
+  let alive = true;
+  /** @type {number} */
+  let previewTimer = 0;
+  let unbindPreviewDrag = () => {};
 
   if (!empty) {
     const countEl = host.querySelector("#print-dialog-num");
@@ -215,6 +366,68 @@ export function renderPrintDialog(host, opts) {
     const assemblyInputs = host.querySelectorAll('input[name="print-dialog-sheet-assembly"]');
     const assemblyField = host.querySelector("#print-dialog-sheet-assembly-field");
     const runBtn = host.querySelector("#btn-print-dialog-run");
+    const previewEl = host.querySelector("#print-dialog-preview");
+    if (previewEl instanceof HTMLElement) unbindPreviewDrag = bindPrintPreviewDrag(previewEl);
+
+    let previewToken = 0;
+    /** @type {import("./storage.js").Card[]|null} */
+    let cachedCards = null;
+    /** @type {Map<string, import("./themes-data.js").LegoTheme>|null} */
+    let themeMap = null;
+
+    function renderPreview() {
+      if (!(previewEl instanceof HTMLElement) || !cachedCards || !themeMap) return;
+      const token = ++previewToken;
+      const doc = buildPrintDocument(
+        cardsToPrint(cachedCards, settings),
+        themeMap,
+        computePrintLayout(settings.printGrid),
+        settings
+      );
+      if (!alive || token !== previewToken) return;
+      const track = previewEl.querySelector(".print-dialog-preview-track");
+      const prevCount = track instanceof HTMLElement ? track.childElementCount : 0;
+      const scrollLeft = previewEl.scrollLeft;
+      previewEl.className = `print-dialog-preview ${doc.className}`;
+      const frames = [...doc.children].map((sheet) => {
+        const frame = document.createElement("div");
+        frame.className = "print-dialog-preview-sheet";
+        frame.setAttribute("aria-hidden", "true");
+        frame.appendChild(sheet);
+        return frame;
+      });
+      if (track instanceof HTMLElement) {
+        previewEl.replaceChildren(track);
+        track.replaceChildren(...frames);
+      } else {
+        previewEl.replaceChildren(...frames);
+      }
+      fitPrintPreviewSheets(previewEl);
+      previewEl.scrollLeft = frames.length === prevCount ? scrollLeft : 0;
+      previewEl.setAttribute("aria-busy", "false");
+    }
+
+    function schedulePreview() {
+      window.clearTimeout(previewTimer);
+      previewTimer = window.setTimeout(() => {
+        if (alive) renderPreview();
+      }, PREVIEW_DEBOUNCE_MS);
+    }
+
+    void (async () => {
+      try {
+        const [cards, themes] = await Promise.all([loadCards(), loadThemes()]);
+        if (!alive) return;
+        cachedCards = cards;
+        themeMap = await themeDisplayMap(themes);
+        if (!alive) return;
+        window.clearTimeout(previewTimer);
+        renderPreview();
+      } catch {
+        if (!alive) return;
+        if (previewEl instanceof HTMLElement) previewEl.setAttribute("aria-busy", "false");
+      }
+    })();
 
     function refresh() {
       if (countEl instanceof HTMLElement) {
@@ -235,6 +448,7 @@ export function renderPrintDialog(host, opts) {
       }
       syncPrintBleedDisabled(bleedInputs, settings);
       syncPrintMenu();
+      schedulePreview();
     }
 
     /** @param {Partial<typeof settings>} partial */
@@ -290,15 +504,7 @@ export function renderPrintDialog(host, opts) {
       if (runBtn instanceof HTMLButtonElement) runBtn.disabled = true;
       try {
         const cards = await loadCards();
-        const selected = cards
-          .filter((card) => getPrintQty(card.id) > 0)
-          .sort((a, b) => compareCardsAsc(a, b, settings.cardPrintOrder));
-        /** @type {import("./storage.js").Card[]} */
-        const toPrint = [];
-        for (const card of selected) {
-          const qty = getPrintQty(card.id);
-          for (let i = 0; i < qty; i++) toPrint.push(card);
-        }
+        const toPrint = cardsToPrint(cards, settings);
         if (!toPrint.length) {
           toast?.(_t("No cards to print"), "error");
           return;
@@ -342,6 +548,9 @@ export function renderPrintDialog(host, opts) {
   document.addEventListener("keydown", onKey);
 
   return () => {
+    alive = false;
+    unbindPreviewDrag();
+    window.clearTimeout(previewTimer);
     gridRangeField?.destroy();
     document.removeEventListener("keydown", onKey);
     backdrop?.removeEventListener("click", onBackdropClick);

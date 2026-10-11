@@ -4869,6 +4869,40 @@ textarea {
   print-color-adjust: exact;
 }
 
+/* Thumbnail scale would shrink the 1px stroke away. Keep it about 1px on screen. */
+.print-dialog-preview.print-cut-mark-face .print-sheet--front .print-slot:not(.is-empty)::after,
+.print-dialog-preview.print-cut-mark-back .print-sheet--back .print-slot:not(.is-empty)::after {
+  border-width: calc(1px / var(--print-preview-scale, 1));
+}
+
+/*
+ * Bleed: rectangle on the slot (sheet mark, not the card transform).
+ * 2 mm on all four sides — scales with the grid.
+ * Face / back via .print-bleed-face / .print-bleed-back (never if
+ * cut marks on the same side are checked). On screen for the dialog
+ * thumbnail; the same rules apply when printing.
+ */
+.print-document.print-bleed-face .print-sheet--front,
+.print-document.print-bleed-back .print-sheet--back {
+  --print-bleed: calc(2mm * var(--print-scale));
+}
+
+.print-document.print-bleed-face .print-sheet--front .print-slot:not(.is-empty),
+.print-document.print-bleed-back .print-sheet--back .print-slot:not(.is-empty) {
+  overflow: visible;
+}
+
+.print-document.print-bleed-face .print-sheet--front .print-slot:not(.is-empty)::before,
+.print-document.print-bleed-back .print-sheet--back .print-slot:not(.is-empty)::before {
+  content: "";
+  position: absolute;
+  inset: calc(-1 * var(--print-bleed));
+  background: var(--card-accent, var(--card-default-accent, #6e6e6e));
+  pointer-events: none;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
 .print-slot > .card,
 .print-slot > .card-back {
   transform: scale(var(--print-scale));
@@ -4880,6 +4914,89 @@ textarea {
 
 .print-slot.is-empty {
   visibility: hidden;
+}
+
+/* Print dialog: summary and thumbnails stay put; only the options scroll. */
+#print-dialog-backdrop > .modal:has(.print-dialog-summary) {
+  height: var(--modal-max-h);
+}
+
+.modal-body:has(> .print-dialog-summary) {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+}
+
+.print-dialog-summary {
+  flex: 0 0 auto;
+  padding: 1.25rem 1.25rem 0.85rem;
+}
+
+.print-dialog-settings {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: none;
+  padding: 0 1.25rem 1.25rem;
+}
+
+.print-dialog-settings:focus {
+  outline: none;
+}
+
+/* A4 thumbnails. No scrollbar: drag, swipe, or the wheel while hovering. */
+.print-dialog-preview {
+  box-sizing: border-box;
+  margin: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
+  user-select: none;
+  scrollbar-width: none;
+}
+
+.print-dialog-preview::-webkit-scrollbar {
+  display: none;
+}
+
+.print-dialog-preview.is-scrollable {
+  cursor: grab;
+}
+
+.print-dialog-preview.is-dragging,
+body.print-preview-dragging {
+  cursor: grabbing;
+}
+
+.print-dialog-preview-track {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: stretch;
+  justify-content: safe center;
+  gap: 0.5rem;
+  box-sizing: border-box;
+  height: 150px;
+}
+
+.print-dialog-preview-sheet {
+  flex: 0 0 auto;
+  height: 100%;
+  width: calc(150px * 210 / 297);
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--ink);
+}
+
+.print-dialog-preview-sheet .print-sheet {
+  transform-origin: top left;
+  margin: 0;
+  page-break-after: auto;
+  break-after: auto;
 }
 
 @media screen {
@@ -5110,32 +5227,5 @@ textarea {
   /* Error brick is screen-only; print treats a failed image as missing. */
   .image-error {
     display: none !important;
-  }
-
-  /*
-   * Bleed: rectangle on the slot (sheet mark, not the
-   * card transform). 2 mm on all four sides — scales with the grid.
-   * Face / back via .print-bleed-face / .print-bleed-back (never if
-   * cut marks on the same side are checked).
-   */
-  .print-document.print-bleed-face .print-sheet--front,
-  .print-document.print-bleed-back .print-sheet--back {
-    --print-bleed: calc(2mm * var(--print-scale));
-  }
-
-  .print-document.print-bleed-face .print-sheet--front .print-slot:not(.is-empty),
-  .print-document.print-bleed-back .print-sheet--back .print-slot:not(.is-empty) {
-    overflow: visible;
-  }
-
-  .print-document.print-bleed-face .print-sheet--front .print-slot:not(.is-empty)::before,
-  .print-document.print-bleed-back .print-sheet--back .print-slot:not(.is-empty)::before {
-    content: "";
-    position: absolute;
-    inset: calc(-1 * var(--print-bleed));
-    background: var(--card-accent, var(--card-default-accent, #6e6e6e));
-    pointer-events: none;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
   }
 }

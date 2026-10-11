@@ -505,6 +505,9 @@ msgstr "Die Karten konnten nicht ausgewählt werden"
 msgid "Print settings"
 msgstr "Druckeinstellungen"
 
+msgid "Print preview"
+msgstr "Druckvorschau"
+
 msgid "Print grid"
 msgstr "Druckraster"
 

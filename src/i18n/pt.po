@@ -505,6 +505,9 @@ msgstr "Não foi possível selecionar os cartões"
 msgid "Print settings"
 msgstr "Configurações de impressão"
 
+msgid "Print preview"
+msgstr "Pré-visualização da impressão"
+
 msgid "Print grid"
 msgstr "Grade de impressão"
 

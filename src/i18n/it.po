@@ -505,6 +505,9 @@ msgstr "Impossibile selezionare le carte"
 msgid "Print settings"
 msgstr "Impostazioni di stampa"
 
+msgid "Print preview"
+msgstr "Anteprima di stampa"
+
 msgid "Print grid"
 msgstr "Griglia di stampa"
 

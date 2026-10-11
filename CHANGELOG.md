@@ -9,6 +9,10 @@ and [gitmoji](https://gitmoji.dev).
 
 ## [Unreleased]
 
+### ✨ Added
+
+- ✨ Print settings: a 150px strip of A4 sheet thumbnails under the summary, matching the pages **Start printing** will produce, with horizontal scrolling when there are many sheets; cut marks stay visible in the thumbnail. The summary and the strip stay in place while the options scroll. The strip has no scrollbar; it moves with a drag, a swipe, or the wheel while the pointer is over it
+
 ### ♻️ Changed
 
 - ⚡️ Overlays open at once with the loading brick while their module loads, and Settings and About are prefetched on idle so a later tap does not wait on the network

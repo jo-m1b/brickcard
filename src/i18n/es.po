@@ -505,6 +505,9 @@ msgstr "No se pudieron seleccionar las tarjetas"
 msgid "Print settings"
 msgstr "Ajustes de impresión"
 
+msgid "Print preview"
+msgstr "Vista previa de la impresión"
+
 msgid "Print grid"
 msgstr "Rejilla de impresión"
 

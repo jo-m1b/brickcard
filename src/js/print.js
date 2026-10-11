@@ -130,12 +130,15 @@ function buildSheet(pageCards, side, themeMap, layout, sheetIndex, sheetTotal) {
 }
 
 /**
+ * Sheets for `window.print()` and the print-dialog thumbnail.
+ * Same order, mirror, assembly, cut marks, and bleed.
  * @param {import("./storage.js").Card[]} cards
  * @param {Map<string, import("./themes-data.js").LegoTheme>} themeMap
  * @param {import("./print-settings.js").PrintLayout} layout
  * @param {import("./print-settings.js").PrintSettings} settings
+ * @returns {HTMLDivElement}
  */
-function buildPrintDocument(cards, themeMap, layout, settings) {
+export function buildPrintDocument(cards, themeMap, layout, settings) {
   const root = document.createElement("div");
   root.className = "print-document";
   if (settings.cutMarkFace) root.classList.add("print-cut-mark-face");
