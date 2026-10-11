@@ -11,6 +11,7 @@ and [gitmoji](https://gitmoji.dev).
 
 ### ✨ Added
 
+- ✨ Search preview: square image `img/brickcard-og-1200x1200.png` (1:1) in JSON-LD, beside the 1200×630 Open Graph image, so a search thumbnail can use a square file
 - ✨ Print settings: a 150px strip of A4 sheet thumbnails under the summary, matching the pages **Start printing** will produce, with horizontal scrolling when there are many sheets; cut marks stay visible in the thumbnail. The summary and the strip stay in place while the options scroll. The strip has no scrollbar; it moves with a drag, a swipe, or the wheel while the pointer is over it
 
 ### ♻️ Changed

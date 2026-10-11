@@ -38,7 +38,8 @@ All app code lives in **`src/`**.
 | `src/img/brickcard-favicon.ico` / `brickcard-favicon-96x96.png` | Raster favicon (tab) |
 | `src/img/brickcard-apple-touch-icon.png` | iOS icon 180×180 |
 | `src/img/brickcard-web-app-manifest-192x192.png` / `512x512.png` | PWA icons (any + maskable) |
-| `src/img/brickcard-og-1200x630.png` | Open Graph / Twitter share image (1200×630 PNG; absolute URL in `index.html`) |
+| `src/img/brickcard-og-1200x630.png` | Open Graph / Twitter share image (1200×630 PNG; absolute URL in `index.html` `og:image` / `twitter:image`) |
+| `src/img/brickcard-og-1200x1200.png` | Square share image (1200×1200 PNG, 1:1) for search thumbnails; JSON-LD `image` only (not a second `og:image`, so Facebook / LinkedIn keep the wide card) |
 | `src/fonts/` | Open Sans + Inter (woff2 variable, latin-ext) + SIL OFL licenses |
 | `src/i18n/README.md` | Translator guide (add a language, `.po` structure, ISO codes) |
 | `src/i18n/locales.json` | Supported locales (`code` ISO + `name` in that language) |
