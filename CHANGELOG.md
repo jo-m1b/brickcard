@@ -9,6 +9,8 @@ and [gitmoji](https://gitmoji.dev).
 
 ## [Unreleased]
 
+## [0.9.9] — 2026-10-12
+
 ### ✨ Added
 
 - ✨ Search preview: square image `img/brickcard-og-1200x1200.png` (1:1) in JSON-LD, beside the 1200×630 Open Graph image, so a search thumbnail can use a square file
