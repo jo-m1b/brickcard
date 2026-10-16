@@ -1,11 +1,11 @@
 {
   "meta": {
-    "generatedAt": "2026-10-15T12:47:50Z",
+    "generatedAt": "2026-10-16T12:39:39Z",
     "source": "https://rebrickable.com/downloads/",
     "numThemes": 406,
     "themesKeys": ["id", "name", "parentId"],
     "numParentThemes": 142,
-    "numSets": 18294,
+    "numSets": 18297,
     "setsKeys": ["id", "name", "numPieces", "numFigurines", "releaseYear", "themeId"],
     "setsImageUrl": "https://cdn.rebrickable.com/media/sets/{id}.jpg"
   },
@@ -3017,6 +3017,7 @@
     ["2198-1","3 Building Plates",3,null,1999,505],
     ["2199-1","Large Bulk Bucket",467,null,1997,467],
     ["22-1","Car",47,null,1971,433],
+    ["22-2","Italy Value-Pack",null,null,1995,559],
     ["220-1","2 x 2 Bricks",20,null,1958,371],
     ["221-2","1 x 2 Bricks",26,null,1958,371],
     ["222-2","1 x 1 Bricks",40,null,1958,371],
@@ -9138,6 +9139,7 @@
     ["5010554-1","LEGO Ideas - Trophy White",null,null,2026,598],
     ["5010555-1","LEGO Ideas - Trophy Black",null,null,2026,598],
     ["5010909-1","Creative Animals with Building Plate Bundle",null,null,2020,505],
+    ["5011164-1","Fig Beetle Garden",null,null,2026,769],
     ["5012-1","Soccer Player with Goal",15,1,2003,462],
     ["5013-1","Basketball",25,1,2003,459],
     ["5014-1","Hockey Players",27,null,2003,461],
@@ -18180,6 +18182,7 @@
     ["L0002205-1","Zane",12,1,2026,435],
     ["L0002206-1","Cole",11,1,2026,435],
     ["L0002207-1","Acid Monster",8,1,2026,435],
+    ["L0002208-1","Arin",12,1,2026,435],
     ["L0002212-1","Zane-Mech",99,null,2026,435],
     ["L0002213-1","Kai vs. Rox",13,2,2026,435],
     ["L0002214-1","Jay and Mutation Monster",24,2,2026,435],
