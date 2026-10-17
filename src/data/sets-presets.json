@@ -1,11 +1,11 @@
 {
   "meta": {
-    "generatedAt": "2026-10-16T12:39:39Z",
+    "generatedAt": "2026-10-17T11:43:08Z",
     "source": "https://rebrickable.com/downloads/",
     "numThemes": 406,
     "themesKeys": ["id", "name", "parentId"],
     "numParentThemes": 142,
-    "numSets": 18297,
+    "numSets": 18299,
     "setsKeys": ["id", "name", "numPieces", "numFigurines", "releaseYear", "themeId"],
     "setsImageUrl": "https://cdn.rebrickable.com/media/sets/{id}.jpg"
   },
@@ -1476,6 +1476,7 @@
     ["11385-1","Star Trek: U.S.S. Enterprise NCC-1701 Bridge",1701,8,2026,721],
     ["11386-1","SpongeBob SquarePants: Bikini Bottom",1794,4,2026,721],
     ["11387-1","Holiday House",1354,4,2026,227],
+    ["11388-1","Venetian Neighborhood",null,null,2026,721],
     ["11389-1","Project Hail Mary",830,2,2026,721],
     ["11390-1","Dragon Ball: Shenron & Goku",null,null,2026,721],
     ["114-1","Universal Building Set",390,null,1977,465],
@@ -6404,6 +6405,7 @@
     ["40894-1","Koenigsegg Sadair's Spear Steering Wheel",228,null,2026,1],
     ["40896-1","The X-Files: Scully's Lab",221,1,2026,576],
     ["40897-1","Darth Vader's Lightsaber",174,null,2026,158],
+    ["40898-1","Venetian Water Taxi",null,null,2026,721],
     ["40899-1","Astro Bot",276,null,2026,301],
     ["409-1","38 Slimbricks Assorted Sizes (The Building Toy)",38,null,1965,756],
     ["4090-1","Motion Madness",243,null,2003,406],
