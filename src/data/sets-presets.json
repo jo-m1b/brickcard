@@ -1,11 +1,11 @@
 {
   "meta": {
-    "generatedAt": "2026-10-19T14:54:03Z",
+    "generatedAt": "2026-10-20T12:53:25Z",
     "source": "https://rebrickable.com/downloads/",
     "numThemes": 406,
     "themesKeys": ["id", "name", "parentId"],
     "numParentThemes": 142,
-    "numSets": 18299,
+    "numSets": 18301,
     "setsKeys": ["id", "name", "numPieces", "numFigurines", "releaseYear", "themeId"],
     "setsImageUrl": "https://cdn.rebrickable.com/media/sets/{id}.jpg"
   },
@@ -11459,6 +11459,7 @@
     ["6607-1","Service Truck",25,1,1982,67],
     ["66073-1","Duplo Farm Value Pack",null,null,2006,650],
     ["6608-1","Tractor",21,1,1982,67],
+    ["6608666-1","Giraffe Playtime",null,null,2025,157],
     ["6609-1","Race Car",17,1,1980,67],
     ["661-1","Spirit of St. Louis",50,null,1976,412],
     ["661-2","1:87 VW Beetle",null,null,1964,368],
@@ -11947,6 +11948,7 @@
     ["6669168-1","Sports Car",54,null,2026,408],
     ["667-1","1:87 VW 1500",1,null,1964,368],
     ["6670-1","Rescue Rig",114,1,1993,67],
+    ["6670124-1","Giraffe Surprise",101,null,2026,157],
     ["66706-1","Animals Bundle",null,null,2022,672],
     ["66707-1","Stuntz Gift Set",5,null,2022,744],
     ["66708-1","Galactic Adventures Pack",null,null,2022,158],
