@@ -1,11 +1,11 @@
 {
   "meta": {
-    "generatedAt": "2026-11-02T17:22:09Z",
+    "generatedAt": "2026-11-03T15:25:56Z",
     "source": "https://rebrickable.com/downloads/",
     "numThemes": 406,
     "themesKeys": ["id", "name", "parentId"],
     "numParentThemes": 142,
-    "numSets": 18310,
+    "numSets": 18312,
     "setsKeys": ["id", "name", "numPieces", "numFigurines", "releaseYear", "themeId"],
     "setsImageUrl": "https://cdn.rebrickable.com/media/sets/{id}.jpg"
   },
@@ -1434,6 +1434,7 @@
     ["112219-1","Jay Vs. Nindroid",11,2,2022,435],
     ["112220-1","Kai vs. Ghoultar",14,2,2022,435],
     ["112221-1","Lloyd vs. Cobra Mechanic",14,2,2022,435],
+    ["11227-1","Gabby's Dollhouse and Doozie's Doghouse",null,null,2027,748],
     ["112322-1","Zane vs Garmadon",13,2,2023,435],
     ["112323-1","Wu vs Ghost",12,2,2023,435],
     ["112327-1","Jay vs. Bone Warrior",3,2,2023,435],
@@ -7508,6 +7509,7 @@
     ["42241-1","Green Bugatti Chiron Pur Sport Hypercar",773,null,2026,1],
     ["42242-1","Mercedes-Benz Unimog U 5023 with Crane",1189,null,2026,1],
     ["4225-1","Challenger Set 350",244,1,1998,470],
+    ["42254-1","Solar System Planets in Orbit",null,null,2027,1],
     ["4226-1","Freestyle Bucket",517,2,1998,470],
     ["4228383-1","Vakama Promotional Set",2,null,2003,324],
     ["4229-1","Brick Pack 300",812,null,1998,470],
