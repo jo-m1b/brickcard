@@ -1,11 +1,11 @@
 {
   "meta": {
-    "generatedAt": "2026-11-08T14:27:28Z",
+    "generatedAt": "2026-11-09T17:44:43Z",
     "source": "https://rebrickable.com/downloads/",
     "numThemes": 406,
     "themesKeys": ["id", "name", "parentId"],
     "numParentThemes": 142,
-    "numSets": 18334,
+    "numSets": 18335,
     "setsKeys": ["id", "name", "numPieces", "numFigurines", "releaseYear", "themeId"],
     "setsImageUrl": "https://cdn.rebrickable.com/media/sets/{id}.jpg"
   },
@@ -12052,6 +12052,7 @@
     ["6685-1","Fire Copter 1",99,1,1982,67],
     ["6686-1","Backhoe",89,1,1984,67],
     ["6687-1","Turbo Prop I",78,2,1987,67],
+    ["6687605-1","Praha Tram",50,null,2026,598],
     ["6688-1","Ambulance",72,2,1985,67],
     ["6689-1","Post-Station",55,2,1985,67],
     ["6690-1","Snorkel Pumper",103,2,1980,67],
@@ -18226,7 +18227,7 @@
     ["L0002225-1","Construction Worker with Roller",34,1,2026,56],
     ["L0002226-1","Beach Quad",28,1,2026,55],
     ["L0002227-1","Firefighter with Helicopter",28,1,2026,58],
-    ["L0002228-1","Aeroplane",30,null,2026,53],
+    ["L0002228-1","Aeroplane",30,1,2026,53],
     ["L0002231-1","Phase 1 Clone Pilot",5,1,2025,158],
     ["L0002232-1","Night Trooper",5,1,2026,158],
     ["L0002233-1","Phase 2 Clone Pilot",5,1,2026,158],
