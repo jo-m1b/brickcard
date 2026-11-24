@@ -1,11 +1,11 @@
 {
   "meta": {
-    "generatedAt": "2026-11-23T19:25:39Z",
+    "generatedAt": "2026-11-24T19:01:15Z",
     "source": "https://rebrickable.com/downloads/",
     "numThemes": 406,
     "themesKeys": ["id", "name", "parentId"],
     "numParentThemes": 142,
-    "numSets": 18378,
+    "numSets": 18379,
     "setsKeys": ["id", "name", "numPieces", "numFigurines", "releaseYear", "themeId"],
     "setsImageUrl": "https://cdn.rebrickable.com/media/sets/{id}.jpg"
   },
@@ -11469,7 +11469,7 @@
     ["6602968-1","Turkey Time Build",41,null,2025,231],
     ["6603-1","Shovel Truck",27,1,1985,67],
     ["6603212-1","German Castle",62,null,2025,598],
-    ["6603984-1","Canada Tennis",43,null,2025,408],
+    ["6603984-1","Canada Tennis",45,null,2025,408],
     ["6604-1","Formula-I Racer",31,1,1985,67],
     ["6605-1","Road Racer",20,1,1984,67],
     ["6605170-1","Jurong Point 10th Anniversary",8,2,2025,408],
@@ -12014,6 +12014,7 @@
     ["6677-1","Motocross Racing",76,1,1986,67],
     ["6677056-1","Gryffindor",38,null,2026,598],
     ["6677056-2","Hufflepuff",29,null,2026,598],
+    ["6677056-3","Ravenclaw",24,null,2026,598],
     ["6677056-4","Slytherin",23,null,2026,598],
     ["66772-1","Big Wheel Gift Set",null,null,2023,57],
     ["66773-1","Play Day Gift Set",null,null,2023,494],
