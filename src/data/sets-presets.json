@@ -1,11 +1,11 @@
 {
   "meta": {
-    "generatedAt": "2026-11-24T19:01:15Z",
+    "generatedAt": "2026-11-25T18:07:39Z",
     "source": "https://rebrickable.com/downloads/",
     "numThemes": 406,
     "themesKeys": ["id", "name", "parentId"],
     "numParentThemes": 142,
-    "numSets": 18379,
+    "numSets": 18380,
     "setsKeys": ["id", "name", "numPieces", "numFigurines", "releaseYear", "themeId"],
     "setsImageUrl": "https://cdn.rebrickable.com/media/sets/{id}.jpg"
   },
@@ -12094,6 +12094,7 @@
     ["6701-1","Minifig Pack",36,6,1983,143],
     ["67012-1","The Joker Wall Art Comic Cover",null,null,2027,697],
     ["6702-1","Minifig Pack",43,6,1986,143],
+    ["67023-1","Marvel Rivals: Jeff the Land Shark",null,null,2027,696],
     ["6703-1","Space Mini-Figures",42,6,1988,143],
     ["6704-1","Minifig Pack",44,6,1991,143],
     ["6705-1","Space Explorers",40,5,1994,143],
@@ -18388,7 +18389,7 @@
     ["LOVELOCK-1","Love Lock",35,null,2024,232],
     ["LUKE-1","Luke Skywalker",87,null,2019,158],
     ["LUNARNEWYEAR-1","Lunar New Year Bundle",null,null,2020,686],
-    ["LWP-15","LEGO World Denmark Puzzle Promo 2022",9,null,2022,598],
+    ["LWP-15","LEGO World Denmark Puzzle Promo 2022",7,null,2022,598],
     ["LWP01-1","LEGO World Denmark Puzzle Promo",7,null,2009,598],
     ["LWP02-1","LEGO World Zwolle Puzzle Promo 2009",7,null,2009,598],
     ["LWP03-1","LEGO World Denmark Puzzle Promo 2010",7,null,2010,598],
